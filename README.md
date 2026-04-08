@@ -60,3 +60,17 @@ Já atuei em projetos de **realidade virtual** e **gamificação**, explorando c
 ---
 
 ✨ Obrigado por visitar meu perfil! Fique à vontade para explorar meus repositórios e trocar ideias comigo.
+
+---
+
+## 🚀 Server
+
+Este repositório agora inclui um servidor Node.js simples em `server.js`.
+
+- `npm install` para instalar dependências
+- `npm start` para iniciar o servidor
+- `npm run dev` para iniciar com `nodemon`
+
+A aplicação expõe:
+- `GET /` com uma mensagem de boas-vindas
+- `GET /api/health` para verificar o status do servidor

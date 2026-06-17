@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HubLocal V2 — Apresentações</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-dark: #0a2e1e;
+    --green-accent: #1d9e75;
+    --green-light: #5dcaa5;
+    --text-primary: #f5f2ec;
+    --text-secondary: #a8c4b8;
+    --text-muted: #6b9982;
+    --surface: rgba(255,255,255,0.04);
+    --surface-2: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.08);
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: #060f0b;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+    padding: 40px 24px;
+  }
+
+  /* ── LOCK SCREEN ── */
+  #lock-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .lock-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green-accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--green-accent); }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  h1 em { font-style: italic; color: var(--green-light); }
+
+  .lock-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  input[type="password"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="password"]::placeholder { color: var(--text-muted); }
+  input[type="password"]:focus { border-color: rgba(29,158,117,0.5); }
+  input[type="password"].error { border-color: rgba(226,75,74,0.6); }
+
+  .error-msg {
+    font-size: 12px;
+    color: #e24b4a;
+    display: none;
+  }
+
+  button.submit {
+    background: var(--green-accent);
+    border: none;
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  button.submit:hover { opacity: 0.88; }
+
+  /* ── MENU ── */
+  #menu-screen {
+    display: none;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .menu-header { display: flex; flex-direction: column; gap: 10px; }
+
+  .deck-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .deck-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .deck-card:hover { border-color: rgba(29,158,117,0.4); background: var(--surface-2); }
+
+  .deck-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: rgba(29,158,117,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .deck-info { flex: 1; }
+  .deck-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .deck-sub { font-size: 12px; color: var(--text-muted); }
+
+  .deck-arrow { color: var(--text-muted); font-size: 16px; }
+
+  .footer-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- LOCK -->
+  <div id="lock-screen">
+    <div class="lock-header">
+      <div class="eyebrow">HubLocal · Design Briefing · Jun 2026</div>
+      <h1>Apresentações<br><em>V2</em></h1>
+    </div>
+    <div class="lock-form">
+      <div class="input-wrap">
+        <input type="password" id="pwd" placeholder="Senha de acesso" autocomplete="off" />
+      </div>
+      <div class="error-msg" id="error-msg">Senha incorreta. Tente novamente.</div>
+      <button class="submit" onclick="check()">Acessar →</button>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu-screen">
+    <div class="menu-header">
+      <div class="eyebrow">HubLocal · Design Briefing · Jun 2026</div>
+      <h1>Apresentações<br><em>V2</em></h1>
+    </div>
+    <div class="deck-list">
+      <a class="deck-card" href="hublocal-discovery-v2.html" target="_blank">
+        <div class="deck-icon">🔍</div>
+        <div class="deck-info">
+          <div class="deck-title">Challenger Assumption</div>
+          <div class="deck-sub">Discovery V2 — Processo de design</div>
+        </div>
+        <div class="deck-arrow">→</div>
+      </a>
+      <a class="deck-card" href="hublocal-diretoria.html" target="_blank">
+        <div class="deck-icon">🎯</div>
+        <div class="deck-info">
+          <div class="deck-title">Personas & Priorização</div>
+          <div class="deck-sub">Diretoria — HubLocal V2</div>
+        </div>
+        <div class="deck-arrow">→</div>
+      </a>
+    </div>
+    <div class="footer-note">Lindberg Pinheiro Jr · Design Brief V2</div>
+  </div>
+
+</div>
+
+<script>
+  const PWD = 'hub123';
+
+  const input = document.getElementById('pwd');
+  const errMsg = document.getElementById('error-msg');
+
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+  input.addEventListener('input', () => {
+    input.classList.remove('error');
+    errMsg.style.display = 'none';
+  });
+
+  function check() {
+    if (input.value === PWD) {
+      document.getElementById('lock-screen').style.display = 'none';
+      const menu = document.getElementById('menu-screen');
+      menu.style.display = 'flex';
+    } else {
+      input.classList.add('error');
+      errMsg.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personas & Priorização — HubLocal V2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-dark: #0a2e1e;
+    --green-mid: #0f4a2e;
+    --green-accent: #1d9e75;
+    --green-light: #5dcaa5;
+    --blue: #378add;
+    --amber: #ef9f27;
+    --purple: #7f77dd;
+    --red: #e24b4a;
+    --text-primary: #f5f2ec;
+    --text-secondary: #a8c4b8;
+    --text-muted: #6b9982;
+    --surface: rgba(255,255,255,0.04);
+    --surface-2: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.08);
+    --slide-w: 1100px;
+  }
+
+  html, body {
+    height: 100%;
+    background: #060f0b;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+
+  /* ── SLIDE ENGINE ── */
+  .deck { width: 100%; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    background: var(--green-dark);
+    overflow: hidden;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .slide-inner {
+    width: 100%;
+    max-width: var(--slide-w);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* bg noise */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    background: rgba(10,46,30,0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 10px 20px;
+  }
+
+  .nav button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+  }
+
+  .nav button:hover { color: var(--text-primary); background: var(--surface-2); }
+  .nav button:disabled { opacity: 0.25; cursor: default; }
+
+  .nav-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 48px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .dot.active { background: var(--green-accent); transform: scale(1.4); }
+
+  /* ── SHARED COMPONENTS ── */
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green-accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--green-accent); }
+
+  h1.display {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(44px, 6vw, 80px);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  h1.display em { font-style: italic; color: var(--green-light); }
+
+  h2.slide-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 4vw, 54px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  h2.slide-title em { font-style: italic; color: var(--green-light); }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 580px;
+    margin-bottom: 40px;
+  }
+
+  .slide-num {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── SLIDE 1: CAPA ── */
+  #s1 { justify-content: center; }
+  #s1 .slide-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  #s1 .meta { font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; margin-top: 40px; }
+  #s1 .meta span { display: flex; align-items: center; gap: 8px; }
+  #s1 .meta span::before { content: '—'; opacity: 0.4; }
+  #s1 .right { display: flex; flex-direction: column; gap: 12px; }
+
+  .agenda-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: var(--surface);
+    transition: border-color 0.2s;
+  }
+
+  .agenda-item:hover { border-color: rgba(255,255,255,0.14); }
+
+  .agenda-n {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--text-muted);
+    min-width: 24px;
+  }
+
+  /* ── SLIDE 2: AS 4 PERSONAS ── */
+  .personas-grid-s {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .p-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .p-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .p-card.cg::after { background: var(--green-accent); }
+  .p-card.cb::after { background: var(--blue); }
+  .p-card.ca::after { background: var(--amber); }
+  .p-card.cp::after { background: var(--purple); }
+
+  .p-avatar {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .p-card.cg .p-avatar { background: rgba(29,158,117,0.15); color: var(--green-light); }
+  .p-card.cb .p-avatar { background: rgba(55,138,221,0.15); color: #85b7eb; }
+  .p-card.ca .p-avatar { background: rgba(239,159,39,0.15);  color: #fac775; }
+  .p-card.cp .p-avatar { background: rgba(127,119,221,0.15); color: #afa9ec; }
+
+  .p-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .p-role { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4; }
+
+  .p-pill {
+    font-size: 9px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+    border: 1px solid; display: inline-block; margin-bottom: 14px;
+  }
+
+  .p-card.cg .p-pill { color: var(--green-accent); border-color: rgba(29,158,117,0.3); }
+  .p-card.cb .p-pill { color: var(--blue); border-color: rgba(55,138,221,0.3); }
+  .p-card.ca .p-pill { color: var(--amber); border-color: rgba(239,159,39,0.3); }
+  .p-card.cp .p-pill { color: var(--purple); border-color: rgba(127,119,221,0.3); }
+
+  .p-needs { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .p-needs li { font-size: 11px; color: var(--text-secondary); display: flex; gap: 7px; align-items: flex-start; line-height: 1.4; }
+  .p-needs li::before { content: '·'; color: var(--text-muted); margin-top: 0; flex-shrink: 0; }
+
+  /* ── SLIDE 3: ESCADA PROGRESSIVA ── */
+  .ladder-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .l-item {
+    padding: 24px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .l-item:last-child { border-right: none; }
+  .l-item::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .l-item.l1::before { background: var(--green-accent); }
+  .l-item.l2::before { background: var(--blue); }
+  .l-item.l3::before { background: var(--purple); }
+
+  .l-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px; line-height: 1; margin-bottom: 12px;
+  }
+
+  .l-item.l1 .l-num { color: var(--green-accent); }
+  .l-item.l2 .l-num { color: var(--blue); }
+  .l-item.l3 .l-num { color: var(--purple); }
+
+  .l-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+  .l-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+  .ladder-map {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .lm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .lm-name { font-size: 12px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+  .lm-level { font-size: 11px; color: var(--text-muted); }
+
+  .lm-bar {
+    display: flex; gap: 3px; margin-top: 8px;
+  }
+
+  .lm-seg {
+    height: 3px; border-radius: 2px; flex: 1;
+    background: var(--border);
+  }
+
+  .lm-seg.on-g { background: var(--green-accent); }
+  .lm-seg.on-b { background: var(--blue); }
+  .lm-seg.on-p { background: var(--purple); }
+
+  /* ── SLIDE 4: COMPLEXIDADE ── */
+  .complexity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .c-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .c-block-title {
+    font-size: 13px; font-weight: 600;
+    color: var(--text-primary); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .c-block-title .icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .icon-warn { background: rgba(226,75,74,0.15); }
+  .icon-info { background: rgba(55,138,221,0.15); }
+
+  .c-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+  .c-list li {
+    font-size: 13px; color: var(--text-secondary);
+    display: flex; gap: 10px; align-items: flex-start; line-height: 1.5;
+  }
+
+  .c-list li .bullet {
+    width: 6px; height: 6px; border-radius: 50%;
+    margin-top: 6px; flex-shrink: 0;
+  }
+
+  .bullet-red { background: var(--red); }
+  .bullet-blue { background: var(--blue); }
+  .bullet-green { background: var(--green-accent); }
+
+  .c-callout {
+    grid-column: 1 / -1;
+    background: rgba(226,75,74,0.06);
+    border: 1px solid rgba(226,75,74,0.2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .c-callout strong { color: var(--text-primary); font-weight: 500; }
+
+  /* ── SLIDE 5: CONFLITO DE CANAL ── */
+  .conflict-diagram {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .cd-col {
+    flex: 1;
+    padding: 24px;
+    border-right: 1px solid var(--border);
+  }
+
+  .cd-col:last-child { border-right: none; }
+
+  .cd-col.highlight { background: rgba(226,75,74,0.04); }
+
+  .cd-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .cd-entity {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .cd-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .cd-entity-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .cd-entity-sub { font-size: 11px; color: var(--text-muted); }
+
+  .cd-arrow {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 0 16px;
+    color: var(--text-muted); font-size: 22px;
+  }
+
+  .cd-arrow-label {
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--red); margin-top: 6px; text-align: center; line-height: 1.4;
+  }
+
+  .conflict-note {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+
+  .cn-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .cn-item strong { color: var(--text-primary); font-weight: 500; display: block; margin-bottom: 4px; }
+
+  .cn-item.warn { border-color: rgba(226,75,74,0.25); background: rgba(226,75,74,0.04); }
+  .cn-item.ok   { border-color: rgba(29,158,117,0.25); background: rgba(29,158,117,0.04); }
+
+  /* ── SLIDE 6: PERGUNTA PARA DIRETORIA ── */
+  #s6 .slide-inner {
+    display: flex; flex-direction: column; align-items: flex-start;
+    max-width: 800px;
+  }
+
+  .question-block {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 3.5vw, 46px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-bottom: 40px;
+  }
+
+  .question-block em { font-style: italic; color: var(--green-light); }
+
+  .decision-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 32px;
+  }
+
+  .d-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .d-card-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .d-card-body {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  }
+
+  .d-card-body strong { color: var(--text-primary); font-weight: 500; }
+
+  .bottom-note {
+    font-size: 13px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    width: 100%;
+    line-height: 1.6;
+  }
+
+  .bottom-note strong { color: var(--text-secondary); font-weight: 400; }
+
+  /* ── KEYBOARD HINT ── */
+  .key-hint {
+    position: fixed;
+    top: 24px;
+    right: 32px;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .key {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ── SLIDE 1: CAPA ── -->
+  <div class="slide active" id="s1">
+    <div class="slide-inner">
+      <div>
+        <div class="eyebrow">HubLocal · Diretoria · Jun 2026</div>
+        <h1 class="display">Personas<br>& <em>Priorização</em><br>V2</h1>
+        <div style="margin-top:36px;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text-muted);">
+          <span>— Lindberg Pinheiro Jr</span>
+          <span>— Design Brief V2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2: AS 4 PERSONAS ── -->
+  <div class="slide" id="s2">
+    <div class="slide-inner">
+      <div class="slide-num">01 — Personas</div>
+      <h2 class="slide-title">Os produtos atendem <em>quatro perfis</em> hoje</h2>
+      <p class="subtitle">Cada um com objetivos, contextos e necessidades distintas — e todos usam a mesma plataforma.</p>
+      <div class="personas-grid-s">
+        <div class="p-card cg">
+          <div class="p-avatar">DG</div>
+          <div class="p-name">Dono / Gestor interno</div>
+          <div class="p-role">PME · negócio próprio · 1–dezenas de unidades</div>
+          <div class="p-pill">Nível 1 e 2</div>
+          <ul class="p-needs">
+            <li>Quer crescer e vender mais</li>
+            <li>Precisa entender o que fazer agora</li>
+            <li>Linguagem direta, sem jargão</li>
+          </ul>
+        </div>
+        <div class="p-card cb">
+          <div class="p-avatar">GE</div>
+          <div class="p-name">Grande empresa / rede</div>
+          <div class="p-role">Centenas de unidades · multi-regional</div>
+          <div class="p-pill">Nível 2–3</div>
+          <ul class="p-needs">
+            <li>Visão consolidada por região</li>
+            <li>Permissões hierárquicas</li>
+            <li>Relatórios executivos</li>
+          </ul>
+        </div>
+        <div class="p-card ca">
+          <div class="p-avatar">GG</div>
+          <div class="p-name">Gestor de Google</div>
+          <div class="p-role">Consultor · white label · cliente direto</div>
+          <div class="p-pill">Nível 2–3</div>
+          <ul class="p-needs">
+            <li>Gerencia múltiplos clientes</li>
+            <li>Precisa de white label</li>
+            <li>Evidencia resultados ao cliente</li>
+          </ul>
+        </div>
+        <div class="p-card cp">
+          <div class="p-avatar">AP</div>
+          <div class="p-name">Agência parceira</div>
+          <div class="p-role">Power user · parceiro formal · intermediário</div>
+          <div class="p-pill">Nível 3</div>
+          <ul class="p-needs">
+            <li>Parceria comercial com HubLocal</li>
+            <li>Acesso a logs e automações</li>
+            <li>Sem necessidade de white label</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 3: ESCADA PROGRESSIVA ── -->
+  <div class="slide" id="s3">
+    <div class="slide-inner">
+      <div class="slide-num">02 — Escada progressiva</div>
+      <h2 class="slide-title">Toda tela serve <em>três níveis</em> ao mesmo tempo</h2>
+      <p class="subtitle" style="margin-bottom:28px;">A escada progressiva é a regra de design que garante que o produto funcione para o dono de uma padaria e para um power user simultaneamente.</p>
+      <div class="ladder-grid">
+        <div class="l-item l1">
+          <div class="l-num">01</div>
+          <div class="l-title">Não técnico · tempo escasso</div>
+          <div class="l-desc">Entende risco, sabe o que fazer agora. Ação óbvia sem ler nada.</div>
+        </div>
+        <div class="l-item l2">
+          <div class="l-num">02</div>
+          <div class="l-title">Analítico · múltiplas unidades</div>
+          <div class="l-desc">Inspeciona evidências, valida métricas, age em lote.</div>
+        </div>
+        <div class="l-item l3">
+          <div class="l-num">03</div>
+          <div class="l-title">Power user · dezenas de clientes</div>
+          <div class="l-desc">Dados brutos, logs, automações, exportação.</div>
+        </div>
+      </div>
+      <div class="ladder-map">
+        <div class="lm-card">
+          <div class="lm-name">Dono / Gestor interno</div>
+          <div class="lm-level">Nível 1 e 2</div>
+          <div class="lm-bar">
+            <div class="lm-seg on-g"></div>
+            <div class="lm-seg on-b"></div>
+            <div class="lm-seg"></div>
+          </div>
+        </div>
+        <div class="lm-card">
+          <div class="lm-name">Grande empresa / rede</div>
+          <div class="lm-level">Nível 2 e 3</div>
+          <div class="lm-bar">
+            <div class="lm-seg"></div>
+            <div class="lm-seg on-b"></div>
+            <div class="lm-seg on-p"></div>
+          </div>
+        </div>
+        <div class="lm-card">
+          <div class="lm-name">Gestor de Google</div>
+          <div class="lm-level">Nível 2 e 3</div>
+          <div class="lm-bar">
+            <div class="lm-seg"></div>
+            <div class="lm-seg on-b"></div>
+            <div class="lm-seg on-p"></div>
+          </div>
+        </div>
+        <div class="lm-card">
+          <div class="lm-name">Agência parceira</div>
+          <div class="lm-level">Nível 3</div>
+          <div class="lm-bar">
+            <div class="lm-seg"></div>
+            <div class="lm-seg"></div>
+            <div class="lm-seg on-p"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4: COMPLEXIDADE ── -->
+  <div class="slide" id="s4">
+    <div class="slide-inner">
+      <div class="slide-num">03 — Complexidade</div>
+      <h2 class="slide-title">Atender quatro perfis <em>sem hierarquia</em><br>paralisa o produto</h2>
+      <p class="subtitle" style="margin-bottom:28px;">Sem uma persona primária definida, cada decisão de produto vira uma negociação entre quatro direções diferentes.</p>
+      <div class="complexity-grid">
+        <div class="c-block">
+          <div class="c-block-title">
+            <div class="icon icon-warn">⚠</div>
+            Impactos no produto
+          </div>
+          <ul class="c-list">
+            <li><span class="bullet bullet-red"></span>Roadmap pulverizado — features para perfis opostos competem pela mesma sprint</li>
+            <li><span class="bullet bullet-red"></span>Interface sobrecarregada — complexidade do Nível 3 visível para o Nível 1</li>
+            <li><span class="bullet bullet-red"></span>Critérios de aceite ambíguos — "aprovado" para quem?</li>
+            <li><span class="bullet bullet-red"></span>Cada melhoria pode degradar a experiência de outro perfil</li>
+          </ul>
+        </div>
+        <div class="c-block">
+          <div class="c-block-title">
+            <div class="icon icon-info">→</div>
+            O que uma hierarquia resolve
+          </div>
+          <ul class="c-list">
+            <li><span class="bullet bullet-blue"></span>Persona primária define o critério de desempate em todo conflito de design</li>
+            <li><span class="bullet bullet-blue"></span>Features avançadas ficam secundárias sem prejudicar o fluxo principal</li>
+            <li><span class="bullet bullet-blue"></span>Marketing e produto falam para o mesmo público</li>
+            <li><span class="bullet bullet-green"></span>Priorização de backlog passa a ter critério objetivo</li>
+          </ul>
+        </div>
+        <div class="c-callout">
+          <strong>Regra da spec atual:</strong> toda superfície deve atender os três níveis simultaneamente — mas sem definir qual é o primário. Isso é correto como princípio de design, mas insuficiente como estratégia de produto. <strong>Precisamos da hierarquia para saber o que nunca sacrificamos.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: CONFLITO DE CANAL ── -->
+  <div class="slide" id="s5">
+    <div class="slide-inner">
+      <div class="slide-num">04 — Conflito de canal</div>
+      <h2 class="slide-title">Todas são B2B — mas <em>o conflito</em><br>de canal ainda existe</h2>
+      <p class="subtitle" style="margin-bottom:24px;">Vender para quem gere o próprio negócio e ao mesmo tempo para o consultor que atende esse mesmo negócio gera uma contradição estratégica — mesmo sendo tudo B2B.</p>
+      <div class="conflict-diagram">
+        <div class="cd-col">
+          <div class="cd-label">B2B — uso próprio</div>
+          <div class="cd-entity">
+            <div class="cd-dot" style="background:var(--green-accent)"></div>
+            <div>
+              <div class="cd-entity-name">Dono / Gestor interno</div>
+              <div class="cd-entity-sub">Gere a presença do próprio negócio</div>
+            </div>
+          </div>
+          <div class="cd-entity">
+            <div class="cd-dot" style="background:var(--blue)"></div>
+            <div>
+              <div class="cd-entity-name">Grande empresa</div>
+              <div class="cd-entity-sub">Gere a presença da própria rede</div>
+            </div>
+          </div>
+        </div>
+        <div class="cd-arrow">
+          ↔
+          <div class="cd-arrow-label">conflito<br>de canal</div>
+        </div>
+        <div class="cd-col highlight">
+          <div class="cd-label">B2B — uso para terceiros</div>
+          <div class="cd-entity">
+            <div class="cd-dot" style="background:var(--amber)"></div>
+            <div>
+              <div class="cd-entity-name">Gestor de Google</div>
+              <div class="cd-entity-sub">Atende o mesmo dono de negócio</div>
+            </div>
+          </div>
+          <div class="cd-entity">
+            <div class="cd-dot" style="background:var(--purple)"></div>
+            <div>
+              <div class="cd-entity-name">Agência parceira</div>
+              <div class="cd-entity-sub">Revende HubLocal para seus clientes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="conflict-note">
+        <div class="cn-item warn">
+          <strong>O risco do marketing híbrido</strong>
+          Marketing focado em "gerencie sua presença você mesmo" comunica ao cliente do gestor de Google que ele pode dispensar o intermediário. A HubLocal vira concorrente do próprio parceiro.
+        </div>
+        <div class="cn-item warn">
+          <strong>Referência de mercado</strong>
+          Shopify e HubSpot enfrentaram esse mesmo dilema. A solução foi criar programas de parceiros estruturados com benefícios exclusivos — e separar o marketing para uso próprio do marketing para intermediários com clareza.
+        </div>
+        <div class="cn-item ok">
+          <strong>Agência parceira está protegida</strong>
+          Por ter vínculo formal com a HubLocal, a agência parceira não sente a ameaça da mesma forma — a parceria é parte da sua proposta de valor ao cliente final.
+        </div>
+        <div class="cn-item ok">
+          <strong>Gestor de Google é o ponto crítico</strong>
+          É o perfil mais exposto ao conflito. Definir se ele é estratégico para o V2 — e como protegê-lo — é a decisão mais urgente.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: A PERGUNTA ── -->
+  <div class="slide" id="s6">
+    <div class="slide-inner" style="max-width:800px;">
+      <div class="slide-num">05 — Decisão</div>
+      <div class="question-block">
+        Qual persona é a <em>primária</em> do V2?<br>A resposta define tudo.
+      </div>
+      <div class="decision-grid">
+        <div class="d-card">
+          <div class="d-card-label">Se for o Dono / PME</div>
+          <div class="d-card-body">
+            Foco em <strong>uso próprio</strong>. Marketing fala diretamente ao dono. Interface prioriza simplicidade. Risco: afastar gestores de Google e agências.
+          </div>
+        </div>
+        <div class="d-card">
+          <div class="d-card-label">Se for a Agência / Gestor intermediário</div>
+          <div class="d-card-body">
+            Foco em <strong>uso para terceiros</strong>. Marketing fala ao intermediário. Interface prioriza multi-cliente e white label. Risco: produto menos acessível ao usuário final.
+          </div>
+        </div>
+        <div class="d-card">
+          <div class="d-card-label">Se for os dois</div>
+          <div class="d-card-body">
+            Produto <strong>híbrido</strong>. Possível, mas exige programa de parceiros estruturado e separação clara de marketing. Risco: alta complexidade de execução.
+          </div>
+        </div>
+      </div>
+      <div class="bottom-note">
+        <strong>O que o time de design e produto precisa da diretoria:</strong> uma decisão de hierarquia de personas antes da próxima sprint. Sem ela, cada melhoria no V2 será arbitrária — e o produto continuará crescendo em todas as direções ao mesmo tempo.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7: O QUE MUDA SE CONFIRMADO ── -->
+  <div class="slide" id="s7">
+    <div class="slide-inner">
+      <div class="slide-num">07 — Impacto da decisão</div>
+      <h2 class="slide-title">Se o Gestor de Google for <em>confirmado</em>,<br>o que muda</h2>
+      <p class="subtitle" style="margin-bottom:28px;">A decisão de persona não é só de design — atravessa produto, marketing e modelo comercial.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div class="c-block">
+          <div class="c-block-title"><span style="font-size:16px;">🎨</span> &nbsp;Produto & design</div>
+          <ul class="c-list">
+            <li><span class="bullet bullet-blue"></span>Multi-cliente vira fluxo principal, não feature secundária</li>
+            <li><span class="bullet bullet-blue"></span>White label como requisito de primeira classe</li>
+            <li><span class="bullet bullet-blue"></span>Interface pode assumir mais densidade — usuário primário é Nível 2–3</li>
+            <li><span class="bullet bullet-blue"></span>Onboarding redesenhado para quem gerencia N clientes, não 1 negócio</li>
+            <li><span class="bullet bullet-blue"></span>Dono de negócio vira <em>usuário final invisível</em> — cliente do gestor, não do produto</li>
+          </ul>
+        </div>
+        <div class="c-block">
+          <div class="c-block-title"><span style="font-size:16px;">📣</span> &nbsp;Marketing & comercial</div>
+          <ul class="c-list">
+            <li><span class="bullet" style="background:var(--amber)"></span>Comunicação fala com o consultor, não com o dono do negócio</li>
+            <li><span class="bullet" style="background:var(--amber)"></span>Canais mudam — LinkedIn e comunidades de gestores de Google</li>
+            <li><span class="bullet" style="background:var(--amber)"></span>Precificação por cliente gerenciado, não por unidade própria</li>
+            <li><span class="bullet" style="background:var(--amber)"></span>Programa de parceiros estruturado protege o gestor do conflito de canal</li>
+            <li><span class="bullet" style="background:var(--amber)"></span>Marketing para uso próprio precisa ser separado do marketing para intermediários para não canibalizar</li>
+          </ul>
+        </div>
+        <div class="c-block">
+          <div class="c-block-title"><span style="font-size:16px;">⚙️</span> &nbsp;Modelo de negócio</div>
+          <ul class="c-list">
+            <li><span class="bullet bullet-green"></span>Felipe propõe visão "Uber do marketing local" — conectar operadores a clientes</li>
+            <li><span class="bullet bullet-green"></span>Parceiro oficial (5% de receita) vs gestor externo (assinatura/Hubcoins, 0% de receita) — diferenciação já existe, precisa ser produto</li>
+            <li><span class="bullet bullet-green"></span>V1 sustenta receita atual — V2 precisa de plano de integração ou modelo próprio sem canibalizar o V1</li>
+            <li><span class="bullet bullet-green"></span>Geração de receita nova é o critério de priorização de qualquer feature (Rodrigo)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 8: O QUE PRECISA SER FEITO ── -->
+  <div class="slide" id="s8">
+    <div class="slide-inner">
+      <div class="slide-num">08 — Próximos passos</div>
+      <h2 class="slide-title">O produto <em>ainda não está pronto</em><br>para a persona que escolhemos</h2>
+      <p class="subtitle" style="margin-bottom:24px;">A Nagila mapeou os gaps técnicos que bloqueiam o gestor de Google como usuário real do V2 hoje.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);margin-bottom:12px;">Gaps que bloqueiam agora</div>
+          <ul class="c-list" style="gap:10px;">
+            <li><span class="bullet bullet-red"></span><strong style="color:var(--text-primary);font-weight:500;">Workspaces compartilhados</strong> — operadores não conseguem trabalhar no mesmo cliente sem processos manuais de convite</li>
+            <li><span class="bullet bullet-red"></span><strong style="color:var(--text-primary);font-weight:500;">Tipos de usuário de gestão</strong> — V2 não diferencia gestor externo de dono do negócio internamente</li>
+            <li><span class="bullet bullet-red"></span><strong style="color:var(--text-primary);font-weight:500;">Multi-cliente sem atrito</strong> — gerenciar N clientes simultâneos exige desenvolvimento específico não feito</li>
+            <li><span class="bullet bullet-red"></span><strong style="color:var(--text-primary);font-weight:500;">V1 não migra para V2</strong> — sem plano de migração, base atual fica presa no produto antigo</li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-accent);margin-bottom:12px;">Ordem de execução sugerida</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <div style="min-width:22px;height:22px;border-radius:50%;background:rgba(226,75,74,0.15);color:var(--red);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;"><strong style="color:var(--text-primary);font-weight:500;">Decisão formal da diretoria</strong> — hierarquia de personas documentada antes da próxima sprint</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <div style="min-width:22px;height:22px;border-radius:50%;background:rgba(55,138,221,0.15);color:var(--blue);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;"><strong style="color:var(--text-primary);font-weight:500;">Infraestrutura de multi-cliente</strong> — workspaces e tipos de usuário são pré-requisito para tudo</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <div style="min-width:22px;height:22px;border-radius:50%;background:rgba(29,158,117,0.15);color:var(--green-accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;"><strong style="color:var(--text-primary);font-weight:500;">Redesenho de onboarding</strong> — primeira experiência precisa ser para quem gerencia múltiplos clientes</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <div style="min-width:22px;height:22px;border-radius:50%;background:rgba(239,159,39,0.15);color:var(--amber);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;"><strong style="color:var(--text-primary);font-weight:500;">White label e exportação</strong> — necessidade imediata do gestor para entregar valor ao cliente final</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <div style="min-width:22px;height:22px;border-radius:50%;background:rgba(127,119,221,0.15);color:var(--purple);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;"><strong style="color:var(--text-primary);font-weight:500;">Plano de migração V1 → V2</strong> — sem isso, a receita atual continua presa no produto antigo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="c-callout" style="border-color:rgba(29,158,117,0.25);background:rgba(29,158,117,0.04);">
+        <strong>O time já está operando com essa direção.</strong> As entrevistas de discovery foram feitas, os gaps foram mapeados e a ordem de execução está clara. O que falta é a <strong>decisão formal da diretoria</strong> para que nenhuma sprint seja reorientada por uma visão diferente no meio do caminho.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- NAV -->
+<div class="nav">
+  <button id="btn-prev" onclick="go(-1)" disabled>←</button>
+  <div class="dots" id="dots"></div>
+  <span class="nav-counter" id="counter">1 / 8</span>
+  <button id="btn-next" onclick="go(1)">→</button>
+</div>
+
+<div class="key-hint">
+  <span class="key">←</span>
+  <span class="key">→</span>
+  <span style="color:var(--text-muted);font-size:11px;">navegar</span>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  let cur = 0;
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    counter.textContent = (cur + 1) + ' / ' + slides.length;
+    btnPrev.disabled = cur === 0;
+    btnNext.disabled = cur === slides.length - 1;
+  }
+
+  function go(dir) { goTo(cur + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+</script>
+</body>
+</html>

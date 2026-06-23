@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Migração V1 → V2 — Pequenos Negócios · HubLocal</title>
+<style>
+  :root {
+    --navy: #1C3557;
+    --navy-mid: #1E3A5F;
+    --navy-dark: #0F172A;
+    --teal: #0D9488;
+    --teal-lt: #CCFBF1;
+    --teal-mid: #5EEAD4;
+    --white: #FFFFFF;
+    --off: #F7F9FC;
+    --slate: #475569;
+    --slate-xl: #94A3B8;
+    --dark: #0F172A;
+    --warn: #F59E0B;
+    --warn-lt: #FEF3C7;
+    --red: #DC2626;
+    --red-lt: #FEE2E2;
+    --border: #E2E8F0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #111827;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 16px;
+    user-select: none;
+  }
+
+  /* ── Deck wrapper ── */
+  .deck {
+    width: min(960px, 100%);
+  }
+
+  /* ── Slide ── */
+  .slide {
+    display: none;
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 24px 60px rgba(0,0,0,.55);
+  }
+  .slide.active { display: flex; flex-direction: column; }
+
+  /* ── Navigation ── */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .nav button {
+    background: #1E293B;
+    border: 1px solid #334155;
+    color: #94A3B8;
+    padding: 8px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .nav button:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .nav button:disabled { opacity: .3; cursor: default; }
+  .counter {
+    color: #94A3B8;
+    font-size: 13px;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* ── Dots ── */
+  .dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #334155;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .dot.active { background: var(--teal); width: 20px; border-radius: 4px; }
+
+  /* ── Keyboard hint ── */
+  .hint { color: #475569; font-size: 11px; text-align: center; margin-top: 10px; }
+
+  /* ════════ SLIDE STYLES ════════ */
+
+  /* shared */
+  .slide-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(18px, 2.7vw, 26px);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .slide-sub {
+    font-size: clamp(10px, 1.35vw, 13px);
+    color: var(--slate);
+    margin-bottom: 0;
+  }
+  .slide-header {
+    padding: 3.5% 6%;
+    padding-bottom: 1%;
+    flex-shrink: 0;
+  }
+
+  /* ── S1 COVER ── */
+  #s1 {
+    background: var(--navy);
+    justify-content: flex-end;
+    padding: 7%;
+  }
+  #s1 .circle-big {
+    position: absolute; right: -5%; top: -20%;
+    width: 38%; aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(13,148,136,.15);
+    pointer-events: none;
+  }
+  #s1 .circle-sm {
+    position: absolute; left: -3%; bottom: -14%;
+    width: 22%; aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(13,148,136,.10);
+    pointer-events: none;
+  }
+  #s1 .eyebrow {
+    font-size: clamp(9px, 1.15vw, 12px);
+    color: var(--teal);
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  #s1 h1 {
+    font-family: Georgia, serif;
+    font-size: clamp(24px, 5.5vw, 52px);
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 14px;
+  }
+  #s1 .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+  #s1 .subtitle {
+    font-size: clamp(11px, 1.7vw, 17px);
+    color: var(--slate-xl);
+    line-height: 1.45;
+    max-width: 68%;
+    margin-bottom: 28px;
+  }
+  #s1 .participants {
+    font-size: clamp(9px, 1.1vw, 11px);
+    color: #475569;
+  }
+
+  /* ── S2 WHY MIGRATE ── */
+  #s2 { background: var(--off); }
+  #s2 .cards {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5%;
+    padding: 1.5% 6% 4%;
+  }
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 7% 8%;
+    box-shadow: 0 4px 18px rgba(0,0,0,.07);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card-icon {
+    width: clamp(28px, 3.5vw, 40px);
+    height: clamp(28px, 3.5vw, 40px);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: clamp(11px, 1.4vw, 14px);
+    flex-shrink: 0;
+    margin-bottom: 4px;
+  }
+  .card h3 {
+    font-family: Georgia, serif;
+    font-size: clamp(12px, 1.4vw, 14px);
+    color: var(--dark);
+    margin-bottom: 2px;
+  }
+  .card p {
+    font-size: clamp(10px, 1.2vw, 12px);
+    color: var(--slate);
+    line-height: 1.5;
+  }
+  .card.red { background: var(--red-lt); }
+  .card.warn { background: var(--warn-lt); }
+  .card.teal { background: var(--teal-lt); }
+
+  /* ── S3 WHY SMALL ── */
+  #s3 { background: var(--off); }
+  #s3 .body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2%;
+    padding: 1% 6% 4%;
+  }
+  #s3 .reasons { display: flex; flex-direction: column; gap: 5%; justify-content: center; }
+  .reason {
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .reason-num {
+    font-family: Georgia, serif;
+    font-size: clamp(18px, 2.2vw, 22px);
+    color: var(--teal);
+    font-weight: 700;
+    min-width: clamp(24px, 2.5vw, 32px);
+    line-height: 1;
+    margin-top: 1px;
+  }
+  .reason-text h4 {
+    font-size: clamp(11px, 1.35vw, 14px);
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 2px;
+  }
+  .reason-text p {
+    font-size: clamp(9px, 1.1vw, 11.5px);
+    color: var(--slate);
+    line-height: 1.45;
+  }
+  #s3 .panel {
+    background: var(--navy);
+    border-radius: 12px;
+    padding: 6% 7%;
+    width: clamp(130px, 22%, 200px);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.18);
+  }
+  #s3 .panel-title {
+    font-family: Georgia, serif;
+    font-size: clamp(10px, 1.3vw, 13px);
+    color: var(--teal);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  #s3 .panel-sub {
+    font-size: clamp(8px, 0.95vw, 10px);
+    color: var(--slate-xl);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  #s3 .panel-item {
+    display: flex; align-items: center; gap: 7px;
+  }
+  #s3 .panel-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--teal); flex-shrink: 0;
+  }
+  #s3 .panel-item span {
+    font-size: clamp(8px, 1vw, 11px);
+    color: var(--white);
+    line-height: 1.3;
+  }
+
+  /* ── S4 PILLARS ── */
+  #s4 { background: var(--navy); }
+  #s4 .slide-title { color: var(--white); }
+  #s4 .slide-sub { color: var(--slate-xl); }
+  #s4 .cards {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5%;
+    padding: 1.5% 6% 4%;
+  }
+  .pillar {
+    background: #1E3A5F;
+    border: 1px solid #253F6A;
+    border-radius: 12px;
+    padding: 6% 7%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.22);
+  }
+  .pillar-top {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+  }
+  .pillar-num {
+    width: clamp(24px, 3vw, 34px); height: clamp(24px, 3vw, 34px);
+    border-radius: 50%;
+    background: var(--teal);
+    color: var(--white);
+    font-size: clamp(11px, 1.4vw, 15px);
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .badge {
+    font-size: clamp(7px, 0.9vw, 9px);
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .badge-teal { background: rgba(13,148,136,.2); color: var(--teal); border: 1px solid rgba(13,148,136,.4); }
+  .badge-warn { background: rgba(245,158,11,.2); color: var(--warn); border: 1px solid rgba(245,158,11,.4); }
+  .pillar h3 {
+    font-family: Georgia, serif;
+    font-size: clamp(14px, 1.8vw, 18px);
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+  .pillar p {
+    font-size: clamp(9px, 1.1vw, 11px);
+    color: var(--slate-xl);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .pillar ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 4px;
+  }
+  .pillar ul li {
+    display: flex; align-items: center; gap: 7px;
+    font-size: clamp(9px, 1.05vw, 10.5px);
+    color: var(--white);
+  }
+  .pillar ul li::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--teal);
+    flex-shrink: 0;
+  }
+
+  /* ── S5 TECH PRIORITY ── */
+  #s5 { background: var(--off); }
+  #s5 .body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.5% 6% 3.5%;
+    justify-content: center;
+  }
+  .tech-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 2.2% 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tech-row:last-child { border-bottom: none; }
+  .tech-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tech-num {
+    width: clamp(22px, 2.6vw, 30px); height: clamp(22px, 2.6vw, 30px);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(11px, 1.4vw, 15px);
+    font-weight: 800;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+  .tech-label {
+    font-family: Georgia, serif;
+    font-size: clamp(12px, 1.6vw, 15px);
+    font-weight: 700;
+    color: var(--dark);
+    flex: 1;
+  }
+  .effort-tag {
+    font-size: clamp(8px, 1vw, 11px);
+    font-weight: 700;
+  }
+  .bar-bg {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 3px 0 4px 0;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    opacity: .7;
+  }
+  .tech-desc {
+    font-size: clamp(9px, 1.1vw, 11px);
+    color: var(--slate);
+    line-height: 1.5;
+    padding-left: calc(clamp(22px, 2.6vw, 30px) + 10px);
+  }
+
+  /* ── S6 OPERATIONAL ── */
+  #s6 { background: var(--off); }
+  #s6 .body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1%;
+    padding: 1% 6% 4%;
+    align-items: stretch;
+  }
+  .op-card {
+    border-radius: 12px;
+    padding: 6% 7%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.07);
+  }
+  .op-card h3 {
+    font-family: Georgia, serif;
+    font-size: clamp(11px, 1.4vw, 14px);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .op-card li {
+    list-style: none;
+    font-size: clamp(9px, 1.1vw, 11.5px);
+    line-height: 1.6;
+    color: var(--slate);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .op-card li .icon { flex-shrink: 0; font-style: normal; margin-top: 1px; }
+  .op-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--teal);
+    font-size: clamp(22px, 3.5vw, 38px);
+    font-weight: 300;
+    padding: 0 1%;
+  }
+
+  /* ── S7 TASKS ── */
+  #s7 { background: var(--off); }
+  #s7 .body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5%;
+    padding: 1.5% 6% 4%;
+  }
+  .task-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6% 7%;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .task-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .task-icon {
+    width: clamp(28px, 3.5vw, 40px); height: clamp(28px, 3.5vw, 40px);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(13px, 1.6vw, 18px);
+    font-weight: 800;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+  .task-head-text h3 {
+    font-family: Georgia, serif;
+    font-size: clamp(12px, 1.5vw, 15px);
+    color: var(--dark);
+    font-weight: 700;
+  }
+  .task-phase {
+    font-size: clamp(8px, 0.9vw, 9px);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .task-divider { height: 1px; background: var(--border); margin: 2px 0; }
+  .task-item {
+    display: flex; flex-direction: column; gap: 2px; padding: 3px 0;
+  }
+  .task-item h4 {
+    font-size: clamp(10px, 1.25vw, 13px);
+    color: var(--dark);
+    font-weight: 700;
+  }
+  .task-item p {
+    font-size: clamp(9px, 1.05vw, 11px);
+    color: var(--slate);
+    line-height: 1.4;
+  }
+
+  /* ── S8 RISKS ── */
+  #s8 { background: var(--off); }
+  #s8 .grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2%;
+    padding: 0.5% 6% 3.5%;
+  }
+  .risk-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3.5% 4%;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  }
+  .risk-icon {
+    width: clamp(24px, 3vw, 34px); height: clamp(24px, 3vw, 34px);
+    background: var(--warn-lt);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(12px, 1.5vw, 16px);
+    font-weight: 800;
+    color: var(--warn);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .risk-body h4 {
+    font-size: clamp(10px, 1.2vw, 12px);
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 2px;
+  }
+  .risk-owner {
+    font-size: clamp(7.5px, 0.9vw, 9px);
+    color: var(--teal);
+    font-weight: 700;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .risk-body p {
+    font-size: clamp(8.5px, 1vw, 10.5px);
+    color: var(--slate);
+    line-height: 1.45;
+  }
+
+  /* ── S9 NEXT STEPS ── */
+  #s9 { background: var(--navy); }
+  #s9 .slide-title { color: var(--white); }
+  #s9 .slide-sub { color: var(--slate-xl); }
+  #s9 .grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2%;
+    padding: 0.5% 6% 3.5%;
+  }
+  .step-card {
+    background: #1E3A5F;
+    border: 1px solid #253F6A;
+    border-radius: 10px;
+    padding: 3.5% 4%;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.18);
+  }
+  .step-num {
+    width: clamp(22px, 2.6vw, 30px); height: clamp(22px, 2.6vw, 30px);
+    border-radius: 50%;
+    background: var(--teal);
+    color: var(--white);
+    font-size: clamp(10px, 1.3vw, 14px);
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-body h4 {
+    font-size: clamp(10px, 1.2vw, 12px);
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+  .step-owner {
+    font-size: clamp(7.5px, 0.9vw, 9px);
+    color: var(--teal);
+    font-weight: 700;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .step-body p {
+    font-size: clamp(8.5px, 1vw, 10.5px);
+    color: var(--slate-xl);
+    line-height: 1.45;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- ═══ SLIDE 1 — CAPA ═══ -->
+  <div class="slide active" id="s1">
+    <div class="circle-big"></div>
+    <div class="circle-sm"></div>
+    <div class="eyebrow">HubLocal · Junho 2026</div>
+    <h1>Migração<br>V1 → V2</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Requisitos essenciais para a migração dos Pequenos Negócios para a nova plataforma</p>
+    <p class="participants">Participantes: Lindberg · Nagila · Cleiton · Lana · Fabio · Caroline</p>
+  </div>
+
+  <!-- ═══ SLIDE 2 — POR QUE MIGRAR ═══ -->
+  <div class="slide" id="s2">
+    <div class="slide-header">
+      <div class="slide-title" style="color:var(--dark)">Por que migrar para o V2?</div>
+    </div>
+    <div class="cards">
+      <div class="card red">
+        <div class="card-icon" style="background:var(--red);color:#fff">V1</div>
+        <h3>Plataforma legada</h3>
+        <p>Time de desenvolvimento dividido entre V1 e V2, gerando lentidão nas entregas e esforço duplicado.</p>
+      </div>
+      <div class="card warn">
+        <div class="card-icon" style="background:var(--warn);color:#fff">$</div>
+        <h3>Custo de manutenção</h3>
+        <p>Manter duas plataformas em paralelo consome recursos operacionais e técnicos que poderiam ser unificados.</p>
+      </div>
+      <div class="card teal">
+        <div class="card-icon" style="background:var(--teal);color:#fff">V2</div>
+        <h3>Plataforma do futuro</h3>
+        <p>V2 é self-service, focada em automação e monitoramento — reduz intervenção manual e escala a operação.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3 — POR QUE PEQUENOS NEGÓCIOS ═══ -->
+  <div class="slide" id="s3">
+    <div class="slide-header">
+      <div class="slide-title" style="color:var(--dark)">Por que começar pelos Pequenos Negócios?</div>
+    </div>
+    <div class="body">
+      <div class="reasons">
+        <div class="reason">
+          <div class="reason-num">01</div>
+          <div class="reason-text">
+            <h4>Caminho mais rápido</h4>
+            <p>Perfil de 1-2 locais se encaixa no modelo atual do V2 sem mudanças drásticas na estrutura.</p>
+          </div>
+        </div>
+        <div class="reason">
+          <div class="reason-num">02</div>
+          <div class="reason-text">
+            <h4>Horizonte de 3 meses</h4>
+            <p>Abordagem "baby steps": começar com esse segmento é viável dentro do prazo trimestral.</p>
+          </div>
+        </div>
+        <div class="reason">
+          <div class="reason-num">03</div>
+          <div class="reason-text">
+            <h4>Validação do modelo self-service</h4>
+            <p>Clientes independentes validam a nova proposta do V2 antes de expandir para grandes negócios.</p>
+          </div>
+        </div>
+        <div class="reason">
+          <div class="reason-num">04</div>
+          <div class="reason-text">
+            <h4>Liberar o time de dev</h4>
+            <p>Migrar esse segmento já reduz a carga no V1 e acelera a unificação da plataforma.</p>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Maioria em número de empresas</div>
+        <div class="panel-sub">Perfil do segmento:</div>
+        <div class="panel-item"><div class="panel-dot"></div><span>1 a 2 locais</span></div>
+        <div class="panel-item"><div class="panel-dot"></div><span>Sem edição em massa</span></div>
+        <div class="panel-item"><div class="panel-dot"></div><span>Workspace funcional</span></div>
+        <div class="panel-item"><div class="panel-dot"></div><span>Menor complexidade</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4 — 3 PILARES ═══ -->
+  <div class="slide" id="s4">
+    <div class="slide-header">
+      <div class="slide-title">Os 3 Pilares para Viabilizar a Migração</div>
+      <div class="slide-sub">Funcionalidades essenciais que o V2 precisa entregar para os Pequenos Negócios</div>
+    </div>
+    <div class="cards">
+      <div class="pillar">
+        <div class="pillar-top">
+          <div class="pillar-num">1</div>
+          <div class="badge badge-teal">Funcional</div>
+        </div>
+        <h3>Workspace</h3>
+        <p>Para pequenos negócios com 1-2 locais, o modelo atual de workspace do V2 já é adequado. Não exige mudanças drásticas na visão do usuário.</p>
+        <ul>
+          <li>Estrutura de locais existente</li>
+          <li>Visão operacional básica</li>
+          <li>Sem edição em massa necessária</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-top">
+          <div class="pillar-num">2</div>
+          <div class="badge badge-warn">Alta prioridade</div>
+        </div>
+        <h3>Monitoramento</h3>
+        <p>O pilar mais complexo e que demandará mais tempo. É o coração do novo modelo operacional baseado em automação.</p>
+        <ul>
+          <li>Dashboard de status das automações</li>
+          <li>Alertas e logs de execução</li>
+          <li>Rastreabilidade de dados (crawlers)</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-top">
+          <div class="pillar-num">3</div>
+          <div class="badge badge-warn">Alta prioridade</div>
+        </div>
+        <h3>Postagens</h3>
+        <p>Automação de postagens via IA (integração Instagram). O cliente configura uma vez e o sistema executa, eliminando login diário.</p>
+        <ul>
+          <li>Automação de postagens via IA</li>
+          <li>Integração com Instagram (V2)</li>
+          <li>Configuração única — execução contínua</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5 — PRIORIDADE TÉCNICA ═══ -->
+  <div class="slide" id="s5">
+    <div class="slide-header">
+      <div class="slide-title" style="color:var(--dark)">Ordem de Prioridade Técnica</div>
+      <div class="slide-sub">Sequência definida em reunião — do maior para o menor esforço estimado</div>
+    </div>
+    <div class="body">
+      <div class="tech-row">
+        <div class="tech-top">
+          <div class="tech-num" style="background:var(--red)">1</div>
+          <div class="tech-label">Monitoramento</div>
+          <div class="effort-tag" style="color:var(--red)">● Alto esforço</div>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:78%;background:var(--red)"></div></div>
+        <div class="tech-desc">Maior complexidade técnica. Requer construção de dashboards, sistema de logs, alertas e rastreabilidade de dados (crawlers externos para verificar consistência com Google).</div>
+      </div>
+      <div class="tech-row">
+        <div class="tech-top">
+          <div class="tech-num" style="background:var(--warn)">2</div>
+          <div class="tech-label">Integração com Instagram</div>
+          <div class="effort-tag" style="color:var(--warn)">● Médio esforço</div>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:52%;background:var(--warn)"></div></div>
+        <div class="tech-desc">A funcionalidade existe no V1, mas precisa ser adaptada para o V2. Exige mapeamento e re-implementação do fluxo de automação de postagens.</div>
+      </div>
+      <div class="tech-row">
+        <div class="tech-top">
+          <div class="tech-num" style="background:var(--teal)">3</div>
+          <div class="tech-label">Listagem</div>
+          <div class="effort-tag" style="color:var(--teal)">● Menor esforço</div>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:30%;background:var(--teal)"></div></div>
+        <div class="tech-desc">Considerada a etapa mais tranquila. Funcionalidade mais direta, menor impacto técnico no processo de migração.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6 — MODELO OPERACIONAL ═══ -->
+  <div class="slide" id="s6">
+    <div class="slide-header">
+      <div class="slide-title" style="color:var(--dark)">Novo Modelo Operacional</div>
+      <div class="slide-sub">A migração transforma a forma de trabalhar da operação</div>
+    </div>
+    <div class="body">
+      <div class="op-card" style="background:var(--red-lt);border:1px solid #FCA5A5">
+        <h3 style="color:var(--red)">ANTES — V1</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:4px">
+          <li><i class="icon">✕</i> Execução manual empresa por empresa</li>
+          <li><i class="icon">✕</i> Time dividido entre V1 e V2</li>
+          <li><i class="icon">✕</i> Dependência de listas externas (Monday)</li>
+          <li><i class="icon">✕</i> Login diário necessário pelo cliente</li>
+          <li><i class="icon">✕</i> Aprovação manual de alterações</li>
+        </ul>
+      </div>
+      <div class="op-arrow">→</div>
+      <div class="op-card" style="background:var(--teal-lt);border:1px solid var(--teal-mid)">
+        <h3 style="color:var(--teal)">DEPOIS — V2</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:4px">
+          <li><i class="icon">✓</i> Configuração única → execução automática</li>
+          <li><i class="icon">✓</i> Time unificado no V2</li>
+          <li><i class="icon">✓</i> Controle centralizado na plataforma</li>
+          <li><i class="icon">✓</i> Self-service: cliente configura, IA executa</li>
+          <li><i class="icon">✓</i> Avisos claros → cliente assume responsabilidade</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7 — CATEGORIZAÇÃO ═══ -->
+  <div class="slide" id="s7">
+    <div class="slide-header">
+      <div class="slide-title" style="color:var(--dark)">O que trazer do V1 para o V2 agora?</div>
+      <div class="slide-sub">Classificação proposta por Lana Maia para definir o escopo da primeira fase</div>
+    </div>
+    <div class="body">
+      <div class="task-card">
+        <div class="task-head">
+          <div class="task-icon" style="background:var(--teal)">D</div>
+          <div class="task-head-text">
+            <h3>Tarefas Diárias</h3>
+            <div class="task-phase" style="color:var(--teal)">Essenciais — Fase 1</div>
+          </div>
+        </div>
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <h4>Postagens</h4>
+          <p>Automação via IA — Instagram</p>
+        </div>
+        <div class="task-item">
+          <h4>Avaliações</h4>
+          <p>Monitoramento e resposta</p>
+        </div>
+        <div class="task-item">
+          <h4>Monitoramento</h4>
+          <p>Verificação de status do perfil</p>
+        </div>
+      </div>
+      <div class="task-card">
+        <div class="task-head">
+          <div class="task-icon" style="background:var(--slate-xl)">E</div>
+          <div class="task-head-text">
+            <h3>Tarefas Esporádicas</h3>
+            <div class="task-phase" style="color:var(--slate-xl)">Segunda fase</div>
+          </div>
+        </div>
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <h4>Cardápio</h4>
+          <p>Atualização de produtos e serviços</p>
+        </div>
+        <div class="task-item">
+          <h4>Serviços</h4>
+          <p>Gestão do perfil de serviços</p>
+        </div>
+        <div class="task-item">
+          <h4>Grupos de locais</h4>
+          <p>Relatórios e padrões de avaliação</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8 — DESAFIOS ═══ -->
+  <div class="slide" id="s8">
+    <div class="slide-header">
+      <div class="slide-title" style="color:var(--dark)">Desafios e Riscos Identificados</div>
+    </div>
+    <div class="grid">
+      <div class="risk-card">
+        <div class="risk-icon">!</div>
+        <div class="risk-body">
+          <h4>Limitações atuais na V2</h4>
+          <div class="risk-owner">Dev</div>
+          <p>Admin não consegue criar locais nem editar planos sem intervenção externa. Necessário resolver antes da migração.</p>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-icon">!</div>
+        <div class="risk-body">
+          <h4>Contratos ativos (V1)</h4>
+          <div class="risk-owner">Comercial</div>
+          <p>Clientes têm contratos prometendo funcionalidades que talvez não vão ao V2. Necessário aditivo contratual.</p>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-icon">!</div>
+        <div class="risk-body">
+          <h4>Descontinuação de integrações</h4>
+          <div class="risk-owner">Produto + Jurídico</div>
+          <p>Facebook, Bing e Apple Maps: baixa relevância ou sem suporte no Brasil. Foco no Google + IA. Requer alinhamento jurídico.</p>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-icon">!</div>
+        <div class="risk-body">
+          <h4>Modelo híbrido (2 públicos)</h4>
+          <div class="risk-owner">Marketing + CS</div>
+          <p>V2 atenderá pequenos negócios e gestores Google. Comunicação e operações precisam ser adaptadas para cada perfil.</p>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-icon">!</div>
+        <div class="risk-body">
+          <h4>Confiabilidade de dados</h4>
+          <div class="risk-owner">Dev</div>
+          <p>Discrepâncias entre perfil Google e dados públicos. Precisa de monitoramento externo (crawlers) para garantir precisão.</p>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-icon">!</div>
+        <div class="risk-body">
+          <h4>Reeducação do cliente</h4>
+          <div class="risk-owner">CS + Produto</div>
+          <p>Self-service exige mudança de comportamento: configura uma vez e o sistema executa, sem necessidade de login diário.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9 — PRÓXIMOS PASSOS ═══ -->
+  <div class="slide" id="s9">
+    <div class="slide-header">
+      <div class="slide-title">Próximos Passos</div>
+      <div class="slide-sub">Ações acordadas na reunião de 22/06/2026</div>
+    </div>
+    <div class="grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Mapear funcionalidades V1 e V2</h4>
+          <div class="step-owner">Equipe</div>
+          <p>Comparar módulos entre versões e segmentar tarefas diárias vs. esporádicas.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Criar tarefas no sistema de gestão</h4>
+          <div class="step-owner">Equipe</div>
+          <p>Registrar requisitos identificados e estimar story points com o time de dev.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Revisar contratos ativos</h4>
+          <div class="step-owner">Comercial</div>
+          <p>Avaliar necessidade de aditivos para funcionalidades descontinuadas no V2.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Alinhar estratégia comercial</h4>
+          <div class="step-owner">Grupo</div>
+          <p>Ajustar comunicação sobre integrações com marketing e vendas.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Investigar erro de plano</h4>
+          <div class="step-owner">Lana</div>
+          <p>Analisar limitação de administradores ao tentar alterar planos na plataforma.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h4>Reunir com Rodrigo</h4>
+          <div class="step-owner">Grupo</div>
+          <p>Debater diretrizes e necessidades de migração com a gestão.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prev" onclick="go(-1)" disabled>← Anterior</button>
+  <span class="counter" id="counter">1 / 9</span>
+  <button id="next" onclick="go(1)">Próximo →</button>
+</div>
+<div class="dots" id="dots"></div>
+<div class="hint">Use ← → ou clique nos pontos para navegar · F para tela cheia</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+
+  // Build dots
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(total - 1, n));
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    document.getElementById('counter').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === total - 1;
+  }
+
+  function go(d) { goTo(cur + d); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+</script>
+</body>
+</html>

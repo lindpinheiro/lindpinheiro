@@ -3,111 +3,296 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apresentações — Lindberg Pinheiro</title>
+<title>HubLocal V2 — Apresentações</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #000C33;
-    color: #fff;
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-accent: #1d9e75;
+    --green-light: #5dcaa5;
+    --text-primary: #f5f2ec;
+    --text-secondary: #a8c4b8;
+    --text-muted: #6b9982;
+    --surface: rgba(255,255,255,0.04);
+    --surface-2: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.08);
+  }
+
+  html, body {
     min-height: 100vh;
+    background: #060f0b;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 64px 24px;
+    justify-content: center;
   }
-  .header {
-    text-align: center;
-    margin-bottom: 56px;
-  }
-  .header h1 {
-    font-size: 36px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-  .header h1 span { color: #00CC73; }
-  .header p {
-    margin-top: 10px;
-    font-size: 16px;
-    opacity: 0.5;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
+
+  .container {
     width: 100%;
-    max-width: 900px;
+    max-width: 520px;
+    padding: 48px 28px;
+    text-align: center;
   }
-  .card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
-    padding: 32px;
-    text-decoration: none;
-    color: inherit;
+
+  /* ── LOCK SCREEN ── */
+  #lock-screen {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    transition: all 0.2s;
+    align-items: center;
+    gap: 36px;
   }
-  .card:hover {
-    background: rgba(0,60,254,0.2);
-    border-color: #003CFE;
-    transform: translateY(-2px);
+
+  .lock-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
   }
-  .card-tag {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
+
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #00CC73;
-  }
-  .card h2 {
-    font-size: 22px;
-    font-weight: 800;
-    line-height: 1.2;
-  }
-  .card p {
-    font-size: 14px;
-    opacity: 0.55;
-    line-height: 1.6;
-  }
-  .card-footer {
-    margin-top: 8px;
+    color: var(--green-accent);
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #003CFE;
+    gap: 10px;
   }
-  .card:hover .card-footer { color: #fff; }
-  .footer {
-    margin-top: 64px;
-    font-size: 13px;
-    opacity: 0.3;
+
+  .eyebrow::before,
+  .eyebrow::after {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--green-accent);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+
+  h1 em { font-style: italic; color: var(--green-light); }
+
+  .lock-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  input[type="password"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--text-primary);
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="password"]::placeholder { color: var(--text-muted); }
+  input[type="password"]:focus { border-color: rgba(29,158,117,0.5); }
+  input[type="password"].error { border-color: rgba(226,75,74,0.6); }
+
+  .error-msg {
+    font-size: 12px;
+    color: #e24b4a;
+    display: none;
+  }
+
+  button.submit {
+    width: 100%;
+    max-width: 340px;
+    background: var(--green-accent);
+    border: none;
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.15s;
+  }
+
+  button.submit:hover { opacity: 0.88; }
+
+  /* ── MENU ── */
+  #menu-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+  }
+
+  .menu-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .deck-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .deck-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary);
+    text-align: left;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .deck-card:hover { border-color: rgba(29,158,117,0.4); background: var(--surface-2); }
+
+  .deck-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: rgba(29,158,117,0.12);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: var(--green-light);
+  }
+
+  .deck-icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
+
+  .deck-info { flex: 1; }
+  .deck-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .deck-sub { font-size: 12px; color: var(--text-muted); }
+
+  .deck-arrow {
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+  }
+
+  .deck-arrow svg { width: 16px; height: 16px; stroke-width: 1.5; }
+
+  .footer-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
   }
 </style>
 </head>
 <body>
+<div class="container">
 
-<div class="header">
-  <h1>Hub<span>Local</span></h1>
-  <p>Apresentações</p>
+  <!-- LOCK -->
+  <div id="lock-screen">
+    <div class="lock-header">
+      <div class="eyebrow">HubLocal · Time de Produto</div>
+      <h1><em>Apresentações</em></h1>
+    </div>
+    <div class="lock-form">
+      <input type="password" id="pwd" placeholder="Senha de acesso" autocomplete="off" />
+      <div class="error-msg" id="error-msg">Senha incorreta. Tente novamente.</div>
+      <button class="submit" onclick="check()">
+        <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+        Acessar
+      </button>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu-screen">
+    <div class="menu-header">
+      <div class="eyebrow">HubLocal · Time de Produto</div>
+      <h1><em>Apresentações</em></h1>
+    </div>
+    <div class="deck-list">
+      <a class="deck-card" href="hublocal-discovery-v2.html" target="_blank">
+        <div class="deck-icon">
+          <i data-lucide="search"></i>
+        </div>
+        <div class="deck-info">
+          <div class="deck-title">Challenger Assumption</div>
+          <div class="deck-sub">Discovery V2 — Processo de design</div>
+        </div>
+        <div class="deck-arrow"><i data-lucide="arrow-right"></i></div>
+      </a>
+      <a class="deck-card" href="hublocal-diretoria.html" target="_blank">
+        <div class="deck-icon">
+          <i data-lucide="users"></i>
+        </div>
+        <div class="deck-info">
+          <div class="deck-title">Personas & Priorização</div>
+          <div class="deck-sub">Diretoria — HubLocal V2</div>
+        </div>
+        <div class="deck-arrow"><i data-lucide="arrow-right"></i></div>
+      </a>
+      <a class="deck-card" href="hublocal-v2-apresentacao.html" target="_blank">
+        <div class="deck-icon">
+          <i data-lucide="monitor"></i>
+        </div>
+        <div class="deck-info">
+          <div class="deck-title">Plataforma V2</div>
+          <div class="deck-sub">Apresentação do produto — HubLocal V2</div>
+        </div>
+        <div class="deck-arrow"><i data-lucide="arrow-right"></i></div>
+      </a>
+    </div>
+    <div class="footer-note">Lindberg Pinheiro Jr · Design Brief V2</div>
+  </div>
+
 </div>
 
-<div class="grid">
+<script>
+  lucide.createIcons();
 
-  <a class="card" href="hublocal-v2-apresentacao.html">
-    <span class="card-tag">Produto</span>
-    <h2>Plataforma V2</h2>
-    <p>A evolução da HubLocal como plataforma de gestão de presença digital para negócios locais.</p>
-    <div class="card-footer">Ver apresentação →</div>
-  </a>
+  const PWD = 'hub123';
+  const input = document.getElementById('pwd');
+  const errMsg = document.getElementById('error-msg');
 
-</div>
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+  input.addEventListener('input', () => {
+    input.classList.remove('error');
+    errMsg.style.display = 'none';
+  });
 
-<div class="footer">lindpinheiro.github.io</div>
-
+  function check() {
+    if (input.value === PWD) {
+      document.getElementById('lock-screen').style.display = 'none';
+      const menu = document.getElementById('menu-screen');
+      menu.style.display = 'flex';
+      lucide.createIcons();
+    } else {
+      input.classList.add('error');
+      errMsg.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  }
+</script>
 </body>
 </html>

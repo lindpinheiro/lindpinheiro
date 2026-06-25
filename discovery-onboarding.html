@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discovery · Ferramentas de Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0E0E0E;
+    --ink2: #4A4A4A;
+    --ink3: #888;
+    --bg: #F7F6F2;
+    --white: #FFFFFF;
+    --accent: #1A56DB;
+    --accent-light: #E8EFFE;
+    --green: #0B7B5E;
+    --green-light: #E0F5EE;
+    --amber: #92500A;
+    --amber-light: #FEF0DC;
+    --red: #9B1C1C;
+    --red-light: #FDE8E8;
+    --border: #E2E0D8;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(247,246,242,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-links a {
+    font-size: 13px;
+    color: var(--ink2);
+    text-decoration: none;
+    padding: 5px 12px;
+    border-radius: 20px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-links a:hover { background: var(--white); color: var(--ink); }
+
+  /* HERO */
+  .hero {
+    padding: 80px 2rem 64px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero-sub {
+    font-size: 17px;
+    color: var(--ink2);
+    max-width: 580px;
+    line-height: 1.65;
+    margin-bottom: 36px;
+  }
+  .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    font-size: 13px;
+    color: var(--ink2);
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 5px 14px;
+    border-radius: 20px;
+  }
+
+  /* SECTION */
+  section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+
+  /* NEEDS */
+  .needs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .need-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .need-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+    font-size: 18px;
+  }
+  .need-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .need-card p { font-size: 13px; color: var(--ink2); line-height: 1.5; }
+
+  /* TOOLS GRID */
+  .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+
+  .tool-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .tool-card:hover { border-color: #bbb; }
+  .tool-card.highlight { border: 2px solid var(--accent); }
+  .tool-card.budget { border: 2px solid var(--green); }
+
+  .rec-badge {
+    position: absolute;
+    top: -11px; left: 20px;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+  .rec-badge.blue { background: var(--accent); color: #fff; }
+  .rec-badge.green { background: var(--green); color: #fff; }
+
+  .tool-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+  .tool-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; }
+  .tool-type { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+
+  .price-block { text-align: right; flex-shrink: 0; }
+  .price-main { font-size: 1.4rem; font-weight: 700; font-family: 'Syne', sans-serif; color: var(--ink); }
+  .price-period { font-size: 11px; color: var(--ink3); }
+  .price-note { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .feature-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--ink2); line-height: 1.4; }
+  .feat-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .feat-icon.ok { color: var(--green); }
+  .feat-icon.warn { color: var(--amber); }
+  .feat-icon.no { color: #ccc; }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .pill.ok { background: var(--green-light); color: var(--green); }
+  .pill.warn { background: var(--amber-light); color: var(--amber); }
+  .pill.info { background: var(--accent-light); color: var(--accent); }
+  .pill.neutral { background: #F0EEE8; color: var(--ink2); }
+
+  /* BUDGET SECTION */
+  .budget-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 32px; }
+  .budget-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .budget-card.best { border-color: var(--green); }
+  .budget-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .budget-name { font-size: 15px; font-weight: 600; }
+  .budget-price { font-size: 1.1rem; font-weight: 700; color: var(--green); font-family: 'Syne', sans-serif; }
+  .budget-price small { font-size: 11px; color: var(--ink3); display: block; font-family: 'Inter', sans-serif; font-weight: 400; }
+  .budget-desc { font-size: 13px; color: var(--ink2); line-height: 1.5; margin-bottom: 12px; }
+  .budget-limit { font-size: 12px; color: var(--amber); background: var(--amber-light); padding: 5px 10px; border-radius: 6px; }
+
+  /* MATRIX */
+  .matrix-wrap { overflow-x: auto; }
+  .matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .matrix th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink3);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    white-space: nowrap;
+  }
+  .matrix td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink2);
+    vertical-align: middle;
+  }
+  .matrix td:first-child { font-weight: 500; color: var(--ink); }
+  .matrix tr:last-child td { border-bottom: none; }
+  .dot { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; }
+  .dot-ok { background: var(--green-light); color: var(--green); }
+  .dot-warn { background: var(--amber-light); color: var(--amber); }
+  .dot-no { background: #F0EEE8; color: #bbb; }
+
+  /* MIGRATION */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .step p { font-size: 13px; color: var(--ink2); line-height: 1.55; }
+  .step-meta { font-size: 12px; color: var(--ink3); margin-top: 6px; }
+
+  /* ALERT */
+  .alert {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--amber-light);
+    border: 1px solid #F6C87A;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    font-size: 13px; color: var(--amber); line-height: 1.5;
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* QUESTIONS */
+  .q-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+  .q-block-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .q-block-title span { font-size: 16px; }
+  .q-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .q-list li { font-size: 13px; color: var(--ink2); padding-left: 16px; position: relative; line-height: 1.5; }
+  .q-list li::before { content: '→'; position: absolute; left: 0; color: var(--ink3); }
+
+  /* CTA FOOTER */
+  .cta-footer {
+    background: var(--ink);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    margin: 0 2rem 60px;
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cta-footer h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--white); margin-bottom: 10px; }
+  .cta-footer p { font-size: 14px; color: #999; margin-bottom: 20px; }
+  .cta-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    font-size: 13px; font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none; cursor: pointer;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-ghost { background: transparent; color: #bbb; border: 1px solid #333; }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .needs-grid, .budget-grid { grid-template-columns: 1fr; }
+    .tools-grid { grid-template-columns: 1fr; }
+    nav { padding: 0 1rem; }
+    section { padding: 40px 1rem; }
+    .hero { padding: 48px 1rem 40px; }
+    .nav-links { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Onboarding Discovery</div>
+  <div class="nav-links">
+    <a href="#necessidades">Necessidades</a>
+    <a href="#ferramentas">Ferramentas</a>
+    <a href="#economicas">Opções econômicas</a>
+    <a href="#migracao">Migração</a>
+    <a href="#perguntas">Perguntas</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="eyebrow">Discovery · Junho 2025</div>
+  <h1>Substituir o<br><em>Products Fruits</em></h1>
+  <p class="hero-sub">Avaliação de ferramentas de onboarding com tours guiados, modais de notificação e rastreamento de engajamento — com preços em reais.</p>
+  <div class="hero-tags">
+    <span class="tag">Tours guiados</span>
+    <span class="tag">Modais promocionais</span>
+    <span class="tag">Analytics de fluxo</span>
+    <span class="tag">Rastreamento de cliques</span>
+    <span class="tag">Segmentação de usuários</span>
+  </div>
+</div>
+
+<!-- NECESSIDADES -->
+<section id="necessidades">
+  <div class="section-label">Contexto</div>
+  <div class="section-title">O que precisamos na nova ferramenta</div>
+  <div class="needs-grid">
+    <div class="need-card">
+      <div class="need-icon">🗺️</div>
+      <h3>Tours guiados</h3>
+      <p>Criar passo a passo interativos que conduzam o usuário por funcionalidades do sistema sem precisar de dev para cada novo tour.</p>
+    </div>
+    <div class="need-card">
+      <div class="need-icon">💬</div>
+      <h3>Modais promocionais</h3>
+      <p>Exibir pop-ups de notificações, anúncios de features e campanhas para segmentos específicos de usuários.</p>
+    </div>
+    <div class="need-card">
+      <div class="need-icon">📊</div>
+      <h3>Rastreamento e dados</h3>
+      <p>Saber quem seguiu os fluxos, quem visualizou pop-ups e quem clicou nos botões — com dados por usuário.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FERRAMENTAS PRINCIPAIS -->
+<section id="ferramentas">
+  <div class="section-label">Opções avaliadas</div>
+  <div class="section-title">Ferramentas recomendadas</div>
+
+  <div class="tools-grid">
+
+    <!-- APPCUES -->
+    <div class="tool-card highlight">
+      <div class="rec-badge blue">⭐ Recomendado</div>
+      <div class="tool-header">
+        <div>
+          <div class="tool-name">Appcues</div>
+          <div class="tool-type">Editor visual sem código</div>
+        </div>
+        <div class="price-block">
+          <div class="price-main">R$ 1.420</div>
+          <div class="price-period">/mês · até 1k MAU</div>
+          <div class="price-note">≈ USD 249 · câmbio R$5,70</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <ul class="feature-list">
+        <li><span class="feat-icon ok">✓</span> Tours guiados com editor drag-and-drop</li>
+        <li><span class="feat-icon ok">✓</span> Modais, tooltips, banners e checklists</li>
+        <li><span class="feat-icon ok">✓</span> Analytics: quem completou, abandonou, clicou</li>
+        <li><span class="feat-icon ok">✓</span> Segmentação por plano, role, data de cadastro</li>
+        <li><span class="feat-icon ok">✓</span> Integra Segment, HubSpot, Mixpanel, Amplitude</li>
+        <li><span class="feat-icon ok">✓</span> Webhooks em tempo real + API REST</li>
+        <li><span class="feat-icon warn">~</span> Eventos de produto exigem <code>track()</code> manual</li>
+        <li><span class="feat-icon warn">~</span> Sem teste A/B no plano de entrada</li>
+      </ul>
+      <div class="tag-row">
+        <span class="pill ok">Fácil de usar</span>
+        <span class="pill info">Setup rápido</span>
+        <span class="pill neutral">USD 249–879/mês</span>
+      </div>
+    </div>
+
+    <!-- PENDO -->
+    <div class="tool-card highlight">
+      <div class="rec-badge blue">⭐ Recomendado</div>
+      <div class="tool-header">
+        <div>
+          <div class="tool-name">Pendo</div>
+          <div class="tool-type">Analytics de produto + onboarding</div>
+        </div>
+        <div class="price-block">
+          <div class="price-main">Grátis</div>
+          <div class="price-period">até 500 MAU</div>
+          <div class="price-note">Enterprise sob consulta</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <ul class="feature-list">
+        <li><span class="feat-icon ok">✓</span> Tours, tooltips, modais e banners</li>
+        <li><span class="feat-icon ok">✓</span> Auto-capture de cliques e navegação sem código</li>
+        <li><span class="feat-icon ok">✓</span> Analytics nativo: funnels, retenção, paths, NPS</li>
+        <li><span class="feat-icon ok">✓</span> Segmentação profunda por comportamento</li>
+        <li><span class="feat-icon ok">✓</span> Data sync com Snowflake, BigQuery, Redshift</li>
+        <li><span class="feat-icon ok">✓</span> Integra Salesforce, Gainsight, Marketo</li>
+        <li><span class="feat-icon warn">~</span> Curva de aprendizado maior que Appcues</li>
+        <li><span class="feat-icon warn">~</span> Preço do plano pago opaco (negociado)</span></li>
+      </ul>
+      <div class="tag-row">
+        <span class="pill ok">Analytics robusto</span>
+        <span class="pill ok">Auto-capture</span>
+        <span class="pill warn">Complexidade maior</span>
+      </div>
+    </div>
+
+    <!-- CHAMELEON -->
+    <div class="tool-card">
+      <div class="tool-header">
+        <div>
+          <div class="tool-name">Chameleon</div>
+          <div class="tool-type">Alta personalização visual</div>
+        </div>
+        <div class="price-block">
+          <div class="price-main">R$ 1.590</div>
+          <div class="price-period">/mês · Starter</div>
+          <div class="price-note">≈ USD 279 · câmbio R$5,70</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <ul class="feature-list">
+        <li><span class="feat-icon ok">✓</span> Tours, modais, tooltips, launchers</li>
+        <li><span class="feat-icon ok">✓</span> Integra Mixpanel, Heap, Amplitude nativamente</li>
+        <li><span class="feat-icon ok">✓</span> Teste A/B de fluxos</li>
+        <li><span class="feat-icon ok">✓</span> Analytics de engajamento por step</li>
+        <li><span class="feat-icon warn">~</span> Analytics de produto menos completo que Pendo</li>
+        <li><span class="feat-icon warn">~</span> Comunidade menor, menos recursos</li>
+      </ul>
+      <div class="tag-row">
+        <span class="pill info">Teste A/B</span>
+        <span class="pill neutral">Bom para times técnicos</span>
+      </div>
+    </div>
+
+    <!-- USERFLOW -->
+    <div class="tool-card">
+      <div class="tool-header">
+        <div>
+          <div class="tool-name">Userflow</div>
+          <div class="tool-type">Setup mais simples</div>
+        </div>
+        <div class="price-block">
+          <div class="price-main">R$ 1.370</div>
+          <div class="price-period">/mês · Startup</div>
+          <div class="price-note">≈ USD 240 · câmbio R$5,70</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <ul class="feature-list">
+        <li><span class="feat-icon ok">✓</span> Tours guiados e checklists</li>
+        <li><span class="feat-icon ok">✓</span> Modais e tooltips</li>
+        <li><span class="feat-icon ok">✓</span> Funis de conclusão por flow</li>
+        <li><span class="feat-icon warn">~</span> Segmentação mais limitada</li>
+        <li><span class="feat-icon warn">~</span> Rastreamento de cliques parcial</li>
+        <li><span class="feat-icon no">✗</span> Sem teste A/B</li>
+      </ul>
+      <div class="tag-row">
+        <span class="pill ok">Implementação rápida</span>
+        <span class="pill neutral">Bom custo-benefício</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- OPÇÕES ECONÔMICAS -->
+<section id="economicas">
+  <div class="section-label">Para orçamentos menores</div>
+  <div class="section-title">Opções mais acessíveis</div>
+
+  <div class="budget-grid">
+
+    <div class="budget-card best">
+      <div class="budget-card-header">
+        <div class="budget-name">Pendo Free</div>
+        <div class="budget-price">R$ 0<small>/mês · forever free</small></div>
+      </div>
+      <div class="budget-desc">Tours, tooltips e modais + analytics básico. Ideal para validar a ferramenta antes de assinar. Funciona bem até 500 usuários ativos mensais.</div>
+      <div class="budget-limit">⚠ Limite: 500 MAU · sem integrações avançadas</div>
+    </div>
+
+    <div class="budget-card">
+      <div class="budget-card-header">
+        <div class="budget-name">Intro.js (open source)</div>
+        <div class="budget-price">R$ 0<small>/mês · auto-hospedado</small></div>
+      </div>
+      <div class="budget-desc">Biblioteca JS para tours passo a passo. Gratuita para uso comercial. Sem modais nativos nem analytics — você implementa por conta.</div>
+      <div class="budget-limit">⚠ Exige desenvolvedor · sem analytics nativo</div>
+    </div>
+
+    <div class="budget-card">
+      <div class="budget-card-header">
+        <div class="budget-name">Shepherd.js (open source)</div>
+        <div class="budget-price">R$ 0<small>/mês · auto-hospedado</small></div>
+      </div>
+      <div class="budget-desc">Tour guiado altamente customizável via código. Sem analytics incluso — pode integrar com Mixpanel ou Google Analytics manualmente.</div>
+      <div class="budget-limit">⚠ Exige desenvolvedor · analytics manual</div>
+    </div>
+
+    <div class="budget-card">
+      <div class="budget-card-header">
+        <div class="budget-name">Intercom Tours</div>
+        <div class="budget-price">R$ 285<small>/mês · add-on</small></div>
+      </div>
+      <div class="budget-desc">Add-on do Intercom (≈ USD 50/mês). Só faz sentido se você já paga Intercom. Tours simples, modais básicos, analytics limitado.</div>
+      <div class="budget-limit">⚠ Menos flexível · depende do Intercom</div>
+    </div>
+
+    <div class="budget-card">
+      <div class="budget-card-header">
+        <div class="budget-name">Lou (Userguiding alternativo)</div>
+        <div class="budget-price">R$ 570<small>/mês · plano básico</small></div>
+      </div>
+      <div class="budget-desc">≈ USD 100/mês. Tours, tooltips e checklists com editor visual. Analytics básico de conclusão. Boa opção de custo intermediário.</div>
+      <div class="budget-limit">⚠ Analytics menos robusto · comunidade pequena</div>
+    </div>
+
+    <div class="budget-card">
+      <div class="budget-card-header">
+        <div class="budget-name">UserGuiding</div>
+        <div class="budget-price">R$ 570<small>/mês · Basic (anual)</small></div>
+      </div>
+      <div class="budget-desc">≈ USD 99/mês no plano anual. Tours guiados, modais e NPS. Analytics de conclusão de flows. Muito similar ao Products Fruits em recursos.</div>
+      <div class="budget-limit">⚠ Segmentação básica · sem auto-capture</div>
+    </div>
+
+  </div>
+
+  <div class="alert">
+    <div class="alert-icon">⚠</div>
+    <div>Preços em USD convertidos na cotação de R$5,70 (junho 2025) e podem variar. Ferramentas como Appcues e Pendo escalando por MAU — com base de usuários maior, solicite cotação direta em reais com os fornecedores. UserGuiding e Lou são alternativas próximas do Products Fruits com custo menor.</div>
+  </div>
+</section>
+
+<!-- MATRIZ -->
+<section>
+  <div class="section-label">Comparativo</div>
+  <div class="section-title">Critérios x Ferramentas</div>
+  <div class="matrix-wrap">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Critério</th>
+          <th>Appcues</th>
+          <th>Pendo</th>
+          <th>Userflow</th>
+          <th>UserGuiding</th>
+          <th>Shepherd.js</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tours guiados</td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+        </tr>
+        <tr>
+          <td>Modais / pop-ups</td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-warn">~</span></td>
+        </tr>
+        <tr>
+          <td>Analytics de fluxo</td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-warn">~</span></td>
+          <td><span class="dot dot-no">✗</span></td>
+        </tr>
+        <tr>
+          <td>Rastrear cliques</td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-warn">~</span></td>
+          <td><span class="dot dot-warn">~</span></td>
+          <td><span class="dot dot-no">✗</span></td>
+        </tr>
+        <tr>
+          <td>Sem código para criar</td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-no">✗</span></td>
+        </tr>
+        <tr>
+          <td>Segmentação avançada</td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-warn">~</span></td>
+          <td><span class="dot dot-warn">~</span></td>
+          <td><span class="dot dot-no">✗</span></td>
+        </tr>
+        <tr>
+          <td>Teste A/B</td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-ok">✓</span></td>
+          <td><span class="dot dot-no">✗</span></td>
+          <td><span class="dot dot-no">✗</span></td>
+          <td><span class="dot dot-no">✗</span></td>
+        </tr>
+        <tr>
+          <td>Preço inicial (R$/mês)</td>
+          <td>R$ 1.420</td>
+          <td>Grátis / Enterprise</td>
+          <td>R$ 1.370</td>
+          <td>R$ 570</td>
+          <td>Gratuito</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- MIGRAÇÃO -->
+<section id="migracao">
+  <div class="section-label">Passo a passo</div>
+  <div class="section-title">Plano de migração do Products Fruits</div>
+
+  <div class="alert">
+    <div class="alert-icon">⚠</div>
+    <div>O Products Fruits não exporta dados históricos de engajamento via API pública. O que migra é o <strong>conteúdo</strong> (textos, lógica dos tours) — não o histórico de quem completou o quê.</div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h3>Inventário dos tours e modais existentes</h3>
+        <p>Liste todos os fluxos ativos: nome, URL gatilho, segmento alvo, sequência de passos e métricas de referência disponíveis no dashboard atual.</p>
+        <div class="step-meta">Estimativa: 1–2 dias · responsável: produto</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h3>Instalação em staging + configuração de usuários</h3>
+        <p>Instalar o snippet em staging. Configurar o <code>identify(userId, { plano, role, dataCadastro })</code> — essa etapa define a qualidade da segmentação futura.</p>
+        <div class="step-meta">Estimativa: 1–3 dias · responsável: dev</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h3>Migração paralela (2–4 semanas)</h3>
+        <p>Rodar ambas as ferramentas simultaneamente. Recriar os flows prioritários e validar o comportamento. Não cancelar o Products Fruits ainda.</p>
+        <div class="step-meta">Atenção: custo duplo neste período — negocie mês avulso no PF</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <h3>Instrumentação de eventos customizados</h3>
+        <p>Mapear e implementar <code>track()</code> nos pontos-chave do produto: ações importantes, features visitadas, marcos de onboarding. Define a riqueza dos dados.</p>
+        <div class="step-meta">Estimativa: 3–5 dias · responsável: dev + produto</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div>
+        <h3>Go-live e cancelamento do Products Fruits</h3>
+        <p>Validar todos os flows, confirmar dados chegando, cancelar o PF após o próximo ciclo de faturamento. Documentar a nova estrutura para o time.</p>
+        <div class="step-meta">Marco: migração completa</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERGUNTAS -->
+<section id="perguntas">
+  <div class="section-label">Roteiro de demo</div>
+  <div class="section-title">Perguntas para fazer aos fornecedores</div>
+
+  <div class="q-block">
+    <div class="q-block-title"><span>🗺️</span> Tours e fluxos</div>
+    <ul class="q-list">
+      <li>O time de produto consegue criar tours sem ajuda de dev?</li>
+      <li>É possível criar condicionais dentro de um tour (pular etapa se usuário já fez X)?</li>
+      <li>Como funciona o versionamento? Tem draft vs publicado?</li>
+      <li>Qual o limite de tours ativos no plano contratado?</li>
+    </ul>
+  </div>
+
+  <div class="q-block">
+    <div class="q-block-title"><span>📊</span> Analytics e rastreamento</div>
+    <ul class="q-list">
+      <li>O que é rastreado por padrão sem instrumentação adicional?</li>
+      <li>Como vejo quais usuários completaram um flow específico? Tem exportação?</li>
+      <li>Posso rastrear cliques em botões fora dos flows (botões nativos do produto)?</li>
+      <li>Os dados ficam disponíveis por quanto tempo no plano?</li>
+    </ul>
+  </div>
+
+  <div class="q-block">
+    <div class="q-block-title"><span>🔌</span> Integração e migração</div>
+    <ul class="q-list">
+      <li>Tem suporte para migração do Products Fruits?</li>
+      <li>Como funciona a integração com Segment/Mixpanel? É bidirecional?</li>
+      <li>Tem webhooks de "flow completado" em tempo real?</li>
+      <li>O snippet impacta a performance de carregamento do produto?</li>
+    </ul>
+  </div>
+
+  <div class="q-block">
+    <div class="q-block-title"><span>💰</span> Contrato e suporte</div>
+    <ul class="q-list">
+      <li>O preço escala por MAU ou por usuários identificados? Como é contado?</li>
+      <li>Vocês fazem contrato em reais? Qual a variação cambial?</li>
+      <li>Tem contrato anual obrigatório ou tem opção mensal?</li>
+      <li>Existe onboarding dedicado para novos clientes? Qual o prazo para go-live?</li>
+    </ul>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-footer">
+  <h2>Próximos passos</h2>
+  <p>Agende demos com Appcues e Pendo · Valide o UserGuiding como alternativa econômica · Defina o MAU atual para comparar custos reais</p>
+  <div class="cta-btns">
+    <a href="https://www.appcues.com/demo" target="_blank" class="btn btn-primary">Demo Appcues</a>
+    <a href="https://www.pendo.io/demo/" target="_blank" class="btn btn-ghost">Demo Pendo</a>
+    <a href="https://userguiding.com" target="_blank" class="btn btn-ghost">UserGuiding (econômico)</a>
+  </div>
+</div>
+
+</body>
+</html>

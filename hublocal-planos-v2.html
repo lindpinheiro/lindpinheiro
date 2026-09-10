@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planos & Monetização — HubLocal V2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-dark: #0a2e1e;
+    --green-mid: #0f4a2e;
+    --green-accent: #1d9e75;
+    --green-light: #5dcaa5;
+    --blue: #378add;
+    --amber: #ef9f27;
+    --purple: #7f77dd;
+    --red: #e24b4a;
+    --text-primary: #f5f2ec;
+    --text-secondary: #a8c4b8;
+    --text-muted: #6b9982;
+    --surface: rgba(255,255,255,0.04);
+    --surface-2: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.08);
+    --slide-w: 1100px;
+  }
+
+  html, body {
+    height: 100%;
+    background: #060f0b;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+
+  /* ── SLIDE ENGINE ── */
+  .deck { width: 100%; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    background: var(--green-dark);
+    overflow: hidden;
+  }
+
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  .slide-inner {
+    width: 100%;
+    max-width: var(--slide-w);
+    position: relative;
+    z-index: 1;
+  }
+
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    background: rgba(10,46,30,0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 10px 20px;
+  }
+
+  .nav button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+  }
+
+  .nav button:hover { color: var(--text-primary); background: var(--surface-2); }
+  .nav button:disabled { opacity: 0.25; cursor: default; }
+
+  .nav-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 48px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dots { display: flex; gap: 6px; align-items: center; }
+
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .dot.active { background: var(--green-accent); transform: scale(1.4); }
+
+  /* ── SHARED ── */
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green-accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--green-accent); }
+
+  h1.display {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(44px, 6vw, 80px);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  h1.display em { font-style: italic; color: var(--green-light); }
+
+  h2.slide-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(30px, 3.6vw, 48px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  h2.slide-title em { font-style: italic; color: var(--green-light); }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 640px;
+    margin-bottom: 28px;
+  }
+
+  .slide-num {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    letter-spacing: 0.08em;
+  }
+
+  .agenda-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: var(--surface);
+    transition: border-color 0.2s;
+  }
+
+  .agenda-item:hover { border-color: rgba(255,255,255,0.14); }
+
+  .agenda-n {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--text-muted);
+    min-width: 24px;
+  }
+
+  /* ── MODEL DIAGRAM (slide 2) ── */
+  .model-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .m-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .m-col::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .m-col.sub::before { background: var(--green-accent); }
+  .m-col.coin::before { background: var(--amber); }
+
+  .m-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+
+  .m-col.sub .m-label { color: var(--green-accent); }
+  .m-col.coin .m-label { color: var(--amber); }
+
+  .m-tagline {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; margin-bottom: 16px; color: var(--text-primary);
+  }
+
+  .m-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .m-list li {
+    font-size: 13px; color: var(--text-secondary);
+    display: flex; gap: 10px; align-items: flex-start; line-height: 1.5;
+  }
+  .m-list li .bullet { width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .bullet-green { background: var(--green-accent); }
+  .bullet-amber { background: var(--amber); }
+  .bullet-blue { background: var(--blue); }
+  .bullet-red { background: var(--red); }
+  .bullet-purple { background: var(--purple); }
+
+  .c-callout {
+    background: rgba(29,158,117,0.06);
+    border: 1px solid rgba(29,158,117,0.25);
+    border-radius: 12px;
+    padding: 18px 24px;
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .c-callout strong { color: var(--text-primary); font-weight: 500; }
+
+  .c-callout.warn {
+    background: rgba(226,75,74,0.06);
+    border-color: rgba(226,75,74,0.25);
+  }
+
+  /* ── PRICING CARDS (slide 3) ── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .price-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 18px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .price-card.featured {
+    background: rgba(29,158,117,0.08);
+    border-color: rgba(29,158,117,0.4);
+  }
+
+  .pc-badge {
+    position: absolute;
+    top: -9px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--green-accent); color: #06231a;
+    border-radius: 20px; padding: 3px 10px; white-space: nowrap;
+  }
+
+  .pc-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; margin-bottom: 2px;
+  }
+
+  .pc-persona { font-size: 10.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4; min-height: 28px; }
+
+  .pc-price { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+  .pc-price .cur { font-size: 13px; font-weight: 400; color: var(--text-muted); margin-right: 2px; }
+  .pc-price .per { font-size: 11px; font-weight: 400; color: var(--text-muted); }
+  .pc-price-note { font-size: 10px; color: var(--text-muted); margin-bottom: 14px; min-height: 13px; }
+
+  .pc-divider { height: 1px; background: var(--border); margin-bottom: 12px; }
+
+  .pc-specs { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .pc-specs li {
+    font-size: 11.5px; color: var(--text-secondary);
+    display: flex; gap: 8px; align-items: flex-start; line-height: 1.45;
+  }
+  .pc-specs li .k { color: var(--text-muted); }
+  .pc-specs li strong { color: var(--text-primary); font-weight: 500; }
+  .pc-specs li.off { opacity: 0.55; }
+
+  /* ── TABLES ── */
+  .tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .tbl-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .tbl-wrap .tbl { border: none; }
+
+  .tbl th, .tbl td {
+    padding: 9px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tbl tr:last-child td { border-bottom: none; }
+
+  .tbl th {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-muted);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .tbl td { color: var(--text-secondary); }
+  .tbl td:first-child { color: var(--text-primary); }
+  .tbl td.c, .tbl th.c { text-align: center; }
+
+  .ok   { color: var(--green-light); }
+  .no   { color: var(--text-muted); opacity: 0.6; }
+  .part { color: var(--amber); }
+  .coin-ico { color: var(--amber); }
+
+  .tbl .hl { background: rgba(29,158,117,0.07); }
+
+  /* ── PERSONA MAP (slide 4) ── */
+  .map-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  .map-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .map-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .map-card.cg::after { background: var(--green-accent); }
+  .map-card.cb::after { background: var(--blue); }
+  .map-card.ca::after { background: var(--amber); }
+  .map-card.cp::after { background: var(--purple); }
+
+  .map-persona { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .map-level { font-size: 10.5px; color: var(--text-muted); margin-bottom: 14px; }
+
+  .map-arrow { font-size: 16px; color: var(--text-muted); margin-bottom: 10px; }
+
+  .map-plan {
+    font-family: 'DM Serif Display', serif;
+    font-size: 21px; margin-bottom: 8px;
+  }
+
+  .map-card.cg .map-plan { color: var(--green-light); }
+  .map-card.cb .map-plan { color: #85b7eb; }
+  .map-card.ca .map-plan { color: #fac775; }
+  .map-card.cp .map-plan { color: #afa9ec; }
+
+  .map-why { font-size: 11.5px; color: var(--text-secondary); line-height: 1.55; }
+
+  /* ── COIN LADDER (slide 6) ── */
+  .ladder-flow {
+    display: flex; align-items: stretch; gap: 8px; margin-bottom: 16px;
+  }
+
+  .lf-step {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    position: relative;
+  }
+
+  .lf-step .lf-name { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .lf-step .lf-val { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--text-primary); }
+  .lf-step .lf-val small { font-size: 12px; color: var(--text-muted); font-family: 'Inter', sans-serif; }
+  .lf-step .lf-sub { font-size: 10.5px; color: var(--text-muted); margin-top: 6px; }
+
+  .lf-arrow { display: flex; align-items: center; color: var(--text-muted); font-size: 18px; }
+
+  /* ── UPSELL DEMO (slide 7) ── */
+  .lock-demo {
+    background: var(--surface);
+    border: 1px dashed rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .lock-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .lock-row:last-child { margin-bottom: 0; }
+
+  .lock-ico {
+    width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+    background: rgba(127,119,221,0.15);
+  }
+
+  .lock-txt { flex: 1; }
+  .lock-t1 { font-size: 12.5px; font-weight: 500; color: var(--text-primary); }
+  .lock-t2 { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .lock-cta {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
+    color: #06231a; background: var(--green-light);
+    border-radius: 20px; padding: 6px 12px; white-space: nowrap;
+  }
+
+  /* ── PENDING (last slide) ── */
+  .pend-row {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pend-row:last-child { border-bottom: none; }
+
+  .pend-n {
+    min-width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(29,158,117,0.15); color: var(--green-accent);
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .pend-txt { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .pend-txt strong { color: var(--text-primary); font-weight: 500; }
+  .pend-owner { font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-top: 3px; }
+
+  /* ── KEY HINT / BACK ── */
+  .key-hint {
+    position: fixed;
+    top: 24px;
+    right: 32px;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .key {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 11px;
+  }
+
+  .back-btn {
+    position: fixed;
+    top: 24px;
+    left: 28px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    background: rgba(10,46,30,0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 7px 14px;
+    z-index: 100;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .back-btn:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.16); }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ── SLIDE 1: CAPA ── -->
+  <div class="slide active" id="s1">
+    <div class="slide-inner" style="display:grid;grid-template-columns:1.2fr 1fr;gap:70px;align-items:center;">
+      <div>
+        <div class="eyebrow">HubLocal · Squad Comercialização · Jul 2026</div>
+        <h1 class="display">Planos &<br><em>Monetização</em><br>V2</h1>
+        <div style="margin-top:36px;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text-muted);">
+          <span>— Lindberg Pinheiro Jr</span>
+          <span>— Proposta pós-reunião de 06/07</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="agenda-item"><span class="agenda-n">01</span> O modelo híbrido</div>
+        <div class="agenda-item"><span class="agenda-n">02</span> Os 4 planos</div>
+        <div class="agenda-item"><span class="agenda-n">03</span> Persona → plano</div>
+        <div class="agenda-item"><span class="agenda-n">04</span> Economia das HubCoins</div>
+        <div class="agenda-item"><span class="agenda-n">05</span> IA como diferenciador</div>
+        <div class="agenda-item"><span class="agenda-n">06</span> Funcionalidades & regras</div>
+        <div class="agenda-item"><span class="agenda-n">07</span> Pendências para a 1.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2: MODELO HÍBRIDO ── -->
+  <div class="slide" id="s2">
+    <div class="slide-inner">
+      <div class="slide-num">01 — O modelo</div>
+      <h2 class="slide-title">Assinatura entrega <em>capacidade</em>.<br>HubCoins entregam <em>volume</em>.</h2>
+      <p class="subtitle">Modelo híbrido decidido na reunião de 06/07: recorrência para previsibilidade financeira, créditos como porta de entrada e complemento — o padrão Figma / Copilot.</p>
+      <div class="model-grid">
+        <div class="m-col sub">
+          <div class="m-label">Assinatura · Recorrente</div>
+          <div class="m-tagline">O que você pode fazer</div>
+          <ul class="m-list">
+            <li><span class="bullet bullet-green"></span>Locais gerenciados</li>
+            <li><span class="bullet bullet-green"></span>Recursos de IA (agente, automações, criação)</li>
+            <li><span class="bullet bullet-green"></span>Usuários e workspaces</li>
+            <li><span class="bullet bullet-green"></span>Relatórios, white label, suporte / SLA</li>
+            <li><span class="bullet bullet-green"></span>Franquia mensal de HubCoins inclusa</li>
+          </ul>
+        </div>
+        <div class="m-col coin">
+          <div class="m-label">HubCoins · Consumo</div>
+          <div class="m-tagline">Quanto você pode analisar</div>
+          <ul class="m-list">
+            <li><span class="bullet bullet-amber"></span>Pré-análises e Local Ranking (pontos de mapa × palavra-chave)</li>
+            <li><span class="bullet bullet-amber"></span>Refazer análises</li>
+            <li><span class="bullet bullet-amber"></span>Única parte com custo de API proporcional ao uso</li>
+            <li><span class="bullet bullet-amber"></span>Packs avulsos para excedente — sem precisar assinar</li>
+          </ul>
+        </div>
+      </div>
+      <div class="c-callout">
+        <strong>IA não consome coins.</strong> IA generativa é diferenciador de tier (Pro e Agência), com fair use diário. Coins ficam reservadas ao que tem custo variável real. O sistema fica legível: <strong>assinatura = capacidade · coins = volume de análise</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 3: OS 4 PLANOS ── -->
+  <div class="slide" id="s3">
+    <div class="slide-inner">
+      <div class="slide-num">02 — Os planos</div>
+      <h2 class="slide-title">Três planos pagos <em>+ free</em>, como definido</h2>
+      <p class="subtitle" style="margin-bottom:24px;">Duas alavancas principais: locais gerenciados e franquia de HubCoins. Todos os planos pagos têm desconto no plano anual. Valores de tabela — lançamento pode usar preço promocional (proposta COO).</p>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="pc-name">Grátis</div>
+          <div class="pc-persona">Porta de entrada · captação de bases concorrentes</div>
+          <div class="pc-price"><span class="cur">R$</span>0</div>
+          <div class="pc-price-note">sem cartão de crédito</div>
+          <div class="pc-divider"></div>
+          <ul class="pc-specs">
+            <li><strong>1</strong>&nbsp;local</li>
+            <li><strong>10 coins</strong>&nbsp;na ativação</li>
+            <li>+4 coins por indicação</li>
+            <li>Grade 3x3</li>
+            <li class="off">IA visível, bloqueada</li>
+            <li class="off">Histórico 30 dias</li>
+          </ul>
+        </div>
+        <div class="price-card">
+          <div class="pc-name">Starter</div>
+          <div class="pc-persona">Dono / gestor interno · gestão da própria presença</div>
+          <div class="pc-price"><span class="cur">R$</span>149<span class="per">/mês</span></div>
+          <div class="pc-price-note">R$ 119/mês no plano anual</div>
+          <div class="pc-divider"></div>
+          <ul class="pc-specs">
+            <li><strong>5</strong>&nbsp;locais</li>
+            <li><strong>30 coins</strong>/mês</li>
+            <li>Grades 3x3 · 5x5</li>
+            <li>Agendamento de posts</li>
+            <li>Relatório Google</li>
+            <li class="off">IA visível, bloqueada</li>
+          </ul>
+        </div>
+        <div class="price-card featured">
+          <div class="pc-badge">Mais popular · âncora</div>
+          <div class="pc-name">Pro</div>
+          <div class="pc-persona">Gestor de Google · prospecção diária</div>
+          <div class="pc-price"><span class="cur">R$</span>297<span class="per">/mês</span></div>
+          <div class="pc-price-note">R$ 237/mês no plano anual</div>
+          <div class="pc-divider"></div>
+          <ul class="pc-specs">
+            <li><strong>10</strong>&nbsp;locais</li>
+            <li><strong>120 coins</strong>/mês</li>
+            <li><strong>IA completa</strong></li>
+            <li>Todas as grades (até 7x7)</li>
+            <li>3 usuários</li>
+            <li>Relatórios + exportação</li>
+            <li>Monitoramento semanal</li>
+          </ul>
+        </div>
+        <div class="price-card">
+          <div class="pc-name">Agência</div>
+          <div class="pc-persona">Agência parceira · grande empresa / rede</div>
+          <div class="pc-price"><span class="cur">R$</span>697<span class="per">/mês</span></div>
+          <div class="pc-price-note">R$ 557/mês no anual · a partir de</div>
+          <div class="pc-divider"></div>
+          <ul class="pc-specs">
+            <li><strong>30+</strong>&nbsp;locais</li>
+            <li><strong>350 coins</strong>/mês</li>
+            <li>IA + automações totais</li>
+            <li>Usuários ilimitados + workspaces</li>
+            <li>White label</li>
+            <li>Monitoramento diário</li>
+            <li>Gerente de sucesso + SLA</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4: PERSONA → PLANO ── -->
+  <div class="slide" id="s4">
+    <div class="slide-inner">
+      <div class="slide-num">03 — Persona → plano</div>
+      <h2 class="slide-title">Cada plano tem <em>um dono</em></h2>
+      <p class="subtitle" style="margin-bottom:24px;">A estrutura segue a proposta acatada na reunião: um plano para pequenos negócios, um para gestores de Google e um aberto a negociação comercial.</p>
+      <div class="map-grid">
+        <div class="map-card cg">
+          <div class="map-persona">Dono / Gestor interno</div>
+          <div class="map-level">Nível 1–2 · PME · 1–5 unidades</div>
+          <div class="map-arrow">↓</div>
+          <div class="map-plan">Starter</div>
+          <div class="map-why">Gestão da própria presença: 5 locais e 30 coins para análise de acompanhamento — a persona é gestão, não prospecção.</div>
+        </div>
+        <div class="map-card ca">
+          <div class="map-persona">Gestor de Google</div>
+          <div class="map-level">Nível 2–3 · prospecção diária</div>
+          <div class="map-arrow">↓</div>
+          <div class="map-plan">Pro</div>
+          <div class="map-why">Dimensionado pelo caso Zaida: 69 análises em 2,5 meses ≈ 112 coins/mês. 120 coins cobrem o prospector real, com IA como arma de venda.</div>
+        </div>
+        <div class="map-card cp">
+          <div class="map-persona">Agência parceira</div>
+          <div class="map-level">Nível 3 · dezenas de clientes</div>
+          <div class="map-arrow">↓</div>
+          <div class="map-plan">Agência</div>
+          <div class="map-why">Workspaces compartilhados (gap levantado pela COO), white label e volume. Base R$ 697 — acima disso, contrato negociado.</div>
+        </div>
+        <div class="map-card cb">
+          <div class="map-persona">Grande empresa / rede</div>
+          <div class="map-level">Nível 2–3 · centenas de unidades</div>
+          <div class="map-arrow">↓</div>
+          <div class="map-plan">Agência</div>
+          <div class="map-why">Mesmo plano, caminho comercial: locais, coins e SLA sob contrato. Não precisa de um 4º plano.</div>
+        </div>
+      </div>
+      <div class="c-callout" style="margin-top:16px;">
+        <strong>E o Grátis?</strong> Não tem persona — tem função: captação. O mercado BR não oferece teste gratuito (oportunidade citada na reunião), e o Programa de Indicação transforma usuários free em canal de crescimento.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: ECONOMIA DAS HUBCOINS ── -->
+  <div class="slide" id="s5">
+    <div class="slide-inner">
+      <div class="slide-num">04 — Economia das HubCoins</div>
+      <h2 class="slide-title">Do custo ao <em>coin</em></h2>
+      <p class="subtitle" style="margin-bottom:24px;">Base: planilha de custos. Custo de uma pré-análise 3x3 ≈ R$ 4,61 → markup 4x → preço-alvo ~R$ 21 → <strong style="color:var(--text-primary);">1 análise 3x3 = 4 coins</strong>, coin avulso ≈ R$ 5.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;">Consumo por palavra-chave</div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <tr><th>Ação</th><th class="c">HubCoins</th></tr>
+              <tr><td>Grade 3x3 — 9 pontos</td><td class="c coin-ico"><strong>4</strong></td></tr>
+              <tr><td>Grade 5x5 — 25 pontos</td><td class="c coin-ico"><strong>10</strong></td></tr>
+              <tr><td>Grade 7x7 — 49 pontos</td><td class="c coin-ico"><strong>20</strong></td></tr>
+              <tr><td>Refazer análise</td><td class="c">custo da original</td></tr>
+              <tr><td>Recomendações do agente IA</td><td class="c ok">0 — incluso no tier</td></tr>
+            </table>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:10px;">Regra de bolso para o usuário: <strong style="color:var(--text-secondary);">1 coin ≈ 2,5 pontos de mapa</strong></div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;">Packs avulsos — sem assinatura</div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <tr><th>Pack</th><th class="c">Preço</th><th class="c">R$/coin</th></tr>
+              <tr><td>10 coins</td><td class="c">R$ 49,90</td><td class="c">4,99</td></tr>
+              <tr><td>30 coins</td><td class="c">R$ 134,90</td><td class="c">4,50</td></tr>
+              <tr><td>50 coins</td><td class="c">R$ 199,90</td><td class="c">4,00</td></tr>
+              <tr><td>100 coins</td><td class="c">R$ 349,00</td><td class="c">3,49</td></tr>
+            </table>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:10px;">Extremos definidos na reunião · intermediários interpolados</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: ESCADA DE PREÇO ── -->
+  <div class="slide" id="s6">
+    <div class="slide-inner">
+      <div class="slide-num">04 — Economia das HubCoins</div>
+      <h2 class="slide-title">A escada empurra para a <em>recorrência</em></h2>
+      <p class="subtitle" style="margin-bottom:24px;">No Starter você paga pela capacidade — 5 locais e features —, não pelo desconto de coin. O incentivo de volume aparece de fato no Pro e Agência: a migração avulso → recorrência que o CTO defendeu.</p>
+      <div class="ladder-flow">
+        <div class="lf-step">
+          <div class="lf-name">Avulso</div>
+          <div class="lf-val">R$ 4,99 <small>/coin</small></div>
+          <div class="lf-sub">porta de entrada</div>
+        </div>
+        <div class="lf-arrow">→</div>
+        <div class="lf-step">
+          <div class="lf-name">Starter</div>
+          <div class="lf-val">R$ 4,97 <small>/coin</small></div>
+          <div class="lf-sub">≈ avulso · valor nos 5 locais</div>
+        </div>
+        <div class="lf-arrow">→</div>
+        <div class="lf-step" style="border-color:rgba(29,158,117,0.4);background:rgba(29,158,117,0.07);">
+          <div class="lf-name" style="color:var(--green-accent);">Pro</div>
+          <div class="lf-val">R$ 2,48 <small>/coin</small></div>
+          <div class="lf-sub">−50% vs avulso</div>
+        </div>
+        <div class="lf-arrow">→</div>
+        <div class="lf-step">
+          <div class="lf-name">Agência</div>
+          <div class="lf-val">R$ 1,99 <small>/coin</small></div>
+          <div class="lf-sub">−60% vs avulso</div>
+        </div>
+      </div>
+      <div class="c-callout warn">
+        <strong>⚠ Ponto de validação com o responsável pelo pricing:</strong> o markup do coin embutido é ~4,3x no Starter (acima do mínimo de 4x), mas cai para ~2,2x no Pro e ~1,7x na Agência. Nos planos maiores a diferença é coberta pelo valor dos recursos de assinatura — e o <strong>custo de nuvem por local</strong> (pendência do CTO) ainda precisa entrar na conta antes de travar as franquias.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7: IA COMO DIFERENCIADOR ── -->
+  <div class="slide" id="s7">
+    <div class="slide-inner">
+      <div class="slide-num">05 — IA como diferenciador</div>
+      <h2 class="slide-title">IA <em>bloqueada, nunca escondida</em></h2>
+      <p class="subtitle" style="margin-bottom:24px;">Agente de recomendações, respostas automáticas e criação com IA ativos só no Pro e Agência. No Grátis e Starter, cada recurso de IA aparece com cadeado e preview — cada tela vira uma superfície de upsell.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+        <div class="lock-demo">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">Como o Starter vê os recursos de IA</div>
+          <div class="lock-row">
+            <div class="lock-ico">🔒</div>
+            <div class="lock-txt">
+              <div class="lock-t1">Recomendações do Agente IA</div>
+              <div class="lock-t2">Preview ilustrativo do resultado · nenhuma chamada executada</div>
+            </div>
+            <div class="lock-cta">Disponível no Pro</div>
+          </div>
+          <div class="lock-row">
+            <div class="lock-ico">🔒</div>
+            <div class="lock-txt">
+              <div class="lock-t1">Respostas automáticas de avaliações</div>
+              <div class="lock-t2">IA propõe, humano aprova — regra do design brief</div>
+            </div>
+            <div class="lock-cta">Disponível no Pro</div>
+          </div>
+          <div class="lock-row">
+            <div class="lock-ico">🔒</div>
+            <div class="lock-txt">
+              <div class="lock-t1">Criação de postagens com IA</div>
+              <div class="lock-t2">Inclui banco de imagens com IA</div>
+            </div>
+            <div class="lock-cta">Disponível no Pro</div>
+          </div>
+        </div>
+        <div>
+          <ul class="m-list" style="gap:12px;">
+            <li><span class="bullet bullet-green"></span><span><strong style="color:var(--text-primary);font-weight:500;">Não consome coins.</strong> IA é feature de tier com fair use diário — sem ansiedade de saldo para usar o diferencial competitivo.</span></li>
+            <li><span class="bullet bullet-green"></span><span><strong style="color:var(--text-primary);font-weight:500;">Justifica o salto de R$ 97 → R$ 297.</strong> O upgrade do Starter para o Pro tem um motivo tangível e demonstrável.</span></li>
+            <li><span class="bullet bullet-green"></span><span><strong style="color:var(--text-primary);font-weight:500;">Protege o posicionamento.</strong> "Plataforma completa com IA" é o diferencial contra extensões de navegador — não pode parecer commodity de plano barato.</span></li>
+            <li><span class="bullet bullet-amber"></span><span><strong style="color:var(--text-primary);font-weight:500;">Automação = retenção.</strong> Respostas automáticas e monitoramento recorrente fazem a plataforma trabalhar pelo cliente (tese do CTO).</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 8: MATRIZ DE FUNCIONALIDADES ── -->
+  <div class="slide" id="s8">
+    <div class="slide-inner">
+      <div class="slide-num">06 — Funcionalidades</div>
+      <h2 class="slide-title">Matriz resumida <em>por plano</em></h2>
+      <p class="subtitle" style="margin-bottom:20px;">Recorte dos 12 módulos da Matriz de Ações e Permissões. Versão completa na spec <span style="color:var(--text-primary);">pricing-plans</span>.</p>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <tr>
+            <th>Funcionalidade</th>
+            <th class="c">Grátis</th>
+            <th class="c">Starter</th>
+            <th class="c hl">Pro</th>
+            <th class="c">Agência</th>
+          </tr>
+          <tr><td>Locais gerenciados</td><td class="c">1</td><td class="c">5</td><td class="c hl">10</td><td class="c">30+</td></tr>
+          <tr><td>HubCoins / mês</td><td class="c">10 (ativação)</td><td class="c">30</td><td class="c hl">120</td><td class="c">350</td></tr>
+          <tr><td>Pré-análise / Local Ranking <span class="coin-ico">💰</span></td><td class="c">3x3</td><td class="c">3x3 · 5x5</td><td class="c hl ok">todas</td><td class="c ok">todas</td></tr>
+          <tr><td>Recomendações do Agente IA</td><td class="c part">🔒</td><td class="c part">🔒 upsell</td><td class="c hl ok">✓</td><td class="c ok">✓</td></tr>
+          <tr><td>Respostas automáticas · criação com IA</td><td class="c part">🔒</td><td class="c part">🔒 upsell</td><td class="c hl ok">✓</td><td class="c ok">✓</td></tr>
+          <tr><td>Agendar postagens</td><td class="c no">✗</td><td class="c ok">✓</td><td class="c hl ok">✓</td><td class="c ok">✓</td></tr>
+          <tr><td>Monitoramento recorrente de ranking</td><td class="c no">✗</td><td class="c no">✗</td><td class="c hl ok">semanal</td><td class="c ok">diário</td></tr>
+          <tr><td>Usuários / workspaces</td><td class="c">1</td><td class="c">1</td><td class="c hl">3</td><td class="c ok">ilimitados</td></tr>
+          <tr><td>Relatórios + exportação</td><td class="c no">✗</td><td class="c part">Google</td><td class="c hl ok">completo</td><td class="c ok">completo</td></tr>
+          <tr><td>White label (relatórios e compartilhamento)</td><td class="c no">✗</td><td class="c no">✗</td><td class="c hl no">✗</td><td class="c ok">✓</td></tr>
+          <tr><td>Histórico (análises · Hubnômetro)</td><td class="c">30 dias</td><td class="c">6 meses</td><td class="c hl ok">completo</td><td class="c ok">completo</td></tr>
+          <tr><td>Suporte</td><td class="c">central de ajuda</td><td class="c">e-mail / chat</td><td class="c hl">WhatsApp prioritário</td><td class="c">gerente + SLA</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 9: REGRAS & GATILHOS ── -->
+  <div class="slide" id="s9">
+    <div class="slide-inner">
+      <div class="slide-num">06 — Regras de negócio</div>
+      <h2 class="slide-title">Regras que protegem <em>custo e experiência</em></h2>
+      <p class="subtitle" style="margin-bottom:24px;">Inclui a pendência "estudar limites de uso" da reunião — resolvida como teto diário por plano.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="m-col sub" style="border-radius:12px;">
+          <div class="m-label" style="color:var(--green-accent);">Regras de coins</div>
+          <ul class="m-list" style="margin-top:10px;">
+            <li><span class="bullet bullet-green"></span><strong style="color:var(--text-primary);font-weight:500;">Rollover 2x</strong> — franquia não usada acumula até 2x o valor mensal</li>
+            <li><span class="bullet bullet-green"></span><strong style="color:var(--text-primary);font-weight:500;">Avulsas valem 12 meses</strong> e são consumidas depois da franquia</li>
+            <li><span class="bullet bullet-green"></span><strong style="color:var(--text-primary);font-weight:500;">Teto diário</strong> — Grátis 2 · Starter 5 · Pro 15 · Agência 50 análises/dia</li>
+            <li><span class="bullet bullet-green"></span><strong style="color:var(--text-primary);font-weight:500;">Anual: 2 meses grátis</strong>, coins creditadas mês a mês</li>
+            <li><span class="bullet bullet-green"></span><strong style="color:var(--text-primary);font-weight:500;">Custo antes do commit</strong> — "Esta análise usará 10 coins · saldo: 84"</li>
+            <li><span class="bullet bullet-green"></span><strong style="color:var(--text-primary);font-weight:500;">Local adicional R$ 29/mês</strong> (Starter e Pro) · Agência em contrato</li>
+          </ul>
+        </div>
+        <div class="m-col coin" style="border-radius:12px;">
+          <div class="m-label" style="color:var(--amber);">Gatilhos de upgrade</div>
+          <ul class="m-list" style="margin-top:10px;">
+            <li><span class="bullet bullet-amber"></span>Acabaram as coins do teste → <strong style="color:var(--text-primary);font-weight:500;">pack avulso ou Starter</strong></li>
+            <li><span class="bullet bullet-amber"></span>Clicou em recurso de IA bloqueado → <strong style="color:var(--text-primary);font-weight:500;">Starter → Pro</strong></li>
+            <li><span class="bullet bullet-amber"></span>2º pack avulso no mesmo mês → <strong style="color:var(--text-primary);font-weight:500;">"sai R$ X mais barato no Pro"</strong></li>
+            <li><span class="bullet bullet-amber"></span>Bateu limite de locais → <strong style="color:var(--text-primary);font-weight:500;">upgrade no próprio fluxo</strong></li>
+            <li><span class="bullet bullet-amber"></span>Precisa de white label / multiusuário → <strong style="color:var(--text-primary);font-weight:500;">Pro → Agência</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 10: PENDÊNCIAS ── -->
+  <div class="slide" id="s10">
+    <div class="slide-inner" style="max-width:860px;">
+      <div class="slide-num">07 — Próximos passos</div>
+      <h2 class="slide-title">O que falta para travar a <em>versão 1.0</em></h2>
+      <p class="subtitle" style="margin-bottom:20px;">A estrutura está pronta para teste — estes números fecham a conta antes do lançamento.</p>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 22px;margin-bottom:16px;">
+        <div class="pend-row">
+          <div class="pend-n">1</div>
+          <div style="flex:1;"><div class="pend-txt"><strong>Custo de nuvem por local</strong> — AWS / GCP / BigQuery / Revo, via métricas da V1</div></div>
+          <div class="pend-owner">CTO + Pricing</div>
+        </div>
+        <div class="pend-row">
+          <div class="pend-n">2</div>
+          <div style="flex:1;"><div class="pend-txt"><strong>Contagem atual de locais</strong> na plataforma — base do custo por local</div></div>
+          <div class="pend-owner">COO</div>
+        </div>
+        <div class="pend-row">
+          <div class="pend-n">3</div>
+          <div style="flex:1;"><div class="pend-txt"><strong>Markup mínimo revisado</strong> na planilha — pode ajustar franquias e preços</div></div>
+          <div class="pend-owner">Pricing</div>
+        </div>
+        <div class="pend-row">
+          <div class="pend-n">4</div>
+          <div style="flex:1;"><div class="pend-txt"><strong>Preços promocionais de lançamento</strong> — teste A/B com leads e parceiros</div></div>
+          <div class="pend-owner">COO + squad</div>
+        </div>
+        <div class="pend-row">
+          <div class="pend-n">5</div>
+          <div style="flex:1;"><div class="pend-txt"><strong>Entrevistas qualitativas</strong> — gestão contínua e disposição a pagar</div></div>
+          <div class="pend-owner">CTO + COO</div>
+        </div>
+        <div class="pend-row">
+          <div class="pend-n">6</div>
+          <div style="flex:1;"><div class="pend-txt"><strong>Taxas de conversão do funil</strong> — prospecção → diagnóstico → fechamento</div></div>
+          <div class="pend-owner">Lucas</div>
+        </div>
+      </div>
+      <div class="c-callout">
+        <strong>Proposta de decisão hoje:</strong> aprovar a arquitetura (4 planos, coins por análise, IA por tier) e iniciar o teste A/B de preços com a base de leads — os valores finais são calibrados com os dados das pendências 1–3.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- NAV -->
+<div class="nav">
+  <button id="btn-prev" onclick="go(-1)" disabled>←</button>
+  <div class="dots" id="dots"></div>
+  <span class="nav-counter" id="counter">1 / 10</span>
+  <button id="btn-next" onclick="go(1)">→</button>
+</div>
+
+<div class="key-hint">
+  <span class="key">←</span>
+  <span class="key">→</span>
+  <span style="color:var(--text-muted);font-size:11px;">navegar</span>
+</div>
+
+<a href="apresentacoes.html" class="back-btn" title="Voltar">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+  Voltar
+</a>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  let cur = 0;
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    counter.textContent = (cur + 1) + ' / ' + slides.length;
+    btnPrev.disabled = cur === 0;
+    btnNext.disabled = cur === slides.length - 1;
+  }
+
+  function go(dir) { goTo(cur + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+</script>
+</body>
+</html>

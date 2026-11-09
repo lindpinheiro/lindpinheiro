@@ -7,11 +7,13 @@ import {
 import { useTheme } from '@mui/material/styles'
 import {
   BookOpen, Check, ChevronDown, Clock, Download, Dumbbell, HeartPulse, History, Moon, Plus, Target, Trash2,
-  TrendingUp, TriangleAlert, Upload, Wind, X,
+  TrendingUp, TriangleAlert, Upload, Utensils, Wind, X,
 } from 'lucide-react'
 import { CARDIO, DIAS, PLAN, duracao, fmtDesc } from './plan.js'
 import { br, hojeISO, num, semana, ultima, useStore } from './store.js'
 import Guia from './Guia.jsx'
+import Dieta from './Dieta.jsx'
+import { REFEICOES } from './dieta.js'
 
 const CUIDADOS = [
   'Coma 1–2 h antes: carboidrato e um pouco de sal.',
@@ -34,13 +36,15 @@ export default function App() {
     <Box sx={{ pb: `calc(${aba === 0 && timer ? 160 : 88}px + env(safe-area-inset-bottom))` }}>
       <Container maxWidth="sm" sx={{ pt: 3 }}>
         {aba === 0 && <Treino s={s} update={update} onDescanso={(seg) => setTimer(seg ? { fim: Date.now() + seg * 1000, total: seg } : null)} />}
-        {aba === 1 && <Progresso s={s} update={update} replace={replace} />}
-        {aba === 2 && <Guia />}
+        {aba === 1 && <Dieta s={s} update={update} />}
+        {aba === 2 && <Progresso s={s} update={update} replace={replace} />}
+        {aba === 3 && <Guia />}
       </Container>
       {aba === 0 && timer && <Descanso timer={timer} setTimer={setTimer} />}
       <Paper square sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, borderTop: 1, borderColor: 'divider', pb: 'env(safe-area-inset-bottom)', zIndex: 10 }}>
-        <BottomNavigation showLabels value={aba} onChange={(_, v) => { setAba(v); window.scrollTo(0, 0) }} sx={{ height: 68, maxWidth: 600, mx: 'auto' }}>
+        <BottomNavigation showLabels value={aba} onChange={(_, v) => { setAba(v); window.scrollTo(0, 0) }} sx={{ height: 68, maxWidth: 600, mx: 'auto', '& .MuiBottomNavigationAction-root': { minWidth: 0, px: 0.5 } }}>
           <BottomNavigationAction label="Treino" icon={<Dumbbell size={22} />} />
+          <BottomNavigationAction label="Dieta" icon={<Utensils size={22} />} />
           <BottomNavigationAction label="Progresso" icon={<TrendingUp size={22} />} />
           <BottomNavigationAction label="Guia" icon={<BookOpen size={22} />} />
         </BottomNavigation>
@@ -265,6 +269,7 @@ function Progresso({ s, update, replace }) {
   const treinos = dias.filter((d) => s.logs[d.date]?.feito).length
   const patinsSem = s.patins.filter((p) => naSemana(p.date))
   const cardioMin = dias.reduce((t, d) => t + (s.logs[d.date]?.cardio?.min || 0), 0) + patinsSem.reduce((t, p) => t + p.min, 0)
+  const dieta = dias.filter((d) => REFEICOES.every((r) => s.dieta?.[d.date]?.m?.[r.id])).length
   const pesos = [...s.peso].sort((a, b) => (a.date < b.date ? -1 : 1))
   const atual = pesos.at(-1), dif = pesos.length > 1 ? atual.kg - pesos[0].kg : null
   const [kg, setKg] = useState(''), [min, setMin] = useState(''), [km, setKm] = useState('')
@@ -298,11 +303,12 @@ function Progresso({ s, update, replace }) {
     <>
       <Typography variant="h4">Progresso</Typography>
       <Titulo>Esta semana</Titulo>
-      <Stack direction="row" spacing={1.5}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
         <Stat v={treinos} de={6} label="treinos" />
+        <Stat v={dieta} de={7} label="dias de dieta" />
         <Stat v={cardioMin} label="min de cardio" />
         <Stat v={patinsSem.length} de={3} label="patins" />
-      </Stack>
+      </Box>
 
       <Titulo>Peso</Titulo>
       <Card>

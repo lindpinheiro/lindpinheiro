@@ -91,10 +91,10 @@ const SECOES = [
   ) },
   { id: 'comida', icone: Utensils, titulo: 'Alimentação', corpo: (
     <Itens>
+      <li>O plano completo, com porções e trocas, está na aba <b>Dieta</b>.</li>
+      <li><b>Resumo</b>: cerca de 2.100 kcal e 160 g de proteína, em três refeições entre 10h30 e 19h.</li>
       <li><b>Ritmo</b>: perder de 0,5 a 1 kg por semana. Mais rápido leva músculo junto.</li>
-      <li><b>Proteína</b>: 150–180 g por dia, uma porção do tamanho da palma da mão em cada refeição.</li>
-      <li><b>Déficit moderado</b>: corte bebidas com açúcar, frituras e doces do dia a dia.</li>
-      <li><b>Prato</b>: metade legumes e salada, um quarto proteína, um quarto carboidrato.</li>
+      <li><b>Sem refrigerante, suco e doce no dia a dia</b>: é onde a conta estoura sem matar a fome.</li>
       <li><b>Água e sono</b>: 3 litros e 7–8 horas por dia.</li>
     </Itens>
   ) },

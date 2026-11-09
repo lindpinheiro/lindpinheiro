@@ -29,7 +29,8 @@ const REGRAS = [
       <li><b>Bebida</b>: refrigerante zero ou água. Refrigerante comum e milk-shake viram quase outra refeição.</li>
       <li><b>Açaí completo de 700 ml</b>: um a cada duas semanas. Ele tem as calorias de quase um dia inteiro, então <b>é a janta</b> daquele dia.</li>
       <li>Açaí e fast food em dias diferentes.</li>
-      <li><b>Chocolate</b>: 2 quadradinhos depois da refeição, até 4 vezes por semana.</li>
+      <li><b>Chocolate</b>: um por dia, depois da refeição. Um bombom (Sonho de Valsa, Ouro Branco) ou 2 quadradinhos de meio amargo.</li>
+      <li>Com isso a margem acabou: outros doces, refrigerante e beliscos ficam de fora.</li>
       <li>Merenda e almoço seguem o plano todos os dias. É isso que mantém a perda em cerca de meio quilo por semana.</li>
     </Itens>
   ) },
@@ -45,7 +46,7 @@ const REGRAS = [
     <Itens>
       <li><b>Ritmo esperado</b>: cerca de 0,5 kg por semana, olhando a média de duas semanas.</li>
       <li><b>Perdendo mais de 1 kg por semana</b> depois da segunda semana, ou tonto no treino: some 2 colheres de arroz no almoço e na janta.</li>
-      <li><b>Duas semanas sem perder nada</b>: primeiro passe para um fast food por semana; depois tire 2 colheres de arroz da janta.</li>
+      <li><b>Duas semanas sem perder nada</b>: primeiro passe para um fast food por semana; depois chocolate dia sim, dia não; por último, tire 2 colheres de arroz da janta.</li>
       <li>Ao chegar perto dos 105 kg, as porções de arroz diminuem um pouco. O app não faz isso sozinho.</li>
     </Itens>
   ) },

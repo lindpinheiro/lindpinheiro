@@ -6,7 +6,7 @@ export const LIVRES_SEMANA = 2 // refeições livres por semana, sempre no lugar
 export const AGUA_META = 6 // garrafas de 500 ml
 export const TOTAL = { kcal: 2100, prot: 160 }
 export const EXTRAS = [
-  { id: 'choc', nome: 'Chocolate', porcao: '2 quadradinhos · por semana', limite: 4, dias: 7 },
+  { id: 'choc', nome: 'Chocolate', porcao: '1 por dia', limite: 7, dias: 7 },
   { id: 'acai', nome: 'Açaí completo', porcao: '700 ml · a cada 2 semanas', limite: 1, dias: 14 },
 ]
 

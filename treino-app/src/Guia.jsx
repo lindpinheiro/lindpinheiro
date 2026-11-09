@@ -92,8 +92,10 @@ const SECOES = [
   { id: 'comida', icone: Utensils, titulo: 'Alimentação', corpo: (
     <Itens>
       <li>O plano completo, com porções e trocas, está na aba <b>Dieta</b>.</li>
-      <li><b>Resumo</b>: cerca de 2.100 kcal e 160 g de proteína, em três refeições entre 10h30 e 19h.</li>
-      <li><b>Ritmo</b>: perder de 0,5 a 1 kg por semana. Mais rápido leva músculo junto.</li>
+      <li><b>Resumo</b>: cerca de 2.100 kcal e 160 g de proteína, em três refeições.</li>
+      <li><b>Jejum</b>: só segunda, terça e quarta, comendo das 10h30 às 19h.</li>
+      <li><b>Fim de semana</b>: uma refeição livre no sábado e outra no domingo.</li>
+      <li><b>Ritmo</b>: cerca de 0,5 kg por semana.</li>
       <li><b>Sem refrigerante, suco e doce no dia a dia</b>: é onde a conta estoura sem matar a fome.</li>
       <li><b>Água e sono</b>: 3 litros e 7–8 horas por dia.</li>
     </Itens>
@@ -109,7 +111,7 @@ const SECOES = [
     <Itens>
       <li><b>1 mês</b>: cargas voltando perto do que eram. Músculo que já existiu volta mais rápido do que se constrói.</li>
       <li><b>3 meses</b>: 6–10 kg a menos; peito, ombro e costas aparecendo.</li>
-      <li><b>6–10 meses</b>: perto dos 95 kg, no ritmo de 0,5 a 1 kg por semana.</li>
+      <li><b>10–12 meses</b>: perto dos 95 kg, no ritmo de meio quilo por semana.</li>
       <li>O que mais atrasa é parar e recomeçar. Semana ruim com 3 treinos vale mais que semana perfeita seguida de pausa.</li>
       <li>Constância vale mais que intensidade.</li>
     </Itens>

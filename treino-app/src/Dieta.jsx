@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, IconButton, LinearProgress, Paper, Stack, Typography } from '@mui/material'
 import { Beef, Check, ChevronDown, Cookie, Droplets, Flame, Minus, Pizza, Plus, Timer } from 'lucide-react'
-import { AGUA_META, DIAS_JEJUM, DIAS_LIVRE, EXTRAS, JANELA, REFEICOES, TOTAL } from './dieta.js'
-import { hojeISO, semana } from './store.js'
+import { AGUA_META, DIAS_JEJUM, EXTRAS, LIVRES_SEMANA, JANELA, REFEICOES, TOTAL } from './dieta.js'
+import { hojeISO, iso, semana } from './store.js'
 
 const dur = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`)
 
@@ -25,11 +25,12 @@ const REGRAS = [
   ) },
   { id: 'livre', titulo: 'Fim de semana e doces', corpo: (
     <Itens>
-      <li><b>Sábado e domingo</b>: uma refeição livre por dia. Ela <b>troca</b> o almoço ou a janta, não entra como refeição a mais.</li>
-      <li><b>No fast food</b>: um lanche com acompanhamento. Refrigerante zero ou água, para a bebida não dobrar a conta.</li>
-      <li><b>Açaí</b>: um de 300 ml no fim de semana, com fruta e granola. Leite condensado e leite em pó dobram as calorias.</li>
+      <li><b>Fast food</b>: duas vezes por semana, em qualquer dia, sempre <b>no lugar da janta</b>. Um lanche com acompanhamento.</li>
+      <li><b>Bebida</b>: refrigerante zero ou água. Refrigerante comum e milk-shake viram quase outra refeição.</li>
+      <li><b>Açaí completo de 700 ml</b>: um a cada duas semanas. Ele tem as calorias de quase um dia inteiro, então <b>é a janta</b> daquele dia.</li>
+      <li>Açaí e fast food em dias diferentes.</li>
       <li><b>Chocolate</b>: 2 quadradinhos depois da refeição, até 4 vezes por semana.</li>
-      <li>As outras refeições do fim de semana seguem o plano. É isso que mantém a perda em cerca de meio quilo por semana.</li>
+      <li>Merenda e almoço seguem o plano todos os dias. É isso que mantém a perda em cerca de meio quilo por semana.</li>
     </Itens>
   ) },
   { id: 'carnes', titulo: 'Carnes e preparo', corpo: (
@@ -44,7 +45,7 @@ const REGRAS = [
     <Itens>
       <li><b>Ritmo esperado</b>: cerca de 0,5 kg por semana, olhando a média de duas semanas.</li>
       <li><b>Perdendo mais de 1 kg por semana</b> depois da segunda semana, ou tonto no treino: some 2 colheres de arroz no almoço e na janta.</li>
-      <li><b>Duas semanas sem perder nada</b>: primeiro reduza os extras do fim de semana; depois tire 2 colheres de arroz da janta.</li>
+      <li><b>Duas semanas sem perder nada</b>: primeiro passe para um fast food por semana; depois tire 2 colheres de arroz da janta.</li>
       <li>Ao chegar perto dos 105 kg, as porções de arroz diminuem um pouco. O app não faz isso sozinho.</li>
     </Itens>
   ) },
@@ -91,8 +92,13 @@ export default function Dieta({ s, update }) {
   const [regra, setRegra] = useState(null)
   const editar = (fn) => update((n) => { n.dieta ??= {}; fn((n.dieta[hoje] ??= { m: {}, agua: 0 })) })
   const agua = dia.agua || 0
-  const emJejum = DIAS_JEJUM.includes(wd), diaLivre = DIAS_LIVRE.includes(wd)
-  const naSemana = (id) => semana().reduce((t, d) => t + (s.dieta?.[d.date]?.[id] || 0), 0)
+  const emJejum = DIAS_JEJUM.includes(wd)
+  const livres = semana().filter((d) => s.dieta?.[d.date]?.livre).length
+  // Soma do extra na semana atual (7) ou nos últimos N dias corridos.
+  const contar = (x) => {
+    const datas = x.dias === 7 ? semana().map((d) => d.date) : Array.from({ length: x.dias }, (_, i) => iso(new Date(Date.now() - i * 864e5)))
+    return datas.reduce((t, d) => t + (s.dieta?.[d]?.[x.id] || 0), 0)
+  }
   const marcar = (r, valor) => { editar((d) => { d.m ??= {}; d.m[r.id] = valor; if (valor !== 'livre' && d.livre === r.id) d.livre = null; if (valor === 'livre') d.livre = r.id }); if (valor) setAberto(null) }
 
   return (
@@ -108,7 +114,7 @@ export default function Dieta({ s, update }) {
       <Paper sx={{ border: 1, borderColor: 'divider', overflow: 'hidden', mt: 2 }}>
         {REFEICOES.map((r, i) => {
           const ok = !!dia.m?.[r.id], livre = dia.m?.[r.id] === 'livre'
-          const podeLivre = diaLivre && r.podeLivre && (!dia.livre || dia.livre === r.id)
+          const podeLivre = r.podeLivre && livres < LIVRES_SEMANA
           return (
             <Accordion key={r.id} square expanded={aberto === r.id} onChange={() => setAberto(aberto === r.id ? null : r.id)}
               sx={{ borderBottom: i < REFEICOES.length - 1 ? 1 : 0, borderColor: 'divider' }}>
@@ -131,7 +137,7 @@ export default function Dieta({ s, update }) {
                   <Button fullWidth variant={ok ? 'outlined' : 'contained'} color={ok ? 'success' : 'primary'} startIcon={ok && <Check size={18} />} onClick={() => marcar(r, ok ? false : true)}>
                     {livre ? 'Refeição livre feita' : ok ? 'Feito' : 'Marcar como feita'}
                   </Button>
-                  {podeLivre && !ok && <Button fullWidth variant="outlined" startIcon={<Pizza size={18} />} onClick={() => marcar(r, 'livre')}>Usar a refeição livre aqui</Button>}
+                  {podeLivre && !ok && <Button fullWidth variant="outlined" startIcon={<Pizza size={18} />} onClick={() => marcar(r, 'livre')}>Usar refeição livre ({livres}/{LIVRES_SEMANA} na semana)</Button>}
                 </Stack>
               </AccordionDetails>
             </Accordion>
@@ -151,10 +157,10 @@ export default function Dieta({ s, update }) {
         </Stack>
       </Card>
 
-      <Typography variant="h6" sx={{ mt: 4, mb: 1.5 }}>Extras da semana</Typography>
+      <Typography variant="h6" sx={{ mt: 4, mb: 1.5 }}>Extras</Typography>
       <Card sx={{ py: 1 }}>
         {EXTRAS.map((x, i) => {
-          const n = naSemana(x.id), passou = n > x.limite
+          const n = contar(x), passou = n > x.limite
           return (
             <Stack key={x.id} direction="row" spacing={1.5} sx={{ alignItems: 'center', py: 1.25, borderTop: i ? 1 : 0, borderColor: 'divider' }}>
               <Box sx={{ color: 'text.secondary', display: 'flex' }}><Cookie size={22} /></Box>

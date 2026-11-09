@@ -2,12 +2,12 @@
 // Jejum só de segunda a quarta (janela 10h30–19h); nos outros dias o horário é livre.
 export const JANELA = { abre: 10 * 60 + 30, fecha: 19 * 60 }
 export const DIAS_JEJUM = [1, 2, 3] // seg, ter, qua
-export const DIAS_LIVRE = [6, 0] // sáb e dom: uma refeição livre por dia
+export const LIVRES_SEMANA = 2 // refeições livres por semana, sempre no lugar da janta
 export const AGUA_META = 6 // garrafas de 500 ml
 export const TOTAL = { kcal: 2100, prot: 160 }
 export const EXTRAS = [
-  { id: 'choc', nome: 'Chocolate', porcao: '2 quadradinhos', limite: 4 },
-  { id: 'acai', nome: 'Açaí', porcao: '300 ml', limite: 1 },
+  { id: 'choc', nome: 'Chocolate', porcao: '2 quadradinhos · por semana', limite: 4, dias: 7 },
+  { id: 'acai', nome: 'Açaí completo', porcao: '700 ml · a cada 2 semanas', limite: 1, dias: 14 },
 ]
 
 export const REFEICOES = [
@@ -22,7 +22,7 @@ export const REFEICOES = [
     ],
   },
   {
-    id: 'almoco', hora: '13h', nome: 'Almoço', jejum: 'Logo depois do treino', livre: 'Logo depois do treino', kcal: 820, prot: 68, podeLivre: true,
+    id: 'almoco', hora: '13h', nome: 'Almoço', jejum: 'Logo depois do treino', livre: 'Logo depois do treino', kcal: 820, prot: 68,
     base: ['Arroz: 6 colheres de sopa', 'Feijão: 1 concha', 'Carne: 200 g pronta (duas palmas da mão)', 'Salada e verduras à vontade', '1 fruta'],
     trocas: ['No lugar do arroz: 1 pegador e meio de macarrão', 'No lugar do arroz: 250 g de batata cozida ou assada'],
   },

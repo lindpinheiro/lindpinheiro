@@ -94,7 +94,7 @@ const SECOES = [
       <li>O plano completo, com porções e trocas, está na aba <b>Dieta</b>.</li>
       <li><b>Resumo</b>: cerca de 2.100 kcal e 160 g de proteína, em três refeições.</li>
       <li><b>Jejum</b>: só segunda, terça e quarta, comendo das 10h30 às 19h.</li>
-      <li><b>Fim de semana</b>: uma refeição livre no sábado e outra no domingo.</li>
+      <li><b>Livres</b>: fast food duas vezes por semana no lugar da janta; açaí completo a cada duas semanas.</li>
       <li><b>Ritmo</b>: cerca de 0,5 kg por semana.</li>
       <li><b>Sem refrigerante, suco e doce no dia a dia</b>: é onde a conta estoura sem matar a fome.</li>
       <li><b>Água e sono</b>: 3 litros e 7–8 horas por dia.</li>

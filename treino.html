@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#14110f">
+<title>Treino do Urso</title>
+<style>
+:root{
+  --bg:#14110f; --card:#1f1b18; --card2:#2a2420; --line:#3a322c;
+  --txt:#f6efe8; --mut:#b9aca0; --acc:#ff7a1a; --acc2:#ffc247;
+  --ok:#4fd18b; --warn:#ffb020; --bad:#ff5d5d; --blue:#6cb8ff;
+  --r:18px;
+}
+*{box-sizing:border-box}
+html{font-size:19px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--txt);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+header{padding:22px 0 8px}
+h1{font-size:1.9rem;line-height:1.1;margin:0;font-weight:900;letter-spacing:-.02em}
+h1 span{color:var(--acc)}
+.sub{color:var(--mut);margin:6px 0 0;font-size:1rem}
+h2{font-size:1.45rem;margin:26px 0 10px;font-weight:800;line-height:1.2}
+h3{font-size:1.15rem;margin:0 0 4px;font-weight:800;line-height:1.25}
+p{margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:12px 0}
+.mut{color:var(--mut)}
+.small{font-size:.9rem}
+
+/* semana */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0 4px}
+.wd{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:8px 2px;text-align:center;
+  color:var(--mut);font-weight:700;font-size:.85rem;cursor:pointer;font-family:inherit;min-height:66px}
+.wd b{display:block;font-size:1.25rem;line-height:1.2;margin-top:2px;color:var(--txt)}
+.wd.sel{border-color:var(--acc);background:var(--card2);color:var(--acc)}
+.wd.today{box-shadow:inset 0 -4px 0 var(--acc2)}
+.wd.done b::after{content:" ✓";color:var(--ok)}
+.wd .sk{font-size:.8rem}
+
+/* treino */
+.tag{display:inline-block;background:var(--card2);border:1px solid var(--line);color:var(--acc2);
+  border-radius:999px;padding:2px 12px;font-size:.85rem;font-weight:700;margin:0 6px 6px 0}
+.alert{border-color:var(--warn);background:#2b2212}
+.alert h3{color:var(--warn)}
+.alert ul{margin:6px 0 0;padding-left:22px}
+.alert li{margin:4px 0}
+.ex h3{display:flex;gap:10px;align-items:baseline}
+.ex .n{color:var(--acc);font-weight:900;min-width:1.2em}
+.meta{color:var(--acc2);font-weight:700;margin:2px 0}
+.last{color:var(--blue);font-size:.92rem;margin:2px 0 8px}
+.set{display:grid;grid-template-columns:2.2em 1fr 1fr 58px;gap:8px;align-items:center;margin:8px 0}
+.set .i{color:var(--mut);font-weight:800;text-align:center}
+input,select,textarea{font:inherit;color:var(--txt);background:#110e0c;border:2px solid var(--line);
+  border-radius:12px;padding:10px 12px;width:100%;min-height:52px;font-size:1.1rem}
+input:focus,select:focus{outline:none;border-color:var(--acc)}
+input::placeholder{color:#7d7168}
+.chk{min-height:52px;border-radius:12px;border:2px solid var(--line);background:#110e0c;color:var(--mut);
+  font-size:1.4rem;font-weight:900;cursor:pointer}
+.chk.on{background:var(--ok);border-color:var(--ok);color:#06200f}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font:inherit;font-weight:900;font-size:1.15rem;
+  background:var(--acc);color:#1a0d00;cursor:pointer;margin-top:10px}
+.btn.sec{background:var(--card2);color:var(--txt);border:2px solid var(--line)}
+.btn.ok{background:var(--ok);color:#06200f}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:1}
+.row>.fit{flex:0 0 auto;width:auto}
+.btn.fit{margin-top:0;padding:13px 18px}
+
+/* nav */
+nav{position:fixed;left:0;right:0;bottom:0;background:#0d0b0a;border-top:1px solid var(--line);
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:20}
+nav div{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+nav button{font:inherit;font-weight:800;font-size:1.05rem;padding:14px 4px;border-radius:14px;border:0;
+  background:transparent;color:var(--mut);cursor:pointer}
+nav button.on{background:var(--card2);color:var(--acc)}
+
+/* timer */
+#timer{position:fixed;left:12px;right:12px;bottom:calc(88px + env(safe-area-inset-bottom));max-width:736px;margin:0 auto;
+  background:var(--acc2);color:#221500;border-radius:16px;padding:12px 16px;display:none;align-items:center;
+  justify-content:space-between;font-weight:900;font-size:1.2rem;z-index:25;box-shadow:0 8px 30px #000a}
+#timer.on{display:flex}
+#timer.end{background:var(--ok)}
+#timer button{font:inherit;font-weight:800;border:0;border-radius:10px;padding:8px 14px;background:#0003;color:inherit;cursor:pointer}
+
+/* progresso */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 8px;text-align:center}
+.stat b{display:block;font-size:1.7rem;line-height:1.1;color:var(--acc)}
+.stat span{color:var(--mut);font-size:.88rem}
+svg{width:100%;height:auto;display:block}
+table{width:100%;border-collapse:collapse}
+td,th{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mut);font-size:.88rem}
+td.r,th.r{text-align:right}
+.x{background:none;border:0;color:var(--bad);font:inherit;font-size:1.2rem;cursor:pointer;padding:4px 10px}
+.guia li{margin:8px 0}
+.guia ul,.guia ol{padding-left:24px;margin:6px 0}
+.guia strong{color:var(--acc2)}
+.plan td:first-child{font-weight:900;color:var(--acc);white-space:nowrap}
+.hide{display:none}
+@media(max-width:420px){html{font-size:18px}.set{grid-template-columns:1.6em 1fr 1fr 52px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Treino do <span>Urso</span> 🐻</h1>
+    <p class="sub" id="sub"></p>
+  </header>
+
+  <!-- ====== TREINO ====== -->
+  <section id="v-treino">
+    <div class="week" id="week"></div>
+    <div id="day"></div>
+  </section>
+
+  <!-- ====== PROGRESSO ====== -->
+  <section id="v-prog" class="hide">
+    <h2>Esta semana</h2>
+    <div class="stats" id="stats"></div>
+
+    <h2>Peso</h2>
+    <div class="card">
+      <div class="row">
+        <input id="pesoKg" type="number" inputmode="decimal" step="0.1" placeholder="Peso de hoje (kg)" aria-label="Peso de hoje em kg">
+        <button class="btn fit" id="pesoAdd">Salvar</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input id="metaKg" type="number" inputmode="decimal" step="0.5" placeholder="Meta (kg)" aria-label="Meta de peso em kg">
+        <button class="btn sec fit" id="metaSet">Definir meta</button>
+      </div>
+      <p class="mut small" style="margin-top:10px">Pese-se 1–2× por semana, de manhã, em jejum, depois do banheiro. Olhe a tendência, não o número do dia.</p>
+      <div id="pesoChart"></div>
+      <div id="pesoList"></div>
+    </div>
+
+    <h2>Patins 🛼</h2>
+    <div class="card">
+      <div class="row">
+        <input id="patMin" type="number" inputmode="numeric" placeholder="Min" aria-label="Minutos de patins">
+        <input id="patKm" type="number" inputmode="decimal" step="0.1" placeholder="Km" aria-label="Quilômetros">
+        <button class="btn fit" id="patAdd">Salvar</button>
+      </div>
+      <div id="patList"></div>
+    </div>
+
+    <h2>Recordes de carga</h2>
+    <div class="card" id="prs"></div>
+
+    <h2>Backup</h2>
+    <div class="card">
+      <p class="mut small">Seus dados ficam salvos só neste aparelho/navegador. Faça um backup de vez em quando.</p>
+      <button class="btn sec" id="exp">Baixar backup</button>
+      <button class="btn sec" id="impBtn">Restaurar backup</button>
+      <input type="file" id="imp" accept="application/json" class="hide">
+    </div>
+  </section>
+
+  <!-- ====== GUIA ====== -->
+  <section id="v-guia" class="hide guia">
+    <h2>O plano em uma frase</h2>
+    <div class="card">
+      <p>Perder gordura <strong>devagar</strong> enquanto treina pesado para <strong>manter e ganhar músculo</strong>. Você não precisa escolher entre "emagrecer primeiro" e "ficar forte depois": quem está começando e tem bastante peso para perder consegue fazer os dois ao mesmo tempo. O visual de urso forte — peitão, bundão, costas largas, trapézio, antebraço e panturrilha — vem da musculação; a definição vem da alimentação.</p>
+    </div>
+
+    <h2>Semana</h2>
+    <div class="card">
+      <table class="plan">
+        <tr><td>Seg</td><td>Peito, ombro e tríceps</td></tr>
+        <tr><td>Ter</td><td>Costas, trapézio e antebraço · 🛼 patins</td></tr>
+        <tr><td>Qua</td><td>Glúteo e posterior de coxa</td></tr>
+        <tr><td>Qui</td><td>Peito superior, ombro e braços · 🛼 patins</td></tr>
+        <tr><td>Sex</td><td>Costas, trapézio e antebraço</td></tr>
+        <tr><td>Sáb</td><td>Glúteo e quadríceps</td></tr>
+        <tr><td>Dom</td><td>Descanso · 🛼 patins leve (opcional)</td></tr>
+      </table>
+      <p class="mut small" style="margin-top:10px">Cada músculo-alvo é treinado 2× por semana. As pernas foram divididas em dois dias mais leves, de propósito, por causa da pressão.</p>
+    </div>
+
+    <h2>Pressão baixa no treino de perna</h2>
+    <div class="card alert">
+      <p>Queda de pressão em treino de perna pesado é comum: os músculos grandes "puxam" muito sangue e, quando você para de repente, falta sangue voltando para a cabeça. O plano já foi montado para reduzir isso, mas siga estas regras:</p>
+      <ul>
+        <li><strong>Coma 1–2 h antes</strong>: carboidrato + um pouco de sal (ex.: pão com ovo, banana com aveia). Nunca treine perna em jejum.</li>
+        <li><strong>Beba água</strong>: uns 500 ml na hora anterior e goles durante o treino.</li>
+        <li><strong>Não prenda a respiração</strong>: solte o ar na subida de cada repetição.</li>
+        <li><strong>Descanse 2–3 minutos</strong> entre as séries de perna e pare com 2–3 repetições "sobrando".</li>
+        <li><strong>Não fique parado em pé</strong> depois da série: ande devagar ou sente-se. Levante-se devagar das máquinas.</li>
+        <li><strong>Termine com 5 min de caminhada leve</strong>, não vá direto para o chuveiro quente.</li>
+        <li><strong>Sinal de alerta</strong> (tontura, visão escurecendo, suor frio, enjoo): pare, sente ou deite com as pernas elevadas, beba água. Só volte se passar por completo — senão, encerre o dia.</li>
+      </ul>
+      <p style="margin-top:10px"><strong>Importante:</strong> antes de aumentar a intensidade, vale fazer um check-up com um médico (de preferência cardiologista) e contar sobre essas quedas — principalmente se você toma remédio para pressão, se já desmaiou ou se sente dor no peito ou palpitação.</p>
+    </div>
+
+    <h2>Como progredir</h2>
+    <div class="card">
+      <ul>
+        <li>Cada exercício tem uma faixa de repetições (ex.: 8–12). Comece com uma carga que você consiga fazer no <strong>mínimo</strong> da faixa com boa execução.</li>
+        <li>Quando conseguir o <strong>máximo</strong> da faixa em todas as séries, <strong>aumente a carga</strong> no treino seguinte.</li>
+        <li>Anote tudo aqui. O site mostra o que você fez da última vez — tente ganhar por 1 repetição ou um pouquinho de carga.</li>
+        <li>Nas 2 primeiras semanas, faça <strong>uma série a menos</strong> em cada exercício para o corpo se adaptar.</li>
+        <li>A cada 6–8 semanas, faça uma semana leve (metade das séries).</li>
+        <li>Dor articular aguda não é normal: troque o exercício por uma variação em máquina.</li>
+      </ul>
+    </div>
+
+    <h2>Alimentação para secar sem perder músculo</h2>
+    <div class="card">
+      <ul>
+        <li><strong>Ritmo</strong>: 0,5 a 1 kg por semana. Mais rápido que isso leva músculo junto e piora a queda de pressão.</li>
+        <li><strong>Proteína</strong>: 150–180 g por dia (carne, frango, ovos, peixe, iogurte, whey). Uma porção do tamanho da palma da mão em cada refeição.</li>
+        <li><strong>Déficit moderado</strong>: corte uns 400–500 kcal por dia — na prática, tire bebida com açúcar, reduza frituras e doces do dia a dia e diminua um pouco a porção de arroz/massa fora do pré-treino.</li>
+        <li><strong>Prato</strong>: metade legumes e salada, um quarto proteína, um quarto carboidrato.</li>
+        <li><strong>Água</strong>: 3 litros ou mais por dia.</li>
+        <li><strong>Sono</strong>: 7–8 h. Dormir mal aumenta a fome e atrapalha o ganho de músculo.</li>
+        <li>Um nutricionista ajusta isso para a sua rotina e exames — vale muito a pena.</li>
+      </ul>
+    </div>
+
+    <h2>Patins 🛼</h2>
+    <div class="card">
+      <ul>
+        <li><strong>2 a 3 vezes por semana, 30–45 minutos</strong>, em ritmo que dê para conversar. É o seu cardio — e ainda trabalha glúteo e panturrilha.</li>
+        <li>Dias sugeridos: <strong>terça, quinta e domingo</strong> (longe do esforço máximo de perna).</li>
+        <li>Se for no mesmo dia da musculação, faça a academia primeiro ou deixe algumas horas de intervalo.</li>
+        <li>Use capacete, munhequeira e joelheira. Com mais peso, a queda machuca mais.</li>
+        <li>Leve água. Se a perna estiver muito cansada do treino, vá mais leve ou troque por caminhada.</li>
+      </ul>
+    </div>
+
+    <h2>O que esperar</h2>
+    <div class="card">
+      <ul>
+        <li><strong>1º mês</strong>: mais disposição, cargas subindo rápido, roupa um pouco mais folgada.</li>
+        <li><strong>3 meses</strong>: 6–10 kg a menos, ombro, peito e costas já aparecendo mais.</li>
+        <li><strong>6–12 meses</strong>: mudança grande de formato — cintura menor, peito, glúteo e costas marcados.</li>
+      </ul>
+      <p class="mut small">Corpos de referência de atleta ou de ilustração levam anos (e genética) para existir. Use como direção, não como régua. Constância ganha de intensidade.</p>
+    </div>
+  </section>
+</div>
+
+<div id="timer"><span id="tTxt"></span><button id="tStop">Fechar</button></div>
+
+<nav><div>
+  <button data-v="treino" class="on">🏋️ Treino</button>
+  <button data-v="prog">📈 Progresso</button>
+  <button data-v="guia">📖 Guia</button>
+</div></nav>
+
+<script>
+/* ================= PLANO ================= */
+const PERNA_AVISO = ['Comeu há 1–2 h (carboidrato + sal)?','Bebeu água?','Solte o ar na subida — não prenda a respiração','Descanse 2–3 min e deixe 2–3 repetições sobrando','Depois da série: ande devagar ou sente, não fique parado em pé','Tontura ou visão escura: pare, deite e eleve as pernas'];
+const E=(id,nome,series,reps,desc,nota)=>({id,nome,series,reps,desc,nota});
+const PLAN = {
+ 1:{titulo:'Peito, ombro e tríceps',tags:['Peitão','Ombro','Tríceps','Panturrilha'],ex:[
+   E('supino-reto','Supino reto (barra ou máquina)',4,'6–10',120,'Principal do peito. Desça controlado, pés firmes no chão.'),
+   E('supino-inc-halter','Supino inclinado com halteres',3,'8–12',90,'Banco a 30°. Enche a parte de cima do peito.'),
+   E('peck-deck','Crucifixo na máquina (peck deck)',3,'12–15',60,'Aperte 1 segundo no meio.'),
+   E('desenv-halter','Desenvolvimento com halteres sentado',3,'8–12',90,'Costas apoiadas no banco.'),
+   E('elev-lateral','Elevação lateral',3,'12–20',60,'Ombro largo deixa a cintura menor. Carga leve, sem balanço.'),
+   E('triceps-corda','Tríceps na polia com corda',3,'10–15',60,'Cotovelos colados no corpo.'),
+   E('pant-em-pe','Panturrilha em pé',4,'10–15',60,'Desça tudo, pause 1 s embaixo, suba até a ponta.')]},
+ 2:{titulo:'Costas, trapézio e antebraço',tags:['Costas','Trapézio','Antebraço','Bíceps'],patins:true,ex:[
+   E('puxada-frontal','Puxada frontal aberta',4,'8–12',90,'Puxe com os cotovelos, peito para cima.'),
+   E('remada-apoiada','Remada com peito apoiado (cavalinho ou máquina)',4,'8–12',90,'Espessura das costas, sem forçar a lombar.'),
+   E('remada-baixa','Remada baixa com triângulo',3,'10–12',90,'Segure 1 s com as escápulas juntas.'),
+   E('encolh-halter','Encolhimento com halteres',4,'10–15',60,'Suba o ombro até a orelha e segure 1 s. Trapézio!'),
+   E('face-pull','Face pull na polia',3,'12–15',60,'Saúde do ombro e parte de trás do trapézio.'),
+   E('rosca-w','Rosca direta com barra W',3,'8–12',60,'Sem jogar o corpo.'),
+   E('rosca-punho','Rosca de punho (antebraço)',3,'15–20',45,'Antebraço apoiado no banco, só o punho se move.'),
+   E('farmer','Caminhada do fazendeiro (segundos)',3,'30–40 s',90,'Halteres pesados, ande reto. Antebraço, trapézio e pegada. Anote os segundos em "reps".')]},
+ 3:{titulo:'Glúteo e posterior de coxa',tags:['Bundão','Posterior','Panturrilha','Core'],perna:true,ex:[
+   E('hip-thrust','Elevação pélvica (hip thrust)',4,'8–12',150,'O melhor exercício de glúteo — e deitado, o que ajuda a pressão. Segure 1 s em cima. Levante devagar ao terminar.'),
+   E('stiff','Stiff com halteres (RDL)',3,'8–12',150,'Quadril para trás, coluna reta, sinta alongar atrás da coxa. Suba devagar.'),
+   E('mesa-flexora','Mesa ou cadeira flexora',3,'10–15',90,''),
+   E('abdutora','Cadeira abdutora',3,'15–20',60,'Incline o tronco um pouco à frente: pega mais o glúteo.'),
+   E('coice-cabo','Coice de glúteo na polia',3,'12–15',60,'Cada perna. Movimento curto e controlado.'),
+   E('pant-sentado','Panturrilha sentado',4,'12–20',60,'Pause 1 s embaixo.'),
+   E('prancha','Prancha (segundos)',3,'30–45 s',60,'Respire normalmente. Anote os segundos em "reps".')]},
+ 4:{titulo:'Peito superior, ombro e braços',tags:['Peitão','Ombro','Braços','Antebraço'],patins:true,ex:[
+   E('supino-inc','Supino inclinado (barra, Smith ou máquina)',4,'6–10',120,'Hoje o inclinado vem primeiro.'),
+   E('supino-reto-halter','Supino reto com halteres',3,'8–12',90,'Desça bem para alongar o peito.'),
+   E('crossover','Crossover na polia',3,'12–15',60,'De cima para baixo, cruzando as mãos na frente.'),
+   E('desenv-maq','Desenvolvimento na máquina',3,'8–12',90,''),
+   E('elev-lateral-cabo','Elevação lateral na polia',4,'12–20',60,'Cada braço.'),
+   E('triceps-frances','Tríceps francês (halter ou polia)',3,'10–12',60,'Alonga a cabeça longa — deixa o braço grosso.'),
+   E('rosca-martelo','Rosca martelo',3,'10–12',60,'Engrossa o antebraço e o braço.')]},
+ 5:{titulo:'Costas, trapézio e antebraço',tags:['Costas','Trapézio','Antebraço','Panturrilha'],ex:[
+   E('remada-maq','Remada articulada na máquina',4,'8–12',90,'Hoje a remada vem primeiro: costas grossas.'),
+   E('puxada-neutra','Puxada com pegada neutra ou supinada',4,'8–12',90,'Alongue bem em cima.'),
+   E('pulldown','Pulldown de braço reto na polia',3,'12–15',60,'Isola a dorsal — largura das costas.'),
+   E('encolh-barra','Encolhimento com barra ou Smith',4,'8–12',75,'Mais pesado que na terça.'),
+   E('crucifixo-inv','Crucifixo inverso (máquina ou halteres)',3,'12–15',60,'Parte de trás do ombro.'),
+   E('rosca-inclinada','Rosca no banco inclinado',3,'10–12',60,''),
+   E('rosca-inversa','Rosca inversa (pegada por cima)',3,'12–15',60,'Queima o antebraço.'),
+   E('pant-em-pe','Panturrilha em pé',4,'10–15',60,'Pause 1 s embaixo.')]},
+ 6:{titulo:'Glúteo e quadríceps',tags:['Bundão','Coxa','Core'],perna:true,ex:[
+   E('leg-press','Leg press 45°',4,'10–12',180,'Pés altos e afastados para pegar glúteo. Não trave o joelho. Levante-se devagar do aparelho.'),
+   E('goblet','Agachamento goblet (com halter)',3,'8–10',180,'Só 3 séries, parando com 3 repetições sobrando. Se a pressão estiver ruim hoje, pule este.'),
+   E('extensora','Cadeira extensora',3,'12–15',90,'Sentado: seguro para a pressão.'),
+   E('hip-thrust-b','Elevação pélvica (máquina ou barra)',3,'10–15',120,'Mais leve que na quarta, mais repetições.'),
+   E('abdutora','Cadeira abdutora',3,'15–20',60,''),
+   E('abd-maq','Abdominal na máquina ou polia',3,'12–15',60,'Solte o ar ao contrair.')]},
+ 0:{titulo:'Descanso',descanso:true,patins:true,ex:[]}
+};
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const ORDEM=[1,2,3,4,5,6,0];
+
+/* ================= ESTADO ================= */
+const KEY='treino-urso-v1';
+let S={logs:{},peso:[],patins:[],meta:null};
+try{const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+const HOJE=new Date(); const hojeISO=iso(HOJE);
+const br=s=>s.split('-').reverse().slice(0,2).join('/');
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function semana(){ // datas ISO de seg a dom da semana atual
+  const d=new Date(HOJE); const dow=(d.getDay()+6)%7; d.setDate(d.getDate()-dow);
+  return ORDEM.map((wd,i)=>{const x=new Date(d);x.setDate(d.getDate()+i);return {wd,date:iso(x)}});
+}
+let sel=semana().find(x=>x.date===hojeISO); // dia selecionado {wd,date}
+
+/* ================= TREINO ================= */
+function renderWeek(){
+  $('week').innerHTML=semana().map(x=>{
+    const done=S.logs[x.date]&&S.logs[x.date].feito;
+    const sk=S.patins.some(p=>p.date===x.date);
+    return `<button class="wd ${x.date===sel.date?'sel':''} ${x.date===hojeISO?'today':''} ${done?'done':''}" data-d="${x.date}" data-w="${x.wd}">
+      ${DIAS[x.wd]}<b>${+x.date.slice(8)}</b><span class="sk">${sk?'🛼':(PLAN[x.wd].patins?'·':'')}</span></button>`}).join('');
+}
+function ultima(exId,antes){
+  const ds=Object.keys(S.logs).filter(d=>d<antes).sort().reverse();
+  for(const d of ds){const sets=(S.logs[d].ex||{})[exId]; if(sets){const f=sets.filter(s=>s&&(s.kg||s.reps)); if(f.length) return {d,sets:f};}}
+  return null;
+}
+function renderDay(){
+  const p=PLAN[sel.wd], log=S.logs[sel.date]||{ex:{}};
+  let h=`<h2>${DIAS[sel.wd]} · ${esc(p.titulo)}</h2><div>${(p.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+  if(sel.date!==hojeISO) h+=`<p class="mut small">Você está vendo ${br(sel.date)}. O que anotar aqui fica salvo nessa data.</p>`;
+  if(p.descanso){
+    h+=`<div class="card"><h3>Dia de descanso 😴</h3><p>É no descanso que o músculo cresce. Durma bem, coma proteína e beba água.</p><p class="mut">Se der vontade, um patins leve de 30–40 min é ótimo. Registre na aba Progresso.</p></div>`;
+    $('day').innerHTML=h; return;
+  }
+  if(p.perna) h+=`<div class="card alert"><h3>⚠️ Dia de perna: cuide da pressão</h3><ul>${PERNA_AVISO.map(a=>`<li>${a}</li>`).join('')}</ul></div>`;
+  if(p.patins) h+=`<div class="card"><h3>🛼 Dia bom para patins</h3><p class="mut" style="margin:0">30–45 min em ritmo leve, depois da academia ou em outro horário.</p></div>`;
+  p.ex.forEach((e,i)=>{
+    const sets=log.ex[e.id]||[], u=ultima(e.id,sel.date);
+    h+=`<div class="card ex"><h3><span class="n">${i+1}</span><span>${esc(e.nome)}</span></h3>
+      <div class="meta">${e.series} séries × ${e.reps} · descanso ${e.desc>=120?(e.desc/60+' min').replace('.',','):e.desc+' s'}</div>
+      ${e.nota?`<p class="mut small" style="margin:0 0 4px">${esc(e.nota)}</p>`:''}
+      ${u?`<div class="last">Última vez (${br(u.d)}): ${u.sets.map(s=>`${s.kg||'–'} kg × ${s.reps||'–'}`).join(' · ')}</div>`:'<div class="last">Primeira vez: comece leve e anote.</div>'}`;
+    for(let k=0;k<e.series;k++){const s=sets[k]||{};
+      h+=`<div class="set"><span class="i">${k+1}</span>
+        <input type="number" inputmode="decimal" step="0.5" placeholder="kg" aria-label="Carga série ${k+1}" value="${s.kg??''}" data-e="${e.id}" data-k="${k}" data-f="kg">
+        <input type="number" inputmode="numeric" placeholder="reps" aria-label="Repetições série ${k+1}" value="${s.reps??''}" data-e="${e.id}" data-k="${k}" data-f="reps">
+        <button class="chk ${s.ok?'on':''}" aria-label="Série ${k+1} feita" data-e="${e.id}" data-k="${k}" data-r="${e.desc}">✓</button></div>`;}
+    h+=`</div>`;
+  });
+  h+=`<button class="btn ${log.feito?'ok':''}" id="fim">${log.feito?'✓ Treino concluído — desfazer':'Concluir treino'}</button>`;
+  if(p.perna) h+=`<p class="mut small" style="margin-top:10px;text-align:center">Terminou? 5 minutos de caminhada leve antes de ir embora.</p>`;
+  $('day').innerHTML=h;
+}
+function getLog(){return S.logs[sel.date]||(S.logs[sel.date]={wd:sel.wd,ex:{}})}
+function getSet(e,k){const l=getLog();const a=l.ex[e]||(l.ex[e]=[]);return a[k]||(a[k]={})}
+$('week').addEventListener('click',ev=>{const b=ev.target.closest('.wd'); if(!b)return; sel={wd:+b.dataset.w,date:b.dataset.d}; renderWeek(); renderDay();});
+$('day').addEventListener('input',ev=>{const t=ev.target; if(!t.dataset.f)return;
+  const s=getSet(t.dataset.e,+t.dataset.k); s[t.dataset.f]=t.value===''?undefined:+t.value; save();});
+$('day').addEventListener('click',ev=>{
+  const c=ev.target.closest('.chk');
+  if(c){const s=getSet(c.dataset.e,+c.dataset.k); s.ok=!s.ok;
+    c.classList.toggle('on',s.ok); save(); if(s.ok) startTimer(+c.dataset.r); return;}
+  if(ev.target.id==='fim'){const l=getLog(); l.feito=!l.feito; save(); renderWeek(); renderDay(); stopTimer();}
+});
+
+/* ================= TIMER ================= */
+let tInt=null,tEnd=0;
+function startTimer(sec){tEnd=Date.now()+sec*1000; $('timer').className='on'; clearInterval(tInt); tick(); tInt=setInterval(tick,250);}
+function tick(){const r=Math.ceil((tEnd-Date.now())/1000);
+  if(r<=0){$('tTxt').textContent='Bora! Próxima série 💪'; $('timer').className='on end'; clearInterval(tInt);
+    if(navigator.vibrate) navigator.vibrate([200,100,200]); setTimeout(()=>{if(Date.now()>=tEnd+7000) stopTimer()},8000); return;}
+  $('tTxt').textContent=`Descanso ${Math.floor(r/60)}:${String(r%60).padStart(2,'0')}`;}
+function stopTimer(){clearInterval(tInt); $('timer').className='';}
+$('tStop').onclick=stopTimer;
+
+/* ================= PROGRESSO ================= */
+function renderProg(){
+  const w=semana(), tre=w.filter(x=>S.logs[x.date]&&S.logs[x.date].feito).length;
+  const pat=S.patins.filter(p=>w.some(x=>x.date===p.date)).length;
+  const ps=[...S.peso].sort((a,b)=>a.date<b.date?-1:1);
+  const dif=ps.length>1?(ps[ps.length-1].kg-ps[0].kg):null;
+  $('stats').innerHTML=`<div class="stat"><b>${tre}/6</b><span>treinos</span></div>
+    <div class="stat"><b>${pat}/3</b><span>patins</span></div>
+    <div class="stat"><b>${dif===null?'–':(dif>0?'+':'')+dif.toFixed(1).replace('.',',')}</b><span>kg desde o início</span></div>`;
+  $('metaKg').value=S.meta??'';
+  // gráfico
+  let g='';
+  if(ps.length>1){
+    const W=600,H=240,P=44, vals=ps.map(p=>p.kg).concat(S.meta?[S.meta]:[]);
+    const mn=Math.min(...vals)-1, mx=Math.max(...vals)+1;
+    const t0=+new Date(ps[0].date), t1=+new Date(ps[ps.length-1].date)||t0+1;
+    const X=d=>P+(W-P-14)*((+new Date(d)-t0)/Math.max(1,t1-t0)), Y=k=>14+(H-48)*(1-(k-mn)/(mx-mn));
+    g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de peso" style="margin-top:12px">
+      ${[mn+1,(mn+mx)/2,mx-1].map(v=>`<line x1="${P}" x2="${W-14}" y1="${Y(v)}" y2="${Y(v)}" stroke="#3a322c"/><text x="${P-8}" y="${Y(v)+6}" fill="#b9aca0" font-size="17" text-anchor="end">${v.toFixed(0)}</text>`).join('')}
+      ${S.meta?`<line x1="${P}" x2="${W-14}" y1="${Y(S.meta)}" y2="${Y(S.meta)}" stroke="#4fd18b" stroke-dasharray="8 6" stroke-width="2"/><text x="${W-16}" y="${Y(S.meta)-7}" fill="#4fd18b" font-size="16" text-anchor="end">meta ${S.meta}</text>`:''}
+      <polyline fill="none" stroke="#ff7a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" points="${ps.map(p=>X(p.date)+','+Y(p.kg)).join(' ')}"/>
+      ${ps.map(p=>`<circle cx="${X(p.date)}" cy="${Y(p.kg)}" r="6" fill="#ffc247"><title>${br(p.date)}: ${p.kg} kg</title></circle>`).join('')}
+      <text x="${P}" y="${H-8}" fill="#b9aca0" font-size="16">${br(ps[0].date)}</text>
+      <text x="${W-14}" y="${H-8}" fill="#b9aca0" font-size="16" text-anchor="end">${br(ps[ps.length-1].date)}</text></svg>`;
+  } else g=`<p class="mut small" style="margin-top:12px">${ps.length?'Registre mais um peso para ver o gráfico.':'Registre seu peso de hoje para começar.'}</p>`;
+  $('pesoChart').innerHTML=g;
+  $('pesoList').innerHTML=ps.length?`<table><tr><th>Data</th><th class="r">Peso</th><th></th></tr>${[...ps].reverse().slice(0,8).map(p=>`<tr><td>${br(p.date)}</td><td class="r">${String(p.kg).replace('.',',')} kg</td><td class="r"><button class="x" data-del="peso" data-d="${p.date}" aria-label="Apagar">✕</button></td></tr>`).join('')}</table>`:'';
+  const pa=[...S.patins].sort((a,b)=>a.date<b.date?1:-1);
+  $('patList').innerHTML=pa.length?`<table style="margin-top:10px"><tr><th>Data</th><th class="r">Tempo</th><th class="r">Km</th><th></th></tr>${pa.slice(0,8).map(p=>`<tr><td>${br(p.date)}</td><td class="r">${p.min} min</td><td class="r">${p.km?String(p.km).replace('.',','):'–'}</td><td class="r"><button class="x" data-del="patins" data-d="${p.date}" aria-label="Apagar">✕</button></td></tr>`).join('')}</table>`:'<p class="mut small" style="margin-top:10px">Nenhum rolê registrado ainda.</p>';
+  // recordes
+  const best={};
+  for(const d in S.logs) for(const id in (S.logs[d].ex||{})) for(const s of S.logs[d].ex[id]) if(s&&s.kg&&(!best[id]||s.kg>best[id].kg)) best[id]={kg:s.kg,reps:s.reps,d};
+  const nomes={}; for(const k in PLAN) for(const e of PLAN[k].ex) nomes[e.id]=e.nome;
+  const ids=Object.keys(best).filter(i=>nomes[i]);
+  $('prs').innerHTML=ids.length?`<table><tr><th>Exercício</th><th class="r">Maior carga</th></tr>${ids.map(i=>`<tr><td>${esc(nomes[i])}</td><td class="r" style="white-space:nowrap"><b>${String(best[i].kg).replace('.',',')} kg</b>${best[i].reps?' × '+best[i].reps:''}<br><span class="mut small">${br(best[i].d)}</span></td></tr>`).join('')}</table>`:'<p class="mut" style="margin:0">Anote as cargas nos treinos e seus recordes aparecem aqui.</p>';
+}
+$('pesoAdd').onclick=()=>{const v=parseFloat($('pesoKg').value); if(!(v>30&&v<400))return;
+  S.peso=S.peso.filter(p=>p.date!==hojeISO); S.peso.push({date:hojeISO,kg:v}); $('pesoKg').value=''; save(); renderProg();};
+$('metaSet').onclick=()=>{const v=parseFloat($('metaKg').value); S.meta=(v>30&&v<400)?v:null; save(); renderProg();};
+$('patAdd').onclick=()=>{const m=parseInt($('patMin').value); if(!(m>0))return; const k=parseFloat($('patKm').value);
+  S.patins=S.patins.filter(p=>p.date!==hojeISO); S.patins.push({date:hojeISO,min:m,km:k>0?k:null}); $('patMin').value=$('patKm').value=''; save(); renderProg(); renderWeek();};
+$('v-prog').addEventListener('click',ev=>{const b=ev.target.closest('[data-del]'); if(!b)return;
+  if(!confirm('Apagar este registro?'))return;
+  S[b.dataset.del]=S[b.dataset.del].filter(p=>p.date!==b.dataset.d); save(); renderProg(); renderWeek();});
+$('exp').onclick=()=>{const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'})); a.download=`treino-backup-${hojeISO}.json`; a.click();};
+$('impBtn').onclick=()=>$('imp').click();
+$('imp').onchange=ev=>{const f=ev.target.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result); if(!d||typeof d.logs!=='object') throw 0;
+    if(!confirm('Substituir os dados deste aparelho pelo backup?'))return;
+    S=Object.assign({logs:{},peso:[],patins:[],meta:null},d); save(); renderAll();}catch(e){alert('Arquivo de backup inválido.')}};
+  r.readAsText(f); ev.target.value='';};
+
+/* ================= NAV ================= */
+document.querySelector('nav').addEventListener('click',ev=>{const b=ev.target.closest('button'); if(!b)return;
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  ['treino','prog','guia'].forEach(v=>$('v-'+v).classList.toggle('hide',v!==b.dataset.v));
+  if(b.dataset.v==='prog') renderProg(); window.scrollTo(0,0);});
+function renderAll(){
+  $('sub').textContent=HOJE.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})+' · musculação seg–sáb + patins';
+  renderWeek(); renderDay(); renderProg();
+}
+renderAll();
+</script>
+</body>
+</html>

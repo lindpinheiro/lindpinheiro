@@ -23,7 +23,7 @@ const REGRAS = [
       <li>O jejum não queima gordura sozinho. Ele ajuda porque tira os lanches da noite e da manhã.</li>
     </Itens>
   ) },
-  { id: 'livre', titulo: 'Fim de semana e doces', corpo: (
+  { id: 'livre', titulo: 'Fast food, açaí e chocolate', corpo: (
     <Itens>
       <li><b>Fast food</b>: duas vezes por semana, em qualquer dia, sempre <b>no lugar da janta</b>. Um lanche com acompanhamento.</li>
       <li><b>Bebida</b>: refrigerante zero ou água. Refrigerante comum e milk-shake viram quase outra refeição.</li>

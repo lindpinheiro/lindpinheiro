@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, IconButton, LinearProgress, Paper, Stack, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, IconButton, LinearProgress, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { Apple, Beef, Check, ChevronDown, Cookie, IceCreamBowl, Droplets, Flame, Minus, Pizza, Plus, Timer } from 'lucide-react'
-import { AGUA_META, DIAS_JEJUM, EXTRAS, LIVRES_SEMANA, JANELA, REFEICOES, TOTAL } from './dieta.js'
+import { AGUA_META, DIAS_JEJUM, EXTRAS, LIVRES_SEMANA, opcao, JANELA, REFEICOES, TOTAL } from './dieta.js'
 import { hojeISO, iso, semana } from './store.js'
 
 const dur = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`)
@@ -118,6 +118,7 @@ export default function Dieta({ s, update }) {
         {REFEICOES.map((r, i) => {
           const ok = !!dia.m?.[r.id], livre = dia.m?.[r.id] === 'livre'
           const podeLivre = r.podeLivre && livres < LIVRES_SEMANA
+          const op = opcao(r, dia), item = op || r
           return (
             <Accordion key={r.id} square expanded={aberto === r.id} onChange={() => setAberto(aberto === r.id ? null : r.id)}
               sx={{ borderBottom: i < REFEICOES.length - 1 ? 1 : 0, borderColor: 'divider' }}>
@@ -128,14 +129,20 @@ export default function Dieta({ s, update }) {
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{r.nome}{emJejum ? ` · ${r.hora}` : ''}</Typography>
-                  <Typography variant="body2" color="text.secondary">{livre ? 'Refeição livre' : emJejum ? r.jejum : r.livre}</Typography>
+                  <Typography variant="body2" color="text.secondary">{livre ? 'Refeição livre' : ok && op ? op.nome : emJejum ? r.jejum : r.livre}</Typography>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
-                <Box component="ul" sx={{ pl: 2.5, mt: 0, mb: 1.5, '& li': { mb: 0.5 } }}>{r.base.map((b) => <li key={b}>{b}</li>)}</Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Cerca de {r.kcal} kcal · {r.prot} g de proteína</Typography>
+                {op && (
+                  <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={op.id} aria-label={`Opção de ${r.nome.toLowerCase()}`} sx={{ mb: 1.5 }}
+                    onChange={(_, v) => v && editar((d) => { (d.opc ??= {})[r.id] = v })}>
+                    {r.opcoes.map((o) => <ToggleButton key={o.id} value={o.id}>{o.nome}</ToggleButton>)}
+                  </ToggleButtonGroup>
+                )}
+                <Box component="ul" sx={{ pl: 2.5, mt: 0, mb: 1.5, '& li': { mb: 0.5 } }}>{item.base.map((b) => <li key={b}>{b}</li>)}</Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Cerca de {item.kcal} kcal · {item.prot} g de proteína</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>Pode trocar por</Typography>
-                <Box component="ul" sx={{ pl: 2.5, mt: 0, mb: 2, color: 'text.secondary', '& li': { mb: 0.5 } }}>{r.trocas.map((t) => <li key={t}>{t}</li>)}</Box>
+                <Box component="ul" sx={{ pl: 2.5, mt: 0, mb: 2, color: 'text.secondary', '& li': { mb: 0.5 } }}>{item.trocas.map((t) => <li key={t}>{t}</li>)}</Box>
                 <Stack spacing={1}>
                   <Button fullWidth variant={ok ? 'outlined' : 'contained'} color={ok ? 'success' : 'primary'} startIcon={ok && <Check size={18} />} onClick={() => marcar(r, ok ? false : true)}>
                     {livre ? 'Refeição livre feita' : ok ? 'Feito' : 'Marcar como feita'}

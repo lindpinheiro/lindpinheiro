@@ -16,6 +16,11 @@ function ler() {
   }
 }
 
+// Pede ao navegador para não apagar os dados sozinho quando faltar espaço no aparelho.
+try { navigator.storage?.persist?.() } catch {}
+
+// Os dados ficam sempre na mesma chave (KEY). Ao mudar o formato, converter aqui em vez de trocar a chave,
+// para que nenhuma atualização do site apague o que já foi registrado.
 export function useStore() {
   const [s, setS] = useState(ler)
   const update = useCallback((fn) => {

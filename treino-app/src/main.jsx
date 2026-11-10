@@ -45,3 +45,8 @@ function Root() {
 }
 
 createRoot(document.getElementById('root')).render(<Root />)
+
+// Permite instalar como app e abrir sem internet. Service worker exige https (ou localhost).
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('treino-sw.js').catch(() => {})
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, IconButton, LinearProgress, Paper, Stack, Typography } from '@mui/material'
-import { Beef, Check, ChevronDown, Cookie, Droplets, Flame, Minus, Pizza, Plus, Timer } from 'lucide-react'
+import { Apple, Beef, Check, ChevronDown, Cookie, IceCreamBowl, Droplets, Flame, Minus, Pizza, Plus, Timer } from 'lucide-react'
 import { AGUA_META, DIAS_JEJUM, EXTRAS, LIVRES_SEMANA, JANELA, REFEICOES, TOTAL } from './dieta.js'
 import { hojeISO, iso, semana } from './store.js'
 
@@ -18,19 +18,21 @@ const REGRAS = [
     <Itens>
       <li><b>Só segunda, terça e quarta</b>: comer das 10h30 às 19h. O primeiro jejum começa depois da janta de domingo.</li>
       <li><b>De quinta a domingo</b>: horário livre, com as mesmas três refeições e porções.</li>
-      <li><b>No jejum pode</b>: água, café e chá sem açúcar.</li>
+      <li><b>No jejum pode</b>: água, café e chá sem açúcar. Fruta só dentro da janela.</li>
       <li><b>A merenda não é opcional</b>: ela é o seu pré-treino. Treinar em jejum ao meio-dia é o que mais derruba a pressão.</li>
       <li>O jejum não queima gordura sozinho. Ele ajuda porque tira os lanches da noite e da manhã.</li>
     </Itens>
   ) },
-  { id: 'livre', titulo: 'Fast food, açaí e chocolate', corpo: (
+  { id: 'livre', titulo: 'Fruta, fast food e doces', corpo: (
     <Itens>
       <li><b>Fast food</b>: duas vezes por semana, em qualquer dia, sempre <b>no lugar da janta</b>. Um lanche com acompanhamento.</li>
       <li><b>Bebida</b>: refrigerante zero ou água. Refrigerante comum e milk-shake viram quase outra refeição.</li>
       <li><b>Açaí completo de 700 ml</b>: um a cada duas semanas. Ele tem as calorias de quase um dia inteiro, então <b>é a janta</b> daquele dia.</li>
       <li>Açaí e fast food em dias diferentes.</li>
+      <li><b>Fruta</b>: liberada quando bater a fome, até 2 por dia além da do almoço. Laranja, banana, maçã, mamão, melancia, abacaxi.</li>
+      <li><b>Não conta como fruta</b>: suco, fruta seca, abacate e açaí.</li>
       <li><b>Chocolate</b>: um por dia, depois da refeição. Um bombom (Sonho de Valsa, Ouro Branco) ou 2 quadradinhos de meio amargo.</li>
-      <li>Com isso a margem acabou: outros doces, refrigerante e beliscos ficam de fora.</li>
+      <li>Fora isso, a margem acabou: outros doces, refrigerante e beliscos ficam de fora.</li>
       <li>Merenda e almoço seguem o plano todos os dias. É isso que mantém a perda em cerca de meio quilo por semana.</li>
     </Itens>
   ) },
@@ -46,7 +48,7 @@ const REGRAS = [
     <Itens>
       <li><b>Ritmo esperado</b>: cerca de 0,5 kg por semana, olhando a média de duas semanas.</li>
       <li><b>Perdendo mais de 1 kg por semana</b> depois da segunda semana, ou tonto no treino: some 2 colheres de arroz no almoço e na janta.</li>
-      <li><b>Duas semanas sem perder nada</b>: primeiro passe para um fast food por semana; depois chocolate dia sim, dia não; por último, tire 2 colheres de arroz da janta.</li>
+      <li><b>Duas semanas sem perder nada</b>: primeiro passe para um fast food por semana; depois chocolate dia sim, dia não e uma fruta extra por dia; por último, tire 2 colheres de arroz da janta.</li>
       <li>Ao chegar perto dos 105 kg, as porções de arroz diminuem um pouco. O app não faz isso sozinho.</li>
     </Itens>
   ) },
@@ -97,7 +99,7 @@ export default function Dieta({ s, update }) {
   const livres = semana().filter((d) => s.dieta?.[d.date]?.livre).length
   // Soma do extra na semana atual (7) ou nos últimos N dias corridos.
   const contar = (x) => {
-    const datas = x.dias === 7 ? semana().map((d) => d.date) : Array.from({ length: x.dias }, (_, i) => iso(new Date(Date.now() - i * 864e5)))
+    const datas = x.dias === 1 ? [hoje] : x.dias === 7 ? semana().map((d) => d.date) : Array.from({ length: x.dias }, (_, i) => iso(new Date(Date.now() - i * 864e5)))
     return datas.reduce((t, d) => t + (s.dieta?.[d]?.[x.id] || 0), 0)
   }
   const marcar = (r, valor) => { editar((d) => { d.m ??= {}; d.m[r.id] = valor; if (valor !== 'livre' && d.livre === r.id) d.livre = null; if (valor === 'livre') d.livre = r.id }); if (valor) setAberto(null) }
@@ -164,7 +166,7 @@ export default function Dieta({ s, update }) {
           const n = contar(x), passou = n > x.limite
           return (
             <Stack key={x.id} direction="row" spacing={1.5} sx={{ alignItems: 'center', py: 1.25, borderTop: i ? 1 : 0, borderColor: 'divider' }}>
-              <Box sx={{ color: 'text.secondary', display: 'flex' }}><Cookie size={22} /></Box>
+              <Box sx={{ color: 'text.secondary', display: 'flex' }}>{x.id === 'fruta' ? <Apple size={22} /> : x.id === 'acai' ? <IceCreamBowl size={22} /> : <Cookie size={22} />}</Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{x.nome}</Typography>
                 <Typography variant="body2" color="text.secondary">{x.porcao}</Typography>

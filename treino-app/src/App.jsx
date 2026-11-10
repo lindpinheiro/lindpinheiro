@@ -13,6 +13,7 @@ import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video } from './plan.js'
 import { br, hojeISO, num, semana, ultima, useStore } from './store.js'
 import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
+import Historico from './Historico.jsx'
 import { REFEICOES } from './dieta.js'
 
 const CUIDADOS = [
@@ -307,6 +308,7 @@ function Progresso({ s, update, replace }) {
   return (
     <>
       <Typography variant="h4">Progresso</Typography>
+      <Historico s={s} />
       <Titulo>Esta semana</Titulo>
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
         <Stat v={treinos} de={6} label="treinos" />

@@ -16,12 +16,12 @@ export const EXTRAS = [
 export const REFEICOES = [
   {
     id: 'merenda', hora: '10h30', nome: 'Merenda', jejum: 'Quebra o jejum e serve de pré-treino', livre: 'Até 1h30 antes do treino', kcal: 580, prot: 28,
-    base: ['Cuscuz pronto: 1 xícara cheia', 'Manteiga: 1 colher de sopa rasa', '3 ovos', 'Café sem açúcar'],
-    trocas: [
-      'Cuscuz + 2 ovos + 1 fatia grossa de queijo',
-      'Cuscuz + 4 colheres de sopa de carne moída',
-      '2 pães franceses + 3 ovos mexidos',
-      '3 fatias de pão de forma + 2 ovos + queijo',
+    // O que foi escolhido fica em dieta[data].opc.merenda; sem escolha, vale a primeira.
+    opcoes: [
+      { id: 'cuscuz', nome: 'Cuscuz com ovo', kcal: 580, prot: 28, base: ['Cuscuz pronto: 1 xícara cheia', 'Manteiga: 1 colher de sopa rasa', '3 ovos', 'Café sem açúcar'],
+        trocas: ['No lugar dos 3 ovos: 2 ovos + 1 fatia grossa de queijo', 'No lugar dos ovos: 4 colheres de sopa de carne moída'] },
+      { id: 'pao', nome: 'Pão com ovo', kcal: 550, prot: 28, base: ['2 pães franceses', 'Manteiga: 1 colher de chá', '3 ovos mexidos', 'Café sem açúcar'],
+        trocas: ['No lugar do pão francês: 3 fatias de pão de forma', 'No lugar dos 3 ovos: 2 ovos + 1 fatia de queijo'] },
     ],
   },
   {
@@ -35,3 +35,8 @@ export const REFEICOES = [
     trocas: ['No lugar do arroz: 1 pegador de macarrão', 'No lugar do arroz: 200 g de batata', 'Cuscuz com carne moída: 1 xícara de cuscuz + 200 g de carne'],
   },
 ]
+
+// Opção escolhida de uma refeição no dia (para as que têm opções).
+export const opcao = (r, d) => r.opcoes && (r.opcoes.find((o) => o.id === d?.opc?.[r.id]) || r.opcoes[0])
+// Calorias e proteína de uma refeição marcada, considerando refeição livre e opção escolhida.
+export const valores = (r, d) => (d?.m?.[r.id] === 'livre' ? LIVRE : opcao(r, d) || r)

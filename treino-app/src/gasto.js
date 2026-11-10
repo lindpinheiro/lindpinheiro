@@ -1,10 +1,18 @@
 // Estimativas de gasto calórico. Todas usam o gasto ACIMA do repouso (MET − 1),
 // porque o repouso já está no gasto base do dia.
 import { PLAN, duracao } from './plan.js'
-import { EXTRAS, LIVRE, REFEICOES } from './dieta.js'
+import { EXTRAS, LIVRE, REFEICOES, valores } from './dieta.js'
 import { PESO_INICIAL } from './store.js'
 
-const MET_LIQ = { musculacao: 2.5, esteira: 5, escada: 6, caminhada: 2.3 }
+const MET_MUSCULACAO = 2.5
+// Cardio da academia por intensidade. Registros antigos, sem intensidade, usam o padrão de cada tipo.
+const MET_CARDIO = {
+  esteira: { leve: 3.5, moderada: 5, forte: 7, padrao: 'moderada' },
+  escada: { leve: 4.5, moderada: 6, forte: 8, padrao: 'moderada' },
+  caminhada: { leve: 2.3, moderada: 3.3, forte: 4.5, padrao: 'leve' },
+}
+export const intensidadeCardio = (tipo, c) => c?.int || MET_CARDIO[tipo].padrao
+export const kcalCardio = (tipo, c, kg) => kcal(MET_CARDIO[tipo][intensidadeCardio(tipo, c)], kg, c.min)
 // Patins: MET de 6, 7,5 e 10 menos o repouso.
 export const INTENSIDADES = {
   leve: { nome: 'Leve', met: 5, como: 'Dá para conversar' },
@@ -40,8 +48,8 @@ export function gastoTreino(s, date, kg) {
   }
   if (r.series) r.minutos = Math.round(seg / 60) + (log.feito ? 5 : 0)
   else if (log.feito) r.minutos = duracao(p) - (p.cardio?.min || 0)
-  r.musculacao = kcal(MET_LIQ.musculacao, kg, r.minutos) + Math.round(r.volume * KCAL_POR_KG_REP)
-  r.cardio = log.cardio && p.cardio ? kcal(MET_LIQ[p.cardio.tipo], kg, log.cardio.min) : 0
+  r.musculacao = kcal(MET_MUSCULACAO, kg, r.minutos) + Math.round(r.volume * KCAL_POR_KG_REP)
+  r.cardio = log.cardio && p.cardio ? kcalCardio(p.cardio.tipo, log.cardio, kg) : 0
   r.total = r.musculacao + r.cardio
   return r
 }
@@ -56,7 +64,7 @@ export function consumo(s, date) {
   const extras = EXTRAS.map((x) => ({ ...x, n: d?.[x.id] || 0 })).filter((x) => x.n)
   return {
     refeicoes, extras, completa: refeicoes.length === REFEICOES.length,
-    kcal: refeicoes.reduce((t, r) => t + (d.m[r.id] === 'livre' ? LIVRE.kcal : r.kcal), 0) + extras.reduce((t, x) => t + x.n * x.kcal, 0),
-    prot: refeicoes.reduce((t, r) => t + (d.m[r.id] === 'livre' ? LIVRE.prot : r.prot), 0),
+    kcal: refeicoes.reduce((t, r) => t + valores(r, d).kcal, 0) + extras.reduce((t, x) => t + x.n * x.kcal, 0),
+    prot: refeicoes.reduce((t, r) => t + valores(r, d).prot, 0),
   }
 }

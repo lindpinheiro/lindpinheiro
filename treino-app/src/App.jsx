@@ -16,7 +16,7 @@ import Dieta from './Dieta.jsx'
 import Historico from './Historico.jsx'
 import Balanco from './Balanco.jsx'
 import Periodo from './Periodo.jsx'
-import { INTENSIDADES, gastoTreino, kcalPatins, pesoEm } from './gasto.js'
+import { INTENSIDADES, gastoTreino, intensidadeCardio, kcalCardio, kcalPatins, pesoEm } from './gasto.js'
 import { REFEICOES } from './dieta.js'
 
 const CUIDADOS = [
@@ -151,7 +151,7 @@ function Treino({ s, update, onDescanso }) {
             ))}
           </Paper>
 
-          <Cardio c={p.cardio} log={log.cardio} patins={p.patins} onToggle={() => editar((l) => { l.cardio = l.cardio ? null : { min: p.cardio.min } })} />
+          <Cardio key={date} c={p.cardio} log={log.cardio} patins={p.patins} kg={pesoEm(s, date)} onSalvar={(v) => editar((l) => { l.cardio = v })} />
 
           <Button fullWidth size="large" sx={{ mt: 3 }} variant={log.feito ? 'outlined' : 'contained'} color={log.feito ? 'success' : 'primary'}
             startIcon={log.feito && <Check size={20} />}
@@ -228,8 +228,10 @@ function Exercicio({ e, n, sets, ant, aberto, onToggle, onCampo, onMarcar, ultim
   )
 }
 
-function Cardio({ c, log, patins, onToggle }) {
+function Cardio({ c, log, patins, kg, onSalvar }) {
   const info = CARDIO[c.tipo]
+  const [min, setMin] = useState(c.min), [int, setInt] = useState(intensidadeCardio(c.tipo))
+  const m = parseInt(min) > 0 ? parseInt(min) : 0
   return (
     <Card sx={{ mt: 2 }}>
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
@@ -239,13 +241,28 @@ function Cardio({ c, log, patins, onToggle }) {
         </Box>
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{info.nome}</Typography>
-          <Typography variant="body2" color="text.secondary">{c.min} min · para fechar o treino</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {log ? `${log.min} min · ${INTENSIDADES[intensidadeCardio(c.tipo, log)].nome.toLowerCase()} · ${kcalCardio(c.tipo, log, kg)} kcal` : `${c.min} min · para fechar o treino`}
+          </Typography>
         </Box>
-        <Button variant={log ? 'text' : 'outlined'} color={log ? 'success' : 'primary'} onClick={onToggle}>{log ? 'Feito' : 'Marcar'}</Button>
+        {log && <Button color="inherit" onClick={() => onSalvar(null)}>Desfazer</Button>}
       </Stack>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-        {info.como}{patins && c.tipo !== 'caminhada' ? ' Vai andar de patins hoje? Pode pular.' : ''}
-      </Typography>
+      {!log && (
+        <>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+            {info.como}{patins && c.tipo !== 'caminhada' ? ' Vai andar de patins hoje? Pode pular.' : ''}
+          </Typography>
+          <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={int} onChange={(_, v) => v && setInt(v)} aria-label="Intensidade do cardio" sx={{ mt: 1.5 }}>
+            {Object.entries(INTENSIDADES).map(([id, i]) => <ToggleButton key={id} value={id}>{i.nome}</ToggleButton>)}
+          </ToggleButtonGroup>
+          <Stack direction="row" spacing={1} sx={{ mt: 1.5, alignItems: 'center' }}>
+            <TextField size="small" type="number" value={min} onChange={(e) => setMin(e.target.value)} sx={{ width: 120 }}
+              slotProps={{ htmlInput: { inputMode: 'numeric', 'aria-label': 'Minutos de cardio' }, input: { endAdornment: <InputAdornment position="end">min</InputAdornment> } }} />
+            <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>{m ? `Cerca de ${kcalCardio(c.tipo, { min: m, int }, kg)} kcal` : ''}</Typography>
+            <Button variant="contained" disabled={!m} onClick={() => onSalvar({ min: m, int })}>Marcar</Button>
+          </Stack>
+        </>
+      )}
     </Card>
   )
 }

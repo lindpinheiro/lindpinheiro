@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import { Box, ButtonBase, Dialog, DialogContent, DialogTitle, Divider, IconButton, Paper, Stack, Typography } from '@mui/material'
 import { Check, ChevronLeft, ChevronRight, Minus, X } from 'lucide-react'
 import { CARDIO, PLAN, duracao } from './plan.js'
-import { LIVRE, REFEICOES } from './dieta.js'
+import { LIVRE, REFEICOES, opcao, valores } from './dieta.js'
 import { hojeISO, num } from './store.js'
-import { INTENSIDADES, consumo, diaSemana, kcalPatins, kcalTreino, pesoEm } from './gasto.js'
+import { INTENSIDADES, consumo, diaSemana, intensidadeCardio, kcalCardio, kcalPatins, kcalTreino, pesoEm } from './gasto.js'
 
 const SEMANA = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom']
 const pad = (n) => String(n).padStart(2, '0')
@@ -133,7 +133,7 @@ function Dia({ s, date, onClose }) {
                 </Box>
               </Stack>
             ))}
-            {r.log?.cardio && <Linha ok titulo={CARDIO[r.plano.cardio?.tipo]?.nome || 'Cardio'} detalhe={`${r.log.cardio.min} min`} />}
+            {r.log?.cardio && <Linha ok titulo={CARDIO[r.plano.cardio?.tipo]?.nome || 'Cardio'} detalhe={`${r.log.cardio.min} min${r.plano.cardio ? ` · ${INTENSIDADES[intensidadeCardio(r.plano.cardio.tipo, r.log.cardio)].nome.toLowerCase()} · cerca de ${kcalCardio(r.plano.cardio.tipo, r.log.cardio, r.kg)} kcal` : ''}`} />}
             {r.pat && <Linha ok titulo="Patins" detalhe={`${r.pat.min} min${r.pat.km ? ` · ${num(r.pat.km)} km` : ''}${` · ${(INTENSIDADES[r.pat.int] || INTENSIDADES.leve).nome.toLowerCase()} · cerca de ${kcalPatins(r.pat, r.kg)} kcal`}`} />}
             {r.gasto > 0 && <Typography variant="body2" color="text.secondary" sx={{ pl: 4.25, pt: 0.5 }}>Gasto estimado no dia: {r.gasto} kcal</Typography>}
 
@@ -141,7 +141,8 @@ function Dia({ s, date, onClose }) {
             <Secao>Dieta</Secao>
             {REFEICOES.map((m) => {
               const v = r.d?.m?.[m.id]
-              return <Linha key={m.id} ok={!!v} titulo={m.nome} detalhe={v === 'livre' ? `Refeição livre · cerca de ${LIVRE.kcal} kcal` : v ? `${m.kcal} kcal · ${m.prot} g de proteína` : 'Não registrada'} />
+              const op = opcao(m, r.d), val = valores(m, r.d)
+              return <Linha key={m.id} ok={!!v} titulo={v && v !== 'livre' && op ? `${m.nome} · ${op.nome.toLowerCase()}` : m.nome} detalhe={v === 'livre' ? `Refeição livre · cerca de ${LIVRE.kcal} kcal` : v ? `${val.kcal} kcal · ${val.prot} g de proteína` : 'Não registrada'} />
             })}
             {r.extras.map((x) => <Linha key={x.id} ok titulo={`${x.nome}${x.n > 1 ? ` × ${x.n}` : ''}`} detalhe={`cerca de ${x.n * x.kcal} kcal`} />)}
             {!!r.d?.agua && <Linha ok titulo="Água" detalhe={`${num(r.d.agua / 2)} litros`} />}

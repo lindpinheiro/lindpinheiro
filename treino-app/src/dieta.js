@@ -5,10 +5,12 @@ export const DIAS_JEJUM = [1, 2, 3] // seg, ter, qua
 export const LIVRES_SEMANA = 2 // refeições livres por semana, sempre no lugar da janta
 export const AGUA_META = 6 // garrafas de 500 ml
 export const TOTAL = { kcal: 2100, prot: 160 }
+// Estimativa de um lanche de fast food com acompanhamento.
+export const LIVRE = { kcal: 1300, prot: 45 }
 export const EXTRAS = [
-  { id: 'fruta', nome: 'Fruta', porcao: 'Por dia', limite: 2, dias: 1 },
-  { id: 'choc', nome: 'Chocolate', porcao: 'Por semana', limite: 7, dias: 7 },
-  { id: 'acai', nome: 'Açaí completo', porcao: 'A cada 2 semanas', limite: 1, dias: 14 },
+  { id: 'fruta', nome: 'Fruta', porcao: 'Por dia', limite: 2, dias: 1, kcal: 80 },
+  { id: 'choc', nome: 'Chocolate', porcao: 'Por semana', limite: 7, dias: 7, kcal: 110 },
+  { id: 'acai', nome: 'Açaí completo', porcao: 'A cada 2 semanas', limite: 1, dias: 14, kcal: 1700 },
 ]
 
 export const REFEICOES = [

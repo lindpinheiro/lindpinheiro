@@ -15,6 +15,7 @@ import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
 import Historico from './Historico.jsx'
 import Balanco from './Balanco.jsx'
+import Periodo from './Periodo.jsx'
 import { INTENSIDADES, gastoTreino, kcalPatins, pesoEm } from './gasto.js'
 import { REFEICOES } from './dieta.js'
 
@@ -328,6 +329,9 @@ function Progresso({ s, update, replace }) {
 
       <Titulo>Balanço da semana</Titulo>
       <Balanco s={s} update={update} />
+
+      <Titulo>Evolução</Titulo>
+      <Periodo s={s} />
 
       <Titulo>Peso</Titulo>
       <Card>

@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, BottomNavigation, BottomNavigationAction, Box, Button,
   ButtonBase, Chip, Collapse, Container, IconButton,
-  InputAdornment, LinearProgress, List, ListItem, ListItemText, Paper, Stack, TextField, Typography,
+  InputAdornment, LinearProgress, List, ListItem, ListItemText, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
-  BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, HeartPulse, History, Moon, Plus, Trash2,
+  BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, Flame, HeartPulse, History, Moon, Plus, Trash2,
   TrendingUp, TriangleAlert, Upload, Utensils, Wind, X,
 } from 'lucide-react'
 import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video } from './plan.js'
@@ -15,7 +15,7 @@ import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
 import Historico from './Historico.jsx'
 import Balanco from './Balanco.jsx'
-import { kcalPatins, pesoEm } from './gasto.js'
+import { INTENSIDADES, gastoTreino, kcalPatins, pesoEm } from './gasto.js'
 import { REFEICOES } from './dieta.js'
 
 const CUIDADOS = [
@@ -71,6 +71,7 @@ function Treino({ s, update, onDescanso }) {
   const completo = (e) => (log.ex?.[e.id] || []).filter((x) => x?.ok).length >= e.series
   const [aberto, setAberto] = useState(null)
   const [cuidados, setCuidados] = useState(false)
+  const gasto = gastoTreino(s, date, pesoEm(s, date))
   useEffect(() => { setAberto(p.ex.find((e) => !completo(e))?.id ?? null) }, [date]) // eslint-disable-line
 
   const editar = (fn) => update((n) => { const l = (n.logs[date] ??= { ex: {} }); l.ex ??= {}; fn(l) })
@@ -126,6 +127,7 @@ function Treino({ s, update, onDescanso }) {
             <Chip size="small" variant="outlined" icon={<Clock size={15} />} label={`${duracao(p)} min`} />
             <Chip size="small" variant="outlined" icon={<Dumbbell size={15} />} label={`${p.ex.length} exercícios`} />
             {p.patins && <Chip size="small" variant="outlined" icon={<Wind size={15} />} label="Patins" />}
+            {gasto.total > 0 && <Chip size="small" color="primary" icon={<Flame size={15} />} label={`${gasto.total} kcal`} />}
           </Stack>
           <LinearProgress variant="determinate" value={(feitas / total) * 100} sx={{ height: 6, borderRadius: 3, mb: 2 }} aria-label="Séries concluídas" />
 
@@ -155,6 +157,11 @@ function Treino({ s, update, onDescanso }) {
             onClick={() => { editar((l) => { l.feito = !l.feito }); onDescanso(0) }}>
             {log.feito ? 'Treino concluído' : 'Concluir treino'}
           </Button>
+          {gasto.total > 0 && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, textAlign: 'center' }}>
+              Gasto estimado: {gasto.total} kcal{gasto.series ? ` · ${gasto.series} ${gasto.series === 1 ? 'série' : 'séries'}` : ''}{gasto.volume ? ` · ${Math.round(gasto.volume).toLocaleString('pt-BR')} kg levantados` : ''}
+            </Typography>
+          )}
         </>
       )}
     </>
@@ -281,7 +288,7 @@ function Progresso({ s, update, replace }) {
   const pesos = [...s.peso].sort((a, b) => (a.date < b.date ? -1 : 1))
   const atual = pesos.at(-1)?.kg ?? PESO_INICIAL, dif = atual - PESO_INICIAL
   const andado = Math.min(100, Math.max(0, ((PESO_INICIAL - atual) / (PESO_INICIAL - META)) * 100))
-  const [kg, setKg] = useState(''), [min, setMin] = useState(''), [km, setKm] = useState('')
+  const [kg, setKg] = useState(''), [min, setMin] = useState(''), [km, setKm] = useState(''), [int, setInt] = useState('leve')
   const arquivo = useRef()
 
   const nomes = {}, best = {}
@@ -292,7 +299,7 @@ function Progresso({ s, update, replace }) {
   const salvarPeso = () => { const v = parseFloat(kg); if (!(v > 30 && v < 400)) return
     update((n) => { n.peso = n.peso.filter((p) => p.date !== hoje); n.peso.push({ date: hoje, kg: v }) }); setKg('') }
   const salvarPatins = () => { const m = parseInt(min); if (!(m > 0)) return; const k = parseFloat(km)
-    update((n) => { n.patins = n.patins.filter((p) => p.date !== hoje); n.patins.push({ date: hoje, min: m, km: k > 0 ? k : null }) }); setMin(''); setKm('') }
+    update((n) => { n.patins = n.patins.filter((p) => p.date !== hoje); n.patins.push({ date: hoje, min: m, km: k > 0 ? k : null, int }) }); setMin(''); setKm('') }
   const exportar = () => { const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([JSON.stringify(s)], { type: 'application/json' })); a.download = `treino-backup-${hoje}.json`; a.click() }
   const importar = (ev) => { const f = ev.target.files[0]; if (!f) return; const r = new FileReader()
@@ -352,13 +359,14 @@ function Progresso({ s, update, replace }) {
             slotProps={{ htmlInput: { inputMode: 'decimal', step: 0.1 } }} />
           <IconButton color="primary" aria-label="Adicionar patins" onClick={salvarPatins} sx={{ border: 1, borderColor: 'divider', borderRadius: 3 }}><Plus size={20} /></IconButton>
         </Stack>
-        {parseInt(min) > 0 && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-            {pesoEm(s, hoje) ? `Cerca de ${kcalPatins(parseInt(min), pesoEm(s, hoje))} kcal gastas, em ritmo leve.` : 'Registre seu peso para estimar as calorias.'}
-          </Typography>
-        )}
+        <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={int} onChange={(_, v) => v && setInt(v)} aria-label="Intensidade" sx={{ mt: 1.5 }}>
+          {Object.entries(INTENSIDADES).map(([id, i]) => <ToggleButton key={id} value={id}>{i.nome}</ToggleButton>)}
+        </ToggleButtonGroup>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {INTENSIDADES[int].como}.{parseInt(min) > 0 ? ` Cerca de ${kcalPatins({ min: parseInt(min), int }, pesoEm(s, hoje))} kcal.` : ''}
+        </Typography>
         <Lista itens={[...s.patins].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 5)}
-          texto={(p) => `${p.min} min${p.km ? ` · ${num(p.km)} km` : ''}${pesoEm(s, p.date) ? ` · ${kcalPatins(p.min, pesoEm(s, p.date))} kcal` : ''}`}
+          texto={(p) => `${p.min} min · ${(INTENSIDADES[p.int] || INTENSIDADES.leve).nome.toLowerCase()} · ${kcalPatins(p, pesoEm(s, p.date))} kcal`}
           onDel={(p) => update((n) => { n.patins = n.patins.filter((x) => x.date !== p.date) })} />
       </Card>
 

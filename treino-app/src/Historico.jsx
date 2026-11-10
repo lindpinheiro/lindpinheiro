@@ -4,7 +4,7 @@ import { Check, ChevronLeft, ChevronRight, Minus, X } from 'lucide-react'
 import { CARDIO, PLAN, duracao } from './plan.js'
 import { LIVRE, REFEICOES } from './dieta.js'
 import { hojeISO, num } from './store.js'
-import { consumo, diaSemana, kcalPatins, kcalTreino, pesoEm } from './gasto.js'
+import { INTENSIDADES, consumo, diaSemana, kcalPatins, kcalTreino, pesoEm } from './gasto.js'
 
 const SEMANA = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom']
 const pad = (n) => String(n).padStart(2, '0')
@@ -17,7 +17,7 @@ function resumo(s, date) {
   const treino = !!log?.feito
   const { refeicoes, extras, kcal, prot } = consumo(s, date)
   const kg = pesoEm(s, date)
-  const gasto = kcalTreino(s, date, kg) + (pat ? kcalPatins(pat.min, kg) || 0 : 0)
+  const gasto = kcalTreino(s, date, kg) + (pat ? kcalPatins(pat, kg) : 0)
   const minutos = (treino ? duracao(plano) : log?.cardio?.min || 0) + (pat?.min || 0)
   return { log, d, pat, plano, treino, refeicoes, extras, kcal, prot, minutos, kg, gasto, ativo: minutos > 0,
     temDieta: refeicoes.length > 0 || extras.length > 0 || !!d?.agua, dietaCompleta: refeicoes.length === REFEICOES.length }
@@ -134,7 +134,7 @@ function Dia({ s, date, onClose }) {
               </Stack>
             ))}
             {r.log?.cardio && <Linha ok titulo={CARDIO[r.plano.cardio?.tipo]?.nome || 'Cardio'} detalhe={`${r.log.cardio.min} min`} />}
-            {r.pat && <Linha ok titulo="Patins" detalhe={`${r.pat.min} min${r.pat.km ? ` · ${num(r.pat.km)} km` : ''}${r.kg ? ` · cerca de ${kcalPatins(r.pat.min, r.kg)} kcal` : ''}`} />}
+            {r.pat && <Linha ok titulo="Patins" detalhe={`${r.pat.min} min${r.pat.km ? ` · ${num(r.pat.km)} km` : ''}${` · ${(INTENSIDADES[r.pat.int] || INTENSIDADES.leve).nome.toLowerCase()} · cerca de ${kcalPatins(r.pat, r.kg)} kcal`}`} />}
             {r.gasto > 0 && <Typography variant="body2" color="text.secondary" sx={{ pl: 4.25, pt: 0.5 }}>Gasto estimado no dia: {r.gasto} kcal</Typography>}
 
             <Divider sx={{ mt: 2 }} />

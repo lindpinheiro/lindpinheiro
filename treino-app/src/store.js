@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import { ORDEM } from './plan.js'
 
 const KEY = 'treino-v2'
-const VAZIO = { logs: {}, peso: [], patins: [], dieta: {}, meta: null }
+const VAZIO = { logs: {}, peso: [], patins: [], dieta: {}, perfil: null, meta: null }
 
 function ler() {
   try {

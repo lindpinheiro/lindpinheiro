@@ -14,6 +14,8 @@ import { br, hojeISO, num, semana, ultima, useStore } from './store.js'
 import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
 import Historico from './Historico.jsx'
+import Balanco from './Balanco.jsx'
+import { kcalPatins, pesoEm } from './gasto.js'
 import { REFEICOES } from './dieta.js'
 
 const CUIDADOS = [
@@ -317,6 +319,9 @@ function Progresso({ s, update, replace }) {
         <Stat v={patinsSem.length} de={3} label="patins" />
       </Box>
 
+      <Titulo>Balanço da semana</Titulo>
+      <Balanco s={s} update={update} />
+
       <Titulo>Peso</Titulo>
       <Card>
         {atual ? (
@@ -346,7 +351,13 @@ function Progresso({ s, update, replace }) {
             slotProps={{ htmlInput: { inputMode: 'decimal', step: 0.1 } }} />
           <IconButton color="primary" aria-label="Adicionar patins" onClick={salvarPatins} sx={{ border: 1, borderColor: 'divider', borderRadius: 3 }}><Plus size={20} /></IconButton>
         </Stack>
-        <Lista itens={[...s.patins].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 5)} texto={(p) => `${p.min} min${p.km ? ` · ${num(p.km)} km` : ''}`}
+        {parseInt(min) > 0 && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+            {pesoEm(s, hoje) ? `Cerca de ${kcalPatins(parseInt(min), pesoEm(s, hoje))} kcal gastas, em ritmo leve.` : 'Registre seu peso para estimar as calorias.'}
+          </Typography>
+        )}
+        <Lista itens={[...s.patins].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 5)}
+          texto={(p) => `${p.min} min${p.km ? ` · ${num(p.km)} km` : ''}${pesoEm(s, p.date) ? ` · ${kcalPatins(p.min, pesoEm(s, p.date))} kcal` : ''}`}
           onDel={(p) => update((n) => { n.patins = n.patins.filter((x) => x.date !== p.date) })} />
       </Card>
 

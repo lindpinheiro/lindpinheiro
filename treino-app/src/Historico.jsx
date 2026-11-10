@@ -2,12 +2,12 @@ import React, { useState } from 'react'
 import { Box, ButtonBase, Dialog, DialogContent, DialogTitle, Divider, IconButton, Paper, Stack, Typography } from '@mui/material'
 import { Check, ChevronLeft, ChevronRight, Minus, X } from 'lucide-react'
 import { CARDIO, PLAN, duracao } from './plan.js'
-import { EXTRAS, LIVRE, REFEICOES } from './dieta.js'
+import { LIVRE, REFEICOES } from './dieta.js'
 import { hojeISO, num } from './store.js'
+import { consumo, diaSemana, kcalPatins, kcalTreino, pesoEm } from './gasto.js'
 
 const SEMANA = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom']
 const pad = (n) => String(n).padStart(2, '0')
-const diaSemana = (date) => new Date(`${date}T12:00:00`).getDay()
 const horas = (min) => (min >= 60 ? `${Math.floor(min / 60)}h${min % 60 ? pad(min % 60) : ''}` : `${min}min`)
 
 // Tudo o que foi registrado em um dia, já resumido.
@@ -15,12 +15,11 @@ function resumo(s, date) {
   const log = s.logs[date], d = s.dieta?.[date], pat = s.patins.find((p) => p.date === date)
   const plano = PLAN[diaSemana(date)]
   const treino = !!log?.feito
-  const refeicoes = REFEICOES.filter((r) => d?.m?.[r.id])
-  const extras = EXTRAS.map((x) => ({ ...x, n: d?.[x.id] || 0 })).filter((x) => x.n)
-  const kcal = refeicoes.reduce((t, r) => t + (d.m[r.id] === 'livre' ? LIVRE.kcal : r.kcal), 0) + extras.reduce((t, x) => t + x.n * x.kcal, 0)
-  const prot = refeicoes.reduce((t, r) => t + (d.m[r.id] === 'livre' ? LIVRE.prot : r.prot), 0)
+  const { refeicoes, extras, kcal, prot } = consumo(s, date)
+  const kg = pesoEm(s, date)
+  const gasto = kcalTreino(s, date, kg) + (pat ? kcalPatins(pat.min, kg) || 0 : 0)
   const minutos = (treino ? duracao(plano) : log?.cardio?.min || 0) + (pat?.min || 0)
-  return { log, d, pat, plano, treino, refeicoes, extras, kcal, prot, minutos, ativo: minutos > 0,
+  return { log, d, pat, plano, treino, refeicoes, extras, kcal, prot, minutos, kg, gasto, ativo: minutos > 0,
     temDieta: refeicoes.length > 0 || extras.length > 0 || !!d?.agua, dietaCompleta: refeicoes.length === REFEICOES.length }
 }
 
@@ -135,7 +134,8 @@ function Dia({ s, date, onClose }) {
               </Stack>
             ))}
             {r.log?.cardio && <Linha ok titulo={CARDIO[r.plano.cardio?.tipo]?.nome || 'Cardio'} detalhe={`${r.log.cardio.min} min`} />}
-            {r.pat && <Linha ok titulo="Patins" detalhe={`${r.pat.min} min${r.pat.km ? ` · ${num(r.pat.km)} km` : ''}`} />}
+            {r.pat && <Linha ok titulo="Patins" detalhe={`${r.pat.min} min${r.pat.km ? ` · ${num(r.pat.km)} km` : ''}${r.kg ? ` · cerca de ${kcalPatins(r.pat.min, r.kg)} kcal` : ''}`} />}
+            {r.gasto > 0 && <Typography variant="body2" color="text.secondary" sx={{ pl: 4.25, pt: 0.5 }}>Gasto estimado no dia: {r.gasto} kcal</Typography>}
 
             <Divider sx={{ mt: 2 }} />
             <Secao>Dieta</Secao>

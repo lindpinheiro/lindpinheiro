@@ -106,4 +106,11 @@ export function duracao(p) {
   return Math.round((AQUECIMENTO * 60 + seg + (p.cardio?.min || 0) * 60) / 300) * 5
 }
 
+// Fotos de início e fim do movimento: free-exercise-db (domínio público), em src/img/<id>.jpg.
+const FOTOS = import.meta.glob('./img/*.jpg', { eager: true, import: 'default' })
+const MESMA_FOTO = { 'hip-thrust-b': 'hip-thrust', 'abdutora-reta': 'abdutora' }
+export const foto = (id) => FOTOS[`./img/${MESMA_FOTO[id] || id}.jpg`]
+// Busca no YouTube pelo nome do exercício, em vez de um vídeo fixo que pode sair do ar.
+export const video = (nome) => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${nome} execução correta`)}`
+
 export const fmtDesc = (s) => (s >= 120 ? `${String(s / 60).replace('.', ',')} min` : `${s} s`)

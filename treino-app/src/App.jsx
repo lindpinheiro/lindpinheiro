@@ -6,10 +6,10 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
-  BookOpen, Check, ChevronDown, Clock, Download, Dumbbell, HeartPulse, History, Moon, Plus, Target, Trash2,
+  BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, HeartPulse, History, Moon, Plus, Target, Trash2,
   TrendingUp, TriangleAlert, Upload, Utensils, Wind, X,
 } from 'lucide-react'
-import { CARDIO, DIAS, PLAN, duracao, fmtDesc } from './plan.js'
+import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video } from './plan.js'
 import { br, hojeISO, num, semana, ultima, useStore } from './store.js'
 import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
@@ -58,7 +58,8 @@ export default function App() {
 function Treino({ s, update, onDescanso }) {
   const hoje = hojeISO()
   const dias = semana()
-  const [date, setDate] = useState(hoje)
+  const [sel, setDate] = useState(hoje)
+  const date = dias.some((d) => d.date === sel) ? sel : hoje // se a semana virar com o app aberto
   const wd = dias.find((d) => d.date === date).wd
   const p = PLAN[wd]
   const log = s.logs[date] || {}
@@ -174,7 +175,11 @@ function Exercicio({ e, n, sets, ant, aberto, onToggle, onCampo, onMarcar, ultim
         {feitas > 0 && !ok && <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>{feitas}/{e.series}</Typography>}
       </AccordionSummary>
       <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
-        {e.nota && <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{e.nota}</Typography>}
+        {aberto && foto(e.id) && (
+          <Box component="img" src={foto(e.id)} alt={`${e.nome}: posição inicial e final`} sx={{ display: 'block', width: '100%', borderRadius: '10px', mb: 1.5 }} />
+        )}
+        {e.nota && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{e.nota}</Typography>}
+        <Button size="small" href={video(e.nome)} target="_blank" rel="noopener" startIcon={<CirclePlay size={18} />} sx={{ mb: 1.5, ml: -0.5 }}>Ver vídeo</Button>
         {ant && (
           <Stack direction="row" spacing={1} sx={{ mb: 1.5, color: 'text.secondary', alignItems: 'center' }}>
             <History size={16} style={{ flexShrink: 0 }} />

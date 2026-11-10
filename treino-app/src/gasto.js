@@ -2,15 +2,16 @@
 // porque o repouso já está no gasto base do dia.
 import { PLAN, duracao } from './plan.js'
 import { EXTRAS, LIVRE, REFEICOES } from './dieta.js'
+import { PESO_INICIAL } from './store.js'
 
 const MET_LIQ = { patins: 5, musculacao: 2.5, esteira: 5, escada: 6, caminhada: 2.3 }
 const kcal = (met, kg, min) => Math.round((met * kg * min) / 60)
 export const diaSemana = (date) => new Date(`${date}T12:00:00`).getDay()
 
-// Peso registrado mais recente até a data; se não houver, o primeiro registrado.
+// Peso registrado mais recente até a data; antes do primeiro registro, o peso inicial.
 export function pesoEm(s, date) {
   const ps = [...s.peso].sort((a, b) => (a.date < b.date ? -1 : 1))
-  return (ps.filter((p) => p.date <= date).at(-1) || ps[0])?.kg ?? null
+  return ps.filter((p) => p.date <= date).at(-1)?.kg ?? PESO_INICIAL
 }
 
 export const kcalPatins = (min, kg) => (kg ? kcal(MET_LIQ.patins, kg, min) : null)

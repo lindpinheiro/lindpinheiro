@@ -2,6 +2,10 @@ import { useCallback, useState } from 'react'
 import { ORDEM } from './plan.js'
 
 const KEY = 'treino-v2'
+// Ponto de partida e objetivo, fixos até a meta ser atingida.
+export const PESO_INICIAL = 117
+export const META = 95
+export const PERFIL_PADRAO = { altura: 179, idade: 33 }
 const VAZIO = { logs: {}, peso: [], patins: [], dieta: {}, perfil: null, meta: null }
 
 function ler() {

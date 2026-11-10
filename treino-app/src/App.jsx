@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, BottomNavigation, BottomNavigationAction, Box, Button,
-  ButtonBase, Chip, Collapse, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton,
+  ButtonBase, Chip, Collapse, Container, IconButton,
   InputAdornment, LinearProgress, List, ListItem, ListItemText, Paper, Stack, TextField, Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
-  BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, HeartPulse, History, Moon, Plus, Target, Trash2,
+  BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, HeartPulse, History, Moon, Plus, Trash2,
   TrendingUp, TriangleAlert, Upload, Utensils, Wind, X,
 } from 'lucide-react'
 import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video } from './plan.js'
-import { br, hojeISO, num, semana, ultima, useStore } from './store.js'
+import { META, PESO_INICIAL, br, hojeISO, iso, num, semana, ultima, useStore } from './store.js'
 import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
 import Historico from './Historico.jsx'
@@ -279,9 +279,9 @@ function Progresso({ s, update, replace }) {
   const cardioMin = dias.reduce((t, d) => t + (s.logs[d.date]?.cardio?.min || 0), 0) + patinsSem.reduce((t, p) => t + p.min, 0)
   const dieta = dias.filter((d) => REFEICOES.every((r) => s.dieta?.[d.date]?.m?.[r.id])).length
   const pesos = [...s.peso].sort((a, b) => (a.date < b.date ? -1 : 1))
-  const atual = pesos.at(-1), dif = pesos.length > 1 ? atual.kg - pesos[0].kg : null
+  const atual = pesos.at(-1)?.kg ?? PESO_INICIAL, dif = atual - PESO_INICIAL
+  const andado = Math.min(100, Math.max(0, ((PESO_INICIAL - atual) / (PESO_INICIAL - META)) * 100))
   const [kg, setKg] = useState(''), [min, setMin] = useState(''), [km, setKm] = useState('')
-  const [dlgMeta, setDlgMeta] = useState(false), [meta, setMeta] = useState('')
   const arquivo = useRef()
 
   const nomes = {}, best = {}
@@ -324,21 +324,22 @@ function Progresso({ s, update, replace }) {
 
       <Titulo>Peso</Titulo>
       <Card>
-        {atual ? (
-          <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="h4" component="div">{num(atual.kg)} <Typography component="span" color="text.secondary">kg</Typography></Typography>
-            {dif !== null && <Typography color={dif <= 0 ? 'success.main' : 'text.secondary'} sx={{ fontWeight: 500 }}>{dif > 0 ? '+' : ''}{num(dif.toFixed(1))} kg</Typography>}
-          </Stack>
-        ) : <Typography color="text.secondary" sx={{ mb: 2 }}>Registre seu peso para acompanhar a evolução.</Typography>}
-        {pesos.length > 1 && <Grafico pesos={pesos} meta={s.meta} />}
+        <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between', mb: 1.5 }}>
+          <Typography variant="h4" component="div">{num(atual)} <Typography component="span" color="text.secondary">kg</Typography></Typography>
+          {dif !== 0 && <Typography color={dif < 0 ? 'success.main' : 'text.secondary'} sx={{ fontWeight: 500 }}>{dif > 0 ? '+' : '− '}{num(Math.abs(dif).toFixed(1))} kg</Typography>}
+        </Stack>
+        <LinearProgress variant="determinate" value={andado} color="success" sx={{ height: 8, borderRadius: 4 }} aria-label="Caminho até a meta" />
+        <Stack direction="row" sx={{ justifyContent: 'space-between', mt: 0.75, mb: 1 }}>
+          <Typography variant="body2" color="text.secondary" noWrap>{PESO_INICIAL} kg</Typography>
+          <Typography variant="body2" color="text.secondary" noWrap>{atual > META ? `Faltam ${num((atual - META).toFixed(1))} kg` : 'Meta atingida'}</Typography>
+          <Typography variant="body2" color="text.secondary" noWrap>{META} kg</Typography>
+        </Stack>
+        {pesos.length > 0 && <Grafico pesos={pesos} meta={META} />}
         <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-          <TextField size="small" type="number" label="Peso de hoje" value={kg} onChange={(e) => setKg(e.target.value)} sx={{ flex: 1 }}
+          <TextField size="small" type="number" label="Peso atual" value={kg} onChange={(e) => setKg(e.target.value)} sx={{ flex: 1 }}
             slotProps={{ htmlInput: { inputMode: 'decimal', step: 0.1 }, input: { endAdornment: <InputAdornment position="end">kg</InputAdornment> } }} />
           <Button variant="contained" onClick={salvarPeso}>Salvar</Button>
         </Stack>
-        <Button size="small" startIcon={<Target size={16} />} sx={{ mt: 1 }} onClick={() => { setMeta(s.meta ?? ''); setDlgMeta(true) }}>
-          {s.meta ? `Meta: ${num(s.meta)} kg` : 'Definir meta'}
-        </Button>
         <Lista itens={[...pesos].reverse().slice(0, 5)} texto={(p) => `${num(p.kg)} kg`} onDel={(p) => update((n) => { n.peso = n.peso.filter((x) => x.date !== p.date) })} />
       </Card>
 
@@ -384,17 +385,6 @@ function Progresso({ s, update, replace }) {
         <input ref={arquivo} type="file" accept="application/json" hidden onChange={importar} />
       </Card>
 
-      <Dialog open={dlgMeta} onClose={() => setDlgMeta(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Meta de peso</DialogTitle>
-        <DialogContent>
-          <TextField autoFocus fullWidth type="number" value={meta} onChange={(e) => setMeta(e.target.value)} sx={{ mt: 1 }}
-            slotProps={{ htmlInput: { inputMode: 'decimal', 'aria-label': 'Meta de peso' }, input: { endAdornment: <InputAdornment position="end">kg</InputAdornment> } }} />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setDlgMeta(false)}>Cancelar</Button>
-          <Button variant="contained" onClick={() => { const v = parseFloat(meta); update((n) => { n.meta = v > 30 && v < 400 ? v : null }); setDlgMeta(false) }}>Salvar</Button>
-        </DialogActions>
-      </Dialog>
     </>
   )
 }
@@ -414,7 +404,10 @@ function Lista({ itens, texto, onDel }) {
   )
 }
 
-function Grafico({ pesos, meta }) {
+function Grafico({ pesos: registros, meta }) {
+  // O primeiro ponto é o peso inicial, um dia antes do primeiro registro.
+  const d0 = new Date(`${registros[0].date}T12:00:00`); d0.setDate(d0.getDate() - 1)
+  const pesos = registros[0].kg === PESO_INICIAL && registros.length > 1 ? registros : [{ date: iso(d0), kg: PESO_INICIAL }, ...registros]
   const t = useTheme()
   const W = 560, H = 180, L = 8, R = 8, T = 12, B = 28
   const vals = pesos.map((p) => p.kg).concat(meta ? [meta] : [])

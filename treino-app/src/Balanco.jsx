@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Button, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
 import { consumo, gastoBase, kcalPatins, kcalTreino, pesoEm } from './gasto.js'
-import { hojeISO, num, semana } from './store.js'
+import { PERFIL_PADRAO, hojeISO, num, semana } from './store.js'
 
 const fmt = (n) => Math.round(n).toLocaleString('pt-BR')
 
@@ -10,9 +10,9 @@ function Perfil({ perfil, onSalvar }) {
   const ok = altura > 100 && altura < 250 && idade > 10 && idade < 110
   return (
     <>
-      <Typography color="text.secondary" sx={{ mb: 2 }}>Para estimar quanto seu corpo gasta por dia, informe altura e idade. Fica salvo só neste aparelho.</Typography>
+      <Typography color="text.secondary" sx={{ mb: 2 }}>Altura e idade entram na estimativa de quanto seu corpo gasta por dia.</Typography>
       <Stack direction="row" spacing={1}>
-        <TextField size="small" type="number" label="Altura (cm)" value={altura} onChange={(e) => setAltura(e.target.value)} sx={{ flex: 1 }} slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+        <TextField size="small" type="number" label="Altura, cm" value={altura} onChange={(e) => setAltura(e.target.value)} sx={{ flex: 1 }} slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
         <TextField size="small" type="number" label="Idade" value={idade} onChange={(e) => setIdade(e.target.value)} sx={{ flex: 1 }} slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
         <Button variant="contained" disabled={!ok} onClick={() => onSalvar({ altura: +altura, idade: +idade })}>Salvar</Button>
       </Stack>
@@ -23,16 +23,15 @@ function Perfil({ perfil, onSalvar }) {
 export default function Balanco({ s, update }) {
   const hoje = hojeISO()
   const [editando, setEditando] = useState(false)
-  const kgHoje = pesoEm(s, hoje)
   const card = (conteudo) => <Paper sx={{ p: 2, border: 1, borderColor: 'divider' }}>{conteudo}</Paper>
 
-  if (!kgHoje) return card(<Typography color="text.secondary">Registre seu peso abaixo para ver quanto você gasta e como treino e patins pesam na dieta.</Typography>)
-  if (!s.perfil || editando) return card(<Perfil perfil={s.perfil} onSalvar={(p) => { update((n) => { n.perfil = p }); setEditando(false) }} />)
+  const perfil = s.perfil || PERFIL_PADRAO
+  if (editando) return card(<Perfil perfil={perfil} onSalvar={(p) => { update((n) => { n.perfil = p }); setEditando(false) }} />)
 
   // Só entram os dias com as três refeições marcadas: refeição não marcada contaria como zero.
   const dias = semana().filter((d) => d.date <= hoje).map((d) => {
     const kg = pesoEm(s, d.date), c = consumo(s, d.date), pat = s.patins.find((p) => p.date === d.date)
-    return { ...d, c, base: gastoBase(kg, s.perfil), treino: kcalTreino(s, d.date, kg), patins: pat ? kcalPatins(pat.min, kg) : 0 }
+    return { ...d, c, base: gastoBase(kg, perfil), treino: kcalTreino(s, d.date, kg), patins: pat ? kcalPatins(pat.min, kg) : 0 }
   })
   const cont = dias.filter((d) => d.c.completa)
   const soma = (f) => cont.reduce((t, d) => t + f(d), 0)
@@ -74,7 +73,7 @@ export default function Balanco({ s, update }) {
       <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
         Conta {cont.length} de {dias.length} {dias.length === 1 ? 'dia' : 'dias'} da semana: só os que têm as três refeições marcadas. Valores estimados.
       </Typography>
-      <Button size="small" sx={{ mt: 0.5, ml: -0.5 }} onClick={() => setEditando(true)}>Altura e idade</Button>
+      <Button size="small" sx={{ mt: 0.5, ml: -0.5 }} onClick={() => setEditando(true)}>Alterar altura e idade</Button>
     </>,
   )
 }

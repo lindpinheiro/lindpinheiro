@@ -30,7 +30,7 @@ const SECOES = [
   ) },
   { id: 'hora', icone: Clock, titulo: 'Treino em 1 hora', corpo: (
     <Itens>
-      <li><b>5 min de aquecimento</b> na esteira ou bicicleta, leve.</li>
+      <li><b>5 min de aquecimento</b>: 2 a 3 min de cardio leve e movimentos para soltar as articulações. A lista está no topo de cada treino.</li>
       <li><b>35–45 min de musculação</b>: 5 ou 6 exercícios. Respeite o cronômetro de descanso — é ele que mantém o treino dentro do tempo.</li>
       <li><b>6–12 min de cardio</b> para fechar.</li>
       <li>Cada dia leva de {Math.min(...ORDEM.filter((d) => d).map((d) => duracao(PLAN[d])))} a {Math.max(...ORDEM.map((d) => duracao(PLAN[d])))} minutos. Com a academia cheia, troque o aparelho ocupado pelo próximo da lista e volte depois.</li>
@@ -104,6 +104,8 @@ const SECOES = [
     <Itens>
       <li><b>2 a 3 vezes por semana, 30–45 min</b>, em ritmo de conversa.</li>
       <li>Dias sugeridos: terça, quinta e domingo. Nesses dias o cardio da academia é opcional.</li>
+      <li><b>Antes de andar</b>: 5 min soltando quadril e tornozelo. <b>Depois</b>: 5 min de alongamento parado. As duas rotinas estão na aba Treino, nos dias de patins.</li>
+      <li><b>O que mais melhora o patins na academia</b>: subida no banco (quarta) e cadeiras abdutora e adutora (quarta e sábado). Elas treinam o empurrar para o lado e o puxar de volta de cada passada.</li>
       <li>Capacete, munhequeira e joelheira sempre.</li>
     </Itens>
   ) },

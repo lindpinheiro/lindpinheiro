@@ -16,6 +16,8 @@ import Dieta from './Dieta.jsx'
 import Historico from './Historico.jsx'
 import Balanco from './Balanco.jsx'
 import Periodo from './Periodo.jsx'
+import Aquecimento, { ListaAquec, RotinaPatins } from './Aquecimento.jsx'
+import { AQUEC, aquecDoDia } from './aquecimento.js'
 import { INTENSIDADES, gastoTreino, intensidadeCardio, kcalCardio, kcalPatins, pesoEm } from './gasto.js'
 import { REFEICOES } from './dieta.js'
 
@@ -117,11 +119,15 @@ function Treino({ s, update, onDescanso }) {
       <Typography variant="h4" sx={{ mt: 3 }}>{p.titulo}</Typography>
 
       {p.descanso ? (
+        <>
         <Card sx={{ mt: 2, textAlign: 'center', py: 5 }}>
           <Box sx={{ color: 'text.secondary', mb: 1 }}><Moon size={32} /></Box>
           <Typography variant="subtitle1">Hoje o corpo se recupera</Typography>
           <Typography color="text.secondary" sx={{ mt: 0.5 }}>Se der vontade, 30–40 min de patins em ritmo leve.</Typography>
         </Card>
+        <Typography variant="h6" sx={{ mt: 4, mb: 1.5 }}>Rotina do patins</Typography>
+        <RotinaPatins />
+        </>
       ) : (
         <>
           <Stack direction="row" spacing={1} sx={{ mt: 1.5, mb: 2, alignItems: 'center', '& .MuiChip-icon': { ml: 1 } }}>
@@ -142,6 +148,8 @@ function Treino({ s, update, onDescanso }) {
             </Alert>
           )}
 
+          <Aquecimento key={`aq-${date}`} itens={aquecDoDia(p)} feitos={log.aq} onMarcar={(id, v) => editar((l) => { (l.aq ??= {})[id] = v })} />
+
           <Paper sx={{ border: 1, borderColor: 'divider', overflow: 'hidden' }}>
             {p.ex.map((e, i) => (
               <Exercicio key={e.id} e={e} n={i + 1} sets={log.ex?.[e.id] || []} ant={ultima(s.logs, e.id, date)}
@@ -151,7 +159,19 @@ function Treino({ s, update, onDescanso }) {
             ))}
           </Paper>
 
-          <Cardio key={date} c={p.cardio} log={log.cardio} patins={p.patins} kg={pesoEm(s, date)} onSalvar={(v) => editar((l) => { l.cardio = v })} />
+          <Cardio key={`cardio-${date}`} c={p.cardio} log={log.cardio} patins={p.patins} kg={pesoEm(s, date)} onSalvar={(v) => editar((l) => { l.cardio = v })} />
+
+          {(p.perna || p.patins) && (
+            <>
+              <Typography variant="h6" sx={{ mt: 4, mb: 1.5 }}>{p.perna ? 'Alongamento no fim' : 'Rotina do patins'}</Typography>
+              {p.perna ? (
+                <Card sx={{ py: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ pt: 0.5, pb: 1 }}>Depois da caminhada, 30 s cada. Melhora a mobilidade para o patins.</Typography>
+                  <ListaAquec itens={AQUEC.depois} />
+                </Card>
+              ) : <RotinaPatins />}
+            </>
+          )}
 
           <Button fullWidth size="large" sx={{ mt: 3 }} variant={log.feito ? 'outlined' : 'contained'} color={log.feito ? 'success' : 'primary'}
             startIcon={log.feito && <Check size={20} />}

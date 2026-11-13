@@ -76,7 +76,7 @@ export const PLAN = {
       E('encolh-barra', 'Encolhimento com barra', 3, '8–12', 75, 'Barra ou Smith. Mais pesado que na terça.'),
       E('crucifixo-inv', 'Crucifixo inverso', 3, '12–15', 45, 'Máquina ou halteres.'),
       E('rosca-inversa', 'Rosca inversa', 3, '12–15', 45, 'Pegada por cima. Trabalha o antebraço.'),
-      E('farmer', 'Caminhada do fazendeiro', 2, '30–40 s', 60, 'Halteres pesados, ande reto. Anote os segundos em "reps".'),
+      E('rosca-punho-inv', 'Rosca de punho invertida', 2, '15–20', 45, 'Antebraço apoiado no banco, palmas para baixo. Só o punho sobe.'),
     ],
   },
   6: {

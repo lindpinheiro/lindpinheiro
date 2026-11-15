@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Button, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
 import { Dumbbell, Wind } from 'lucide-react'
-import { DIAS, PLAN } from './plan.js'
+import { DIAS, planoDe } from './plan.js'
 import { INTENSIDADES, consumo, diaSemana, gastoBase, gastoTreino, kcalPatins, pesoEm } from './gasto.js'
 import { PERFIL_PADRAO, hojeISO, num, semana } from './store.js'
 
@@ -43,7 +43,7 @@ export default function Balanco({ s, update }) {
   })
   // Atividades da semana, todas, com o gasto de cada uma.
   const atividades = dias.flatMap((d) => [
-    d.treino.total > 0 && { id: `t${d.date}`, icone: Dumbbell, dia: DIAS[d.wd], nome: PLAN[diaSemana(d.date)].titulo,
+    d.treino.total > 0 && { id: `t${d.date}`, icone: Dumbbell, dia: DIAS[d.wd], nome: planoDe(s.logs, d.date).titulo,
       detalhe: [d.treino.series && `${d.treino.series} ${d.treino.series === 1 ? 'série' : 'séries'}`, d.treino.volume && `${fmt(d.treino.volume)} kg levantados`, d.treino.cardio && `cardio ${d.treino.cardio} kcal`].filter(Boolean).join(' · '), kcal: d.treino.total },
     d.pat && { id: `p${d.date}`, icone: Wind, dia: DIAS[d.wd], nome: 'Patins', detalhe: `${d.pat.min} min · ${(INTENSIDADES[d.pat.int] || INTENSIDADES.leve).nome.toLowerCase()}`, kcal: d.patins },
   ]).filter(Boolean)

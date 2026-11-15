@@ -1,6 +1,6 @@
 // Estimativas de gasto calórico. Todas usam o gasto ACIMA do repouso (MET − 1),
 // porque o repouso já está no gasto base do dia.
-import { PLAN, duracao } from './plan.js'
+import { duracao, planoDe } from './plan.js'
 import { EXTRAS, LIVRE, REFEICOES, valores } from './dieta.js'
 import { PESO_INICIAL } from './store.js'
 
@@ -35,7 +35,7 @@ export const kcalPatins = (p, kg) => kcal((INTENSIDADES[p.int] || INTENSIDADES.l
 // Gasto do treino a partir do que foi registrado: tempo das séries marcadas (execução + descanso),
 // peso do corpo e volume levantado (carga × repetições). Sem séries marcadas, usa a duração planejada.
 export function gastoTreino(s, date, kg) {
-  const log = s.logs[date], p = PLAN[diaSemana(date)]
+  const log = s.logs[date], p = planoDe(s.logs, date)
   const r = { series: 0, volume: 0, minutos: 0, musculacao: 0, cardio: 0, total: 0 }
   if (!log) return r
   let seg = 0

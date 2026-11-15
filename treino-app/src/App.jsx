@@ -82,7 +82,7 @@ function Reposicao({ s, dias, hoje, onEscolher }) {
   const texto = boas.length
     ? `Você pode repor um hoje.${evitar.length ? ` ${evitar.length > 1 ? 'Os' : 'O'} de ${evitar.map((d) => NOME_DIA[d.wd]).join(' e ')} não ${evitar.length > 1 ? 'entram' : 'entra'}: amanhã já é ${GRUPO[AMANHA.grupo]}.` : ''}`
     : faltou.length
-      ? `O treino que ficou para trás é de ${GRUPO[AMANHA.grupo]}, e amanhã você treina ${GRUPO[AMANHA.grupo]} de novo. Não precisa repor: a semana segue normal a partir de segunda.`
+      ? `${faltou.length > 1 ? 'Os treinos que ficaram para trás são' : 'O treino que ficou para trás é'} de ${GRUPO[AMANHA.grupo]}, e amanhã você treina ${GRUPO[AMANHA.grupo]} de novo. Não precisa repor: a semana segue normal a partir de segunda.`
       : 'Nenhum treino ficou para trás. Se quiser, dá para fazer um extra.'
   return (
     <Card sx={{ mt: 2 }}>

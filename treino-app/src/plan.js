@@ -98,6 +98,12 @@ export const PLAN = {
 }
 
 export const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+
+// Treino de uma data. No domingo, se um treino da semana foi reposto, logs[data].repoe guarda o dia (1–6).
+export function planoDe(logs, date) {
+  const repoe = logs?.[date]?.repoe
+  return repoe ? { ...PLAN[repoe], repoe } : PLAN[new Date(`${date}T12:00:00`).getDay()]
+}
 export const ORDEM = [1, 2, 3, 4, 5, 6, 0]
 export const AQUECIMENTO = 5
 

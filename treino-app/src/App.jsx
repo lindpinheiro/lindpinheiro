@@ -9,7 +9,7 @@ import {
   BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, Flame, HeartPulse, History, Moon, Plus, Trash2,
   TrendingUp, TriangleAlert, Upload, Utensils, Wind, X,
 } from 'lucide-react'
-import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video } from './plan.js'
+import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video, planoDe } from './plan.js'
 import { META, PESO_INICIAL, br, hojeISO, iso, num, semana, ultima, useStore } from './store.js'
 import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
@@ -61,13 +61,48 @@ export default function App() {
 
 /* ---------- Treino ---------- */
 
+// Domingo: escolher um treino da semana para repor.
+function Reposicao({ s, dias, hoje, onEscolher }) {
+  const semana = dias.filter((d) => d.wd !== 0)
+  const faltou = semana.filter((d) => !s.logs[d.date]?.feito && d.date < hoje)
+  const lista = [...faltou, ...semana.filter((d) => !faltou.includes(d))]
+  const [todos, setTodos] = useState(false)
+  const visiveis = todos || !faltou.length ? lista : faltou
+  return (
+    <Card sx={{ mt: 2 }}>
+      <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{faltou.length ? 'Faltou algum treino?' : 'Semana completa'}</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        {faltou.length
+          ? `Você pode repor hoje. ${faltou.length === 1 ? 'Ficou faltando 1 treino' : `Ficaram faltando ${faltou.length} treinos`}; escolha um.`
+          : 'Nenhum treino ficou para trás. Se quiser, dá para fazer um extra.'}
+      </Typography>
+      {(faltou.length || todos) ? visiveis.map((d) => {
+        const plano = PLAN[d.wd], feito = !!s.logs[d.date]?.feito
+        return (
+          <Stack key={d.date} direction="row" spacing={1.5} sx={{ py: 1, borderTop: 1, borderColor: 'divider', alignItems: 'center' }}>
+            <Typography color="primary" sx={{ width: 36, fontWeight: 600 }}>{DIAS[d.wd]}</Typography>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography sx={{ lineHeight: 1.3 }}>{plano.titulo}</Typography>
+              <Typography variant="body2" color={feito ? 'success.main' : 'text.secondary'}>{feito ? 'Feito' : d.date < hoje ? 'Faltou' : 'Ainda não'} · {duracao(plano)} min</Typography>
+            </Box>
+            <Button size="small" variant={feito ? 'text' : 'outlined'} onClick={() => onEscolher(d.wd)}>Fazer</Button>
+          </Stack>
+        )
+      }) : null}
+      {!todos && (
+        <Button size="small" sx={{ mt: 0.5, ml: -0.5 }} onClick={() => setTodos(true)}>{faltou.length ? 'Ver todos os treinos' : 'Escolher um treino extra'}</Button>
+      )}
+    </Card>
+  )
+}
+
 function Treino({ s, update, onDescanso }) {
   const hoje = hojeISO()
   const dias = semana()
   const [sel, setDate] = useState(hoje)
   const date = dias.some((d) => d.date === sel) ? sel : hoje // se a semana virar com o app aberto
   const wd = dias.find((d) => d.date === date).wd
-  const p = PLAN[wd]
+  const p = planoDe(s.logs, date)
   const log = s.logs[date] || {}
   const feitas = p.ex.reduce((t, e) => t + (log.ex?.[e.id] || []).filter((x) => x?.ok).length, 0)
   const total = p.ex.reduce((t, e) => t + e.series, 0)
@@ -75,7 +110,7 @@ function Treino({ s, update, onDescanso }) {
   const [aberto, setAberto] = useState(null)
   const [cuidados, setCuidados] = useState(false)
   const gasto = gastoTreino(s, date, pesoEm(s, date))
-  useEffect(() => { setAberto(p.ex.find((e) => !completo(e))?.id ?? null) }, [date]) // eslint-disable-line
+  useEffect(() => { setAberto(p.ex.find((e) => !completo(e))?.id ?? null) }, [date, p.repoe]) // eslint-disable-line
 
   const editar = (fn) => update((n) => { const l = (n.logs[date] ??= { ex: {} }); l.ex ??= {}; fn(l) })
   const marcar = (e, k, sugestao) => {
@@ -118,8 +153,19 @@ function Treino({ s, update, onDescanso }) {
 
       <Typography variant="h4" sx={{ mt: 3 }}>{p.titulo}</Typography>
 
+      {p.repoe && (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
+          <Typography color="text.secondary" sx={{ flex: 1 }}>Reposição do treino de {DIAS[p.repoe].toLowerCase()}</Typography>
+          <Button size="small" onClick={() => {
+            if (feitas && !confirm('Trocar o treino de hoje? As séries já marcadas ficam salvas, mas deixam de aparecer aqui.')) return
+            editar((l) => { delete l.repoe; l.feito = false }); onDescanso(0)
+          }}>Trocar</Button>
+        </Stack>
+      )}
+
       {p.descanso ? (
         <>
+        <Reposicao s={s} dias={dias} hoje={hoje} onEscolher={(d) => editar((l) => { l.repoe = d })} />
         <Card sx={{ mt: 2, textAlign: 'center', py: 5 }}>
           <Box sx={{ color: 'text.secondary', mb: 1 }}><Moon size={32} /></Box>
           <Typography variant="subtitle1">Hoje o corpo se recupera</Typography>

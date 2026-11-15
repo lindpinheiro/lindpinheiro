@@ -35,6 +35,7 @@ const SECOES = [
       <li><b>6–12 min de cardio</b> para fechar.</li>
       <li>Cada dia leva de {Math.min(...ORDEM.filter((d) => d).map((d) => duracao(PLAN[d])))} a {Math.max(...ORDEM.map((d) => duracao(PLAN[d])))} minutos. Com a academia cheia, troque o aparelho ocupado pelo próximo da lista e volte depois.</li>
       <li>Sem tempo? Corte o último exercício, nunca o primeiro.</li>
+      <li><b>Faltou um dia?</b> No domingo, a aba Treino mostra os treinos que ficaram para trás e deixa repor um deles. Um só: o domingo continua sendo o dia de recuperar.</li>
     </Itens>
   ) },
   { id: 'cardio', icone: HeartPulse, titulo: 'Cardio na academia', corpo: (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, ButtonBase, Dialog, DialogContent, DialogTitle, Divider, IconButton, Paper, Stack, Typography } from '@mui/material'
 import { Check, ChevronLeft, ChevronRight, Minus, X } from 'lucide-react'
-import { CARDIO, PLAN, duracao } from './plan.js'
+import { CARDIO, PLAN, duracao, planoDe } from './plan.js'
 import { LIVRE, REFEICOES, opcao, valores } from './dieta.js'
 import { hojeISO, num } from './store.js'
 import { INTENSIDADES, consumo, diaSemana, intensidadeCardio, kcalCardio, kcalPatins, kcalTreino, pesoEm } from './gasto.js'
@@ -13,7 +13,7 @@ const horas = (min) => (min >= 60 ? `${Math.floor(min / 60)}h${min % 60 ? pad(mi
 // Tudo o que foi registrado em um dia, já resumido.
 function resumo(s, date) {
   const log = s.logs[date], d = s.dieta?.[date], pat = s.patins.find((p) => p.date === date)
-  const plano = PLAN[diaSemana(date)]
+  const plano = planoDe(s.logs, date)
   const treino = !!log?.feito
   const { refeicoes, extras, kcal, prot } = consumo(s, date)
   const kg = pesoEm(s, date)

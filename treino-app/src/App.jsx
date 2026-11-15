@@ -16,8 +16,8 @@ import Dieta from './Dieta.jsx'
 import Historico from './Historico.jsx'
 import Balanco from './Balanco.jsx'
 import Periodo from './Periodo.jsx'
-import Aquecimento, { ListaAquec, RotinaPatins } from './Aquecimento.jsx'
-import { AQUEC, aquecDoDia } from './aquecimento.js'
+import Aquecimento, { AlongamentoFim, RotinaPatins } from './Aquecimento.jsx'
+import { aquecDoDia } from './aquecimento.js'
 import { INTENSIDADES, gastoTreino, intensidadeCardio, kcalCardio, kcalPatins, pesoEm } from './gasto.js'
 import { REFEICOES } from './dieta.js'
 
@@ -125,8 +125,7 @@ function Treino({ s, update, onDescanso }) {
           <Typography variant="subtitle1">Hoje o corpo se recupera</Typography>
           <Typography color="text.secondary" sx={{ mt: 0.5 }}>Se der vontade, 30–40 min de patins em ritmo leve.</Typography>
         </Card>
-        <Typography variant="h6" sx={{ mt: 4, mb: 1.5 }}>Rotina do patins</Typography>
-        <RotinaPatins />
+        <RotinaPatins sx={{ mt: 2 }} />
         </>
       ) : (
         <>
@@ -161,17 +160,7 @@ function Treino({ s, update, onDescanso }) {
 
           <Cardio key={`cardio-${date}`} c={p.cardio} log={log.cardio} patins={p.patins} kg={pesoEm(s, date)} onSalvar={(v) => editar((l) => { l.cardio = v })} />
 
-          {(p.perna || p.patins) && (
-            <>
-              <Typography variant="h6" sx={{ mt: 4, mb: 1.5 }}>{p.perna ? 'Alongamento no fim' : 'Rotina do patins'}</Typography>
-              {p.perna ? (
-                <Card sx={{ py: 1 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ pt: 0.5, pb: 1 }}>Depois da caminhada, 30 s cada. Melhora a mobilidade para o patins.</Typography>
-                  <ListaAquec itens={AQUEC.depois} />
-                </Card>
-              ) : <RotinaPatins />}
-            </>
-          )}
+          {p.perna ? <AlongamentoFim sx={{ mt: 2 }} /> : p.patins && <RotinaPatins sx={{ mt: 2 }} />}
 
           <Button fullWidth size="large" sx={{ mt: 3 }} variant={log.feito ? 'outlined' : 'contained'} color={log.feito ? 'success' : 'primary'}
             startIcon={log.feito && <Check size={20} />}

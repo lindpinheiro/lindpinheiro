@@ -19,6 +19,7 @@ export const CARDIO = {
 export const PLAN = {
   1: {
     titulo: 'Peito, ombro e tríceps',
+    grupo: 'peito',
     cardio: { tipo: 'esteira', min: 12 },
     ex: [
       E('supino-reto', 'Supino reto', 4, '6–10', 120, 'Escápulas juntas, peito alto. Desça em 2–3 s até o peito e pause 1 s.'),
@@ -31,6 +32,7 @@ export const PLAN = {
   },
   2: {
     titulo: 'Costas, trapézio e antebraço',
+    grupo: 'costas',
     cardio: { tipo: 'escada', min: 12 },
     patins: true,
     ex: [
@@ -44,6 +46,7 @@ export const PLAN = {
   },
   3: {
     titulo: 'Glúteo e posterior',
+    grupo: 'perna',
     perna: true,
     cardio: { tipo: 'caminhada', min: 8 },
     ex: [
@@ -57,6 +60,7 @@ export const PLAN = {
   },
   4: {
     titulo: 'Peito superior, ombro e braços',
+    grupo: 'peito',
     cardio: { tipo: 'escada', min: 10 },
     patins: true,
     ex: [
@@ -70,6 +74,7 @@ export const PLAN = {
   },
   5: {
     titulo: 'Costas, trapézio e antebraço',
+    grupo: 'costas',
     cardio: { tipo: 'esteira', min: 12 },
     ex: [
       E('remada-maq', 'Remada articulada', 4, '8–12', 90, 'Na máquina, com o peito apoiado.'),
@@ -82,6 +87,7 @@ export const PLAN = {
   },
   6: {
     titulo: 'Glúteo e quadríceps',
+    grupo: 'perna',
     perna: true,
     cardio: { tipo: 'caminhada', min: 6 },
     ex: [

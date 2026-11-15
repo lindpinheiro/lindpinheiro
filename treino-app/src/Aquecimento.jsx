@@ -34,7 +34,7 @@ export function ListaAquec({ itens, feitos, onMarcar }) {
 // Cartão recolhível de aquecimento no topo do treino.
 export default function Aquecimento({ itens, feitos, onMarcar }) {
   const n = itens.filter((a) => feitos?.[a.id]).length, completo = n === itens.length
-  const [aberto, setAberto] = useState(!completo)
+  const [aberto, setAberto] = useState(false) // opcional: só abre quando tocado
   return (
     <Paper sx={{ border: 1, borderColor: 'divider', overflow: 'hidden', mb: 2 }}>
       <Accordion square expanded={aberto} onChange={() => setAberto(!aberto)}>
@@ -45,7 +45,7 @@ export default function Aquecimento({ itens, feitos, onMarcar }) {
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Aquecimento</Typography>
-            <Typography variant="body2" color="text.secondary">5 min · {n}/{itens.length}</Typography>
+            <Typography variant="body2" color="text.secondary">5 min · opcional{n ? ` · ${n}/${itens.length}` : ''}</Typography>
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{ px: 2, pt: 0, pb: 1 }}>
@@ -56,13 +56,18 @@ export default function Aquecimento({ itens, feitos, onMarcar }) {
   )
 }
 
-// Cartão com as rotinas do patins: antes (dinâmico) e depois (estático), cada uma recolhível.
-export function RotinaPatins({ sx }) {
+const PATINS = [
+  { id: 'antes', titulo: 'Antes do patins', sub: '5 min · opcional · solta quadril e tornozelo', itens: AQUEC.antesPatins },
+  { id: 'depois', titulo: 'Depois do patins', sub: '5 min · opcional · alongamento parado', itens: AQUEC.depois },
+]
+const FIM_PERNA = [{ id: 'fim', titulo: 'Alongamento no fim', sub: '5 min · opcional · depois da caminhada', itens: AQUEC.depois }]
+
+// Rotinas opcionais de alongamento, sempre fechadas até serem tocadas.
+export function RotinaPatins({ sx }) { return <Rotinas secoes={PATINS} sx={sx} /> }
+export function AlongamentoFim({ sx }) { return <Rotinas secoes={FIM_PERNA} sx={sx} /> }
+
+function Rotinas({ secoes, sx }) {
   const [aberto, setAberto] = useState(null)
-  const secoes = [
-    { id: 'antes', titulo: 'Antes do patins', sub: '5 min · solta quadril e tornozelo', itens: AQUEC.antesPatins },
-    { id: 'depois', titulo: 'Depois do patins', sub: '5 min · alongamento parado', itens: AQUEC.depois },
-  ]
   return (
     <Paper sx={{ border: 1, borderColor: 'divider', overflow: 'hidden', ...sx }}>
       {secoes.map((x, i) => (

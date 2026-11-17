@@ -68,17 +68,17 @@ function Peso({ s, update }) {
           <Typography variant="body2" color="text.secondary">Peso atual</Typography>
           <Typography variant="h4" component="div">{num(atual)} <Typography component="span" color="text.secondary">kg</Typography></Typography>
           <Typography variant="body2" color={dif < 0 ? 'success.main' : 'text.secondary'} sx={{ fontWeight: dif < 0 ? 500 : 400 }}>
-            {dif === 0 ? 'Ponto de partida' : `${dif > 0 ? '+' : '−'} ${num(Math.abs(dif).toFixed(1))} kg desde o início`}
+            {dif === 0 ? 'Ponto de partida' : `${dif > 0 ? '+' : '−'} ${num(Math.abs(dif).toFixed(1))} kg no total`}
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<Scale size={18} />} onClick={() => setDlg(true)}>Registrar</Button>
+        <Button variant="contained" size="small" startIcon={<Scale size={16} />} onClick={() => setDlg(true)} sx={{ flexShrink: 0 }}>Registrar</Button>
       </Stack>
 
       <LinearProgress variant="determinate" value={andado} color="success" sx={{ height: 8, borderRadius: 4, mt: 2 }} aria-label="Caminho até a meta" />
       <Stack direction="row" sx={{ justifyContent: 'space-between', mt: 0.75 }}>
-        <Typography variant="body2" color="text.secondary" noWrap>{PESO_INICIAL} kg</Typography>
-        <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>{atual > META ? `Faltam ${num((atual - META).toFixed(1))} kg` : 'Meta atingida'}</Typography>
-        <Typography variant="body2" color="text.secondary" noWrap>Meta {META} kg</Typography>
+        <Typography variant="caption" color="text.secondary">{PESO_INICIAL} kg</Typography>
+        <Typography variant="caption" sx={{ fontWeight: 600 }}>{atual > META ? `Faltam ${num((atual - META).toFixed(1))} kg` : 'Meta atingida'}</Typography>
+        <Typography variant="caption" color="text.secondary">Meta {META} kg</Typography>
       </Stack>
       {dias != null && dias >= 7 && <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>Último registro há {dias} dias. Que tal se pesar?</Typography>}
       {!ultimo && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Registre seu peso uma vez por semana, de manhã e em jejum.</Typography>}
@@ -138,7 +138,7 @@ function Patins({ s, update }) {
             {naSemana.length}/3 na semana{kcalSem ? ` · ${kcalSem.toLocaleString('pt-BR')} kcal` : ''}
           </Typography>
         </Box>
-        <Button variant="outlined" startIcon={<Plus size={18} />} onClick={() => setDlg(true)}>Registrar</Button>
+        <Button variant="outlined" size="small" startIcon={<Plus size={16} />} onClick={() => setDlg(true)} sx={{ flexShrink: 0 }}>Registrar</Button>
       </Stack>
       {lista.length > 0 && (
         <>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, IconButton, LinearProgress, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, ButtonBase, Chip, IconButton, LinearProgress, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { Apple, Beef, Check, ChevronDown, Cookie, IceCreamBowl, Droplets, Flame, Minus, Pizza, Plus, Timer } from 'lucide-react'
 import { AGUA_META, DIAS_JEJUM, EXTRAS, LIVRES_SEMANA, opcao, JANELA, REFEICOES, TOTAL } from './dieta.js'
 import { hojeISO, iso, semana } from './store.js'
@@ -120,13 +120,14 @@ export default function Dieta({ s, update }) {
           const podeLivre = r.podeLivre && livres < LIVRES_SEMANA
           const op = opcao(r, dia), item = op || r
           return (
-            <Accordion key={r.id} square expanded={aberto === r.id} onChange={() => setAberto(aberto === r.id ? null : r.id)}
-              sx={{ borderBottom: i < REFEICOES.length - 1 ? 1 : 0, borderColor: 'divider' }}>
-              <AccordionSummary expandIcon={<ChevronDown size={20} />} sx={{ px: 2, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.5, my: 1.5 } }}>
-                <Box sx={{ width: 32, height: 32, flexShrink: 0, borderRadius: '50%', display: 'grid', placeItems: 'center',
-                  bgcolor: ok ? 'success.main' : 'action.hover', color: ok ? 'success.contrastText' : 'text.secondary', fontSize: 14, fontWeight: 600 }}>
-                  {livre ? <Pizza size={18} /> : ok ? <Check size={18} /> : i + 1}
-                </Box>
+            <Stack key={r.id} direction="row" sx={{ alignItems: 'flex-start', borderBottom: i < REFEICOES.length - 1 ? 1 : 0, borderColor: 'divider' }}>
+            <ButtonBase onClick={() => marcar(r, ok ? false : true)} aria-label={`${r.nome}: ${ok ? 'desmarcar' : 'marcar como feita'}`} aria-pressed={ok}
+              sx={{ width: 36, height: 36, flexShrink: 0, ml: 1.5, mt: 1.5, borderRadius: '50%', border: 1.5,
+                borderColor: ok ? 'success.main' : 'divider', bgcolor: ok ? 'success.main' : 'transparent', color: ok ? 'success.contrastText' : 'text.secondary' }}>
+              {livre ? <Pizza size={18} /> : <Check size={18} />}
+            </ButtonBase>
+            <Accordion square expanded={aberto === r.id} onChange={() => setAberto(aberto === r.id ? null : r.id)} sx={{ flex: 1, minWidth: 0, bgcolor: 'transparent' }}>
+              <AccordionSummary expandIcon={<ChevronDown size={18} />} sx={{ pl: 1.5, pr: 2, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.5, my: 1.5 } }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{r.nome}{emJejum ? ` · ${r.hora}` : ''}</Typography>
                   <Typography variant="body2" color="text.secondary">{livre ? 'Refeição livre' : ok && op ? op.nome : emJejum ? r.jejum : r.livre}</Typography>
@@ -151,6 +152,7 @@ export default function Dieta({ s, update }) {
                 </Stack>
               </AccordionDetails>
             </Accordion>
+            </Stack>
           )
         })}
       </Paper>

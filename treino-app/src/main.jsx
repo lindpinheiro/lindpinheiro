@@ -29,6 +29,7 @@ function Root() {
           button: { textTransform: 'none', fontWeight: 600, fontSize: '0.875rem' },
         },
         components: {
+          MuiCssBaseline: { styleOverrides: { 'html, body': { overscrollBehaviorX: 'none' } } },
           MuiPaper: { defaultProps: { elevation: 0 }, styleOverrides: { root: { backgroundImage: 'none' } } },
           MuiButton: {
             defaultProps: { disableElevation: true },

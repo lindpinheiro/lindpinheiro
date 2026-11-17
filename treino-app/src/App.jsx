@@ -5,6 +5,7 @@ import {
   InputAdornment, LinearProgress, List, ListItem, ListItemText, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { keyframes } from '@emotion/react'
 import {
   BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, Flame, HeartPulse, History, Moon, Plus, Trash2,
   TrendingUp, TriangleAlert, Upload, Utensils, Wind, X,
@@ -31,14 +32,43 @@ const CUIDADOS = [
 const Card = ({ sx, ...p }) => <Paper sx={{ p: 2, border: 1, borderColor: 'divider', ...sx }} {...p} />
 const Titulo = (p) => <Typography variant="h6" sx={{ mt: 4, mb: 1.5 }} {...p} />
 
+const ABAS = 4
+const entraDireita = keyframes`from { opacity: 0; transform: translateX(28px) } to { opacity: 1; transform: none }`
+const entraEsquerda = keyframes`from { opacity: 0; transform: translateX(-28px) } to { opacity: 1; transform: none }`
+
 export default function App() {
   const [s, update, replace] = useStore()
   const [aba, setAba] = useState(0)
+  const [dir, setDir] = useState(0) // direção da última troca de aba, para a animação
   const [timer, setTimer] = useState(null) // { fim, total }
+  const toque = useRef(null)
+
+  const ir = (v) => {
+    if (v < 0 || v >= ABAS || v === aba) return
+    setDir(v > aba ? 1 : -1); setAba(v); window.scrollTo(0, 0)
+  }
+  // Arrastar para o lado troca de aba. Ignora toques perto das bordas (gesto de voltar do Android),
+  // em campos, botões de opção e janelas, e movimentos mais verticais que horizontais.
+  const inicioToque = (e) => {
+    toque.current = null
+    if (e.touches.length !== 1) return
+    const t = e.touches[0]
+    if (t.clientX < 24 || t.clientX > window.innerWidth - 24) return
+    if (e.target.closest?.('input, textarea, select, .MuiToggleButtonGroup-root, .MuiModal-root, [data-sem-arrasto]')) return
+    toque.current = { x: t.clientX, y: t.clientY, t: Date.now() }
+  }
+  const fimToque = (e) => {
+    const i = toque.current; toque.current = null
+    if (!i || window.getSelection?.().toString()) return
+    const t = e.changedTouches[0], dx = t.clientX - i.x, dy = t.clientY - i.y
+    if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy) && Date.now() - i.t < 700) ir(aba + (dx < 0 ? 1 : -1))
+  }
 
   return (
-    <Box sx={{ pb: `calc(${aba === 0 && timer ? 160 : 88}px + env(safe-area-inset-bottom))` }}>
-      <Container maxWidth="sm" sx={{ pt: 3 }}>
+    <Box onTouchStart={inicioToque} onTouchEnd={fimToque} onTouchCancel={() => { toque.current = null }}
+      sx={{ minHeight: '100vh', overflowX: 'clip', pb: `calc(${aba === 0 && timer ? 160 : 88}px + env(safe-area-inset-bottom))` }}>
+      <Container key={aba} maxWidth="sm" sx={{ pt: 3, animation: dir ? `${dir > 0 ? entraDireita : entraEsquerda} .22s ease-out` : 'none',
+        '@media (prefers-reduced-motion: reduce)': { animation: 'none' } }}>
         {aba === 0 && <Treino s={s} update={update} onDescanso={(seg) => setTimer(seg ? { fim: Date.now() + seg * 1000, total: seg } : null)} />}
         {aba === 1 && <Dieta s={s} update={update} />}
         {aba === 2 && <Progresso s={s} update={update} replace={replace} />}
@@ -46,7 +76,7 @@ export default function App() {
       </Container>
       {aba === 0 && timer && <Descanso timer={timer} setTimer={setTimer} />}
       <Paper square sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, borderTop: 1, borderColor: 'divider', pb: 'env(safe-area-inset-bottom)', zIndex: 10 }}>
-        <BottomNavigation showLabels value={aba} onChange={(_, v) => { setAba(v); window.scrollTo(0, 0) }} sx={{ height: 68, maxWidth: 600, mx: 'auto', '& .MuiBottomNavigationAction-root': { minWidth: 0, px: 0.5 } }}>
+        <BottomNavigation showLabels value={aba} onChange={(_, v) => ir(v)} sx={{ height: 68, maxWidth: 600, mx: 'auto', '& .MuiBottomNavigationAction-root': { minWidth: 0, px: 0.5 } }}>
           <BottomNavigationAction label="Treino" icon={<Dumbbell size={22} />} />
           <BottomNavigationAction label="Dieta" icon={<Utensils size={22} />} />
           <BottomNavigationAction label="Progresso" icon={<TrendingUp size={22} />} />

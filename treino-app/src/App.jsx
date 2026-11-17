@@ -131,6 +131,8 @@ function Treino({ s, update, onDescanso }) {
       const set = ((l.ex[e.id] ??= [])[k] ??= {})
       set.ok = ligando
       if (ligando) { set.kg ??= sugestao.kg; set.reps ??= sugestao.reps }
+      // Última série do treino marcada: conclui o treino sem precisar de outro toque.
+      if (ligando && p.ex.every((x) => (l.ex[x.id] || []).filter((y) => y?.ok).length >= x.series)) l.feito = true
     })
     if (!ligando) return
     const ultimaSerie = (log.ex?.[e.id] || []).filter((x, i) => x?.ok && i !== k).length + 1 >= e.series
@@ -223,7 +225,7 @@ function Treino({ s, update, onDescanso }) {
           <Button fullWidth size="large" sx={{ mt: 3 }} variant={log.feito ? 'outlined' : 'contained'} color={log.feito ? 'success' : 'primary'}
             startIcon={log.feito && <Check size={20} />}
             onClick={() => { editar((l) => { l.feito = !l.feito }); onDescanso(0) }}>
-            {log.feito ? 'Treino concluído' : 'Concluir treino'}
+            {log.feito ? 'Treino concluído' : feitas ? 'Concluir agora' : 'Concluir treino'}
           </Button>
           {gasto.total > 0 && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, textAlign: 'center' }}>
@@ -239,50 +241,67 @@ function Treino({ s, update, onDescanso }) {
 function Exercicio({ e, n, sets, ant, aberto, onToggle, onCampo, onMarcar, ultimo }) {
   const feitas = sets.filter((x) => x?.ok).length
   const ok = feitas >= e.series
+  const [comoFazer, setComoFazer] = useState(false)
+  const campoSx = { flex: 1, '& input': { textAlign: 'center', py: 1.25, fontVariantNumeric: 'tabular-nums' } }
   return (
     <Accordion expanded={aberto} onChange={onToggle} sx={{ borderBottom: ultimo ? 0 : 1, borderColor: 'divider' }} square>
-      <AccordionSummary expandIcon={<ChevronDown size={20} />} sx={{ px: 2, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.5, my: 1.5 } }}>
-        <Box sx={{ width: 32, height: 32, flexShrink: 0, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 600,
+      <AccordionSummary expandIcon={<ChevronDown size={18} />} sx={{ px: 2, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.5, my: 1.25 } }}>
+        <Box sx={{ width: 28, height: 28, flexShrink: 0, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 600,
           bgcolor: ok ? 'success.main' : 'action.hover', color: ok ? 'success.contrastText' : 'text.secondary' }}>
-          {ok ? <Check size={18} /> : n}
+          {ok ? <Check size={16} /> : n}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{e.nome}</Typography>
-          <Typography variant="body2" color="text.secondary">{e.series} × {e.reps} · descanso {fmtDesc(e.desc)}</Typography>
+          <Typography variant="body2" color="text.secondary">{e.series} × {e.reps} · {fmtDesc(e.desc)} de descanso</Typography>
         </Box>
         {feitas > 0 && !ok && <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>{feitas}/{e.series}</Typography>}
       </AccordionSummary>
       <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
-        {aberto && foto(e.id) && (
-          <Box component="img" src={foto(e.id)} alt={`${e.nome}: posição inicial e final`} sx={{ display: 'block', width: '100%', borderRadius: '10px', mb: 1.5 }} />
-        )}
-        {e.nota && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{e.nota}</Typography>}
-        <Button size="small" href={video(e.nome)} target="_blank" rel="noopener" startIcon={<CirclePlay size={18} />} sx={{ mb: 1.5, ml: -0.5 }}>Ver vídeo</Button>
-        {ant && (
-          <Stack direction="row" spacing={1} sx={{ mb: 1.5, color: 'text.secondary', alignItems: 'center' }}>
-            <History size={16} style={{ flexShrink: 0 }} />
-            <Typography variant="body2">{br(ant.d)}: {ant.sets.map((x) => `${num(x.kg ?? '–')} kg × ${x.reps ?? '–'}`).join(' · ')}</Typography>
-          </Stack>
-        )}
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1, gap: 1 }}>
+          {ant ? (
+            <Stack direction="row" spacing={0.75} sx={{ color: 'text.secondary', alignItems: 'center', minWidth: 0 }}>
+              <History size={14} style={{ flexShrink: 0 }} />
+              <Typography variant="body2" noWrap>Última vez: {ant.sets.length} {ant.sets.length === 1 ? 'série' : 'séries'}, até {num(Math.max(...ant.sets.map((x) => x.kg || 0)))} kg</Typography>
+            </Stack>
+          ) : <Typography variant="body2" color="text.secondary">Primeira vez: comece leve</Typography>}
+          <Button size="small" onClick={() => setComoFazer(!comoFazer)} sx={{ flexShrink: 0, mr: -1 }}
+            endIcon={<ChevronDown size={14} style={{ transform: comoFazer ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />}>
+            Como fazer
+          </Button>
+        </Stack>
+        <Collapse in={comoFazer} unmountOnExit>
+          <Box sx={{ pb: 1.5 }}>
+            {foto(e.id) && <Box component="img" src={foto(e.id)} alt={`${e.nome}: posição inicial e final`} sx={{ display: 'block', width: '100%', borderRadius: 2, mb: 1 }} />}
+            {e.nota && <Typography variant="body2" color="text.secondary">{e.nota}</Typography>}
+            <Button size="small" href={video(e.nome)} target="_blank" rel="noopener" startIcon={<CirclePlay size={16} />} sx={{ mt: 0.5, ml: -1 }}>Ver vídeo</Button>
+          </Box>
+        </Collapse>
+
+        <Stack direction="row" spacing={1} sx={{ mb: 0.5, color: 'text.secondary' }}>
+          <Typography variant="caption" sx={{ width: 20, textAlign: 'center' }}>#</Typography>
+          <Typography variant="caption" sx={{ flex: 1, textAlign: 'center' }}>Carga (kg)</Typography>
+          <Typography variant="caption" sx={{ flex: 1, textAlign: 'center' }}>Repetições</Typography>
+          <Box sx={{ width: 48 }} />
+        </Stack>
         <Stack spacing={1}>
           {Array.from({ length: e.series }, (_, k) => {
             const set = sets[k] || {}
-            const base = sets[k - 1] || ant?.sets[Math.min(k, (ant?.sets.length || 1) - 1)] || {}
+            // Sugestão: a mesma série do último treino; sem histórico, a série anterior de hoje.
+            const base = ant?.sets[k] || sets[k - 1] || ant?.sets.at(-1) || {}
             const sug = { kg: base.kg, reps: base.reps }
-            const campo = (nome, sufixo, modo) => (
-              <TextField size="small" type="number" value={set[nome] ?? ''} placeholder={sug[nome] != null ? String(sug[nome]) : ''}
+            const campo = (nome, rotulo, modo) => (
+              <TextField size="small" type="number" value={set[nome] ?? ''} placeholder={sug[nome] != null ? num(sug[nome]) : '–'}
                 onChange={(ev) => onCampo(k, nome, ev.target.value === '' ? undefined : +ev.target.value)}
-                slotProps={{ htmlInput: { inputMode: modo, 'aria-label': `${sufixo}, série ${k + 1}`, step: nome === 'kg' ? 0.5 : 1 },
-                  input: { endAdornment: <InputAdornment position="end">{sufixo}</InputAdornment> } }} sx={{ flex: 1 }} />
+                slotProps={{ htmlInput: { inputMode: modo, 'aria-label': `${rotulo}, série ${k + 1}`, step: nome === 'kg' ? 0.5 : 1 } }} sx={campoSx} />
             )
             return (
               <Stack key={k} direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                <Typography color="text.secondary" sx={{ width: 20, textAlign: 'center' }}>{k + 1}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ width: 20, textAlign: 'center' }}>{k + 1}</Typography>
                 {campo('kg', 'kg', 'decimal')}
                 {campo('reps', 'reps', 'numeric')}
                 <IconButton onClick={() => onMarcar(k, sug)} aria-label={`Série ${k + 1} feita`} aria-pressed={!!set.ok}
-                  sx={{ width: 44, height: 44, border: 1, borderColor: set.ok ? 'success.main' : 'divider', borderRadius: 3,
-                    bgcolor: set.ok ? 'success.main' : 'transparent', color: set.ok ? 'success.contrastText' : 'text.disabled',
+                  sx={{ width: 48, height: 44, border: 1, borderColor: set.ok ? 'success.main' : 'divider', borderRadius: 2.5,
+                    bgcolor: set.ok ? 'success.main' : 'transparent', color: set.ok ? 'success.contrastText' : 'text.secondary',
                     '&:hover': { bgcolor: set.ok ? 'success.main' : 'action.hover' } }}>
                   <Check size={20} />
                 </IconButton>
@@ -290,6 +309,7 @@ function Exercicio({ e, n, sets, ant, aberto, onToggle, onCampo, onMarcar, ultim
             )
           })}
         </Stack>
+        {feitas === 0 && <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>Fez o sugerido? Toque só no ✓.</Typography>}
       </AccordionDetails>
     </Accordion>
   )

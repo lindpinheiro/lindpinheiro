@@ -245,22 +245,28 @@ function Recordes({ s }) {
   for (const d in s.logs) for (const id in s.logs[d].ex || {}) for (const x of s.logs[d].ex[id] || [])
     if (x?.kg && nomes[id] && (!best[id] || kgTotal(x, id) > kgTotal(best[id], id))) best[id] = { ...x, d }
   const itens = Object.entries(best)
+  if (!itens.length) return null
   return (
-    <Card sx={{ py: itens.length ? 1.5 : 2 }}>
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: itens.length ? 0.5 : 1 }}>
-        <Box sx={{ color: 'primary.main', display: 'flex' }}><Trophy size={20} /></Box>
-        <Typography variant="subtitle1">Maiores cargas</Typography>
-      </Stack>
-      {itens.length ? (
-        <List disablePadding>
-          {itens.map(([id, b], i) => (
-            <ListItem key={id} disableGutters divider={i < itens.length - 1} secondaryAction={<Typography sx={{ fontWeight: 600 }}>{num(kgNoModo(b, id, modoLado(s, id)))} kg{modoLado(s, id) ? ' cada' : ''}{b.reps ? ` × ${b.reps}` : ''}</Typography>}>
-              <ListItemText primary={nomes[id]} secondary={br(b.d)} sx={{ pr: 10 }} />
-            </ListItem>
-          ))}
-        </List>
-      ) : <Typography color="textSecondary">Anote as cargas nos treinos e elas aparecem aqui.</Typography>}
-    </Card>
+    <Paper sx={{ border: 1, borderColor: 'divider', overflow: 'hidden' }}>
+      <Accordion square>
+        <AccordionSummary expandIcon={<ChevronDown size={18} />} sx={{ px: 2, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.25, my: 1.5 } }}>
+          <Box sx={{ color: 'primary.main', display: 'flex' }}><Trophy size={18} /></Box>
+          <Box>
+            <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Recordes de carga</Typography>
+            <Typography variant="body2" color="textSecondary">A maior carga de cada exercício, desde o início</Typography>
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails sx={{ px: 2, pt: 0, pb: 1 }}>
+          <List disablePadding>
+            {itens.map(([id, b], i) => (
+              <ListItem key={id} disableGutters divider={i < itens.length - 1} secondaryAction={<Typography variant="body2" sx={{ fontWeight: 600 }}>{num(kgNoModo(b, id, modoLado(s, id)))} kg{modoLado(s, id) ? ' cada' : ''}{b.reps ? ` × ${b.reps}` : ''}</Typography>}>
+                <ListItemText primary={nomes[id]} secondary={br(b.d)} sx={{ pr: 12 }} slotProps={{ primary: { variant: 'body2' } }} />
+              </ListItem>
+            ))}
+          </List>
+        </AccordionDetails>
+      </Accordion>
+    </Paper>
   )
 }
 

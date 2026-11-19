@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Box, Button, Collapse, Dialog, DialogActions, DialogContent, DialogTitle,
-  IconButton, InputAdornment, LinearProgress, List, ListItem, ListItemText, Paper, Stack, Tab, Tabs, TextField,
+  IconButton, InputAdornment, LinearProgress, List, ListItem, ListItemText, Paper, Stack, Switch, Tab, Tabs, TextField,
   ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -12,6 +12,7 @@ import { INTENSIDADES, kcalPatins, pesoEm } from './gasto.js'
 import Historico from './Historico.jsx'
 import Balanco, { Perfil } from './Balanco.jsx'
 import Periodo from './Periodo.jsx'
+import { testarBip } from './bip.js'
 
 const Card = ({ sx, ...p }) => <Paper sx={{ p: 2, border: 1, borderColor: 'divider', ...sx }} {...p} />
 const ABAS = ['resumo', 'calendario', 'evolucao']
@@ -201,10 +202,20 @@ function Ajustes({ s, update, replace }) {
           <Box sx={{ color: 'text.secondary', display: 'flex' }}><Settings size={20} /></Box>
           <Box>
             <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Ajustes e backup</Typography>
-            <Typography variant="body2" color="text.secondary">Altura, idade e cópia dos seus dados</Typography>
+            <Typography variant="body2" color="text.secondary">Bipe, altura, idade e cópia dos dados</Typography>
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
+          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+            <Box>
+              <Typography>Bipe no fim do descanso</Typography>
+              <Typography variant="body2" color="text.secondary">Toca no fone, se estiver conectado</Typography>
+            </Box>
+            <Stack direction="row" sx={{ alignItems: 'center' }}>
+              <Button size="small" onClick={testarBip}>Testar</Button>
+              <Switch checked={s.som !== false} onChange={(e) => update((n) => { n.som = e.target.checked })} slotProps={{ input: { 'aria-label': 'Bipe no fim do descanso' } }} />
+            </Stack>
+          </Stack>
           {editando ? (
             <Perfil perfil={perfil} onSalvar={(p) => { update((n) => { n.perfil = p }); setEditando(false) }} />
           ) : (

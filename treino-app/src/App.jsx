@@ -8,9 +8,10 @@ import { useTheme } from '@mui/material/styles'
 import { keyframes } from '@emotion/react'
 import {
   ArrowLeftRight, BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, Flame, HeartPulse, History, Minus, Moon, Plus, Repeat, Trash2,
-  TrendingUp, TriangleAlert, Upload, Utensils, Wind, X,
+  TrendingUp, TriangleAlert, Upload, Utensils, Volume2, VolumeX, Wind, X,
 } from 'lucide-react'
 import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video, planoDe } from './plan.js'
+import { agendarBip, cancelarBip, testarBip } from './bip.js'
 import { ALTERNATIVAS, kgNoModo, modoLado, progressao, treinoDe } from './exercicios.js'
 import { META, PESO_INICIAL, br, hojeISO, iso, num, semana, ultima, useStore } from './store.js'
 import Guia from './Guia.jsx'
@@ -42,6 +43,12 @@ export default function App() {
   const [aba, setAba] = useState(0)
   const [dir, setDir] = useState(0) // direção da última troca de aba, para a animação
   const [timer, setTimer] = useState(null) // { fim, total }
+  const som = s.som !== false
+  // Inicia (ou encerra, com 0) o descanso e agenda o bipe do fim.
+  const descanso = (seg) => {
+    setTimer(seg ? { fim: Date.now() + seg * 1000, total: seg } : null)
+    if (seg && som) agendarBip(seg); else cancelarBip()
+  }
   const toque = useRef(null)
 
   const ir = (v) => {
@@ -70,12 +77,19 @@ export default function App() {
       sx={{ minHeight: '100vh', overflowX: 'clip', pb: `calc(${aba === 0 && timer ? 160 : 88}px + env(safe-area-inset-bottom))` }}>
       <Container key={aba} maxWidth="sm" sx={{ pt: 3, animation: dir ? `${dir > 0 ? entraDireita : entraEsquerda} .22s ease-out` : 'none',
         '@media (prefers-reduced-motion: reduce)': { animation: 'none' } }}>
-        {aba === 0 && <Treino s={s} update={update} onDescanso={(seg) => setTimer(seg ? { fim: Date.now() + seg * 1000, total: seg } : null)} />}
+        {aba === 0 && <Treino s={s} update={update} onDescanso={descanso} />}
         {aba === 1 && <Dieta s={s} update={update} />}
         {aba === 2 && <Progresso s={s} update={update} replace={replace} />}
         {aba === 3 && <Guia />}
       </Container>
-      {aba === 0 && timer && <Descanso timer={timer} setTimer={setTimer} />}
+      {aba === 0 && timer && <Descanso timer={timer} setTimer={setTimer} som={som}
+        onMais30={() => { const fim = timer.fim + 30000; setTimer({ fim, total: timer.total + 30 }); if (som) agendarBip((fim - Date.now()) / 1000) }}
+        onFechar={() => { setTimer(null); cancelarBip() }}
+        onSom={() => {
+          const ligar = !som
+          update((n) => { n.som = ligar })
+          if (ligar) { agendarBip(Math.max(0, (timer.fim - Date.now()) / 1000)); if (timer.fim <= Date.now()) testarBip() } else cancelarBip()
+        }} />}
       <Paper square sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, borderTop: 1, borderColor: 'divider', pb: 'env(safe-area-inset-bottom)', zIndex: 10 }}>
         <BottomNavigation showLabels value={aba} onChange={(_, v) => ir(v)} sx={{ height: 68, maxWidth: 600, mx: 'auto', '& .MuiBottomNavigationAction-root': { minWidth: 0, px: 0.5 } }}>
           <BottomNavigationAction label="Treino" icon={<Dumbbell size={22} />} />
@@ -470,7 +484,7 @@ function Cardio({ c, log, patins, kg, onSalvar }) {
   )
 }
 
-function Descanso({ timer, setTimer }) {
+function Descanso({ timer, setTimer, som, onMais30, onFechar, onSom }) {
   const [agora, setAgora] = useState(Date.now())
   const vibrou = useRef(false)
   useEffect(() => { vibrou.current = false; const i = setInterval(() => setAgora(Date.now()), 250); return () => clearInterval(i) }, [timer])
@@ -488,8 +502,9 @@ function Descanso({ timer, setTimer }) {
         <Typography sx={{ flex: 1, fontWeight: 500 }}>
           {fim ? 'Próxima série' : <>Descanso <Box component="span" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600, ml: 0.5 }}>{Math.floor(resta / 60)}:{String(resta % 60).padStart(2, '0')}</Box></>}
         </Typography>
-        {!fim && <Button size="small" color="inherit" onClick={() => setTimer({ fim: timer.fim + 30000, total: timer.total + 30 })}>+30 s</Button>}
-        <IconButton color="inherit" aria-label="Fechar cronômetro" onClick={() => setTimer(null)}><X size={20} /></IconButton>
+        {!fim && <Button size="small" color="inherit" onClick={onMais30}>+30 s</Button>}
+        <IconButton color="inherit" aria-label={som ? 'Desligar bipe' : 'Ligar bipe'} aria-pressed={som} onClick={onSom}>{som ? <Volume2 size={20} /> : <VolumeX size={20} />}</IconButton>
+        <IconButton color="inherit" aria-label="Fechar cronômetro" onClick={onFechar}><X size={20} /></IconButton>
       </Stack>
       {!fim && <LinearProgress variant="determinate" value={100 - (resta / timer.total) * 100} color="inherit" sx={{ height: 3, opacity: 0.5 }} />}
     </Paper>

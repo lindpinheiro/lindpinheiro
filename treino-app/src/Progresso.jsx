@@ -6,7 +6,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { ChevronDown, Download, Plus, Scale, Settings, Trash2, Trophy, Upload, Wind } from 'lucide-react'
-import { PLAN } from './plan.js'
+import { NOMES, kgNoModo, kgTotal, modoLado, progressao } from './exercicios.js'
 import { META, PERFIL_PADRAO, PESO_INICIAL, br, hojeISO, iso, num, semana } from './store.js'
 import { INTENSIDADES, kcalPatins, pesoEm } from './gasto.js'
 import Historico from './Historico.jsx'
@@ -230,10 +230,9 @@ function Ajustes({ s, update, replace }) {
 /* ---------- Recordes ---------- */
 
 function Recordes({ s }) {
-  const nomes = {}, best = {}
-  for (const k in PLAN) for (const e of PLAN[k].ex) nomes[e.id] = e.nome
+  const nomes = NOMES, best = {}
   for (const d in s.logs) for (const id in s.logs[d].ex || {}) for (const x of s.logs[d].ex[id] || [])
-    if (x?.kg && nomes[id] && (!best[id] || x.kg > best[id].kg)) best[id] = { ...x, d }
+    if (x?.kg && nomes[id] && (!best[id] || kgTotal(x, id) > kgTotal(best[id], id))) best[id] = { ...x, d }
   const itens = Object.entries(best)
   return (
     <Card sx={{ py: itens.length ? 1.5 : 2 }}>
@@ -244,7 +243,7 @@ function Recordes({ s }) {
       {itens.length ? (
         <List disablePadding>
           {itens.map(([id, b], i) => (
-            <ListItem key={id} disableGutters divider={i < itens.length - 1} secondaryAction={<Typography sx={{ fontWeight: 600 }}>{num(b.kg)} kg{b.reps ? ` × ${b.reps}` : ''}</Typography>}>
+            <ListItem key={id} disableGutters divider={i < itens.length - 1} secondaryAction={<Typography sx={{ fontWeight: 600 }}>{num(kgNoModo(b, id, modoLado(s, id)))} kg{modoLado(s, id) ? ' cada' : ''}{b.reps ? ` × ${b.reps}` : ''}</Typography>}>
               <ListItemText primary={nomes[id]} secondary={br(b.d)} sx={{ pr: 10 }} />
             </ListItem>
           ))}

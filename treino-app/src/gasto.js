@@ -1,6 +1,7 @@
 // Estimativas de gasto calórico. Todas usam o gasto ACIMA do repouso (MET − 1),
 // porque o repouso já está no gasto base do dia.
-import { duracao, planoDe } from './plan.js'
+import { duracao } from './plan.js'
+import { kgTotal, treinoDe } from './exercicios.js'
 import { EXTRAS, LIVRE, REFEICOES, valores } from './dieta.js'
 import { PESO_INICIAL } from './store.js'
 
@@ -35,7 +36,7 @@ export const kcalPatins = (p, kg) => kcal((INTENSIDADES[p.int] || INTENSIDADES.l
 // Gasto do treino a partir do que foi registrado: tempo das séries marcadas (execução + descanso),
 // peso do corpo e volume levantado (carga × repetições). Sem séries marcadas, usa a duração planejada.
 export function gastoTreino(s, date, kg) {
-  const log = s.logs[date], p = planoDe(s.logs, date)
+  const log = s.logs[date], p = treinoDe(s, date)
   const r = { series: 0, volume: 0, minutos: 0, musculacao: 0, cardio: 0, total: 0 }
   if (!log) return r
   let seg = 0
@@ -44,7 +45,7 @@ export function gastoTreino(s, date, kg) {
     if (!feitas.length) continue
     r.series += feitas.length
     seg += feitas.length * (40 + e.desc) + 60
-    r.volume += feitas.reduce((t, x) => t + (x.kg || 0) * (x.reps || 0), 0)
+    r.volume += feitas.reduce((t, x) => t + kgTotal(x, e.id) * (x.reps || 0), 0)
   }
   if (r.series) r.minutos = Math.round(seg / 60) + (log.feito ? 5 : 0)
   else if (log.feito) r.minutos = duracao(p) - (p.cardio?.min || 0)

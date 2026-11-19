@@ -1,15 +1,13 @@
 import React, { useState } from 'react'
 import { Box, IconButton, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { PLAN } from './plan.js'
+import { NOMES, kgTotal, modoLado } from './exercicios.js'
 import { consumo, diaSemana, gastoTreino, kcalPatins, pesoEm } from './gasto.js'
 import { hojeISO, iso, num } from './store.js'
 
 const fmt = (n) => Math.round(n).toLocaleString('pt-BR')
 const sinal = (v, casas = 1) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${num(Math.abs(v).toFixed(casas))}`
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-const NOMES = {}
-for (const k in PLAN) for (const e of PLAN[k].ex) NOMES[e.id] = e.nome
 
 // Números de um intervalo de datas (até hoje).
 function resumir(s, ini, fim) {
@@ -25,7 +23,7 @@ function resumir(s, ini, fim) {
     if (pat) { r.patins++; r.patinsMin += pat.min; r.kcal += kcalPatins(pat, kg) }
     r.kcal += g.total; r.volume += g.volume
     for (const id in log?.ex || {}) {
-      const max = Math.max(0, ...log.ex[id].filter((x) => x?.kg).map((x) => x.kg))
+      const max = Math.max(0, ...log.ex[id].filter((x) => x?.kg).map((x) => kgTotal(x, id)))
       if (max && NOMES[id]) (cargas[id] ??= []).push(max)
     }
   }
@@ -101,9 +99,9 @@ export default function Periodo({ s }) {
         <Stack key={c.id} direction="row" spacing={1.5} sx={{ py: 1, borderTop: 1, borderColor: 'divider', alignItems: 'center' }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ lineHeight: 1.3 }}>{NOMES[c.id]}</Typography>
-            <Typography variant="body2" color="text.secondary">{num(c.de)} → {num(c.para)} kg</Typography>
+            <Typography variant="body2" color="text.secondary">{num(c.de / (modoLado(s, c.id) ? 2 : 1))} → {num(c.para / (modoLado(s, c.id) ? 2 : 1))} kg{modoLado(s, c.id) ? ' cada' : ''}</Typography>
           </Box>
-          <Typography noWrap color={c.dif > 0 ? 'success.main' : 'text.secondary'} sx={{ fontWeight: 600 }}>{sinal(c.dif)} kg</Typography>
+          <Typography noWrap color={c.dif > 0 ? 'success.main' : 'text.secondary'} sx={{ fontWeight: 600 }}>{sinal(c.dif / (modoLado(s, c.id) ? 2 : 1))} kg</Typography>
         </Stack>
       )) : <Typography variant="body2" color="text.secondary">Aparece quando um exercício tiver dois treinos registrados no período, com cargas diferentes.</Typography>}
     </Paper>

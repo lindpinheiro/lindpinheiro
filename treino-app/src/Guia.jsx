@@ -33,7 +33,7 @@ const SECOES = [
       <li><b>Segunda a quinta, cerca de 1 hora</b>: 5 min de aquecimento, 5 ou 6 exercícios e 8 a 12 min de cardio. Respeite o cronômetro de descanso: é ele que mantém o treino no horário do almoço.</li>
       <li><b>Sábado e domingo, até 2 horas</b>: perna completa no sábado ({duracao(PLAN[6])} min) e peito, ombro e acessórios no domingo ({duracao(PLAN[0])} min). Antebraço, trapézio e panturrilha ficam aqui, para não ocupar os dias curtos.</li>
       <li><b>Nos treinos longos</b>: faça uma refeição 1 a 2 h antes, leve água e uma fruta, e beba entre os exercícios. No sábado de perna, os descansos são mais longos de propósito, por causa da pressão.</li>
-      <li><b>Sexta é descanso</b> (patins leve, se quiser), para chegar inteiro no fim de semana.</li>
+      <li><b>Sexta é descanso</b>, para chegar inteiro no fim de semana. Se estiver com vontade, há um treino opcional de abdômen e cardio leve (cerca de 45 min) ou patins leve.</li>
       <li>Sem tempo? Corte o último exercício, nunca o primeiro. Com a academia cheia, use “Trocar exercício”.</li>
       <li><b>Faltou um dia?</b> Na sexta, a aba Treino mostra o que ficou para trás e sugere repor só o que não bate com o fim de semana. Perna e peito perdidos na semana não precisam de reposição: sábado e domingo já cobrem.</li>
     </Itens>

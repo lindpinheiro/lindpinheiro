@@ -10,7 +10,7 @@ import {
   ArrowLeftRight, BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, Flame, HeartPulse, History, Minus, Moon, Plus, Repeat, Trash2,
   TrendingUp, TriangleAlert, Upload, Utensils, Volume2, VolumeX, Wind, X,
 } from 'lucide-react'
-import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, previstoEm, video, planoDe } from './plan.js'
+import { CARDIO, DIAS, OPCIONAL, PLAN, duracao, fmtDesc, foto, previstoEm, video, planoDe } from './plan.js'
 import { agendarBip, cancelarBip, testarBip } from './bip.js'
 import { ALTERNATIVAS, kgNoModo, modoLado, progressao, treinoDe } from './exercicios.js'
 import { META, PESO_INICIAL, br, hojeISO, iso, num, semana, ultima, useStore } from './store.js'
@@ -110,7 +110,7 @@ const NOME_DIA = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', '
 const somaDias = (date, n) => { const d = new Date(`${date}T12:00:00`); d.setDate(d.getDate() + n); return iso(d) }
 const diaDe = (date) => new Date(`${date}T12:00:00`).getDay()
 
-function Reposicao({ s, dias, data, onEscolher }) {
+function Reposicao({ s, dias, data, temOpcional, onEscolher }) {
   const ontem = somaDias(data, -1)
   const proximos = [1, 2].map((n) => ({ n, date: somaDias(data, n), g: previstoEm(somaDias(data, n)).grupo }))
   const grupoOntem = s.logs[ontem]?.feito ? planoDe(s.logs, ontem).grupo : null
@@ -132,6 +132,8 @@ function Reposicao({ s, dias, data, onEscolher }) {
     if (m && !confirm(`${m}. Fazer ${previstoEm(d.date).titulo.toLowerCase()} hoje tira o tempo de recuperação desse músculo. Fazer mesmo assim?`)) return
     onEscolher(d.date)
   }
+  // Semana em dia num dia com treino opcional: o cartão do opcional já basta.
+  if (!faltou.length && temOpcional) return null
   const titulo = boas.length ? 'Faltou algum treino?' : faltou.length ? 'Melhor descansar hoje' : 'Semana em dia'
   const texto = boas.length
     ? `Você pode repor um hoje.${evitar.length ? ` ${evitar.length > 1 ? 'Os' : 'O'} de ${evitar.map((d) => NOME_DIA[d.wd]).join(' e ')} não ${evitar.length > 1 ? 'entram' : 'entra'}: ${motivo(evitar[0]).toLowerCase()}.` : ''}`
@@ -179,7 +181,7 @@ function Treino({ s, update, onDescanso }) {
   const [aberto, setAberto] = useState(null)
   const [cuidados, setCuidados] = useState(false)
   const gasto = gastoTreino(s, date, pesoEm(s, date))
-  useEffect(() => { setAberto(p.ex.find((e) => !completo(e))?.id ?? null) }, [date, p.repoe]) // eslint-disable-line
+  useEffect(() => { setAberto(p.ex.find((e) => !completo(e))?.id ?? null) }, [date, p.repoe, p.extra]) // eslint-disable-line
 
   const editar = (fn) => update((n) => { const l = (n.logs[date] ??= { ex: {} }); l.ex ??= {}; fn(l) })
   const marcar = (e, k, sugestao) => {
@@ -224,19 +226,34 @@ function Treino({ s, update, onDescanso }) {
 
       <Typography variant="h4" sx={{ mt: 3 }}>{p.titulo}</Typography>
 
-      {p.repoe && (
+      {(p.repoe || p.extra) && (
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
-          <Typography color="textSecondary" sx={{ flex: 1 }}>Reposição do treino de {NOME_DIA[p.repoe]}</Typography>
+          <Typography color="textSecondary" sx={{ flex: 1 }}>{p.extra ? 'Treino opcional · dia de descanso' : `Reposição do treino de ${NOME_DIA[p.repoe]}`}</Typography>
           <Button size="small" onClick={() => {
-            if (feitas && !confirm('Trocar o treino de hoje? As séries já marcadas ficam salvas, mas deixam de aparecer aqui.')) return
-            editar((l) => { delete l.repoe; l.feito = false }); onDescanso(0)
-          }}>Trocar</Button>
+            if (feitas && !confirm('Voltar ao descanso? As séries já marcadas ficam salvas, mas deixam de aparecer aqui.')) return
+            editar((l) => { delete l.repoe; delete l.extra; l.feito = false }); onDescanso(0)
+          }}>{p.extra ? 'Voltar ao descanso' : 'Trocar'}</Button>
         </Stack>
       )}
 
       {p.descanso ? (
         <>
-        <Reposicao key={date} s={s} dias={dias} data={date} onEscolher={(d) => editar((l) => { l.repoe = d })} />
+        <Reposicao key={date} s={s} dias={dias} data={date} temOpcional={!!p.opcional} onEscolher={(d) => editar((l) => { l.repoe = d; delete l.extra })} />
+        {p.opcional && (
+          <Card sx={{ mt: 2 }}>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+              <Box sx={{ width: 36, height: 36, flexShrink: 0, borderRadius: '50%', display: 'grid', placeItems: 'center', bgcolor: 'action.hover', color: 'primary.main' }}><Dumbbell size={18} /></Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Treino opcional: {OPCIONAL.titulo.toLowerCase()}</Typography>
+                <Typography variant="body2" color="textSecondary">{duracao(OPCIONAL)} min · leve, não atrapalha o fim de semana</Typography>
+              </Box>
+            </Stack>
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>
+              Só se estiver com vontade. Descansar hoje também é treino: é o que te deixa inteiro para o sábado de perna.
+            </Typography>
+            <Button fullWidth variant="outlined" sx={{ mt: 1.5 }} onClick={() => editar((l) => { l.extra = true; delete l.repoe })}>Fazer o treino opcional</Button>
+          </Card>
+        )}
         <Card sx={{ mt: 2, textAlign: 'center', py: 5 }}>
           <Box sx={{ color: 'text.secondary', mb: 1 }}><Moon size={32} /></Box>
           <Typography variant="subtitle1">Hoje o corpo se recupera</Typography>

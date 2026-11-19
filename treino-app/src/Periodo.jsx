@@ -20,7 +20,7 @@ function resumir(s, ini, fim) {
   for (let d = new Date(`${ini}T12:00:00`); iso(d) <= fim && iso(d) <= hoje; d.setDate(d.getDate() + 1)) {
     const date = iso(d), kg = pesoEm(s, date), log = s.logs[date], pat = s.patins.find((p) => p.date === date)
     if (date >= primeiro) { r.dias++; if (!previstoEm(date).descanso) r.previstos++ }
-    if (log?.feito) r.treinos++
+    if (log?.feito && !log.extra) r.treinos++
     if (consumo(s, date).completa) r.dieta++
     if (pat) { r.patins++; r.patinsMin += pat.min; r.kcal += kcalPatins(pat, kg) }
     if (s.peso.some((p) => p.date === date)) r.pesagens++

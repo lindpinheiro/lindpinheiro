@@ -1,5 +1,5 @@
 // Alternativas de cada exercício, carga "por lado" e a regra de progressão de carga.
-import { PLAN, PLAN_ANTIGO, planoDe } from './plan.js'
+import { OPCIONAL, PLAN, PLAN_ANTIGO, planoDe } from './plan.js'
 
 const A = (id, nome, nota = '') => ({ id, nome, nota })
 
@@ -57,17 +57,20 @@ export const ALTERNATIVAS = {
   'supino-reto-halter': [A('supino-maq', 'Supino na máquina'), A('supino-reto', 'Supino reto com barra')],
   'desenv-halter': [A('desenv-maq', 'Desenvolvimento na máquina'), A('desenv-smith', 'Desenvolvimento no Smith')],
   'triceps-corda-alto': [A('triceps-frances', 'Tríceps francês'), A('triceps-corda', 'Tríceps na polia com corda')],
+  'abd-polia': [A('abd-maq', 'Abdominal na máquina', 'Solte o ar ao contrair.'), A('abd-bola', 'Abdominal no chão com pés apoiados', 'Mãos no peito, suba só até tirar as escápulas do chão.')],
+  'elev-pernas': [A('elev-pernas-barra', 'Elevação de pernas na barra', 'Pendurado, suba os joelhos até a altura do quadril.'), A('dead-bug', 'Dead bug', 'Deitado, braço e perna opostos descem juntos, lombar colada no chão.')],
+  'pallof': [A('dead-bug', 'Dead bug', 'Deitado, braço e perna opostos descem juntos, lombar colada no chão.')],
   'adutora': [A('aducao-cabo', 'Adução na polia', 'Tornozeleira na polia baixa, puxe a perna para dentro.'), A('sumo', 'Agachamento sumô com halter', 'Pés bem abertos, halter entre as pernas.')],
 }
 
 // Nome de qualquer exercício (do plano ou alternativo), para histórico e recordes.
 export const NOMES = {}
-for (const P of [PLAN, PLAN_ANTIGO]) for (const k in P) for (const e of P[k].ex) NOMES[e.id] ??= e.nome
+for (const P of [PLAN, PLAN_ANTIGO, { x: OPCIONAL }]) for (const k in P) for (const e of P[k].ex) NOMES[e.id] ??= e.nome
 for (const k in ALTERNATIVAS) for (const a of ALTERNATIVAS[k]) NOMES[a.id] ??= a.nome
 
 // Exercício completo por id (as alternativas herdam séries e repetições do original), para a progressão.
 export const EXERCICIOS = {}
-for (const P of [PLAN, PLAN_ANTIGO]) for (const k in P) for (const e of P[k].ex) EXERCICIOS[e.id] ??= e
+for (const P of [PLAN, PLAN_ANTIGO, { x: OPCIONAL }]) for (const k in P) for (const e of P[k].ex) EXERCICIOS[e.id] ??= e
 for (const k in ALTERNATIVAS) for (const a of ALTERNATIVAS[k]) EXERCICIOS[a.id] ??= { ...EXERCICIOS[k], ...a }
 
 // Troca vigente para um exercício numa data: a do dia, ou a permanente (válida a partir de quando foi feita).

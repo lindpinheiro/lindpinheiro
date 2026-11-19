@@ -47,7 +47,7 @@ export default function Balanco({ s }) {
     d.pat && { id: `p${d.date}`, icone: Wind, dia: DIAS[d.wd], nome: 'Patins', detalhe: `${d.pat.min} min · ${(INTENSIDADES[d.pat.int] || INTENSIDADES.leve).nome.toLowerCase()}`, kcal: d.patins },
   ]).filter(Boolean)
   const totalExercicio = atividades.reduce((t, a) => t + a.kcal, 0)
-  const treinos = sem.filter((d) => s.logs[d.date]?.feito).length
+  const treinos = sem.filter((d) => s.logs[d.date]?.feito && !s.logs[d.date]?.extra).length
   const diasDieta = dias.filter((d) => d.c.completa).length
 
   // A previsão só usa os dias com as três refeições marcadas: refeição não marcada contaria como zero.

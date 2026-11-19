@@ -108,7 +108,7 @@ const SECOES = [
     <Itens>
       <li><b>2 a 3 vezes por semana, 30–45 min</b>, em ritmo de conversa.</li>
       <li>Dias sugeridos: terça, quinta e domingo. Nesses dias o cardio da academia é opcional.</li>
-      <li><b>Antes de andar</b>: 5 min soltando quadril e tornozelo. <b>Depois</b>: 5 min de alongamento parado. As duas rotinas estão na aba Treino, nos dias de patins.</li>
+      <li><b>Antes de andar</b>: 5 min soltando quadril e tornozelo (na aba Treino, nos dias de patins). <b>Depois</b>: os 3 alongamentos do dia, que ficam no fim de todo treino.</li>
       <li><b>O que mais melhora o patins na academia</b>: subida no banco (quarta) e cadeiras abdutora e adutora (quarta e sábado). Elas treinam o empurrar para o lado e o puxar de volta de cada passada.</li>
       <li>Capacete, munhequeira e joelheira sempre.</li>
     </Itens>

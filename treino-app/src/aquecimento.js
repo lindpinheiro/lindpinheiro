@@ -32,13 +32,15 @@ export const AQUEC = {
     TORNOZELO,
     A('passo-lateral', 'Passo lateral semiagachado', '10 passos cada lado', 'Na posição do patins: joelhos dobrados, tronco à frente.'),
   ],
-  // Depois do patins ou no fim do treino de perna. Estático, 30 s cada lado.
+  // Os 3 alongamentos do dia: depois do treino ou do patins. Parados, 45 s cada lado, soltando o ar devagar.
+  // Cobrem frente do quadril e coxa, toda a parte de trás (panturrilha, posterior, costas, ombros) e glúteo.
   depois: [
-    A('flexor', 'Flexor do quadril em pé', '30 s cada', 'Passo grande à frente, joelho de trás quase esticado, encaixe o quadril para a frente. É o músculo que mais encurta na posição do patins.'),
-    A('adutor', 'Parte interna da coxa', '30 s', 'Pernas bem abertas, transfira o peso para um lado dobrando aquele joelho. Repita do outro.'),
-    A('gluteo', 'Glúteo sentado', '30 s cada', 'Sentado no banco, cruze o tornozelo sobre o joelho oposto e incline o tronco à frente.'),
-    A('panturrilha', 'Panturrilha na parede', '30 s cada', 'Mãos na parede, perna de trás esticada, calcanhar no chão.'),
-    A('posterior', 'Posterior da coxa', '30 s cada', 'Calcanhar num degrau baixo, perna esticada, incline o tronco com a coluna reta.'),
+    A('afundo-ajoelhado', 'Afundo ajoelhado com braço para cima', '45 s cada lado',
+      'Um joelho no tatame, o outro pé à frente. Aperte o glúteo de trás, leve o quadril à frente e estique o braço do lado do joelho para cima, inclinando para o outro lado. Solta a frente do quadril e a lateral do tronco.'),
+    A('esquadro-trave', 'Esquadro na trave ou na parede', '45 s',
+      'Mãos na trave ou na parede, na altura do quadril. Ande para trás até o tronco ficar paralelo ao chão, braços esticados, peito descendo, calcanhares no chão. Estica panturrilha, posterior, costas e ombros.'),
+    A('figura-4', 'Figura 4 deitado', '45 s cada lado',
+      'Deitado, cruze o tornozelo sobre o joelho oposto e puxe a coxa de baixo para o peito. Solta glúteo e lombar. Para levantar, role de lado e suba devagar.'),
   ],
 }
 

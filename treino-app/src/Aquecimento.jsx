@@ -58,13 +58,12 @@ export default function Aquecimento({ itens, feitos, onMarcar }) {
 
 const PATINS = [
   { id: 'antes', titulo: 'Antes do patins', sub: '5 min · opcional · solta quadril e tornozelo', itens: AQUEC.antesPatins },
-  { id: 'depois', titulo: 'Depois do patins', sub: '5 min · opcional · alongamento parado', itens: AQUEC.depois },
 ]
-const FIM_PERNA = [{ id: 'fim', titulo: 'Alongamento no fim', sub: '5 min · opcional · depois da caminhada', itens: AQUEC.depois }]
+const FIM = [{ id: 'fim', titulo: 'Alongamento', sub: '3 alongamentos · 5 min · opcional', itens: AQUEC.depois }]
 
 // Rotinas opcionais de alongamento, sempre fechadas até serem tocadas.
 export function RotinaPatins({ sx }) { return <Rotinas secoes={PATINS} sx={sx} /> }
-export function AlongamentoFim({ sx }) { return <Rotinas secoes={FIM_PERNA} sx={sx} /> }
+export function AlongamentoFim({ sx }) { return <Rotinas secoes={FIM} sx={sx} /> }
 
 function Rotinas({ secoes, sx }) {
   const [aberto, setAberto] = useState(null)

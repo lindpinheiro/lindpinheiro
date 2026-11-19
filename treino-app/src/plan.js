@@ -160,7 +160,7 @@ export const PLAN = {
       E('rosca-polia', 'Rosca na polia', 3, '10–12', 60, 'Cotovelos parados ao lado do corpo.'),
     ],
   },
-  5: { titulo: 'Descanso', descanso: true, patins: true, ex: [] },
+  5: { titulo: 'Descanso', descanso: true, patins: true, opcional: true, ex: [] },
   6: {
     titulo: 'Perna completa',
     grupo: 'perna',
@@ -200,6 +200,21 @@ export const PLAN = {
   },
 }
 
+// Treino opcional da sexta: abdômen e cardio leve. Não pesa perna, peito nem costas, para não atrapalhar o fim de semana.
+export const OPCIONAL = {
+  titulo: 'Abdômen e cardio',
+  grupo: 'core',
+  opcional: true,
+  cardio: { tipo: 'esteira', min: 15 },
+  ex: [
+    E('abd-polia', 'Abdominal na polia ajoelhado', 3, '12–15', 60, 'Corda atrás da cabeça, enrole o tronco levando os cotovelos aos joelhos. Solte o ar ao descer.'),
+    E('elev-pernas', 'Elevação de pernas no banco', 3, '10–15', 60, 'Deitado, mãos segurando o banco. Suba as pernas e tire o quadril do banco no fim. Desça devagar.'),
+    E('pallof', 'Pallof press na polia', 2, '10 cada lado', 45, 'De lado para a polia, empurre a alça à frente do peito sem deixar o tronco girar.'),
+    E('prancha', 'Prancha', 3, '30–45 s', 45, 'Cotovelos sob os ombros, corpo reto, glúteo contraído. Respire normalmente. Anote os segundos em repetições.'),
+    E('prancha-lateral', 'Prancha lateral', 2, '20–30 s cada lado', 45, 'Joelhos no chão para facilitar. Anote os segundos em repetições.'),
+  ],
+}
+
 // Primeiro dia do plano novo. Antes dele, cada data usa o plano antigo.
 export const INICIO_PLANO = '2026-11-20'
 export const planoBase = (date) => (date < INICIO_PLANO ? PLAN_ANTIGO : PLAN)
@@ -213,6 +228,7 @@ export const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 export function planoDe(logs, date) {
   const repoe = logs?.[date]?.repoe
   // Reposição nova guarda a data do treino perdido; a antiga guardava só o dia da semana.
+  if (logs?.[date]?.extra) return { ...OPCIONAL, extra: true }
   if (typeof repoe === 'string') { const wd = diaDe(repoe); return { ...planoBase(repoe)[wd], repoe: wd } }
   if (repoe) return { ...planoBase(date)[repoe], repoe }
   return planoBase(date)[diaDe(date)]

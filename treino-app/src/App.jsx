@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, BottomNavigation, BottomNavigationAction, Box, Button,
-  ButtonBase, Chip, Collapse, Container, IconButton,
+  ButtonBase, Chip, Collapse, Container, Dialog, DialogContent, DialogTitle, IconButton,
   InputAdornment, LinearProgress, List, ListItem, ListItemText, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { keyframes } from '@emotion/react'
 import {
-  BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, Flame, HeartPulse, History, Moon, Plus, Trash2,
+  ArrowLeftRight, BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, Flame, HeartPulse, History, Minus, Moon, Plus, Repeat, Trash2,
   TrendingUp, TriangleAlert, Upload, Utensils, Wind, X,
 } from 'lucide-react'
 import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video, planoDe } from './plan.js'
+import { ALTERNATIVAS, kgNoModo, modoLado, progressao, treinoDe } from './exercicios.js'
 import { META, PESO_INICIAL, br, hojeISO, iso, num, semana, ultima, useStore } from './store.js'
 import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
@@ -144,7 +145,8 @@ function Treino({ s, update, onDescanso }) {
   const [sel, setDate] = useState(hoje)
   const date = dias.some((d) => d.date === sel) ? sel : hoje // se a semana virar com o app aberto
   const wd = dias.find((d) => d.date === date).wd
-  const p = planoDe(s.logs, date)
+  const p = treinoDe(s, date)
+  const [trocando, setTrocando] = useState(null) // exercício aberto na janela de troca
   const log = s.logs[date] || {}
   const feitas = p.ex.reduce((t, e) => t + (log.ex?.[e.id] || []).filter((x) => x?.ok).length, 0)
   const total = p.ex.reduce((t, e) => t + e.series, 0)
@@ -160,7 +162,7 @@ function Treino({ s, update, onDescanso }) {
     editar((l) => {
       const set = ((l.ex[e.id] ??= [])[k] ??= {})
       set.ok = ligando
-      if (ligando) { set.kg ??= sugestao.kg; set.reps ??= sugestao.reps }
+      if (ligando) { set.kg ??= sugestao.kg; set.reps ??= sugestao.reps; set.lado = modoLado(s, e.id) }
       // Última série do treino marcada: conclui o treino sem precisar de outro toque.
       if (ligando && p.ex.every((x) => (l.ex[x.id] || []).filter((y) => y?.ok).length >= x.series)) l.feito = true
     })
@@ -241,12 +243,24 @@ function Treino({ s, update, onDescanso }) {
 
           <Paper sx={{ border: 1, borderColor: 'divider', overflow: 'hidden' }}>
             {p.ex.map((e, i) => (
-              <Exercicio key={e.id} e={e} n={i + 1} sets={log.ex?.[e.id] || []} ant={ultima(s.logs, e.id, date)}
+              <Exercicio key={e.id} e={e} n={i + 1} sets={log.ex?.[e.id] || []} ant={ultima(s.logs, e.id, date)} lado={modoLado(s, e.id)}
+                onLado={(v) => update((n) => { (n.lados ??= {})[e.id] = v; for (const x of n.logs[date]?.ex?.[e.id] || []) if (x) x.lado = v })}
+                onTrocar={(ALTERNATIVAS[(e.original || e).id]) ? () => setTrocando(e) : null}
                 aberto={aberto === e.id} onToggle={() => setAberto(aberto === e.id ? null : e.id)}
-                onCampo={(k, campo, v) => editar((l) => { ((l.ex[e.id] ??= [])[k] ??= {})[campo] = v })}
+                onCampo={(k, campo, v) => editar((l) => { const x = ((l.ex[e.id] ??= [])[k] ??= {}); x[campo] = v; x.lado = modoLado(s, e.id) })}
                 onMarcar={(k, sug) => marcar(e, k, sug)} ultimo={i === p.ex.length - 1} />
             ))}
           </Paper>
+
+          <Trocar e={trocando} onClose={() => setTrocando(null)} onEscolher={(orig, altId, sempre) => {
+            if (sempre) update((n) => {
+              n.trocas ??= {}
+              if (altId) n.trocas[orig.id] = { por: altId, desde: date }; else delete n.trocas[orig.id]
+              if (n.logs[date]?.troca) delete n.logs[date].troca[orig.id]
+            })
+            else editar((l) => { (l.troca ??= {})[orig.id] = altId || '' })
+            setAberto(altId || orig.id); setTrocando(null)
+          }} />
 
           <Cardio key={`cardio-${date}`} c={p.cardio} log={log.cardio} patins={p.patins} kg={pesoEm(s, date)} onSalvar={(v) => editar((l) => { l.cardio = v })} />
 
@@ -268,10 +282,34 @@ function Treino({ s, update, onDescanso }) {
   )
 }
 
-function Exercicio({ e, n, sets, ant, aberto, onToggle, onCampo, onMarcar, ultimo }) {
+// Linha de orientação de carga, a partir do último treino.
+function Orientacao({ prog, ant, e, lado }) {
+  const un = lado ? ' kg cada' : ' kg'
+  const ultimaTxt = ant && `Última vez: ${ant.sets.length} ${ant.sets.length === 1 ? 'série' : 'séries'}, até ${num(Math.max(...ant.sets.map((x) => kgNoModo(x, e.id, lado) || 0)))}${un}`
+  const cfg = !prog
+    ? { cor: 'text.secondary', icone: History, titulo: ant ? 'Repita a carga da última vez' : 'Primeira vez: comece leve', sub: ant ? ultimaTxt : 'Escolha uma carga que permita fazer as repetições com boa execução.' }
+    : prog.tipo === 'subir'
+      ? { cor: 'success.main', icone: TrendingUp, titulo: `Suba para ${num(prog.kg)}${un}`, sub: `Você fez ${prog.f.max} repetições em todas as séries com ${num(prog.de)}${un}. Comece com ${prog.reps} e vá subindo.` }
+      : prog.tipo === 'pesado'
+        ? { cor: 'warning.main', icone: TriangleAlert, titulo: `Mantenha ${num(prog.kg)}${un}`, sub: `Ficou abaixo de ${prog.f.min} repetições. Repita até fazer ${prog.f.min} em todas; se não passar disso em 2 treinos, baixe um pouco.` }
+        : { cor: 'primary.main', icone: Repeat, titulo: `Mantenha ${num(prog.kg)}${un}, tente ${prog.reps} repetições`, sub: `Quando fizer ${prog.f.max} em todas as séries, o app avisa para subir.` }
+  const Icone = cfg.icone
+  return (
+    <Stack direction="row" spacing={1.25} sx={{ mb: 1.5, alignItems: 'flex-start' }}>
+      <Box sx={{ color: cfg.cor, display: 'flex', mt: '2px' }}><Icone size={18} /></Box>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="subtitle2" sx={{ color: cfg.cor === 'text.secondary' ? 'text.primary' : cfg.cor }}>{cfg.titulo}</Typography>
+        <Typography variant="body2" color="text.secondary">{cfg.sub}</Typography>
+      </Box>
+    </Stack>
+  )
+}
+
+function Exercicio({ e, n, sets, ant, lado, onLado, onTrocar, aberto, onToggle, onCampo, onMarcar, ultimo }) {
   const feitas = sets.filter((x) => x?.ok).length
   const ok = feitas >= e.series
   const [comoFazer, setComoFazer] = useState(false)
+  const prog = progressao(e, ant, lado)
   const campoSx = { flex: 1, '& input': { textAlign: 'center', py: 1.25, fontVariantNumeric: 'tabular-nums' } }
   return (
     <Accordion expanded={aberto} onChange={onToggle} sx={{ borderBottom: ultimo ? 0 : 1, borderColor: 'divider' }} square>
@@ -282,22 +320,22 @@ function Exercicio({ e, n, sets, ant, aberto, onToggle, onCampo, onMarcar, ultim
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{e.nome}</Typography>
-          <Typography variant="body2" color="text.secondary">{e.series} × {e.reps} · {fmtDesc(e.desc)} de descanso</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {e.series} × {e.reps} · {fmtDesc(e.desc)} de descanso{e.original ? ` · no lugar de ${e.original.nome.toLowerCase()}` : ''}
+          </Typography>
         </Box>
-        {feitas > 0 && !ok && <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>{feitas}/{e.series}</Typography>}
+        {feitas > 0 && !ok ? <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>{feitas}/{e.series}</Typography>
+          : prog?.tipo === 'subir' && !ok ? <Box sx={{ color: 'success.main', display: 'flex' }} aria-label="Pronto para subir carga"><TrendingUp size={18} /></Box> : null}
       </AccordionSummary>
       <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1, gap: 1 }}>
-          {ant ? (
-            <Stack direction="row" spacing={0.75} sx={{ color: 'text.secondary', alignItems: 'center', minWidth: 0 }}>
-              <History size={14} style={{ flexShrink: 0 }} />
-              <Typography variant="body2" noWrap>Última vez: {ant.sets.length} {ant.sets.length === 1 ? 'série' : 'séries'}, até {num(Math.max(...ant.sets.map((x) => x.kg || 0)))} kg</Typography>
-            </Stack>
-          ) : <Typography variant="body2" color="text.secondary">Primeira vez: comece leve</Typography>}
-          <Button size="small" onClick={() => setComoFazer(!comoFazer)} sx={{ flexShrink: 0, mr: -1 }}
+        <Orientacao prog={prog} ant={ant} e={e} lado={lado} />
+
+        <Stack direction="row" spacing={0.5} sx={{ mb: 1, ml: -1 }}>
+          <Button size="small" onClick={() => setComoFazer(!comoFazer)}
             endIcon={<ChevronDown size={14} style={{ transform: comoFazer ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />}>
             Como fazer
           </Button>
+          {onTrocar && <Button size="small" startIcon={<ArrowLeftRight size={14} />} onClick={onTrocar}>Trocar exercício</Button>}
         </Stack>
         <Collapse in={comoFazer} unmountOnExit>
           <Box sx={{ pb: 1.5 }}>
@@ -307,18 +345,25 @@ function Exercicio({ e, n, sets, ant, aberto, onToggle, onCampo, onMarcar, ultim
           </Box>
         </Collapse>
 
-        <Stack direction="row" spacing={1} sx={{ mb: 0.5, color: 'text.secondary' }}>
+        <Stack direction="row" spacing={1} sx={{ mb: 0.5, color: 'text.secondary', alignItems: 'center' }}>
           <Typography variant="caption" sx={{ width: 20, textAlign: 'center' }}>#</Typography>
-          <Typography variant="caption" sx={{ flex: 1, textAlign: 'center' }}>Carga (kg)</Typography>
+          <Box sx={{ flex: 1, textAlign: 'center' }}>
+            <ButtonBase onClick={() => onLado(!lado)} aria-label={`Carga ${lado ? 'por lado' : 'total'}. Tocar para trocar`}
+              sx={{ borderRadius: 1, px: 0.75, py: 0.25, typography: 'caption', color: 'primary.main', fontWeight: 600, gap: 0.5 }}>
+              kg {lado ? 'por lado' : 'total'} <ArrowLeftRight size={12} />
+            </ButtonBase>
+          </Box>
           <Typography variant="caption" sx={{ flex: 1, textAlign: 'center' }}>Repetições</Typography>
           <Box sx={{ width: 48 }} />
         </Stack>
         <Stack spacing={1}>
           {Array.from({ length: e.series }, (_, k) => {
             const set = sets[k] || {}
-            // Sugestão: a mesma série do último treino; sem histórico, a série anterior de hoje.
-            const base = ant?.sets[k] || sets[k - 1] || ant?.sets.at(-1) || {}
-            const sug = { kg: base.kg, reps: base.reps }
+            // Sugestão: se é hora de subir, a carga nova; senão a mesma série do último treino (ou a anterior de hoje).
+            const base = ant?.sets[k] || ant?.sets.at(-1)
+            const sug = prog?.tipo === 'subir' ? { kg: prog.kg, reps: prog.reps }
+              : base ? { kg: kgNoModo(base, e.id, lado), reps: base.reps }
+              : { kg: sets[k - 1]?.kg, reps: sets[k - 1]?.reps }
             const campo = (nome, rotulo, modo) => (
               <TextField size="small" type="number" value={set[nome] ?? ''} placeholder={sug[nome] != null ? num(sug[nome]) : '–'}
                 onChange={(ev) => onCampo(k, nome, ev.target.value === '' ? undefined : +ev.target.value)}
@@ -342,6 +387,47 @@ function Exercicio({ e, n, sets, ant, aberto, onToggle, onCampo, onMarcar, ultim
         {feitas === 0 && <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>Fez o sugerido? Toque só no ✓.</Typography>}
       </AccordionDetails>
     </Accordion>
+  )
+}
+
+// Janela para trocar um exercício por outro parecido, só hoje ou daqui em diante.
+function Trocar({ e, onClose, onEscolher }) {
+  const [sempre, setSempre] = useState(false)
+  const [ultimo, setUltimo] = useState(e)
+  if (e && e !== ultimo) setUltimo(e) // mantém o conteúdo durante a animação de fechar
+  const atual = e || ultimo
+  if (!atual) return null
+  const orig = atual.original || atual
+  const opcoes = [...(atual.original ? [{ id: null, nome: orig.nome, nota: 'Voltar ao exercício do plano' }] : []), ...(ALTERNATIVAS[orig.id] || []).filter((a) => a.id !== atual.id)]
+  return (
+    <Dialog open={!!e} onClose={onClose} fullWidth maxWidth="xs" scroll="paper">
+      <DialogTitle sx={{ pb: 1 }}>
+        Trocar {atual.nome.toLowerCase()}
+        <Typography variant="body2" color="text.secondary">Mesmo músculo, mesmas séries e repetições.</Typography>
+      </DialogTitle>
+      <DialogContent sx={{ pt: 0 }}>
+        <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={sempre ? 'sempre' : 'hoje'} onChange={(_, v) => v && setSempre(v === 'sempre')}
+          aria-label="Por quanto tempo" sx={{ mb: 1.5 }}>
+          <ToggleButton value="hoje">Só hoje</ToggleButton>
+          <ToggleButton value="sempre">Sempre</ToggleButton>
+        </ToggleButtonGroup>
+        {opcoes.map((a) => (
+          <ButtonBase key={a.id ?? 'original'} onClick={() => onEscolher(orig, a.id, sempre)}
+            sx={{ display: 'flex', width: '100%', textAlign: 'left', gap: 1.5, py: 1.25, borderTop: 1, borderColor: 'divider', alignItems: 'center', justifyContent: 'flex-start' }}>
+            {foto(a.id ?? orig.id)
+              ? <Box component="img" src={foto(a.id ?? orig.id)} alt="" sx={{ width: 96, height: 48, objectFit: 'cover', borderRadius: 1, flexShrink: 0 }} />
+              : <Box sx={{ width: 96, height: 48, borderRadius: 1, bgcolor: 'action.hover', flexShrink: 0, display: 'grid', placeItems: 'center', color: 'text.secondary' }}><Dumbbell size={18} /></Box>}
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{a.nome}</Typography>
+              {a.nota && <Typography variant="body2" color="text.secondary">{a.nota}</Typography>}
+            </Box>
+          </ButtonBase>
+        ))}
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
+          Cada exercício guarda o próprio histórico de cargas.
+        </Typography>
+      </DialogContent>
+    </Dialog>
   )
 }
 

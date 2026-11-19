@@ -67,7 +67,9 @@ const SECOES = [
     <Itens>
       <li>Comece com uma carga que permita o <b>mínimo da faixa</b> de repetições com boa execução.</li>
       <li>Quando fizer o <b>máximo da faixa em todas as séries</b>, aumente a carga no treino seguinte.</li>
-      <li>O app mostra o que você fez da última vez. Tente ganhar por uma repetição ou um pouco de carga.</li>
+      <li><b>O app avisa</b> no topo de cada exercício: <b>suba</b> (seta verde), <b>mantenha e tente mais uma repetição</b>, ou <b>mantenha</b> se ficou abaixo da faixa. A sugestão já vem preenchida nas séries.</li>
+      <li><b>Quanto subir</b>: 2,5 kg nos exercícios de tronco, 5 kg nos de perna e 2 kg por halter. Se a máquina não tiver esse passo, use o próximo peso disponível.</li>
+      <li><b>Halteres e exercícios de um lado só</b>: toque em “kg total” acima das séries para trocar para “kg por lado”. Assim as contas de progresso e volume ficam certas.</li>
       <li>Voltando de uma pausa: na <b>primeira semana</b> use cargas mais leves e uma série a menos. A força antiga volta rápido.</li>
       <li>A cada 6–8 semanas, uma semana leve com metade das séries.</li>
     </Itens>

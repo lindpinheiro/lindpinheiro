@@ -19,7 +19,7 @@ const SECOES = [
             <Typography color="primary" sx={{ width: 44, flexShrink: 0, fontWeight: 600 }}>{DIAS[wd]}</Typography>
             <Box>
               <Typography>{p.titulo}</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 {[p.cardio && `${CARDIO[p.cardio.tipo].nome} ${p.cardio.min} min`, p.patins && 'Patins'].filter(Boolean).join(' · ')}
               </Typography>
             </Box>
@@ -58,7 +58,7 @@ const SECOES = [
         <li><b>Não fique parado em pé</b> depois da série. Levante-se devagar dos aparelhos.</li>
         <li><b>Tontura, visão escura, suor frio ou enjoo</b>: pare, deite com as pernas elevadas e beba água. Se não passar por completo, encerre o dia.</li>
       </Itens>
-      <Typography color="text.secondary" sx={{ mt: 2 }}>
+      <Typography color="textSecondary" sx={{ mt: 2 }}>
         Conte sobre essas quedas a um médico antes de aumentar a intensidade — principalmente se você toma remédio para pressão, já desmaiou ou sente dor no peito.
       </Typography>
     </>
@@ -129,7 +129,7 @@ export default function Guia() {
   return (
     <>
       <Typography variant="h4">Guia</Typography>
-      <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
+      <Typography color="textSecondary" sx={{ mt: 1, mb: 3 }}>
         Perder gordura devagar enquanto ganha músculo: musculação seis dias por semana, cardio curto no fim e patins como extra.
       </Typography>
       <Paper sx={{ border: 1, borderColor: 'divider', overflow: 'hidden' }}>

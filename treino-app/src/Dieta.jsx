@@ -79,7 +79,7 @@ function Jejum() {
         <Box sx={{ color: aberta ? 'success.main' : pct === null ? 'text.secondary' : 'primary.main', display: 'flex' }}><Timer size={22} /></Box>
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{titulo}</Typography>
-          <Typography variant="body2" color="text.secondary">{texto}</Typography>
+          <Typography variant="body2" color="textSecondary">{texto}</Typography>
         </Box>
       </Stack>
       {pct !== null && <LinearProgress variant="determinate" value={pct} color={aberta ? 'success' : 'primary'} sx={{ height: 6, borderRadius: 3, mt: 1.5 }} aria-label={aberta ? 'Tempo da janela' : 'Tempo de jejum'} />}
@@ -130,7 +130,7 @@ export default function Dieta({ s, update }) {
               <AccordionSummary expandIcon={<ChevronDown size={18} />} sx={{ pl: 1.5, pr: 2, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1.5, my: 1.5 } }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{r.nome}{emJejum ? ` · ${r.hora}` : ''}</Typography>
-                  <Typography variant="body2" color="text.secondary">{livre ? 'Refeição livre' : ok && op ? op.nome : emJejum ? r.jejum : r.livre}</Typography>
+                  <Typography variant="body2" color="textSecondary">{livre ? 'Refeição livre' : ok && op ? op.nome : emJejum ? r.jejum : r.livre}</Typography>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
@@ -141,7 +141,7 @@ export default function Dieta({ s, update }) {
                   </ToggleButtonGroup>
                 )}
                 <Box component="ul" sx={{ pl: 2.5, mt: 0, mb: 1.5, '& li': { mb: 0.5 } }}>{item.base.map((b) => <li key={b}>{b}</li>)}</Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Cerca de {item.kcal} kcal · {item.prot} g de proteína</Typography>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 1.5 }}>Cerca de {item.kcal} kcal · {item.prot} g de proteína</Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>Pode trocar por</Typography>
                 <Box component="ul" sx={{ pl: 2.5, mt: 0, mb: 2, color: 'text.secondary', '& li': { mb: 0.5 } }}>{item.trocas.map((t) => <li key={t}>{t}</li>)}</Box>
                 <Stack spacing={1}>
@@ -162,7 +162,7 @@ export default function Dieta({ s, update }) {
           <Box sx={{ color: agua >= AGUA_META ? 'success.main' : 'primary.main', display: 'flex' }}><Droplets size={22} /></Box>
           <Box sx={{ flex: 1 }}>
             <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Água</Typography>
-            <Typography variant="body2" color="text.secondary">{String(agua / 2).replace('.', ',')} de {AGUA_META / 2} litros</Typography>
+            <Typography variant="body2" color="textSecondary">{String(agua / 2).replace('.', ',')} de {AGUA_META / 2} litros</Typography>
           </Box>
           <IconButton aria-label="Tirar 500 ml" disabled={!agua} onClick={() => editar((d) => { d.agua = Math.max(0, (d.agua || 0) - 1) })} sx={{ border: 1, borderColor: 'divider', borderRadius: 3 }}><Minus size={20} /></IconButton>
           <IconButton aria-label="Somar 500 ml" color="primary" onClick={() => editar((d) => { d.agua = (d.agua || 0) + 1 })} sx={{ border: 1, borderColor: 'divider', borderRadius: 3 }}><Plus size={20} /></IconButton>
@@ -178,9 +178,9 @@ export default function Dieta({ s, update }) {
               <Box sx={{ color: 'text.secondary', display: 'flex' }}>{x.id === 'fruta' ? <Apple size={22} /> : x.id === 'acai' ? <IceCreamBowl size={22} /> : <Cookie size={22} />}</Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{x.nome}</Typography>
-                <Typography variant="body2" color="text.secondary">{x.porcao}</Typography>
+                <Typography variant="body2" color="textSecondary">{x.porcao}</Typography>
               </Box>
-              <Typography color={passou ? 'warning.main' : 'text.primary'} sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{n}/{x.limite}</Typography>
+              <Typography color={passou ? 'warning' : 'textPrimary'} sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{n}/{x.limite}</Typography>
               <IconButton aria-label={`Tirar ${x.nome}`} disabled={!dia[x.id]} onClick={() => editar((d) => { d[x.id] = Math.max(0, (d[x.id] || 0) - 1) })} sx={{ border: 1, borderColor: 'divider', borderRadius: 3 }}><Minus size={20} /></IconButton>
               <IconButton aria-label={`Somar ${x.nome}`} color="primary" onClick={() => editar((d) => { d[x.id] = (d[x.id] || 0) + 1 })} sx={{ border: 1, borderColor: 'divider', borderRadius: 3 }}><Plus size={20} /></IconButton>
             </Stack>

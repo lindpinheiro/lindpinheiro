@@ -66,9 +66,9 @@ function Peso({ s, update }) {
     <Card>
       <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <Box>
-          <Typography variant="body2" color="text.secondary">Peso atual</Typography>
-          <Typography variant="h4" component="div">{num(atual)} <Typography component="span" color="text.secondary">kg</Typography></Typography>
-          <Typography variant="body2" color={dif < 0 ? 'success.main' : 'text.secondary'} sx={{ fontWeight: dif < 0 ? 500 : 400 }}>
+          <Typography variant="body2" color="textSecondary">Peso atual</Typography>
+          <Typography variant="h4" component="div">{num(atual)} <Typography component="span" color="textSecondary">kg</Typography></Typography>
+          <Typography variant="body2" color={dif < 0 ? 'success' : 'textSecondary'} sx={{ fontWeight: dif < 0 ? 500 : 400 }}>
             {dif === 0 ? 'Ponto de partida' : `${dif > 0 ? '+' : '−'} ${num(Math.abs(dif).toFixed(1))} kg no total`}
           </Typography>
         </Box>
@@ -77,12 +77,12 @@ function Peso({ s, update }) {
 
       <LinearProgress variant="determinate" value={andado} color="success" sx={{ height: 8, borderRadius: 4, mt: 2 }} aria-label="Caminho até a meta" />
       <Stack direction="row" sx={{ justifyContent: 'space-between', mt: 0.75 }}>
-        <Typography variant="caption" color="text.secondary">{PESO_INICIAL} kg</Typography>
+        <Typography variant="caption" color="textSecondary">{PESO_INICIAL} kg</Typography>
         <Typography variant="caption" sx={{ fontWeight: 600 }}>{atual > META ? `Faltam ${num((atual - META).toFixed(1))} kg` : 'Meta atingida'}</Typography>
-        <Typography variant="caption" color="text.secondary">Meta {META} kg</Typography>
+        <Typography variant="caption" color="textSecondary">Meta {META} kg</Typography>
       </Stack>
-      {dias != null && dias >= 7 && <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>Último registro há {dias} dias. Que tal se pesar?</Typography>}
-      {!ultimo && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Registre seu peso uma vez por semana, de manhã e em jejum.</Typography>}
+      {dias != null && dias >= 7 && <Typography variant="body2" color="warning" sx={{ mt: 1 }}>Último registro há {dias} dias. Que tal se pesar?</Typography>}
+      {!ultimo && <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>Registre seu peso uma vez por semana, de manhã e em jejum.</Typography>}
 
       {pesos.length > 0 && (
         <>
@@ -103,7 +103,7 @@ function Peso({ s, update }) {
           <TextField autoFocus fullWidth value={kg} onChange={(e) => setKg(e.target.value)} placeholder={num(atual)} sx={{ mt: 1 }}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); salvar() } }}
             slotProps={{ htmlInput: { inputMode: 'decimal', step: 0.1, 'aria-label': 'Peso de hoje' }, input: { endAdornment: <InputAdornment position="end">kg</InputAdornment> } }} />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>De manhã, em jejum, depois do banheiro. Se já registrou hoje, o valor é substituído.</Typography>
+          <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>De manhã, em jejum, depois do banheiro. Se já registrou hoje, o valor é substituído.</Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setDlg(false)}>Cancelar</Button>
@@ -135,7 +135,7 @@ function Patins({ s, update }) {
         <Box sx={{ color: 'primary.main', display: 'flex' }}><Wind size={22} /></Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Patins</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             {naSemana.length}/3 na semana{kcalSem ? ` · ${kcalSem.toLocaleString('pt-BR')} kcal` : ''}
           </Typography>
         </Box>
@@ -165,7 +165,7 @@ function Patins({ s, update }) {
           <ToggleButtonGroup exclusive fullWidth color="primary" value={int} onChange={(_, v) => v && setInt(v)} aria-label="Intensidade" sx={{ mt: 2 }}>
             {Object.entries(INTENSIDADES).map(([id, i]) => <ToggleButton key={id} value={id}>{i.nome}</ToggleButton>)}
           </ToggleButtonGroup>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+          <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>
             {INTENSIDADES[int].como}.{m ? ` Cerca de ${kcalPatins({ min: m, int }, pesoEm(s, hoje))} kcal.` : ''}
           </Typography>
         </DialogContent>
@@ -202,14 +202,14 @@ function Ajustes({ s, update, replace }) {
           <Box sx={{ color: 'text.secondary', display: 'flex' }}><Settings size={20} /></Box>
           <Box>
             <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Ajustes e backup</Typography>
-            <Typography variant="body2" color="text.secondary">Bipe, altura, idade e cópia dos dados</Typography>
+            <Typography variant="body2" color="textSecondary">Bipe, altura, idade e cópia dos dados</Typography>
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
             <Box>
               <Typography>Bipe no fim do descanso</Typography>
-              <Typography variant="body2" color="text.secondary">Toca no fone, se estiver conectado</Typography>
+              <Typography variant="body2" color="textSecondary">Toca no fone, se estiver conectado</Typography>
             </Box>
             <Stack direction="row" sx={{ alignItems: 'center' }}>
               <Button size="small" onClick={testarBip}>Testar</Button>
@@ -224,7 +224,7 @@ function Ajustes({ s, update, replace }) {
               <Button size="small" onClick={() => setEditando(true)}>Alterar</Button>
             </Stack>
           )}
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2, mb: 1.5 }}>
+          <Typography variant="body2" color="textSecondary" sx={{ mt: 2, mb: 1.5 }}>
             Os dados ficam só neste aparelho. Baixe uma cópia de vez em quando, para não perder nada se trocar de celular ou limpar o navegador.
           </Typography>
           <Stack direction="row" spacing={1}>
@@ -259,7 +259,7 @@ function Recordes({ s }) {
             </ListItem>
           ))}
         </List>
-      ) : <Typography color="text.secondary">Anote as cargas nos treinos e elas aparecem aqui.</Typography>}
+      ) : <Typography color="textSecondary">Anote as cargas nos treinos e elas aparecem aqui.</Typography>}
     </Card>
   )
 }
@@ -271,7 +271,7 @@ function Lista({ itens, texto, onDel }) {
       {itens.map((p) => (
         <ListItem key={p.date} disableGutters sx={{ py: 0.25 }}
           secondaryAction={<IconButton edge="end" size="small" aria-label={`Apagar registro de ${br(p.date)}`} onClick={() => confirm('Apagar este registro?') && onDel(p)}><Trash2 size={16} /></IconButton>}>
-          <Typography variant="body2" color="text.secondary" sx={{ width: 64 }}>{br(p.date)}</Typography>
+          <Typography variant="body2" color="textSecondary" sx={{ width: 64 }}>{br(p.date)}</Typography>
           <Typography variant="body2">{texto(p)}</Typography>
         </ListItem>
       ))}

@@ -130,7 +130,7 @@ function Reposicao({ s, dias, hoje, onEscolher }) {
   return (
     <Card sx={{ mt: 2 }}>
       <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{titulo}</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{texto}</Typography>
+      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>{texto}</Typography>
       {lista.map((d) => {
         const plano = PLAN[d.wd], feito = !!s.logs[d.date]?.feito, ruim = conflita(d.wd)
         return (
@@ -138,7 +138,7 @@ function Reposicao({ s, dias, hoje, onEscolher }) {
             <Typography color="primary" sx={{ width: 36, fontWeight: 600 }}>{DIAS[d.wd]}</Typography>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography sx={{ lineHeight: 1.3 }}>{plano.titulo}</Typography>
-              <Typography variant="body2" color={ruim ? 'warning.main' : feito ? 'success.main' : 'text.secondary'}>
+              <Typography variant="body2" color={ruim ? 'warning' : feito ? 'success' : 'textSecondary'}>
                 {ruim ? `Amanhã já é ${GRUPO[AMANHA.grupo]}` : `${feito ? 'Feito' : d.date < hoje ? 'Faltou' : 'Ainda não'} · ${duracao(plano)} min`}
               </Typography>
             </Box>
@@ -191,7 +191,7 @@ function Treino({ s, update, onDescanso }) {
 
   return (
     <>
-      <Typography color="text.secondary" sx={{ '&::first-letter': { textTransform: 'uppercase' } }}>
+      <Typography color="textSecondary" sx={{ '&::first-letter': { textTransform: 'uppercase' } }}>
         {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
       </Typography>
       <Stack direction="row" sx={{ justifyContent: 'space-between', my: 2 }}>
@@ -200,7 +200,7 @@ function Treino({ s, update, onDescanso }) {
           return (
             <ButtonBase key={d.date} onClick={() => { setDate(d.date); onDescanso(0) }} aria-pressed={sel} aria-label={`${DIAS[d.wd]} ${br(d.date)}`}
               sx={{ flexDirection: 'column', gap: 0.5, borderRadius: 3, py: 0.5, flex: 1 }}>
-              <Typography variant="caption" color={d.date === hoje ? 'primary' : 'text.secondary'} sx={{ fontWeight: d.date === hoje ? 600 : 400 }}>{DIAS[d.wd]}</Typography>
+              <Typography variant="caption" color={d.date === hoje ? 'primary' : 'textSecondary'} sx={{ fontWeight: d.date === hoje ? 600 : 400 }}>{DIAS[d.wd]}</Typography>
               <Box sx={{ width: 40, height: 40, borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 500,
                 bgcolor: sel ? 'primary.main' : 'transparent', color: sel ? 'primary.contrastText' : ok ? 'success.main' : 'text.primary',
                 border: ok && !sel ? 2 : 0, borderColor: 'success.main' }}>
@@ -215,7 +215,7 @@ function Treino({ s, update, onDescanso }) {
 
       {p.repoe && (
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
-          <Typography color="text.secondary" sx={{ flex: 1 }}>Reposição do treino de {DIAS[p.repoe].toLowerCase()}</Typography>
+          <Typography color="textSecondary" sx={{ flex: 1 }}>Reposição do treino de {DIAS[p.repoe].toLowerCase()}</Typography>
           <Button size="small" onClick={() => {
             if (feitas && !confirm('Trocar o treino de hoje? As séries já marcadas ficam salvas, mas deixam de aparecer aqui.')) return
             editar((l) => { delete l.repoe; l.feito = false }); onDescanso(0)
@@ -229,7 +229,7 @@ function Treino({ s, update, onDescanso }) {
         <Card sx={{ mt: 2, textAlign: 'center', py: 5 }}>
           <Box sx={{ color: 'text.secondary', mb: 1 }}><Moon size={32} /></Box>
           <Typography variant="subtitle1">Hoje o corpo se recupera</Typography>
-          <Typography color="text.secondary" sx={{ mt: 0.5 }}>Se der vontade, 30–40 min de patins em ritmo leve.</Typography>
+          <Typography color="textSecondary" sx={{ mt: 0.5 }}>Se der vontade, 30–40 min de patins em ritmo leve.</Typography>
         </Card>
         <RotinaPatins sx={{ mt: 2 }} />
         <AlongamentoFim sx={{ mt: 2 }} />
@@ -288,7 +288,7 @@ function Treino({ s, update, onDescanso }) {
             {log.feito ? 'Treino concluído' : feitas ? 'Concluir agora' : 'Concluir treino'}
           </Button>
           {gasto.total > 0 && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, textAlign: 'center' }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5, textAlign: 'center' }}>
               Gasto estimado: {gasto.total} kcal{gasto.series ? ` · ${gasto.series} ${gasto.series === 1 ? 'série' : 'séries'}` : ''}{gasto.volume ? ` · ${Math.round(gasto.volume).toLocaleString('pt-BR')} kg levantados` : ''}
             </Typography>
           )}
@@ -315,7 +315,7 @@ function Orientacao({ prog, ant, e, lado }) {
       <Box sx={{ color: cfg.cor, display: 'flex', mt: '2px' }}><Icone size={18} /></Box>
       <Box sx={{ minWidth: 0 }}>
         <Typography variant="subtitle2" sx={{ color: cfg.cor === 'text.secondary' ? 'text.primary' : cfg.cor }}>{cfg.titulo}</Typography>
-        <Typography variant="body2" color="text.secondary">{cfg.sub}</Typography>
+        <Typography variant="body2" color="textSecondary">{cfg.sub}</Typography>
       </Box>
     </Stack>
   )
@@ -336,7 +336,7 @@ function Exercicio({ e, n, sets, ant, lado, onLado, onTrocar, aberto, onToggle, 
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{e.nome}</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             {e.series} × {e.reps} · {fmtDesc(e.desc)} de descanso{e.original ? ` · no lugar de ${e.original.nome.toLowerCase()}` : ''}
           </Typography>
         </Box>
@@ -356,7 +356,7 @@ function Exercicio({ e, n, sets, ant, lado, onLado, onTrocar, aberto, onToggle, 
         <Collapse in={comoFazer} unmountOnExit>
           <Box sx={{ pb: 1.5 }}>
             {foto(e.id) && <Box component="img" src={foto(e.id)} alt={`${e.nome}: posição inicial e final`} sx={{ display: 'block', width: '100%', borderRadius: 2, mb: 1 }} />}
-            {e.nota && <Typography variant="body2" color="text.secondary">{e.nota}</Typography>}
+            {e.nota && <Typography variant="body2" color="textSecondary">{e.nota}</Typography>}
             <Button size="small" href={video(e.nome)} target="_blank" rel="noopener" startIcon={<CirclePlay size={16} />} sx={{ mt: 0.5, ml: -1 }}>Ver vídeo</Button>
           </Box>
         </Collapse>
@@ -387,7 +387,7 @@ function Exercicio({ e, n, sets, ant, lado, onLado, onTrocar, aberto, onToggle, 
             )
             return (
               <Stack key={k} direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                <Typography variant="body2" color="text.secondary" sx={{ width: 20, textAlign: 'center' }}>{k + 1}</Typography>
+                <Typography variant="body2" color="textSecondary" sx={{ width: 20, textAlign: 'center' }}>{k + 1}</Typography>
                 {campo('kg', 'kg', 'decimal')}
                 {campo('reps', 'reps', 'numeric')}
                 <IconButton onClick={() => onMarcar(k, sug)} aria-label={`Série ${k + 1} feita`} aria-pressed={!!set.ok}
@@ -400,7 +400,7 @@ function Exercicio({ e, n, sets, ant, lado, onLado, onTrocar, aberto, onToggle, 
             )
           })}
         </Stack>
-        {feitas === 0 && <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>Fez o sugerido? Toque só no ✓.</Typography>}
+        {feitas === 0 && <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1 }}>Fez o sugerido? Toque só no ✓.</Typography>}
       </AccordionDetails>
     </Accordion>
   )
@@ -419,7 +419,7 @@ function Trocar({ e, onClose, onEscolher }) {
     <Dialog open={!!e} onClose={onClose} fullWidth maxWidth="xs" scroll="paper">
       <DialogTitle sx={{ pb: 1 }}>
         Trocar {atual.nome.toLowerCase()}
-        <Typography variant="body2" color="text.secondary">Mesmo músculo, mesmas séries e repetições.</Typography>
+        <Typography variant="body2" color="textSecondary">Mesmo músculo, mesmas séries e repetições.</Typography>
       </DialogTitle>
       <DialogContent sx={{ pt: 0 }}>
         <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={sempre ? 'sempre' : 'hoje'} onChange={(_, v) => v && setSempre(v === 'sempre')}
@@ -435,11 +435,11 @@ function Trocar({ e, onClose, onEscolher }) {
               : <Box sx={{ width: 96, height: 48, borderRadius: 1, bgcolor: 'action.hover', flexShrink: 0, display: 'grid', placeItems: 'center', color: 'text.secondary' }}><Dumbbell size={18} /></Box>}
             <Box sx={{ minWidth: 0 }}>
               <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{a.nome}</Typography>
-              {a.nota && <Typography variant="body2" color="text.secondary">{a.nota}</Typography>}
+              {a.nota && <Typography variant="body2" color="textSecondary">{a.nota}</Typography>}
             </Box>
           </ButtonBase>
         ))}
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
+        <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1.5 }}>
           Cada exercício guarda o próprio histórico de cargas.
         </Typography>
       </DialogContent>
@@ -460,7 +460,7 @@ function Cardio({ c, log, patins, kg, onSalvar }) {
         </Box>
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{info.nome}</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             {log ? `${log.min} min · ${INTENSIDADES[intensidadeCardio(c.tipo, log)].nome.toLowerCase()} · ${kcalCardio(c.tipo, log, kg)} kcal` : `${c.min} min · para fechar o treino`}
           </Typography>
         </Box>
@@ -468,7 +468,7 @@ function Cardio({ c, log, patins, kg, onSalvar }) {
       </Stack>
       {!log && (
         <>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+          <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>
             {info.como}{patins && c.tipo !== 'caminhada' ? ' Vai andar de patins hoje? Pode pular.' : ''}
           </Typography>
           <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={int} onChange={(_, v) => v && setInt(v)} aria-label="Intensidade do cardio" sx={{ mt: 1.5 }}>
@@ -477,7 +477,7 @@ function Cardio({ c, log, patins, kg, onSalvar }) {
           <Stack direction="row" spacing={1} sx={{ mt: 1.5, alignItems: 'center' }}>
             <TextField size="small" type="number" value={min} onChange={(e) => setMin(e.target.value)} sx={{ width: 120 }}
               slotProps={{ htmlInput: { inputMode: 'numeric', 'aria-label': 'Minutos de cardio' }, input: { endAdornment: <InputAdornment position="end">min</InputAdornment> } }} />
-            <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>{m ? `Cerca de ${kcalCardio(c.tipo, { min: m, int }, kg)} kcal` : ''}</Typography>
+            <Typography variant="body2" color="textSecondary" sx={{ flex: 1 }}>{m ? `Cerca de ${kcalCardio(c.tipo, { min: m, int }, kg)} kcal` : ''}</Typography>
             <Button variant="contained" disabled={!m} onClick={() => onSalvar({ min: m, int })}>Marcar</Button>
           </Stack>
         </>

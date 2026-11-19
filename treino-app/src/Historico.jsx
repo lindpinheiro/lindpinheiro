@@ -39,7 +39,7 @@ export default function Historico({ s }) {
   const Stat = ({ v, label }) => (
     <Box sx={{ flex: 1, textAlign: 'center' }}>
       <Typography variant="h6" component="div" sx={{ lineHeight: 1.2 }}>{v}</Typography>
-      <Typography variant="body2" color="text.secondary">{label}</Typography>
+      <Typography variant="body2" color="textSecondary">{label}</Typography>
     </Box>
   )
 
@@ -58,7 +58,7 @@ export default function Historico({ s }) {
           <IconButton aria-label="Próximo mês" disabled={mesAtual} onClick={() => mudar(1)}><ChevronRight size={20} /></IconButton>
         </Stack>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', rowGap: 0.5 }}>
-          {SEMANA.map((d) => <Typography key={d} variant="caption" color="text.secondary" sx={{ textAlign: 'center', pb: 0.5 }}>{d}</Typography>)}
+          {SEMANA.map((d) => <Typography key={d} variant="caption" color="textSecondary" sx={{ textAlign: 'center', pb: 0.5 }}>{d}</Typography>)}
           {Array.from({ length: recuo }, (_, i) => <span key={`v${i}`} />)}
           {dias.map((d) => {
             const futuro = d.date > hoje
@@ -96,12 +96,12 @@ const Linha = ({ ok, titulo, detalhe }) => (
   <Stack direction="row" spacing={1.5} sx={{ py: 0.75, alignItems: 'flex-start' }}>
     <Box sx={{ color: ok ? 'success.main' : 'text.disabled', display: 'flex', mt: '3px' }}>{ok ? <Check size={18} /> : <Minus size={18} />}</Box>
     <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography color={ok ? 'text.primary' : 'text.secondary'}>{titulo}</Typography>
-      {detalhe && <Typography variant="body2" color="text.secondary">{detalhe}</Typography>}
+      <Typography color={ok ? 'textPrimary' : 'textSecondary'}>{titulo}</Typography>
+      {detalhe && <Typography variant="body2" color="textSecondary">{detalhe}</Typography>}
     </Box>
   </Stack>
 )
-const Secao = (p) => <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mt: 2, lineHeight: 2 }} {...p} />
+const Secao = (p) => <Typography variant="overline" color="textSecondary" sx={{ display: 'block', mt: 2, lineHeight: 2 }} {...p} />
 
 function Dia({ s, date, onClose }) {
   const [ultima, setUltima] = useState(date)
@@ -120,7 +120,7 @@ function Dia({ s, date, onClose }) {
         <IconButton aria-label="Fechar" onClick={onClose}><X size={20} /></IconButton>
       </DialogTitle>
       <DialogContent sx={{ pt: 0 }}>
-        {vazio ? <Typography color="text.secondary" sx={{ py: 2 }}>Nada registrado neste dia.</Typography> : (
+        {vazio ? <Typography color="textSecondary" sx={{ py: 2 }}>Nada registrado neste dia.</Typography> : (
           <>
             <Secao sx={{ display: 'block', mt: 0, lineHeight: 2 }}>Treino</Secao>
             {r.plano.descanso
@@ -130,13 +130,13 @@ function Dia({ s, date, onClose }) {
               <Stack key={e.id} direction="row" spacing={1.5} sx={{ py: 0.5, pl: 4.25 }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2">{e.nome}</Typography>
-                  <Typography variant="body2" color="text.secondary">{sets.map((x) => `${x.kg != null ? num(x.kg) : '–'} kg${(x.lado ?? ladoPadrao(e.id)) ? ' cada' : ''} × ${x.reps ?? '–'}`).join(' · ')}</Typography>
+                  <Typography variant="body2" color="textSecondary">{sets.map((x) => `${x.kg != null ? num(x.kg) : '–'} kg${(x.lado ?? ladoPadrao(e.id)) ? ' cada' : ''} × ${x.reps ?? '–'}`).join(' · ')}</Typography>
                 </Box>
               </Stack>
             ))}
             {r.log?.cardio && <Linha ok titulo={CARDIO[r.plano.cardio?.tipo]?.nome || 'Cardio'} detalhe={`${r.log.cardio.min} min${r.plano.cardio ? ` · ${INTENSIDADES[intensidadeCardio(r.plano.cardio.tipo, r.log.cardio)].nome.toLowerCase()} · cerca de ${kcalCardio(r.plano.cardio.tipo, r.log.cardio, r.kg)} kcal` : ''}`} />}
             {r.pat && <Linha ok titulo="Patins" detalhe={`${r.pat.min} min${r.pat.km ? ` · ${num(r.pat.km)} km` : ''}${` · ${(INTENSIDADES[r.pat.int] || INTENSIDADES.leve).nome.toLowerCase()} · cerca de ${kcalPatins(r.pat, r.kg)} kcal`}`} />}
-            {r.gasto > 0 && <Typography variant="body2" color="text.secondary" sx={{ pl: 4.25, pt: 0.5 }}>Gasto estimado no dia: {r.gasto} kcal</Typography>}
+            {r.gasto > 0 && <Typography variant="body2" color="textSecondary" sx={{ pl: 4.25, pt: 0.5 }}>Gasto estimado no dia: {r.gasto} kcal</Typography>}
 
             <Divider sx={{ mt: 2 }} />
             <Secao>Dieta</Secao>
@@ -150,9 +150,9 @@ function Dia({ s, date, onClose }) {
 
             {r.kcal > 0 && (
               <Paper sx={{ mt: 2, p: 2, bgcolor: 'action.hover' }}>
-                <Typography variant="body2" color="text.secondary">Consumo estimado</Typography>
+                <Typography variant="body2" color="textSecondary">Consumo estimado</Typography>
                 <Typography variant="h6" component="div">{r.kcal.toLocaleString('pt-BR')} kcal · {r.prot} g de proteína</Typography>
-                <Typography variant="body2" color="text.secondary">Conta só o que foi marcado, pelas porções do plano.</Typography>
+                <Typography variant="body2" color="textSecondary">Conta só o que foi marcado, pelas porções do plano.</Typography>
               </Paper>
             )}
           </>

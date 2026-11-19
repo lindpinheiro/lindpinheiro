@@ -21,7 +21,7 @@ export function ListaAquec({ itens, feitos, onMarcar }) {
           <Typography sx={{ lineHeight: 1.35, color: ok ? 'text.secondary' : 'text.primary' }}>
             {a.nome} <Box component="span" sx={{ color: 'primary.main', fontWeight: 600, whiteSpace: 'nowrap' }}>· {a.dose}</Box>
           </Typography>
-          <Typography variant="body2" color="text.secondary">{a.como}</Typography>
+          <Typography variant="body2" color="textSecondary">{a.como}</Typography>
         </Box>
         <IconButton size="small" href={video(a.nome)} target="_blank" rel="noopener" aria-label={`Vídeo: ${a.nome}`} sx={{ color: 'text.secondary', mt: -0.25 }}>
           <CirclePlay size={18} />
@@ -45,7 +45,7 @@ export default function Aquecimento({ itens, feitos, onMarcar }) {
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Aquecimento</Typography>
-            <Typography variant="body2" color="text.secondary">5 min · opcional{n ? ` · ${n}/${itens.length}` : ''}</Typography>
+            <Typography variant="body2" color="textSecondary">5 min · opcional{n ? ` · ${n}/${itens.length}` : ''}</Typography>
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{ px: 2, pt: 0, pb: 1 }}>
@@ -75,7 +75,7 @@ function Rotinas({ secoes, sx }) {
           <AccordionSummary expandIcon={<ChevronDown size={20} />} sx={{ px: 2, '& .MuiAccordionSummary-content': { my: 1.5 } }}>
             <Box>
               <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{x.titulo}</Typography>
-              <Typography variant="body2" color="text.secondary">{x.sub}</Typography>
+              <Typography variant="body2" color="textSecondary">{x.sub}</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ px: 2, pt: 0, pb: 1 }}><ListaAquec itens={x.itens} /></AccordionDetails>

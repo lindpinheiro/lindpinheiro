@@ -51,8 +51,8 @@ export default function Periodo({ s }) {
 
   const Stat = ({ v, sub, label }) => (
     <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
-      <Typography variant="h6" component="div" sx={{ lineHeight: 1.2 }}>{v}{sub && <Typography component="span" variant="body2" color="text.secondary"> {sub}</Typography>}</Typography>
-      <Typography variant="body2" color="text.secondary">{label}</Typography>
+      <Typography variant="h6" component="div" sx={{ lineHeight: 1.2 }}>{v}{sub && <Typography component="span" variant="body2" color="textSecondary"> {sub}</Typography>}</Typography>
+      <Typography variant="body2" color="textSecondary">{label}</Typography>
     </Box>
   )
 
@@ -69,8 +69,8 @@ export default function Periodo({ s }) {
       </Stack>
 
       <Box sx={{ textAlign: 'center', py: 1.5 }}>
-        <Typography variant="h4" component="div" color={difPeso < 0 ? 'success.main' : 'text.primary'}>{difPeso === 0 ? '0 kg' : `${sinal(difPeso)} kg`}</Typography>
-        <Typography variant="body2" color="text.secondary">Peso: de {num(r.pesoIni)} para {num(r.pesoFim)} kg</Typography>
+        <Typography variant="h4" component="div" color={difPeso < 0 ? 'success' : 'textPrimary'}>{difPeso === 0 ? '0 kg' : `${sinal(difPeso)} kg`}</Typography>
+        <Typography variant="body2" color="textSecondary">Peso: de {num(r.pesoIni)} para {num(r.pesoFim)} kg</Typography>
       </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
@@ -79,7 +79,7 @@ export default function Periodo({ s }) {
         <Stat v={r.patins} sub={r.patinsMin ? `· ${r.patinsMin} min` : ''} label="Patins" />
         <Stat v={fmt(r.kcal)} sub="kcal" label="Gasto com exercício" />
       </Box>
-      {r.volume > 0 && <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>{fmt(r.volume)} kg levantados no período.</Typography>}
+      {r.volume > 0 && <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>{fmt(r.volume)} kg levantados no período.</Typography>}
 
       {meses && (
         <Box sx={{ mt: 2 }}>
@@ -87,7 +87,7 @@ export default function Periodo({ s }) {
           {meses.map((m) => (
             <Stack key={m.nome} direction="row" spacing={1.5} sx={{ py: 1, borderTop: 1, borderColor: 'divider', opacity: m.futuro ? 0.4 : 1 }}>
               <Typography sx={{ width: 40, fontWeight: 600, textTransform: 'capitalize' }}>{m.nome}</Typography>
-              <Typography color="text.secondary" sx={{ flex: 1 }}>{m.futuro ? '–' : `${m.treinos} treinos · ${m.dieta} de dieta`}</Typography>
+              <Typography color="textSecondary" sx={{ flex: 1 }}>{m.futuro ? '–' : `${m.treinos} treinos · ${m.dieta} de dieta`}</Typography>
               {!m.futuro && <Typography noWrap sx={{ fontVariantNumeric: 'tabular-nums' }}>{sinal(m.pesoFim - m.pesoIni)} kg</Typography>}
             </Stack>
           ))}
@@ -99,11 +99,11 @@ export default function Periodo({ s }) {
         <Stack key={c.id} direction="row" spacing={1.5} sx={{ py: 1, borderTop: 1, borderColor: 'divider', alignItems: 'center' }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ lineHeight: 1.3 }}>{NOMES[c.id]}</Typography>
-            <Typography variant="body2" color="text.secondary">{num(c.de / (modoLado(s, c.id) ? 2 : 1))} → {num(c.para / (modoLado(s, c.id) ? 2 : 1))} kg{modoLado(s, c.id) ? ' cada' : ''}</Typography>
+            <Typography variant="body2" color="textSecondary">{num(c.de / (modoLado(s, c.id) ? 2 : 1))} → {num(c.para / (modoLado(s, c.id) ? 2 : 1))} kg{modoLado(s, c.id) ? ' cada' : ''}</Typography>
           </Box>
-          <Typography noWrap color={c.dif > 0 ? 'success.main' : 'text.secondary'} sx={{ fontWeight: 600 }}>{sinal(c.dif / (modoLado(s, c.id) ? 2 : 1))} kg</Typography>
+          <Typography noWrap color={c.dif > 0 ? 'success' : 'textSecondary'} sx={{ fontWeight: 600 }}>{sinal(c.dif / (modoLado(s, c.id) ? 2 : 1))} kg</Typography>
         </Stack>
-      )) : <Typography variant="body2" color="text.secondary">Aparece quando um exercício tiver dois treinos registrados no período, com cargas diferentes.</Typography>}
+      )) : <Typography variant="body2" color="textSecondary">Aparece quando um exercício tiver dois treinos registrados no período, com cargas diferentes.</Typography>}
     </Paper>
   )
 }

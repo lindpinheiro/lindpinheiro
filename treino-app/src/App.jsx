@@ -232,6 +232,7 @@ function Treino({ s, update, onDescanso }) {
           <Typography color="text.secondary" sx={{ mt: 0.5 }}>Se der vontade, 30–40 min de patins em ritmo leve.</Typography>
         </Card>
         <RotinaPatins sx={{ mt: 2 }} />
+        <AlongamentoFim sx={{ mt: 2 }} />
         </>
       ) : (
         <>
@@ -278,7 +279,8 @@ function Treino({ s, update, onDescanso }) {
 
           <Cardio key={`cardio-${date}`} c={p.cardio} log={log.cardio} patins={p.patins} kg={pesoEm(s, date)} onSalvar={(v) => editar((l) => { l.cardio = v })} />
 
-          {p.perna ? <AlongamentoFim sx={{ mt: 2 }} /> : p.patins && <RotinaPatins sx={{ mt: 2 }} />}
+          {p.patins && <RotinaPatins sx={{ mt: 2 }} />}
+          <AlongamentoFim sx={{ mt: 2 }} />
 
           <Button fullWidth size="large" sx={{ mt: 3 }} variant={log.feito ? 'outlined' : 'contained'} color={log.feito ? 'success' : 'primary'}
             startIcon={log.feito && <Check size={20} />}

@@ -28,22 +28,21 @@ const SECOES = [
       })}
     </Stack>
   ) },
-  { id: 'hora', icone: Clock, titulo: 'Treino em 1 hora', corpo: (
+  { id: 'hora', icone: Clock, titulo: 'Duração dos treinos', corpo: (
     <Itens>
-      <li><b>5 min de aquecimento</b>: 2 a 3 min de cardio leve e movimentos para soltar as articulações. A lista está no topo de cada treino.</li>
-      <li><b>35–45 min de musculação</b>: 5 ou 6 exercícios. Respeite o cronômetro de descanso — é ele que mantém o treino dentro do tempo.</li>
-      <li><b>6–12 min de cardio</b> para fechar.</li>
-      <li>Cada dia leva de {Math.min(...ORDEM.filter((d) => d).map((d) => duracao(PLAN[d])))} a {Math.max(...ORDEM.map((d) => duracao(PLAN[d])))} minutos. Com a academia cheia, troque o aparelho ocupado pelo próximo da lista e volte depois.</li>
-      <li>Sem tempo? Corte o último exercício, nunca o primeiro.</li>
-      <li><b>Faltou um dia?</b> No domingo, a aba Treino mostra os treinos que ficaram para trás e deixa repor um deles. Um só: o domingo continua sendo o dia de recuperar.</li>
-      <li><b>Faltou segunda ou quinta (peito)?</b> Não reponha no domingo: na segunda você já treina peito, e o músculo precisa de ao menos 48 h. Siga a semana normalmente. Faltar um treino de peito não atrapalha o resultado; repetir o mesmo músculo sem descanso, sim.</li>
+      <li><b>Segunda a quinta, cerca de 1 hora</b>: 5 min de aquecimento, 5 ou 6 exercícios e 8 a 12 min de cardio. Respeite o cronômetro de descanso: é ele que mantém o treino no horário do almoço.</li>
+      <li><b>Sábado e domingo, até 2 horas</b>: perna completa no sábado ({duracao(PLAN[6])} min) e peito, ombro e acessórios no domingo ({duracao(PLAN[0])} min). Antebraço, trapézio e panturrilha ficam aqui, para não ocupar os dias curtos.</li>
+      <li><b>Nos treinos longos</b>: faça uma refeição 1 a 2 h antes, leve água e uma fruta, e beba entre os exercícios. No sábado de perna, os descansos são mais longos de propósito, por causa da pressão.</li>
+      <li><b>Sexta é descanso</b> (patins leve, se quiser), para chegar inteiro no fim de semana.</li>
+      <li>Sem tempo? Corte o último exercício, nunca o primeiro. Com a academia cheia, use “Trocar exercício”.</li>
+      <li><b>Faltou um dia?</b> Na sexta, a aba Treino mostra o que ficou para trás e sugere repor só o que não bate com o fim de semana. Perna e peito perdidos na semana não precisam de reposição: sábado e domingo já cobrem.</li>
     </Itens>
   ) },
   { id: 'cardio', icone: HeartPulse, titulo: 'Cardio na academia', corpo: (
     <Itens>
-      <li><b>Esteira inclinada</b> (segunda e sexta): 5–6 km/h com 8–12% de inclinação. Gasta bastante e poupa o joelho.</li>
-      <li><b>Escada</b> (terça e quinta): nível 4–6. Trabalha glúteo e panturrilha. Diminua o ritmo nos 2 últimos minutos; parar de uma vez pode derrubar a pressão.</li>
-      <li><b>Caminhada leve</b> (quarta e sábado): só para a circulação voltar ao normal depois da perna. Nada de escada nesses dias.</li>
+      <li><b>Esteira inclinada</b> (segunda, quinta e domingo): 5–6 km/h com 8–12% de inclinação. Gasta bastante e poupa o joelho.</li>
+      <li><b>Escada</b> (quarta): nível 4–6. Trabalha glúteo e panturrilha. Diminua o ritmo nos 2 últimos minutos; parar de uma vez pode derrubar a pressão.</li>
+      <li><b>Caminhada leve</b> (terça e sábado): só para a circulação voltar ao normal depois da perna. Nada de escada nesses dias.</li>
       <li>Intensidade certa: você consegue falar frases inteiras, mas não cantar.</li>
       <li>Quando ficar fácil, aumente a inclinação ou o nível, não o tempo.</li>
     </Itens>
@@ -76,7 +75,7 @@ const SECOES = [
   ) },
   { id: 'peito', icone: Shirt, titulo: 'Peito que não cresce', corpo: (
     <Itens>
-      <li><b>Crossover de baixo para cima</b> (quinta): trabalha a parte de cima do peito, a que dá volume perto da clavícula. Ajuda, mas como complemento do supino inclinado.</li>
+      <li><b>Crossover de baixo para cima</b> (quarta): trabalha a parte de cima do peito, a que dá volume perto da clavícula. Ajuda, mas como complemento do supino inclinado.</li>
       <li><b>Execução vale mais que o exercício</b>: escápulas juntas e peito alto o tempo todo. Se o ombro vai para a frente, quem trabalha é o ombro.</li>
       <li><b>Alongue sob carga</b>: desça devagar e fundo, com pausa de 1 s embaixo. Halteres e máquinas permitem descer mais que a barra.</li>
       <li><b>Chegue perto da falha</b>: termine cada série com 1 ou 2 repetições sobrando, não 5.</li>
@@ -88,7 +87,7 @@ const SECOES = [
     <Itens>
       <li>O hip dip é o espaço entre o osso do quadril e o do fêmur. <b>O formato do osso não muda</b> com treino.</li>
       <li>O que dá para fazer é <b>suavizar</b>: desenvolver a lateral e a parte de cima do glúteo e reduzir a gordura da cintura.</li>
-      <li>Por isso a <b>cadeira abdutora</b> entra na quarta e no sábado, além da elevação pélvica nos dois dias.</li>
+      <li>Por isso a <b>cadeira abdutora</b> entra na terça e no sábado, além da elevação pélvica nos dois dias.</li>
       <li>Na abdutora, segure 1 s aberto e volte devagar. Carga que você controla, não tranco.</li>
       <li>Os patins ajudam: o movimento lateral usa justamente esse músculo.</li>
     </Itens>
@@ -107,9 +106,9 @@ const SECOES = [
   { id: 'patins', icone: Wind, titulo: 'Patins', corpo: (
     <Itens>
       <li><b>2 a 3 vezes por semana, 30–45 min</b>, em ritmo de conversa.</li>
-      <li>Dias sugeridos: terça, quinta e domingo. Nesses dias o cardio da academia é opcional.</li>
-      <li><b>Antes de andar</b>: 5 min soltando quadril e tornozelo (na aba Treino, nos dias de patins). <b>Depois</b>: os 3 alongamentos do dia, que ficam no fim de todo treino.</li>
-      <li><b>O que mais melhora o patins na academia</b>: subida no banco (quarta) e cadeiras abdutora e adutora (quarta e sábado). Elas treinam o empurrar para o lado e o puxar de volta de cada passada.</li>
+      <li>Dias sugeridos: segunda, quinta e sexta (leve). Nesses dias o cardio da academia é opcional. Evite patins forte na véspera do sábado de perna.</li>
+      <li><b>Antes de andar</b>: 5 min soltando quadril e tornozelo (na aba Treino, nos dias de patins). <b>Depois</b>: o alongamento do dia (rotina A, B ou C), que fica no fim de todo treino.</li>
+      <li><b>O que mais melhora o patins na academia</b>: subida no banco e cadeiras abdutora e adutora, no sábado. Elas treinam o empurrar para o lado e o puxar de volta de cada passada.</li>
       <li>Capacete, munhequeira e joelheira sempre.</li>
     </Itens>
   ) },

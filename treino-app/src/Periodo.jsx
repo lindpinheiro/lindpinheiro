@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Dumbbell, Scale, TrendingDown, TrendingUp, C
 import { EXERCICIOS, NOMES, kgTotal, modoLado, progressao } from './exercicios.js'
 import { consumo, diaSemana, gastoTreino, kcalPatins, pesoEm } from './gasto.js'
 import { hojeISO, iso, num, ultima } from './store.js'
+import { previstoEm } from './plan.js'
 
 const fmt = (n) => Math.round(n).toLocaleString('pt-BR')
 const kg1 = (v) => num(Math.abs(v).toFixed(1))
@@ -18,7 +19,7 @@ function resumir(s, ini, fim) {
   const primeiro = [...Object.keys(s.logs), ...Object.keys(s.dieta || {}), ...s.peso.map((x) => x.date), ...s.patins.map((x) => x.date)].sort()[0] || hoje
   for (let d = new Date(`${ini}T12:00:00`); iso(d) <= fim && iso(d) <= hoje; d.setDate(d.getDate() + 1)) {
     const date = iso(d), kg = pesoEm(s, date), log = s.logs[date], pat = s.patins.find((p) => p.date === date)
-    if (date >= primeiro) { r.dias++; if (diaSemana(date) !== 0) r.previstos++ }
+    if (date >= primeiro) { r.dias++; if (!previstoEm(date).descanso) r.previstos++ }
     if (log?.feito) r.treinos++
     if (consumo(s, date).completa) r.dieta++
     if (pat) { r.patins++; r.patinsMin += pat.min; r.kcal += kcalPatins(pat, kg) }

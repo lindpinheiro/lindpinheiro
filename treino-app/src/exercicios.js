@@ -1,5 +1,5 @@
 // Alternativas de cada exercício, carga "por lado" e a regra de progressão de carga.
-import { PLAN, planoDe } from './plan.js'
+import { PLAN, PLAN_ANTIGO, planoDe } from './plan.js'
 
 const A = (id, nome, nota = '') => ({ id, nome, nota })
 
@@ -49,17 +49,25 @@ export const ALTERNATIVAS = {
   'extensora': [A('leg-press', 'Leg press 45°', 'Pés mais baixos na plataforma para pegar mais a coxa.'), A('hack', 'Agachamento no hack')],
   'hip-thrust-b': [A('hip-thrust-maq', 'Elevação pélvica na máquina'), A('ponte-gluteo', 'Ponte de glúteo com halter')],
   'abdutora-reta': [A('abducao-cabo', 'Abdução na polia')],
+  'remada-baixa': [A('remada-maq', 'Remada articulada'), A('remada-apoiada', 'Remada com peito apoiado')],
+  'remada-unilateral': [A('remada-baixa', 'Remada baixa com triângulo'), A('remada-maq', 'Remada articulada')],
+  'rosca-polia': [A('rosca-halter', 'Rosca alternada com halteres'), A('rosca-w', 'Rosca direta com barra W')],
+  'hack': [A('smith-agacha', 'Agachamento no Smith'), A('leg-press', 'Leg press 45°', 'Pés no meio da plataforma.')],
+  'flexora-sentado': [A('mesa-flexora', 'Mesa flexora'), A('flexora-pe', 'Flexora em pé', 'Uma perna de cada vez.')],
+  'supino-reto-halter': [A('supino-maq', 'Supino na máquina'), A('supino-reto', 'Supino reto com barra')],
+  'desenv-halter': [A('desenv-maq', 'Desenvolvimento na máquina'), A('desenv-smith', 'Desenvolvimento no Smith')],
+  'triceps-corda-alto': [A('triceps-frances', 'Tríceps francês'), A('triceps-corda', 'Tríceps na polia com corda')],
   'adutora': [A('aducao-cabo', 'Adução na polia', 'Tornozeleira na polia baixa, puxe a perna para dentro.'), A('sumo', 'Agachamento sumô com halter', 'Pés bem abertos, halter entre as pernas.')],
 }
 
 // Nome de qualquer exercício (do plano ou alternativo), para histórico e recordes.
 export const NOMES = {}
-for (const k in PLAN) for (const e of PLAN[k].ex) NOMES[e.id] = e.nome
+for (const P of [PLAN, PLAN_ANTIGO]) for (const k in P) for (const e of P[k].ex) NOMES[e.id] ??= e.nome
 for (const k in ALTERNATIVAS) for (const a of ALTERNATIVAS[k]) NOMES[a.id] ??= a.nome
 
 // Exercício completo por id (as alternativas herdam séries e repetições do original), para a progressão.
 export const EXERCICIOS = {}
-for (const k in PLAN) for (const e of PLAN[k].ex) EXERCICIOS[e.id] ??= e
+for (const P of [PLAN, PLAN_ANTIGO]) for (const k in P) for (const e of P[k].ex) EXERCICIOS[e.id] ??= e
 for (const k in ALTERNATIVAS) for (const a of ALTERNATIVAS[k]) EXERCICIOS[a.id] ??= { ...EXERCICIOS[k], ...a }
 
 // Troca vigente para um exercício numa data: a do dia, ou a permanente (válida a partir de quando foi feita).

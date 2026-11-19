@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, ButtonBase, IconButton, Paper, Stack, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, ButtonBase, IconButton, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { Check, ChevronDown, CirclePlay, Flame } from 'lucide-react'
 import { video } from './plan.js'
-import { AQUEC } from './aquecimento.js'
+import { ALONGAMENTOS, AQUEC, alongamentoDoDia } from './aquecimento.js'
 
 // Lista de itens de aquecimento/alongamento. Com `feitos`/`onMarcar`, cada item pode ser marcado.
 export function ListaAquec({ itens, feitos, onMarcar }) {
@@ -59,11 +59,33 @@ export default function Aquecimento({ itens, feitos, onMarcar }) {
 const PATINS = [
   { id: 'antes', titulo: 'Antes do patins', sub: '5 min · opcional · solta quadril e tornozelo', itens: AQUEC.antesPatins },
 ]
-const FIM = [{ id: 'fim', titulo: 'Alongamento', sub: '3 alongamentos · 5 min · opcional', itens: AQUEC.depois }]
 
 // Rotinas opcionais de alongamento, sempre fechadas até serem tocadas.
 export function RotinaPatins({ sx }) { return <Rotinas secoes={PATINS} sx={sx} /> }
-export function AlongamentoFim({ sx }) { return <Rotinas secoes={FIM} sx={sx} /> }
+// Alongamento do fim do treino: rotina A, B ou C (a do dia já vem escolhida), sempre fechado até ser tocado.
+export function AlongamentoFim({ sx, date }) {
+  const [aberto, setAberto] = useState(false)
+  const doDia = alongamentoDoDia(date)
+  const [rotina, setRotina] = useState(doDia)
+  return (
+    <Paper sx={{ border: 1, borderColor: 'divider', overflow: 'hidden', ...sx }}>
+      <Accordion square expanded={aberto} onChange={() => setAberto(!aberto)}>
+        <AccordionSummary expandIcon={<ChevronDown size={18} />} sx={{ px: 2, '& .MuiAccordionSummary-content': { my: 1.5 } }}>
+          <Box>
+            <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>Alongamento {rotina}</Typography>
+            <Typography variant="body2" color="textSecondary">3 alongamentos · 5 min · opcional</Typography>
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails sx={{ px: 2, pt: 0, pb: 1 }}>
+          <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={rotina} onChange={(_, v) => v && setRotina(v)} aria-label="Rotina de alongamento" sx={{ mb: 1 }}>
+            {['A', 'B', 'C'].map((r) => <ToggleButton key={r} value={r}>{r}{r === doDia ? ' · hoje' : ''}</ToggleButton>)}
+          </ToggleButtonGroup>
+          <ListaAquec itens={ALONGAMENTOS[rotina]} />
+        </AccordionDetails>
+      </Accordion>
+    </Paper>
+  )
+}
 
 function Rotinas({ secoes, sx }) {
   const [aberto, setAberto] = useState(null)

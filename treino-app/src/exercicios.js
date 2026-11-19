@@ -57,6 +57,11 @@ export const NOMES = {}
 for (const k in PLAN) for (const e of PLAN[k].ex) NOMES[e.id] = e.nome
 for (const k in ALTERNATIVAS) for (const a of ALTERNATIVAS[k]) NOMES[a.id] ??= a.nome
 
+// Exercício completo por id (as alternativas herdam séries e repetições do original), para a progressão.
+export const EXERCICIOS = {}
+for (const k in PLAN) for (const e of PLAN[k].ex) EXERCICIOS[e.id] ??= e
+for (const k in ALTERNATIVAS) for (const a of ALTERNATIVAS[k]) EXERCICIOS[a.id] ??= { ...EXERCICIOS[k], ...a }
+
 // Troca vigente para um exercício numa data: a do dia, ou a permanente (válida a partir de quando foi feita).
 export function trocaDe(s, date, id) {
   const doDia = s.logs?.[date]?.troca?.[id]

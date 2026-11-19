@@ -10,7 +10,7 @@ import {
   ArrowLeftRight, BookOpen, Check, ChevronDown, CirclePlay, Clock, Download, Dumbbell, Flame, HeartPulse, History, Minus, Moon, Plus, Repeat, Trash2,
   TrendingUp, TriangleAlert, Upload, Utensils, Volume2, VolumeX, Wind, X,
 } from 'lucide-react'
-import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, video, planoDe } from './plan.js'
+import { CARDIO, DIAS, PLAN, duracao, fmtDesc, foto, previstoEm, video, planoDe } from './plan.js'
 import { agendarBip, cancelarBip, testarBip } from './bip.js'
 import { ALTERNATIVAS, kgNoModo, modoLado, progressao, treinoDe } from './exercicios.js'
 import { META, PESO_INICIAL, br, hojeISO, iso, num, semana, ultima, useStore } from './store.js'
@@ -104,49 +104,60 @@ export default function App() {
 
 /* ---------- Treino ---------- */
 
-// Domingo: escolher um treino da semana para repor.
-// Segunda é peito: repor no domingo um treino de peito colocaria o mesmo músculo dois dias seguidos.
-const AMANHA = PLAN[1]
-const GRUPO = { peito: 'peito', costas: 'costas', perna: 'perna' }
+// Dia de descanso: escolher um treino da semana para repor.
+// Não sugere treinar um grupo que foi treinado ontem ou que volta amanhã ou depois de amanhã.
 const NOME_DIA = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado']
-const conflita = (wd) => PLAN[wd].grupo === AMANHA.grupo
+const somaDias = (date, n) => { const d = new Date(`${date}T12:00:00`); d.setDate(d.getDate() + n); return iso(d) }
+const diaDe = (date) => new Date(`${date}T12:00:00`).getDay()
 
-function Reposicao({ s, dias, hoje, onEscolher }) {
-  const semana = dias.filter((d) => d.wd !== 0)
-  const faltou = semana.filter((d) => !s.logs[d.date]?.feito && d.date < hoje)
-  const boas = faltou.filter((d) => !conflita(d.wd)), evitar = faltou.filter((d) => conflita(d.wd))
+function Reposicao({ s, dias, data, onEscolher }) {
+  const ontem = somaDias(data, -1)
+  const proximos = [1, 2].map((n) => ({ n, date: somaDias(data, n), g: previstoEm(somaDias(data, n)).grupo }))
+  const grupoOntem = s.logs[ontem]?.feito ? planoDe(s.logs, ontem).grupo : null
+  // Motivo para não repor um treino hoje, ou null se pode.
+  const motivo = (d) => {
+    const g = previstoEm(d.date).grupo, prox = proximos.find((x) => x.g === g)
+    if (prox) return `${prox.n === 1 ? 'Amanhã' : NOME_DIA[diaDe(prox.date)].replace(/^./, (c) => c.toUpperCase())} já é ${g}`
+    if (g === grupoOntem) return `Você treinou ${g} ontem`
+    return null
+  }
+  // Só os treinos que já passaram nesta semana; os seguintes ainda vão acontecer.
+  const semana = dias.filter((d) => d.date < data && !previstoEm(d.date).descanso)
+  const faltou = semana.filter((d) => !s.logs[d.date]?.feito && d.date < data)
+  const boas = faltou.filter((d) => !motivo(d)), evitar = faltou.filter((d) => motivo(d))
   const [todos, setTodos] = useState(false)
   const lista = todos ? [...boas, ...semana.filter((d) => !boas.includes(d))] : boas
   const escolher = (d) => {
-    if (conflita(d.wd) && !confirm(`Amanhã é treino de ${GRUPO[AMANHA.grupo]}. Fazer ${PLAN[d.wd].titulo.toLowerCase()} hoje põe o mesmo músculo dois dias seguidos, sem tempo de recuperar. Fazer mesmo assim?`)) return
-    onEscolher(d.wd)
+    const m = motivo(d)
+    if (m && !confirm(`${m}. Fazer ${previstoEm(d.date).titulo.toLowerCase()} hoje tira o tempo de recuperação desse músculo. Fazer mesmo assim?`)) return
+    onEscolher(d.date)
   }
-  const titulo = boas.length ? 'Faltou algum treino?' : faltou.length ? 'Melhor descansar hoje' : 'Semana completa'
+  const titulo = boas.length ? 'Faltou algum treino?' : faltou.length ? 'Melhor descansar hoje' : 'Semana em dia'
   const texto = boas.length
-    ? `Você pode repor um hoje.${evitar.length ? ` ${evitar.length > 1 ? 'Os' : 'O'} de ${evitar.map((d) => NOME_DIA[d.wd]).join(' e ')} não ${evitar.length > 1 ? 'entram' : 'entra'}: amanhã já é ${GRUPO[AMANHA.grupo]}.` : ''}`
+    ? `Você pode repor um hoje.${evitar.length ? ` ${evitar.length > 1 ? 'Os' : 'O'} de ${evitar.map((d) => NOME_DIA[d.wd]).join(' e ')} não ${evitar.length > 1 ? 'entram' : 'entra'}: ${motivo(evitar[0]).toLowerCase()}.` : ''}`
     : faltou.length
-      ? `${faltou.length > 1 ? 'Os treinos que ficaram para trás são' : 'O treino que ficou para trás é'} de ${GRUPO[AMANHA.grupo]}, e amanhã você treina ${GRUPO[AMANHA.grupo]} de novo. Não precisa repor: a semana segue normal a partir de segunda.`
-      : 'Nenhum treino ficou para trás. Se quiser, dá para fazer um extra.'
+      ? `${motivo(faltou[0])}, então não vale repor. Descanse: o fim de semana já cobre perna e peito.`
+      : 'Nenhum treino ficou para trás. Aproveite o descanso.'
   return (
     <Card sx={{ mt: 2 }}>
       <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{titulo}</Typography>
       <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>{texto}</Typography>
       {lista.map((d) => {
-        const plano = PLAN[d.wd], feito = !!s.logs[d.date]?.feito, ruim = conflita(d.wd)
+        const plano = previstoEm(d.date), feito = !!s.logs[d.date]?.feito, m = motivo(d)
         return (
           <Stack key={d.date} direction="row" spacing={1.5} sx={{ py: 1, borderTop: 1, borderColor: 'divider', alignItems: 'center' }}>
             <Typography color="primary" sx={{ width: 36, fontWeight: 600 }}>{DIAS[d.wd]}</Typography>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography sx={{ lineHeight: 1.3 }}>{plano.titulo}</Typography>
-              <Typography variant="body2" color={ruim ? 'warning' : feito ? 'success' : 'textSecondary'}>
-                {ruim ? `Amanhã já é ${GRUPO[AMANHA.grupo]}` : `${feito ? 'Feito' : d.date < hoje ? 'Faltou' : 'Ainda não'} · ${duracao(plano)} min`}
+              <Typography variant="body2" color={m ? 'warning' : feito ? 'success' : 'textSecondary'}>
+                {m || `${feito ? 'Feito' : d.date < data ? 'Faltou' : 'Ainda não'} · ${duracao(plano)} min`}
               </Typography>
             </Box>
-            <Button size="small" variant={ruim || feito ? 'text' : 'outlined'} color={ruim ? 'inherit' : 'primary'} onClick={() => escolher(d)}>Fazer</Button>
+            <Button size="small" variant={m || feito ? 'text' : 'outlined'} color={m ? 'inherit' : 'primary'} onClick={() => escolher(d)}>Fazer</Button>
           </Stack>
         )
       })}
-      {!todos && (
+      {!todos && semana.length > boas.length && (
         <Button size="small" sx={{ mt: 0.5, ml: -0.5 }} onClick={() => setTodos(true)}>{faltou.length ? 'Ver todos os treinos' : 'Escolher um treino extra'}</Button>
       )}
     </Card>
@@ -215,7 +226,7 @@ function Treino({ s, update, onDescanso }) {
 
       {p.repoe && (
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
-          <Typography color="textSecondary" sx={{ flex: 1 }}>Reposição do treino de {DIAS[p.repoe].toLowerCase()}</Typography>
+          <Typography color="textSecondary" sx={{ flex: 1 }}>Reposição do treino de {NOME_DIA[p.repoe]}</Typography>
           <Button size="small" onClick={() => {
             if (feitas && !confirm('Trocar o treino de hoje? As séries já marcadas ficam salvas, mas deixam de aparecer aqui.')) return
             editar((l) => { delete l.repoe; l.feito = false }); onDescanso(0)
@@ -225,14 +236,14 @@ function Treino({ s, update, onDescanso }) {
 
       {p.descanso ? (
         <>
-        <Reposicao s={s} dias={dias} hoje={hoje} onEscolher={(d) => editar((l) => { l.repoe = d })} />
+        <Reposicao key={date} s={s} dias={dias} data={date} onEscolher={(d) => editar((l) => { l.repoe = d })} />
         <Card sx={{ mt: 2, textAlign: 'center', py: 5 }}>
           <Box sx={{ color: 'text.secondary', mb: 1 }}><Moon size={32} /></Box>
           <Typography variant="subtitle1">Hoje o corpo se recupera</Typography>
           <Typography color="textSecondary" sx={{ mt: 0.5 }}>Se der vontade, 30–40 min de patins em ritmo leve.</Typography>
         </Card>
         <RotinaPatins sx={{ mt: 2 }} />
-        <AlongamentoFim sx={{ mt: 2 }} />
+        <AlongamentoFim key={`along-${date}`} sx={{ mt: 2 }} date={date} />
         </>
       ) : (
         <>
@@ -280,7 +291,7 @@ function Treino({ s, update, onDescanso }) {
           <Cardio key={`cardio-${date}`} c={p.cardio} log={log.cardio} patins={p.patins} kg={pesoEm(s, date)} onSalvar={(v) => editar((l) => { l.cardio = v })} />
 
           {p.patins && <RotinaPatins sx={{ mt: 2 }} />}
-          <AlongamentoFim sx={{ mt: 2 }} />
+          <AlongamentoFim key={`along-${date}`} sx={{ mt: 2 }} date={date} />
 
           <Button fullWidth size="large" sx={{ mt: 3 }} variant={log.feito ? 'outlined' : 'contained'} color={log.feito ? 'success' : 'primary'}
             startIcon={log.feito && <Check size={20} />}

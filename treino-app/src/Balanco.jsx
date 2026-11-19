@@ -13,7 +13,7 @@ export function Perfil({ perfil, onSalvar }) {
   const ok = altura > 100 && altura < 250 && idade > 10 && idade < 110
   return (
     <>
-      <Typography color="text.secondary" sx={{ mb: 2 }}>Altura e idade entram na estimativa de quanto seu corpo gasta por dia.</Typography>
+      <Typography color="textSecondary" sx={{ mb: 2 }}>Altura e idade entram na estimativa de quanto seu corpo gasta por dia.</Typography>
       <Stack direction="row" spacing={1}>
         <TextField size="small" type="number" label="Altura, cm" value={altura} onChange={(e) => setAltura(e.target.value)} sx={{ flex: 1 }} slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
         <TextField size="small" type="number" label="Idade" value={idade} onChange={(e) => setIdade(e.target.value)} sx={{ flex: 1 }} slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
@@ -25,7 +25,7 @@ export function Perfil({ perfil, onSalvar }) {
 
 const Linha = ({ rotulo, valor, forte }) => (
   <Stack direction="row" spacing={2} sx={{ justifyContent: 'space-between', py: 0.5 }}>
-    <Typography color={forte ? 'text.primary' : 'text.secondary'} sx={{ fontWeight: forte ? 600 : 400 }}>{rotulo}</Typography>
+    <Typography color={forte ? 'textPrimary' : 'textSecondary'} sx={{ fontWeight: forte ? 600 : 400 }}>{rotulo}</Typography>
     <Typography noWrap sx={{ fontWeight: forte ? 600 : 400, fontVariantNumeric: 'tabular-nums' }}>{valor}</Typography>
   </Stack>
 )
@@ -63,9 +63,9 @@ export default function Balanco({ s }) {
   const Metrica = ({ v, de, label }) => (
     <Box sx={{ flex: 1, textAlign: 'center', py: 1, borderRadius: 2, bgcolor: 'action.hover' }}>
       <Typography variant="h6" component="div" sx={{ lineHeight: 1.2 }}>
-        {v}{de != null && <Typography component="span" variant="body2" color="text.secondary">/{de}</Typography>}
+        {v}{de != null && <Typography component="span" variant="body2" color="textSecondary">/{de}</Typography>}
       </Typography>
-      <Typography variant="body2" color="text.secondary">{label}</Typography>
+      <Typography variant="body2" color="textSecondary">{label}</Typography>
     </Box>
   )
 
@@ -73,15 +73,15 @@ export default function Balanco({ s }) {
     <Paper sx={{ p: 2, border: 1, borderColor: 'divider' }}>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'baseline' }}>
         <Typography variant="subtitle1">Esta semana</Typography>
-        <Typography variant="body2" color="text.secondary">{periodo}</Typography>
+        <Typography variant="body2" color="textSecondary">{periodo}</Typography>
       </Stack>
 
       <Box sx={{ my: 2 }}>
-        <Typography variant="body2" color="text.secondary">Previsão de perda</Typography>
+        <Typography variant="body2" color="textSecondary">Previsão de perda</Typography>
         {cont.length ? (
           <>
-            <Typography variant="h4" component="div" color={ritmo > 0 ? 'success.main' : 'warning.main'}>{kg(ritmo)}</Typography>
-            <Typography variant="body2" color="text.secondary">Treino e patins somam {kg(ritmo - soDieta).replace(/^[−+] /, '')} a isso.</Typography>
+            <Typography variant="h4" component="div" color={ritmo > 0 ? 'success' : 'warning'}>{kg(ritmo)}</Typography>
+            <Typography variant="body2" color="textSecondary">Treino e patins somam {kg(ritmo - soDieta).replace(/^[−+] /, '')} a isso.</Typography>
           </>
         ) : (
           <Typography sx={{ mt: 0.5 }}>Aparece quando você marcar as três refeições de um dia na aba Dieta.</Typography>
@@ -105,7 +105,7 @@ export default function Balanco({ s }) {
             <Linha rotulo="Comido" valor={`− ${fmt(comido)} kcal`} />
             <Divider sx={{ my: 1 }} />
             <Linha forte rotulo={deficit >= 0 ? 'Déficit' : 'Excesso'} valor={`${fmt(Math.abs(deficit))} kcal`} />
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Só com a dieta seria {kg(soDieta)}.</Typography>
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>Só com a dieta seria {kg(soDieta)}.</Typography>
           </Box>
         )}
         <Typography variant="subtitle2" sx={{ mt: 2, mb: 0.5 }}>Gasto com exercício</Typography>
@@ -114,12 +114,12 @@ export default function Balanco({ s }) {
             <Box sx={{ color: 'text.secondary', display: 'flex' }}><a.icone size={20} /></Box>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography sx={{ lineHeight: 1.3 }}>{a.dia} · {a.nome}</Typography>
-              {a.detalhe && <Typography variant="body2" color="text.secondary">{a.detalhe}</Typography>}
+              {a.detalhe && <Typography variant="body2" color="textSecondary">{a.detalhe}</Typography>}
             </Box>
             <Typography noWrap sx={{ fontVariantNumeric: 'tabular-nums' }}>{a.kcal} kcal</Typography>
           </Stack>
-        )) : <Typography variant="body2" color="text.secondary">Nenhum treino ou patins registrado ainda.</Typography>}
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+        )) : <Typography variant="body2" color="textSecondary">Nenhum treino ou patins registrado ainda.</Typography>}
+        <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>
           Estimativa com {cont.length} de {dias.length} {dias.length === 1 ? 'dia' : 'dias'}, projetada para a semana. Só contam os dias com as três refeições marcadas; cada 7.700 kcal de déficit dão cerca de 1 kg.
         </Typography>
       </Collapse>

@@ -14,6 +14,8 @@ function Root() {
           primary: { main: dark ? '#a5b4fc' : '#4f46e5' },
           success: { main: dark ? '#6ee7b7' : '#059669' },
           background: dark ? { default: '#0f1115', paper: '#181b21' } : { default: '#f6f7f9', paper: '#ffffff' },
+          // Subtítulos mais apagados que os títulos, para separar as duas camadas de texto.
+          text: dark ? { primary: '#eef0f4', secondary: '#949bab' } : { primary: '#1a1d24', secondary: '#687082' },
         },
         shape: { borderRadius: 16 },
         typography: {
@@ -21,7 +23,7 @@ function Root() {
           h4: { fontWeight: 600, letterSpacing: '-0.02em', fontSize: '1.5rem', lineHeight: 1.25 },
           h5: { fontWeight: 600, letterSpacing: '-0.01em', fontSize: '1.25rem', lineHeight: 1.3 },
           h6: { fontWeight: 600, fontSize: '1.0625rem', lineHeight: 1.35 },
-          subtitle1: { fontWeight: 500, fontSize: '0.9375rem', lineHeight: 1.4 },
+          subtitle1: { fontWeight: 600, fontSize: '0.9375rem', lineHeight: 1.4 },
           subtitle2: { fontWeight: 600, fontSize: '0.875rem' },
           body1: { fontSize: '0.9375rem', lineHeight: 1.5 },
           body2: { fontSize: '0.8125rem', lineHeight: 1.45 },

@@ -1772,22 +1772,42 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return modelsCache;
   }
 
+  // custo aproximado de um capítulo: ~12 mil tokens de contexto + ~2.500 de texto
+  function chapterCost(m) {
+    const c = 12000 * Number(m.pricing?.prompt || 0) + 2500 * Number(m.pricing?.completion || 0);
+    if (!(c > 0)) return '';
+    return c < 0.01 ? 'menos de US$ 0,01 por capítulo' : `~US$ ${c.toFixed(2).replace('.', ',')} por capítulo`;
+  }
+  // quanto o modelo escreve de uma vez (limite de resposta)
+  function outWords(m) {
+    const t = Number(m.top_provider?.max_completion_tokens || 0);
+    return t ? `escreve até ~${fmtNum(Math.round(t * 0.7 / 100) * 100)} palavras por vez` : '';
+  }
+
   function buildModelPicker(container, { selected, onPick }) {
-    const search = el('input', { type: 'text', placeholder: 'Buscar pelo nome…', 'aria-label': 'Buscar modelo' });
-    const free = el('input', { type: 'checkbox', id: 'pickFree' });
-    free.checked = true;
+    let kind = 'gratis';
+    const tabFree = el('button', { type: 'button', text: 'Grátis' });
+    const tabPaid = el('button', { type: 'button', text: 'Pagos' });
+    const search = el('input', { type: 'text', placeholder: 'Buscar pelo nome…', 'aria-label': 'Buscar modelo', style: 'margin-top:10px' });
+    const info = el('p', { class: 'hint' });
     const status = el('div', { class: 'status', role: 'status', text: 'Carregando a lista de modelos…' });
     const list = el('div', { class: 'model-list', role: 'listbox', 'aria-label': 'Modelos' });
     let sel = selected;
-    container.append(search, el('label', { class: 'check', for: 'pickFree', style: 'margin-top:10px' }, free, el('span', { text: 'Só os grátis' })), status, list);
+    container.append(el('div', { class: 'seg', role: 'group', 'aria-label': 'Tipo de modelo', style: 'display:flex' }, tabFree, tabPaid), search, info, status, list);
 
     const render = () => {
+      tabFree.setAttribute('aria-pressed', String(kind === 'gratis'));
+      tabPaid.setAttribute('aria-pressed', String(kind === 'pagos'));
+      tabFree.style.flex = tabPaid.style.flex = '1';
+      info.textContent = kind === 'gratis'
+        ? 'Sem custo, mas com limite de uso por dia e qualidade que varia.'
+        : 'Mais memória e mais estáveis. São cobrados pelos créditos do OpenRouter (menu Credits no site deles).';
       list.innerHTML = '';
       if (!modelsCache) return;
       const q = search.value.trim().toLowerCase();
-      const found = modelsCache.filter(m => (!free.checked || isFree(m)) &&
+      const found = modelsCache.filter(m => (kind === 'gratis') === isFree(m) &&
         (!q || m.id.toLowerCase().includes(q) || (m.name || '').toLowerCase().includes(q)));
-      status.textContent = found.length ? `${found.length} modelo(s). Os que lembram mais páginas aparecem primeiro.` : 'Nenhum modelo com esse filtro.';
+      status.textContent = found.length ? `${found.length} modelo(s). Os que lembram mais páginas aparecem primeiro.` : 'Nenhum modelo com essa busca.';
       status.className = 'status';
       found.slice(0, 150).forEach(m => list.append(el('button', {
         type: 'button', role: 'option', 'aria-selected': String(m.id === sel),
@@ -1795,11 +1815,21 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       },
         m.name || m.id,
         el('span', { class: 'tag' + (isFree(m) ? ' free' : ''), text: isFree(m) ? 'grátis' : 'pago' }),
-        el('span', { class: 'mid', text: (pagesOf(m) ? `lembra ~${fmtNum(pagesOf(m))} páginas · ` : '') + m.id }))));
+        el('span', { class: 'mid', text: [
+          pagesOf(m) ? `lembra ~${fmtNum(pagesOf(m))} páginas` : '',
+          outWords(m), chapterCost(m), m.id
+        ].filter(Boolean).join(' · ') }))));
     };
+    tabFree.addEventListener('click', () => { kind = 'gratis'; render(); });
+    tabPaid.addEventListener('click', () => { kind = 'pagos'; render(); });
     search.addEventListener('input', render);
-    free.addEventListener('change', render);
-    loadModels().then(render).catch(() => {
+    render();
+    loadModels().then(() => {
+      // abre na aba do modelo que já está escolhido
+      const cur = modelsCache.find(m => m.id === sel);
+      if (cur && !isFree(cur)) kind = 'pagos';
+      render();
+    }).catch(() => {
       status.textContent = 'Não consegui carregar a lista. Confira a internet.';
       status.className = 'status err';
     });
@@ -1903,7 +1933,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         }
       });
       b.append(...setupHead('Escolha o modelo'),
-        el('p', { class: 'lead', text: 'Cada modelo escreve de um jeito. Os grátis têm limite de uso por dia. Se um deles recusar cenas, escrever mal ou em outro idioma, é só trocar depois.' }),
+        el('p', { class: 'lead', text: 'Cada modelo escreve de um jeito. Se um deles recusar cenas, escrever mal ou em outro idioma, é só trocar depois em IA.' }),
         picker, chosen, status,
         el('div', { class: 'row', style: 'margin-top:12px' },
           el('button', { text: '← Voltar', onclick: () => { setup.step = 2; renderSetup(); } }),
@@ -1961,8 +1991,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const max = el('select', { id: 'set-max' },
       el('option', { value: '4096', text: 'Menor (4.096 tokens)' }),
       el('option', { value: '8192', text: 'Padrão (8.192 tokens)' }),
-      el('option', { value: '16000', text: 'Maior (16.000 tokens)' }));
-    max.value = ['4096', '8192', '16000'].includes(String(settings.maxTokens)) ? String(settings.maxTokens) : '8192';
+      el('option', { value: '16000', text: 'Maior (16.000 tokens)' }),
+      el('option', { value: '32000', text: 'Máximo (32.000 tokens), para modelos pagos' }));
+    max.value = ['4096', '8192', '16000', '32000'].includes(String(settings.maxTokens)) ? String(settings.maxTokens) : '8192';
     max.addEventListener('change', () => { settings.maxTokens = Number(max.value); saveSettings(); });
 
     const ep = el('input', { type: 'text', id: 'set-ep' });

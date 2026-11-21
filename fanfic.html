@@ -450,6 +450,19 @@
   </div>
 </dialog>
 
+<!-- Colar capítulo -->
+<dialog id="pasteDlg" aria-labelledby="pasteTitle">
+  <div class="dlg-head"><h2 id="pasteTitle">📋 Colar um capítulo</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <label for="pasteName" style="margin-top:8px">Título <span class="muted">(opcional)</span></label>
+  <input type="text" id="pasteName" placeholder="Ex.: O baile">
+  <label for="pasteBody">Texto do capítulo</label>
+  <textarea id="pasteBody" class="big" style="min-height:40vh" placeholder="Cole aqui o capítulo."></textarea>
+  <p class="hint">Onde tiver <b>[[CENA QUENTE: descrição]]</b>, toque depois em <b>🍆 Adicionar cenas hot</b> para a IA escrever a cena.</p>
+  <div class="row" style="margin-top:14px">
+    <button class="primary wide" id="pasteGo">Adicionar capítulo</button>
+  </div>
+</dialog>
+
 <!-- Ajustar -->
 <dialog id="adjustDlg" aria-labelledby="adjustTitle">
   <div class="dlg-head"><h2 id="adjustTitle">Ajustar</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
@@ -871,7 +884,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       sec.append(el('div', { class: 'card empty' },
         el('h2', { text: 'Nenhum capítulo ainda' }),
         el('p', { text: 'A IA escreve o primeiro capítulo a partir da sua ideia. Depois você lê, ajusta e pede o próximo.' }),
-        el('button', { class: 'primary', text: '✍️ Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog })));
+        el('div', { class: 'row', style: 'justify-content:center' },
+          el('button', { class: 'primary', text: '✍️ Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog }),
+          el('button', { text: '📋 Colar um capítulo', disabled: !!busy, onclick: openPaste }))));
       return;
     }
 
@@ -879,15 +894,21 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     sec.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:12px' },
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
+        el('button', { text: '📋 Colar', disabled: !!busy, onclick: openPaste }),
         el('button', { text: '📋 Copiar tudo', onclick: () => copyText(fullStoryText(p), 'História copiada') }),
         el('button', { text: '⬇ Baixar', onclick: () => exportStory(p) }))));
+
+    const pending = p.chapters.reduce((n, c) => n + countMarks(c.text), 0);
+    if (pending && !busy) sec.append(el('div', { class: 'notice' },
+      el('p', { text: pending === 1 ? '1 cena hot marcada para escrever.' : `${pending} cenas hot marcadas para escrever.` }),
+      el('button', { class: 'primary', text: `🍆 Adicionar cenas hot (${pending})`, onclick: writeAllHotScenes })));
 
     p.chapters.forEach((c, i) => {
       const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
       sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
-        el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` }),
+        el('div', { class: 'num' }, `CAPÍTULO ${i + 1}`, countMarks(c.text) ? el('span', { class: 'tag', text: `🍆 ${countMarks(c.text)}` }) : null),
         el('h3', { text: chTitle(p, c) }),
-        el('div', { class: 'preview', text: c.text.slice(0, 260) || (busy && busy.chapterId === c.id ? 'Escrevendo…' : '(vazio)') }),
+        el('div', { class: 'preview', text: c.text.slice(0, 400).replace(/\[\[\s*CENA\s+(?:QUENTE|HOT)\s*:[\s\S]*?(\]\]|$)/gi, '🍆 …').slice(0, 260) || (busy && busy.chapterId === c.id ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
           el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
           el('button', { text: '📋 Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyText(c.text, 'Capítulo copiado'); } }))));
@@ -900,9 +921,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const paras = text.split(/\n\s*\n/);
     paras.forEach((t, i) => {
       const clean = t.replace(/^\n+|\n+$/g, '');
-      const mark = /^\s*\[\[\s*CENA QUENTE\s*:\s*([\s\S]*?)\]\]\s*$/i.exec(clean);
+      const mark = /^\s*\[\[\s*CENA\s+(?:QUENTE|HOT)\s*:\s*([\s\S]*?)\]\]\s*$/i.exec(clean);
       const pEl = mark
-        ? el('p', { class: 'hot-mark', text: '🔥 Cena quente a escrever: ' + mark[1].trim() })
+        ? el('p', { class: 'hot-mark', text: '🍆 Cena hot a escrever: ' + mark[1].trim() })
         : el('p', { text: clean });
       if (streaming && i === paras.length - 1) pEl.classList.add('cursor');
       container.append(pEl);
@@ -925,8 +946,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, el('span', { class: 'hide-m', text: '✏️ ' }), 'Editar'))));
 
     if (!writingThis && !busy && hasMarks(ch.text)) sec.append(el('div', { class: 'notice' },
-      el('p', { text: 'Falta escrever a cena quente marcada neste capítulo.' }),
-      el('button', { class: 'primary', text: '🔥 Escrever a cena quente', onclick: () => writeHotScenes(ch) })));
+      el('p', { text: countMarks(ch.text) === 1 ? 'Este capítulo tem 1 cena hot marcada para escrever.' : `Este capítulo tem ${countMarks(ch.text)} cenas hot marcadas para escrever.` }),
+      el('button', { class: 'primary', text: '🍆 Adicionar cenas hot', onclick: () => writeHotScenes(ch) })));
     if (!writingThis && !busy && wrongLang(p, ch.text)) sec.append(el('div', { class: 'notice' },
       el('p', { text: `Este capítulo saiu em inglês.` }),
       el('button', { class: 'primary', text: `Reescrever em ${langLower(p)}`, onclick: () => runAdjust({ ch, start: 0, end: ch.text.length, partial: false, useHot: twoWriters(p) },
@@ -1144,9 +1165,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Dois escritores: um escreve a história, outro só as cenas quentes
   // =====================================================================
   const twoWriters = (p) => !!settings.hotModel && p.heat !== 'leve';
-  const HOT_OPTS = () => ({ role: 'hot', override: { model: settings.hotModel } });
-  const MARK_RE = /\[\[\s*CENA QUENTE\s*:\s*([\s\S]*?)\]\]/i;
-  const MARK_RE_G = /\[\[\s*CENA QUENTE\s*:\s*([\s\S]*?)\]\]/gi;
+  const HOT_OPTS = () => ({ role: settings.hotModel ? 'hot' : 'main', override: { model: settings.hotModel || settings.model } });
+  const MARK_RE = /\[\[\s*CENA\s+(?:QUENTE|HOT)\s*:\s*([\s\S]*?)\]\]/i;
+  const MARK_RE_G = /\[\[\s*CENA\s+(?:QUENTE|HOT)\s*:\s*([\s\S]*?)\]\]/gi;
+  const countMarks = (t) => ((t || '').match(MARK_RE_G) || []).length;
   const hasMarks = (t) => MARK_RE.test(t || '');
   const MARK_RULE = 'CENAS QUENTES: você não escreve cenas de sexo; outro autor escreve essas cenas. Romance, tensão, beijos e sedução você escreve normalmente. ' +
     'Quando a história chegar a uma cena de sexo, escreva até o momento logo antes dela e coloque, sozinha numa linha, a marcação ' +
@@ -1166,10 +1188,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   function hotPrompt(p, before, after, brief, strong) {
     const words = p.heat === 'intenso' ? 700 : 500;
+    const heat = HEAT[p.heat === 'leve' ? 'picante' : p.heat];
     return withLang(p, `${bible(p)}\n\n` +
       `TRECHO ANTES DA CENA:\n${before.slice(-3500)}\n\n` +
       (after.trim() ? `O QUE VEM DEPOIS DA CENA:\n${after.slice(0, 1500)}\n\n` : '') +
-      `TAREFA: Escreva a cena descrita abaixo, que fica entre os dois trechos, com cerca de ${words} palavras, no nível de intensidade "${HEAT[p.heat]}". ` +
+      `TAREFA: Escreva a cena descrita abaixo, que fica entre os dois trechos, com cerca de ${words} palavras, no nível de intensidade "${heat}". ` +
       `Comece exatamente onde o trecho anterior para e termine de forma que o trecho seguinte continue naturalmente. Devolva só a cena.\nCENA: ${brief}`, strong);
   }
 
@@ -1182,7 +1205,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const brief = m[1].trim();
       const before = ch.text.slice(0, m.index).replace(/\s+$/, '');
       const after = ch.text.slice(m.index + m[0].length).replace(/^\s+/, '');
-      updateBusy({ label: `🔥 Cena quente${total > 1 ? ` ${k} de ${total}` : ''}`, words: 0, thinking: false });
+      updateBusy({ label: `🍆 Cena hot${total > 1 ? ` ${k} de ${total}` : ''}`, words: 0, thinking: false });
       const r = await aiWrite(p, (strong) => hotPrompt(p, before, after, brief, strong), {
         ...HOT_OPTS(), signal: b.ctrl.signal,
         onRetry: () => updateBusy({ words: 0 }),
@@ -1198,15 +1221,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function writeHotScenes(ch) {
     const p = cur();
     if (busy || !ensureReady(p, () => writeHotScenes(ch))) return;
-    if (!settings.hotModel) { setupTwoWriters(); return; }
     const original = ch.text;
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
-    const b = startBusy('hot', '🔥 Cena quente', ch.id);
+    const b = startBusy('hot', '🍆 Cena hot', ch.id);
     try {
       await fillHotScenes(p, ch, b);
       ch.prev = original;
       stopBusy();
-      toast('Cena quente escrita ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
+      toast('Cenas hot adicionadas ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
       stopBusy();
       if (e.name === 'AbortError') toast('Parado. A cena que faltava continua marcada.');
@@ -1214,6 +1236,36 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     } finally {
       stopBusy(); saveProject(p, true);
       if (currentId === p.id) renderTab();
+    }
+  }
+
+  async function writeAllHotScenes() {
+    const p = cur();
+    if (busy || !ensureReady(p, writeAllHotScenes)) return;
+    const list = p.chapters.filter(c => hasMarks(c.text));
+    if (!list.length) return;
+    view = { tab: 'capitulos', chapterId: list[0].id, mode: 'ler' };
+    const b = startBusy('hot', '🍆 Cena hot', list[0].id);
+    let done = 0;
+    try {
+      for (const ch of list) {
+        view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
+        busy.chapterId = ch.id;
+        renderChapters(); scrollTo(0, 0);
+        const original = ch.text;
+        await fillHotScenes(p, ch, b);
+        ch.prev = original; done++;
+        saveProject(p, true);
+      }
+      stopBusy();
+      toast(`Cenas hot adicionadas em ${done} capítulo(s) ✓`);
+    } catch (e) {
+      stopBusy();
+      if (e.name === 'AbortError') toast('Parado. As cenas que faltam continuam marcadas.');
+      else handleAIError(e, writeAllHotScenes);
+    } finally {
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) { renderTab(); renderProjects(); }
     }
   }
 
@@ -1226,6 +1278,28 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       lead: `O modelo atual (${current}) passa a escrever só as cenas quentes. Agora escolha quem escreve o resto da história. Os modelos Claude são pagos: adicione créditos no OpenRouter antes.`
     });
   }
+
+  function openPaste() {
+    if (busy) return;
+    $('pasteName').value = '';
+    $('pasteBody').value = drafts['paste:' + cur().id] || '';
+    $('pasteDlg').showModal();
+    $('pasteBody').focus();
+  }
+  $('pasteBody').addEventListener('input', () => setDraft('paste:' + cur().id, $('pasteBody').value));
+  $('pasteGo').addEventListener('click', () => {
+    const p = cur();
+    const text = $('pasteBody').value.replace(/\r/g, '').trim();
+    if (!text) { $('pasteBody').focus(); toast('Cole o texto do capítulo.'); return; }
+    const ch = { id: uid(), title: $('pasteName').value.trim(), text, hotScenes: [] };
+    p.chapters.push(ch);
+    setDraft('paste:' + p.id, '');
+    $('pasteDlg').close();
+    view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
+    saveProject(p, true); renderTab(); renderProjects(); scrollTo(0, 0);
+    const n = countMarks(text);
+    toast(n ? `Capítulo adicionado, com ${n} ${n === 1 ? 'cena hot' : 'cenas hot'} para escrever` : 'Capítulo adicionado ✓');
+  });
 
   async function writeChapter(dir, length) {
     const p = cur();

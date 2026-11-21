@@ -1,0 +1,17 @@
+{
+  "name": "Escritor de Fanfics",
+  "short_name": "Fanfics",
+  "description": "Escreva e revise suas fanfics com IA",
+  "lang": "pt-BR",
+  "id": "fanfic",
+  "start_url": "fanfic.html",
+  "scope": "./fanfic",
+  "display": "standalone",
+  "background_color": "#faf6f4",
+  "theme_color": "#b0234d",
+  "icons": [
+    { "src": "fanfic-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "fanfic-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "fanfic-icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

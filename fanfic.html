@@ -235,7 +235,7 @@
   .alert .close { min-height: 40px; min-width: 40px; padding: 0; background: transparent; border: 0; font-size: 1.2rem; }
   .bar { background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; }
   .bar-inner { max-width: 860px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
-  .bar-status { flex: 1; font-weight: 600; }
+  .bar-status { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .spin { width: 22px; height: 22px; flex: none; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .spin, .cursor::after { animation: none; } }
@@ -271,6 +271,32 @@
   .success { text-align: center; padding: 10px 0; }
   .success .big-ico { font-size: 3rem; }
   .quote { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; font-family: Georgia, serif; margin: 12px 0; }
+
+  /* ---------- celular: mais espaço para o texto ---------- */
+  @media (max-width: 640px) {
+    html { font-size: 17px; }
+    header { position: static; padding: 8px 12px; gap: 8px; }
+    button, .btn { min-height: 42px; padding: 8px 12px; }
+    main { padding: 10px 12px 150px; }
+    .card { padding: 14px; margin-bottom: 12px; }
+    .tabs { margin-bottom: 10px; padding-bottom: 6px; }
+    .tabs button { min-height: 38px; }
+    .hide-m { display: none; }
+    .nav-row { gap: 6px; flex-wrap: nowrap; margin-bottom: 10px; }
+    .nav-row > button { min-width: 42px; padding: 6px 10px; }
+    .nav-row .pos { margin: 0 auto 0 2px; }
+    .seg button { padding: 6px 12px; }
+    .reader { font-size: 1.12rem; line-height: 1.75; }
+    .reader-title { font-size: 1.2rem; margin: 0 0 14px; }
+    textarea.big { font-size: 1.05rem; }
+    .bar { padding: 8px 12px; }
+    .bar button { min-height: 44px; }
+    .spin { width: 18px; height: 18px; }
+    .alert { padding: 10px 12px; }
+    .dock .alert { margin-left: 12px; margin-right: 12px; }
+    h2 { font-size: 1.15rem; }
+    label { margin-top: 12px; }
+  }
 
   .toast {
     position: fixed; left: 50%; top: 80px; transform: translateX(-50%); z-index: 50;
@@ -787,8 +813,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   function busyText() {
     if (!busy) return '';
-    if (busy.thinking && !busy.words) return `${busy.label}: a IA está planejando…`;
-    return busy.words ? `${busy.label} · ${fmtNum(busy.words)} palavras` : `${busy.label}…`;
+    if (busy.thinking && !busy.words) return `${busy.label} · planejando…`;
+    return busy.words ? `${busy.label} · ${fmtNum(busy.words)} palavras` : `${busy.label} · começando…`;
   }
 
   function renderBar() {
@@ -878,13 +904,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const setMode = (m) => { view.mode = m; renderChapters(); };
 
     sec.append(el('div', { class: 'nav-row' },
-      el('button', { text: '← Capítulos', onclick: () => { view.chapterId = null; renderChapters(); scrollTo(0, 0); } }),
+      el('button', { 'aria-label': 'Voltar para todos os capítulos', onclick: () => { view.chapterId = null; renderChapters(); scrollTo(0, 0); } }, '←', el('span', { class: 'hide-m', text: ' Capítulos' })),
       el('button', { text: '◀', 'aria-label': 'Capítulo anterior', disabled: i === 0, onclick: () => go(i - 1) }),
       el('button', { text: '▶', 'aria-label': 'Próximo capítulo', disabled: i === p.chapters.length - 1, onclick: () => go(i + 1) }),
-      el('span', { class: 'pos', text: `${i + 1} de ${p.chapters.length}` }),
+      el('span', { class: 'pos', text: `${i + 1}/${p.chapters.length}` }),
       el('div', { class: 'seg', role: 'group', 'aria-label': 'Modo' },
-        el('button', { text: '📖 Ler', 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }),
-        el('button', { text: '✏️ Editar', 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }))));
+        el('button', { 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }, el('span', { class: 'hide-m', text: '📖 ' }), 'Ler'),
+        el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, el('span', { class: 'hide-m', text: '✏️ ' }), 'Editar'))));
+
+    if (!writingThis && !busy && wrongLang(p, ch.text)) sec.append(el('div', { class: 'notice' },
+      el('p', { text: `Este capítulo saiu em inglês.` }),
+      el('button', { class: 'primary', text: `Reescrever em ${langLower(p)}`, onclick: () => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
+        `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`) })));
 
     const card = el('div', { class: 'card' });
     const words = el('div', { class: 'muted', id: 'chWords', style: 'margin-top:8px', text: fmtNum(countWords(ch.text)) + ' palavras' });
@@ -1035,30 +1066,69 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     writeChapter(dir, length);
   });
 
-  function langLine(p) {
-    const lang = p.lang || DEFAULT_LANG;
-    return lang === 'English'
-      ? 'LANGUAGE: write everything in English.'
-      : `IDIOMA: escreva tudo em ${lang}, inclusive os diálogos. Não use inglês.`;
+  const langOf = (p) => p.lang || DEFAULT_LANG;
+  const langLower = (p) => { const l = langOf(p); return l.charAt(0).toLowerCase() + l.slice(1); };
+  function langLine(p, strong) {
+    const lang = langOf(p);
+    if (lang === 'English') return 'LANGUAGE: write everything in English.';
+    return (strong ? 'IMPORTANTE: a tentativa anterior saiu em inglês, e isso está errado. ' : '') +
+      `IDIOMA OBRIGATÓRIO: escreva tudo em ${lang}, inclusive diálogos e pensamentos. Não escreva em inglês, mesmo que algum material esteja em inglês.`;
+  }
+  // idioma no começo e no fim do pedido: alguns modelos só obedecem ao que está perto do fim
+  const withLang = (p, body, strong) => `${langLine(p, strong)}\n\n${body}\n\n${langLine(p, strong)}`;
+
+  const EN = new Set('the and was were his her with that she he had of to it you for on at but not they from this is are have would could into him them their there what when'.split(' '));
+  const PT = new Set('que não de da do uma um ele ela com para por mas como se os dos das era foi seu sua na no em você eu mais isso quando ao pela pelo'.split(' '));
+  function looksEnglish(t) {
+    const w = (t.toLowerCase().match(/[a-zà-ú]+/g) || []).slice(0, 400);
+    if (w.length < 40) return false;
+    let en = 0, pt = 0;
+    for (const x of w) { if (EN.has(x)) en++; if (PT.has(x)) pt++; }
+    return en >= 8 && en > pt * 2;
+  }
+  const wrongLang = (p, t) => langOf(p) !== 'English' && looksEnglish(t);
+
+  // chama a IA; se ela começar em inglês, para e tenta de novo uma vez com a ordem mais forte
+  async function aiWrite(p, makePrompt, opts) {
+    const guard = () => { let checked = false; return (t) => {
+      if (checked || countWords(t) < 60) return null;
+      checked = true;
+      if (!wrongLang(p, t)) return null;
+      const e = new Error('lang'); e.code = 'lang'; return e;
+    }; };
+    try {
+      return await callAI(makePrompt(false), { ...opts, guard: guard() });
+    } catch (e) {
+      if (e.code !== 'lang') throw e;
+      opts.onRetry && opts.onRetry();
+      try {
+        return await callAI(makePrompt(true), { ...opts, guard: guard() });
+      } catch (e2) {
+        if (e2.code !== 'lang') throw e2;
+        const err = new Error(`Este modelo insiste em escrever em inglês. Escolha outro modelo, de preferência um que escreva bem em ${langLower(p)}.`);
+        err.action = 'model'; err.code = 'lang-final'; throw err;
+      }
+    }
   }
 
   async function writeChapter(dir, length) {
     const p = cur();
     const n = p.chapters.length + 1;
-    const prompt = `${buildContext(p, p.chapters.length, dir)}\n\n` +
+    const makePrompt = (strong) => withLang(p, `${buildContext(p, p.chapters.length, dir)}\n\n` +
       `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde o anterior parou') +
       `, com cerca de ${length} palavras.` +
       (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') +
-      `\nNão escreva o título; comece direto no texto.\n${langLine(p)}`;
+      `\nNão escreva o título; comece direto no texto.`, strong);
 
     const ch = { id: uid(), title: '', text: '' };
     p.chapters.push(ch);
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
-    const b = startBusy('chapter', `Escrevendo o capítulo ${n}`, ch.id);
+    const b = startBusy('chapter', `Capítulo ${n}`, ch.id);
     renderProjects(); scrollTo(0, 0);
     try {
-      const r = await callAI(prompt, {
+      const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal,
+        onRetry: () => { ch.text = ''; paintChapter(ch, ''); updateBusy({ words: 0, label: `Capítulo ${n} (de novo, em ${langLower(p)})` }); },
         onThinking: () => updateBusy({ thinking: true }),
         onText: (t) => { ch.text = t; paintChapter(ch, t); updateBusy({ words: countWords(t) }); }
       });
@@ -1071,7 +1141,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       else toast(`Capítulo ${n} pronto ✓`);
     } catch (e) {
       stopBusy();
-      if (!ch.text.trim()) { p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null; }
+      if (!ch.text.trim() || e.code === 'lang-final') { p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null; }
       else if (e.name === 'AbortError') { toast('Parado. O que já foi escrito ficou salvo.'); e = null; }
       if (e) handleAIError(e, () => writeChapter(dir, length));
     } finally {
@@ -1088,16 +1158,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (busy || !ensureReady(p, () => continueChapter(ch))) return;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
-    const prompt = `${buildContext(p, idx, '')}\n\n` +
+    const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, '')}\n\n` +
       `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` +
       `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
-      `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.\n${langLine(p)}`;
+      `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.`, strong);
     const sep = !original ? '' : /[.!?…"”»*)\]]\s*$/.test(original) ? '\n\n' : ' ';
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
-    const b = startBusy('continue', 'Continuando o capítulo', ch.id);
+    const b = startBusy('continue', 'Continuando', ch.id);
     try {
-      const r = await callAI(prompt, {
+      const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal,
+        onRetry: () => { paintChapter(ch, original); updateBusy({ words: 0 }); },
         onThinking: () => updateBusy({ thinking: true }),
         onText: (t) => { paintChapter(ch, original + sep + t); updateBusy({ words: countWords(original + sep + t) }); }
       });
@@ -1162,23 +1233,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const { ch, start, end, partial } = target;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
-    let prompt = `${buildContext(p, idx, instr)}\n\n`;
-    if (partial) {
-      prompt += `CAPÍTULO ATUAL (contexto):\n${original}\n\n` +
+    const task = partial
+      ? `CAPÍTULO ATUAL (contexto):\n${original}\n\n` +
         `TRECHO A REESCREVER:\n"""\n${original.slice(start, end)}\n"""\n\n` +
         `TAREFA: Reescreva apenas esse trecho seguindo este pedido: ${instr}\n` +
-        `Ele precisa se encaixar no texto antes e depois. Devolva só o trecho novo.\n${langLine(p)}`;
-    } else {
-      prompt += `CAPÍTULO ATUAL:\n${original}\n\n` +
+        `Ele precisa se encaixar no texto antes e depois. Devolva só o trecho novo.`
+      : `CAPÍTULO ATUAL:\n${original}\n\n` +
         `TAREFA: Reescreva este capítulo seguindo este pedido: ${instr}\n` +
-        `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.\n${langLine(p)}`;
-    }
+        `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
+    const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, instr)}\n\n${task}`, strong);
     const before = original.slice(0, start), after = original.slice(end);
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
-    const b = startBusy('adjust', partial ? 'Reescrevendo o trecho' : 'Reescrevendo o capítulo', ch.id);
+    const b = startBusy('adjust', partial ? 'Reescrevendo o trecho' : 'Reescrevendo', ch.id);
     try {
-      const r = await callAI(prompt, {
+      const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal,
+        onRetry: () => { paintChapter(ch, original); updateBusy({ words: 0 }); },
         onThinking: () => updateBusy({ thinking: true }),
         onText: (t) => { paintChapter(ch, before + t + after); updateBusy({ words: countWords(before + t + after) }); }
       });
@@ -1263,7 +1333,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `Seja fiel ao que está escrito; não invente fatos. Escreva tudo em português do Brasil.`;
 
     const old = p.summary;
-    const b = startBusy('summary', 'Fazendo o resumo', null);
+    const b = startBusy('summary', 'Resumo', null);
     try {
       const r = await callAI(prompt, {
         signal: b.ctrl.signal,
@@ -1570,7 +1640,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (hasSummary) parts.push(`RESUMO DA HISTÓRIA ATÉ AGORA (memória):\n${p.summary}`);
     const lastTail = upto > 0 ? p.chapters[upto - 1].text.slice(-2500) : '';
     const refs = pickReferences(p, [p.characters, p.premise, p.fandom, p.tone, lastTail, extraQuery].join('\n'));
-    if (refs) parts.push(`MATERIAL DE REFERÊNCIA enviado pelo autor (apoio; não copie trechos literalmente):\n${refs}`);
+    if (refs) parts.push(`MATERIAL DE REFERÊNCIA enviado pelo autor (apoio; não copie trechos literalmente; pode estar em outro idioma, mas a história é escrita em ${langOf(p)}):\n${refs}`);
     const prev = previousText(p, upto, hasSummary ? 16000 : 24000);
     if (prev) parts.push(`CAPÍTULOS ANTERIORES (os mais recentes):\n${prev}`);
     return parts.join('\n\n');
@@ -1594,7 +1664,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return e;
   }
 
-  async function callAI(userPrompt, { onText, onThinking, signal, override } = {}) {
+  async function callAI(userPrompt, { onText, onThinking, signal, override, guard } = {}) {
     const cfg = Object.assign({}, settings, override || {});
     if (!cfg.key || !cfg.model) { const e = new Error('A IA ainda não está conectada.'); e.action = 'setup'; throw e; }
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key };
@@ -1647,7 +1717,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         const d = c.delta || {};
         if ((d.reasoning || d.reasoning_content) && onThinking) onThinking();
         const tok = d.content ?? c.message?.content ?? '';
-        if (tok) { full += tok; onText && onText(full); }
+        if (tok) {
+          full += tok;
+          const stop = guard && guard(full);
+          if (stop) { try { reader.cancel(); } catch {} throw stop; }
+          onText && onText(full);
+        }
       }
     }
     if (!full.trim()) {

@@ -1015,14 +1015,23 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return true;
   }
 
-  function handleAIError(e, retry) {
+  // rascunhos dos pedidos: só somem quando o pedido dá certo
+  const drafts = local.get('fanfic.drafts', {});
+  function setDraft(k, v) {
+    if (v && v.trim()) drafts[k] = v; else delete drafts[k];
+    local.set('fanfic.drafts', drafts);
+  }
+
+  // retry: refaz o mesmo pedido; edit: reabre a janela com o pedido para mudar
+  function handleAIError(e, retry, edit) {
     if (e.name === 'AbortError') { toast('Parado.'); return; }
     const actions = [];
-    if (e.action === 'key') actions.push({ label: 'Trocar a chave', primary: true, onClick: () => openSetup(2) });
-    if (e.action === 'model') actions.push({ label: 'Escolher outro modelo', primary: true, onClick: () => openSetup(3) });
-    if (e.action === 'setup') actions.push({ label: 'Conectar a IA', primary: true, onClick: () => openSetup(1) });
-    if (retry && e.action !== 'key' && e.action !== 'setup') actions.push({ label: 'Tentar de novo', onClick: retry });
-    showAlert({ kind: 'err', msg: e.message, actions });
+    if (e.action === 'key') actions.push({ label: 'Trocar a chave', primary: true, onClick: () => openSetup(2, retry) });
+    if (e.action === 'model') actions.push({ label: 'Escolher outro modelo', primary: true, onClick: () => openSetup(3, retry) });
+    if (e.action === 'setup') actions.push({ label: 'Conectar a IA', primary: true, onClick: () => openSetup(1, retry) });
+    if (retry && e.action !== 'key' && e.action !== 'setup') actions.push({ label: 'Tentar de novo', primary: !e.action, onClick: retry });
+    if (edit) actions.push({ label: '✏️ Mudar o pedido', onClick: edit });
+    showAlert({ kind: 'err', msg: e.message + (edit ? ' Seu pedido ficou guardado.' : ''), actions });
   }
 
   // =====================================================================
@@ -1034,7 +1043,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!ensureReady(p, openWriteDialog)) return;
     const n = p.chapters.length + 1;
     $('writeTitle').textContent = `✍️ Capítulo ${n}`;
-    $('writeDir').value = '';
+    $('writeDir').value = drafts['write:' + p.id] || '';
     $('writeLength').value = p.length || '1500';
     const ideas = n === 1
       ? ['Comece apresentando os personagens', 'Comece no meio da ação', 'Comece pelo primeiro encontro']
@@ -1046,8 +1055,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   function renderChips(box, items, target) {
     box.innerHTML = '';
+    const current = target.value.split(/\s*;\s*/);
     items.forEach(t => box.append(el('button', {
-      class: 'chip', type: 'button', 'aria-pressed': 'false', text: t,
+      class: 'chip', type: 'button', 'aria-pressed': String(current.includes(t)), text: t,
       onclick: (e) => {
         const b = e.currentTarget;
         const on = b.getAttribute('aria-pressed') !== 'true';
@@ -1055,9 +1065,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         const parts = target.value.split(/\s*;\s*/).filter(Boolean).filter(x => x !== t);
         if (on) parts.push(t);
         target.value = parts.join('; ');
+        target.dispatchEvent(new Event('input'));
       }
     })));
   }
+
+  $('writeDir').addEventListener('input', () => setDraft('write:' + cur().id, $('writeDir').value));
+  $('adjustText').addEventListener('input', () => adjustTarget && setDraft('adj:' + adjustTarget.ch.id, $('adjustText').value));
 
   $('writeGo').addEventListener('click', () => {
     const dir = $('writeDir').value.trim();
@@ -1139,11 +1153,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         actions: [{ label: '➕ Continuar escrevendo', primary: true, onClick: () => continueChapter(ch) }]
       });
       else toast(`Capítulo ${n} pronto ✓`);
+      setDraft('write:' + p.id, '');
     } catch (e) {
       stopBusy();
       if (!ch.text.trim() || e.code === 'lang-final') { p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null; }
       else if (e.name === 'AbortError') { toast('Parado. O que já foi escrito ficou salvo.'); e = null; }
-      if (e) handleAIError(e, () => writeChapter(dir, length));
+      if (e) handleAIError(e, () => writeChapter(dir, length), openWriteDialog);
     } finally {
       stopBusy(); saveProject(p, true);
       if (currentId === p.id) { renderTab(); renderProjects(); }
@@ -1206,15 +1221,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return at >= 0 ? { start: at, end: at + txt.length } : null;
   }
 
-  function openAdjust(ch) {
+  function openAdjust(ch, preset) {
     if (busy) return;
-    const sel = currentSelection(ch);
+    const sel = preset ? (preset.partial ? { start: preset.start, end: preset.end } : null) : currentSelection(ch);
     adjustTarget = { ch, start: sel ? sel.start : 0, end: sel ? sel.end : ch.text.length, partial: !!sel };
     $('adjustTitle').textContent = sel ? '✏️ Ajustar o trecho selecionado' : '✏️ Ajustar o capítulo';
     $('adjustScope').textContent = sel
       ? `Só o trecho selecionado (${fmtNum(countWords(ch.text.slice(sel.start, sel.end)))} palavras) vai mudar. O resto fica igual.`
       : 'O capítulo inteiro vai ser reescrito. Para mudar só uma parte, feche, selecione o trecho e toque em Ajustar de novo.';
-    $('adjustText').value = '';
+    $('adjustText').value = drafts['adj:' + ch.id] || '';
     renderChips($('adjustChips'), ['Mais diálogo', 'Mais sentimentos', 'Mais detalhes', 'Mais curto', 'Mais longo',
       'Mais romântico', 'Mais intenso', 'Ritmo mais lento', 'Corrigir o português'], $('adjustText'));
     $('adjustDlg').showModal();
@@ -1255,12 +1270,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ch.prev = original;
       ch.text = before + r.text + after;
       stopBusy();
+      setDraft('adj:' + ch.id, '');
       toast('Ajuste feito ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
       ch.text = original;
       stopBusy();
       if (e.name === 'AbortError') toast('Ajuste cancelado. O texto original foi mantido.');
-      else handleAIError(e, () => runAdjust(target, instr));
+      else {
+        setDraft('adj:' + ch.id, instr);
+        handleAIError(e, () => runAdjust(target, instr), () => {
+          view = { tab: 'capitulos', chapterId: ch.id, mode: view.mode }; renderTab();
+          openAdjust(ch, target);
+        });
+      }
     } finally {
       stopBusy(); saveProject(p, true);
       if (currentId === p.id) renderTab();

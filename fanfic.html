@@ -55,6 +55,7 @@
     line-height: 1.55;
   }
   [hidden] { display: none !important; }
+  .lbl-short { display: none; }
   a { color: var(--accent); }
 
   /* ---------- cabeçalho ---------- */
@@ -281,7 +282,8 @@
     .card { padding: 14px; margin-bottom: 12px; }
     .tabs { margin-bottom: 10px; padding-bottom: 6px; }
     .tabs button { min-height: 38px; }
-    .hide-m { display: none; }
+    .hide-m, .lbl-long { display: none; }
+    .lbl-short { display: inline; }
     .nav-row { gap: 6px; flex-wrap: nowrap; margin-bottom: 10px; }
     .nav-row > button { min-width: 42px; padding: 6px 10px; }
     .nav-row .pos { margin: 0 auto 0 2px; }
@@ -314,7 +316,7 @@
   <button id="menuBtn" aria-label="Abrir a lista de projetos">☰ <span id="menuTitle"></span></button>
   <h1>✍️ Escritor de Fanfics</h1>
   <div id="currentTitle"></div>
-  <button id="installBtn" class="primary" aria-label="Instalar app" hidden>📲</button>
+  <button id="installBtn" class="primary" aria-label="Baixar o app" hidden>📲 <span class="lbl-long">Baixar app</span><span class="lbl-short">App</span></button>
   <button id="settingsBtn" aria-label="Configurar a IA"><span class="dot off" id="aiDot"></span>IA</button>
 </header>
 
@@ -469,12 +471,26 @@
 </dialog>
 
 <!-- Instalar no iPhone -->
-<dialog id="iosDlg" aria-labelledby="iosTitle">
-  <div class="dlg-head"><h2 id="iosTitle">📲 Instalar no iPhone</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
-  <ol class="howto">
+<dialog id="installDlg" aria-labelledby="installTitle">
+  <div class="dlg-head"><h2 id="installTitle">📲 Baixar o app</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <p class="lead">O app <b>Fanfics</b> fica na tela inicial com ícone próprio e abre em tela cheia. Não precisa da Play Store, e suas histórias continuam as mesmas.</p>
+  <div id="installAndroid">
+    <ol class="howto">
+      <li>Abra esta página no <b>Chrome</b>.</li>
+      <li>Toque no menu <b>⋮</b> (três pontinhos), no canto de cima.</li>
+      <li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li>
+      <li>Confirme em <b>Instalar</b>.</li>
+    </ol>
+    <p class="hint">Se a barra de cima estiver roxa, você está dentro do app de treino. Abra o Chrome e digite o endereço desta página.</p>
+  </div>
+  <ol class="howto" id="installIOS" hidden>
     <li>Abra esta página no <b>Safari</b>.</li>
     <li>Toque em <b>Compartilhar</b> (o quadrado com a seta para cima).</li>
     <li>Toque em <b>Adicionar à Tela de Início</b> e depois em <b>Adicionar</b>.</li>
+  </ol>
+  <ol class="howto" id="installDesktop" hidden>
+    <li>Abra esta página no <b>Chrome</b> ou no <b>Edge</b>.</li>
+    <li>Clique no ícone de instalar, no fim da barra de endereço, ou no menu <b>⋮</b> e depois em <b>Instalar</b>.</li>
   </ol>
   <button class="primary wide" data-close>Entendi</button>
 </dialog>
@@ -2053,13 +2069,26 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(navigator.userAgent);
   let installEvent = null;
-  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvent = e; $('installBtn').hidden = false; });
+  // o botão aparece sempre, menos quando já está aberto como app
+  $('installBtn').hidden = standalone;
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvent = e; });
   addEventListener('appinstalled', () => { installEvent = null; $('installBtn').hidden = true; toast('App instalado! Procure “Fanfics” na tela inicial.'); });
-  if (isIOS && !standalone) $('installBtn').hidden = false;
   $('installBtn').addEventListener('click', async () => {
-    if (installEvent) { installEvent.prompt(); await installEvent.userChoice; installEvent = null; $('installBtn').hidden = true; }
-    else if (isIOS) $('iosDlg').showModal();
+    if (installEvent) {
+      // o navegador deixa instalar direto
+      installEvent.prompt();
+      const choice = await installEvent.userChoice;
+      installEvent = null;
+      if (choice.outcome === 'accepted') $('installBtn').hidden = true;
+      return;
+    }
+    // sem pedido automático: mostra o passo a passo do aparelho
+    $('installAndroid').hidden = isIOS || !(isAndroid || !matchMedia('(pointer: fine)').matches);
+    $('installIOS').hidden = !isIOS;
+    $('installDesktop').hidden = isIOS || !$('installAndroid').hidden;
+    $('installDlg').showModal();
   });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     navigator.serviceWorker.register('fanfic-sw.js', { scope: './fanfic' }).catch(() => {});

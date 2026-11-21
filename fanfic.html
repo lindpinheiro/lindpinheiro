@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Escritor de Fanfics</title>
+<link rel="manifest" href="fanfic.webmanifest">
+<meta name="theme-color" content="#b0234d">
+<link rel="icon" type="image/png" href="fanfic-icon-192.png">
+<link rel="apple-touch-icon" href="fanfic-icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fanfics">
 <style>
   :root {
     --bg: #faf6f4;
@@ -69,6 +76,7 @@
     .layout { grid-template-columns: 1fr; }
     #menuBtn { display: inline-block; }
     header h1 { display: none; }
+    header .lbl { display: none; }
     aside#projects {
       position: fixed; z-index: 30; top: 0; bottom: 0; left: 0;
       width: min(340px, 86vw); transform: translateX(-105%);
@@ -210,6 +218,7 @@
   <button id="menuBtn" aria-label="Abrir projetos">☰ Projetos</button>
   <h1>✍️ Escritor de Fanfics</h1>
   <div id="currentTitle"></div>
+  <button id="installBtn" class="primary" aria-label="Instalar app" hidden>📲 <span class="lbl">Instalar app</span></button>
   <button id="settingsBtn">⚙ IA</button>
 </header>
 
@@ -367,6 +376,17 @@
     <button id="testBtn">Testar conexão</button>
     <button id="closeSettingsBtn">Fechar</button>
   </div>
+</dialog>
+
+<!-- Instalar no iPhone -->
+<dialog id="iosDlg">
+  <h2>📲 Instalar no iPhone</h2>
+  <ol style="padding-left:1.2em;margin:0 0 14px">
+    <li>Abra esta página no <b>Safari</b>.</li>
+    <li>Toque no botão <b>Compartilhar</b> (o quadrado com a seta para cima).</li>
+    <li>Toque em <b>Adicionar à Tela de Início</b> e depois em <b>Adicionar</b>.</li>
+  </ol>
+  <button id="iosCloseBtn" class="primary">Entendi</button>
 </dialog>
 
 <!-- Pedir ajuste -->
@@ -1177,7 +1197,14 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     if (!res.ok) {
       let msg = await res.text();
       try { const j = JSON.parse(msg); msg = j.error?.message || msg; } catch {}
-      throw new Error(`Erro ${res.status}: ${String(msg).slice(0, 300)}`);
+      msg = String(msg);
+      let dica = '';
+      if (/management key|provisioning key/i.test(msg)) dica = 'Essa é uma chave de gerenciamento, que não escreve. No OpenRouter, crie uma chave comum em “API Keys” e cole em ⚙ IA.';
+      else if (res.status === 401) dica = 'A chave não foi aceita. Confira se colou a chave inteira em ⚙ IA, ou crie outra.';
+      else if (res.status === 402) dica = 'Sem créditos para este modelo. Escolha um modelo grátis (com :free no nome) ou adicione créditos.';
+      else if (res.status === 404 && /model|endpoint/i.test(msg)) dica = 'Modelo não encontrado. Confira o nome exato do modelo em ⚙ IA.';
+      else if (res.status === 429) dica = 'Limite de pedidos atingido. Espere um pouco ou troque de modelo.';
+      throw new Error(dica ? `${dica} (Erro ${res.status})` : `Erro ${res.status}: ${msg.slice(0, 300)}`);
     }
     const reader = res.body.getReader();
     const dec = new TextDecoder();
@@ -1391,6 +1418,42 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
       st.textContent = e.message; st.className = 'status err';
     }
   });
+
+  // =====================================================================
+  // App instalável
+  // =====================================================================
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let installEvent = null;
+
+  addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installEvent = e;
+    $('installBtn').hidden = false;
+  });
+  addEventListener('appinstalled', () => {
+    installEvent = null;
+    $('installBtn').hidden = true;
+    toast('App instalado! Procure “Fanfics” na tela inicial.');
+  });
+  if (isIOS && !standalone) $('installBtn').hidden = false;
+
+  $('installBtn').addEventListener('click', async () => {
+    if (installEvent) {
+      installEvent.prompt();
+      await installEvent.userChoice;
+      installEvent = null;
+      $('installBtn').hidden = true;
+    } else if (isIOS) {
+      $('iosDlg').showModal();
+    }
+  });
+  $('iosCloseBtn').addEventListener('click', () => $('iosDlg').close());
+
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('fanfic-sw.js', { scope: './fanfic' }).catch(() => {});
+  }
 
   // =====================================================================
   // Início

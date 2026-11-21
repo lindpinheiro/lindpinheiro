@@ -5,7 +5,7 @@
   "lang": "pt-BR",
   "id": "treino",
   "start_url": "treino.html",
-  "scope": "./",
+  "scope": "./treino",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f1115",

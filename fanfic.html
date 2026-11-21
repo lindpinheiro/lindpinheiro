@@ -153,6 +153,13 @@
   .status:empty { display: none; }
   .notice { background: var(--accent-soft); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; font-size: .95rem; }
   .empty { text-align: center; color: var(--muted); padding: 28px 8px; }
+  .model-list { max-height: 45vh; overflow-y: auto; display: grid; gap: 6px; margin-top: 8px; }
+  .model-list button { text-align: left; font-weight: 600; padding: 10px 12px; }
+  .model-list button[aria-selected=true] { background: var(--accent-soft); border-color: var(--accent); }
+  .model-list .mid { display: block; font-weight: 400; font-size: .78rem; color: var(--muted); overflow-wrap: anywhere; }
+  .tag { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 8px; border-radius: 99px;
+    background: var(--surface-2); border: 1px solid var(--border); margin-left: 6px; vertical-align: middle; }
+  .tag.free { color: var(--ok); border-color: var(--ok); }
 
   /* ---------- capítulos ---------- */
   .ch-item { cursor: pointer; }
@@ -351,7 +358,14 @@
   <input type="password" id="s-key" autocomplete="off" placeholder="sk-…">
 
   <label for="s-model">Modelo</label>
-  <input type="text" id="s-model" placeholder="Copie o nome exato do modelo no site do provedor">
+  <input type="text" id="s-model" placeholder="Ex.: empresa/modelo:free">
+  <button id="pickModelBtn" style="margin-top:8px">🔎 Escolher na lista de modelos</button>
+  <div id="modelPicker" hidden style="margin-top:10px">
+    <input type="text" id="modelSearch" placeholder="Buscar pelo nome…" aria-label="Buscar modelo">
+    <label class="check" style="margin-top:8px"><input type="checkbox" id="freeOnly" checked><span>Só modelos grátis</span></label>
+    <div class="status" id="modelStatus" style="margin-top:6px"></div>
+    <div id="modelList" class="model-list" role="listbox" aria-label="Modelos"></div>
+  </div>
 
   <div class="grid2">
     <div>
@@ -1202,7 +1216,8 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
       if (/management key|provisioning key/i.test(msg)) dica = 'Essa é uma chave de gerenciamento, que não escreve. No OpenRouter, crie uma chave comum em “API Keys” e cole em ⚙ IA.';
       else if (res.status === 401) dica = 'A chave não foi aceita. Confira se colou a chave inteira em ⚙ IA, ou crie outra.';
       else if (res.status === 402) dica = 'Sem créditos para este modelo. Escolha um modelo grátis (com :free no nome) ou adicione créditos.';
-      else if (res.status === 404 && /model|endpoint/i.test(msg)) dica = 'Modelo não encontrado. Confira o nome exato do modelo em ⚙ IA.';
+      else if (/not a valid model|model.*not (found|exist)|no endpoints found/i.test(msg) || (res.status === 404 && /model/i.test(msg)))
+        dica = 'Esse modelo não existe ou não está disponível. Em ⚙ IA, toque em “Escolher na lista de modelos” e escolha outro.';
       else if (res.status === 429) dica = 'Limite de pedidos atingido. Espere um pouco ou troque de modelo.';
       throw new Error(dica ? `${dica} (Erro ${res.status})` : `Erro ${res.status}: ${msg.slice(0, 300)}`);
     }
@@ -1383,8 +1398,74 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     $('s-max').value = settings.maxTokens;
     $('s-system').value = settings.system;
     $('settingsStatus').textContent = '';
+    $('modelPicker').hidden = true;
     $('settingsDlg').showModal();
   }
+
+  // ---------- lista de modelos ----------
+  let modelsCache = null;
+
+  function modelsUrl() {
+    const ep = $('s-endpoint').value.trim() || DEFAULT_SETTINGS.endpoint;
+    return ep.replace(/\/chat\/completions\/?$/, '') + '/models';
+  }
+
+  function isFree(m) {
+    const p = m.pricing || {};
+    return /:free$/.test(m.id) || (Number(p.prompt) === 0 && Number(p.completion) === 0);
+  }
+
+  function renderModels() {
+    const list = $('modelList');
+    list.innerHTML = '';
+    if (!modelsCache) return;
+    const q = $('modelSearch').value.trim().toLowerCase();
+    const freeOnly = $('freeOnly').checked;
+    const current = $('s-model').value.trim();
+    const found = modelsCache.filter(m =>
+      (!freeOnly || isFree(m)) &&
+      (!q || m.id.toLowerCase().includes(q) || (m.name || '').toLowerCase().includes(q)));
+    $('modelStatus').textContent = found.length
+      ? `${found.length} modelo(s). Toque em um para escolher.`
+      : 'Nenhum modelo encontrado com esse filtro.';
+    $('modelStatus').className = 'status';
+    found.slice(0, 150).forEach(m => {
+      const ctx = m.context_length ? ` · lê até ~${fmtNum(Math.round(m.context_length * 3 / 1000))} mil caracteres` : '';
+      list.append(el('button', {
+        role: 'option', 'aria-selected': String(m.id === current),
+        onclick: () => {
+          $('s-model').value = m.id;
+          renderModels();
+          $('modelStatus').textContent = `Escolhido: ${m.name || m.id}. Toque em Salvar.`;
+          $('modelStatus').className = 'status ok';
+        }
+      },
+        m.name || m.id,
+        el('span', { class: 'tag' + (isFree(m) ? ' free' : ''), text: isFree(m) ? 'grátis' : 'pago' }),
+        el('span', { class: 'mid', text: m.id + ctx })));
+    });
+  }
+
+  $('pickModelBtn').addEventListener('click', async () => {
+    $('modelPicker').hidden = false;
+    if (modelsCache) { renderModels(); return; }
+    $('modelStatus').textContent = 'Carregando a lista…';
+    $('modelStatus').className = 'status';
+    try {
+      const res = await fetch(modelsUrl());
+      if (!res.ok) throw new Error();
+      const j = await res.json();
+      modelsCache = (j.data || []).filter(m => m && m.id)
+        .sort((a, b) => (isFree(b) - isFree(a)) || (a.name || a.id).localeCompare(b.name || b.id));
+      renderModels();
+      $('modelSearch').focus();
+    } catch {
+      $('modelStatus').textContent = 'Não consegui carregar a lista. Confira a internet e o endereço da API.';
+      $('modelStatus').className = 'status err';
+    }
+  });
+  $('modelSearch').addEventListener('input', renderModels);
+  $('freeOnly').addEventListener('change', renderModels);
 
   function readSettings() {
     settings = {

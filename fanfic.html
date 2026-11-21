@@ -24,8 +24,11 @@
     --accent-text: #ffffff;
     --accent-soft: #fbe5ec;
     --danger: #a3261d;
+    --danger-soft: #fdecea;
     --ok: #2f6b3a;
+    --ok-soft: #e6f3e8;
     --radius: 14px;
+    --side: 290px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -39,7 +42,9 @@
       --accent-text: #1a0d12;
       --accent-soft: #3a1d27;
       --danger: #ff7b70;
+      --danger-soft: #3a1d1b;
       --ok: #7fd18e;
+      --ok-soft: #1d3322;
     }
   }
   * { box-sizing: border-box; }
@@ -50,65 +55,67 @@
     line-height: 1.55;
   }
   [hidden] { display: none !important; }
+  a { color: var(--accent); }
 
-  /* ---------- estrutura ---------- */
+  /* ---------- cabeçalho ---------- */
   header {
     position: sticky; top: 0; z-index: 10;
     background: var(--surface); border-bottom: 1px solid var(--border);
     padding: 10px 16px; display: flex; gap: 10px; align-items: center;
   }
-  header h1 { font-size: 1.1rem; margin: 0; white-space: nowrap; }
+  header h1 { font-size: 1.05rem; margin: 0; white-space: nowrap; }
   #currentTitle {
     flex: 1; min-width: 0; font-weight: 700; color: var(--muted);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .layout { display: grid; grid-template-columns: 290px 1fr; min-height: calc(100vh - 67px); }
+  #menuBtn {
+    display: none; flex: 1; min-width: 0; text-align: left;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .dot.on { background: var(--ok); }
+  .dot.off { background: #e59a2f; }
+
+  /* ---------- estrutura ---------- */
+  .layout { display: grid; grid-template-columns: var(--side) 1fr; min-height: calc(100vh - 67px); }
   aside#projects {
     background: var(--surface); border-right: 1px solid var(--border);
     padding: 16px; overflow-y: auto;
   }
-  main { padding: 18px 16px 150px; min-width: 0; }
+  main { padding: 18px 16px 200px; min-width: 0; }
   .wrap { max-width: 860px; margin: 0 auto; }
-  #menuBtn { display: none; }
   #backdrop { display: none; }
 
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }
-    #menuBtn { display: inline-block; }
-    header h1 { display: none; }
-    header .lbl { display: none; }
+    header h1, #currentTitle { display: none; }
+    #menuBtn { display: block; }
     aside#projects {
       position: fixed; z-index: 30; top: 0; bottom: 0; left: 0;
       width: min(340px, 86vw); transform: translateX(-105%);
-      transition: transform .2s ease; border-right: 1px solid var(--border);
+      border-right: 1px solid var(--border); visibility: hidden;
     }
-    aside#projects.open { transform: none; }
-    #backdrop.open {
-      display: block; position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.45);
-    }
+    aside#projects.open { transform: none; visibility: visible; transition: transform .2s ease; }
+    #backdrop.open { display: block; position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.45); }
   }
 
   /* ---------- projetos ---------- */
   .proj-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .proj-head h2 { margin: 0; }
   .proj-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-  .proj-item {
-    width: 100%; text-align: left; display: block; padding: 12px 14px;
-    background: var(--surface-2); border: 1px solid var(--border);
-  }
+  .proj-item { width: 100%; text-align: left; display: block; padding: 12px 14px; }
   .proj-item.active { background: var(--accent-soft); border-color: var(--accent); }
   .proj-item .meta { display: block; font-weight: 400; font-size: .8rem; color: var(--muted); }
 
   /* ---------- abas ---------- */
-  .tabs {
-    display: flex; gap: 6px; overflow-x: auto; margin-bottom: 18px;
-    border-bottom: 1px solid var(--border); padding-bottom: 8px;
-  }
-  .tabs button { white-space: nowrap; background: transparent; border-color: transparent; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .tabs button { flex: 1; white-space: nowrap; background: transparent; border-color: transparent; padding: 8px 10px; }
   .tabs button[aria-selected=true] { background: var(--accent-soft); border-color: var(--accent); }
+  .tabs .count { font-weight: 400; color: var(--muted); }
   @media (max-width: 640px) {
-    .tabs { display: grid; grid-template-columns: 1fr 1fr; overflow: visible; }
-    .tabs button { padding: 8px 10px; font-size: .9rem; }
+    .tabs { gap: 2px; }
+    .tabs button { font-size: .8rem; padding: 8px 4px; }
+    .tabs .ico { display: none; }
   }
 
   /* ---------- componentes ---------- */
@@ -118,53 +125,75 @@
   }
   h2 { font-size: 1.2rem; margin: 0 0 12px; }
   h3 { font-size: 1.05rem; margin: 0; }
-  label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  label { display: block; font-weight: 600; margin: 16px 0 6px; }
   .hint { color: var(--muted); font-size: .85rem; font-weight: 400; margin: 4px 0 0; }
-  p.lead { color: var(--muted); margin: 0 0 14px; font-size: .95rem; }
+  .lead { color: var(--muted); margin: 0 0 14px; font-size: .95rem; }
   input[type=text], input[type=password], input[type=number], select, textarea {
     width: 100%; font: inherit; color: var(--text); background: var(--surface-2);
     border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
   }
-  textarea { resize: vertical; min-height: 90px; }
+  textarea { resize: vertical; min-height: 100px; }
   textarea.big {
     min-height: 60vh; font-family: Georgia, "Times New Roman", serif;
     font-size: 1.05rem; line-height: 1.75; background: var(--surface);
   }
-  input:focus, select:focus, textarea:focus, button:focus-visible {
+  input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible {
     outline: 3px solid var(--accent); outline-offset: 1px;
   }
-  button {
+  button, .btn {
     font: inherit; font-weight: 600; cursor: pointer; border-radius: 10px;
     padding: 10px 16px; border: 1px solid var(--border);
-    background: var(--surface-2); color: var(--text); min-height: 46px;
+    background: var(--surface-2); color: var(--text); min-height: 48px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    text-decoration: none; text-align: center;
   }
-  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  button.primary, .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
   button.danger { color: var(--danger); }
+  button.link { background: none; border: 0; color: var(--danger); font-weight: 600; padding: 8px 4px; min-height: 44px; }
+  button.wide, .btn.wide { width: 100%; }
   button:disabled { opacity: .5; cursor: not-allowed; }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .row.end { justify-content: flex-end; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
   @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
-  .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; margin-top: 14px; }
-  .check input { width: 24px; height: 24px; margin-top: 2px; flex: none; }
+  .check { display: flex; gap: 12px; align-items: flex-start; font-weight: 600; margin-top: 16px; cursor: pointer; }
+  .check input { width: 24px; height: 24px; margin-top: 2px; flex: none; accent-color: var(--accent); }
   .muted { color: var(--muted); font-size: .85rem; }
-  .status { font-size: .9rem; color: var(--muted); min-height: 1.4em; }
+  .status { font-size: .9rem; color: var(--muted); margin-top: 10px; }
   .status.err { color: var(--danger); }
   .status.ok { color: var(--ok); }
   .status:empty { display: none; }
-  .notice { background: var(--accent-soft); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; font-size: .95rem; }
-  .empty { text-align: center; color: var(--muted); padding: 28px 8px; }
-  .model-list { max-height: 45vh; overflow-y: auto; display: grid; gap: 6px; margin-top: 8px; }
-  .model-list button { text-align: left; font-weight: 600; padding: 10px 12px; }
-  .model-list button[aria-selected=true] { background: var(--accent-soft); border-color: var(--accent); }
-  .model-list .mid { display: block; font-weight: 400; font-size: .78rem; color: var(--muted); overflow-wrap: anywhere; }
-  .tag { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 8px; border-radius: 99px;
-    background: var(--surface-2); border: 1px solid var(--border); margin-left: 6px; vertical-align: middle; }
-  .tag.free { color: var(--ok); border-color: var(--ok); }
+  .empty { text-align: center; padding: 32px 18px; }
+  .empty p { color: var(--muted); margin: 0 0 16px; }
+  details > summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
+
+  /* escolha em cartões (intensidade) */
+  .choice { display: grid; gap: 8px; }
+  .choice label {
+    display: flex; gap: 12px; align-items: flex-start; margin: 0; padding: 12px 14px; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2);
+  }
+  .choice input { width: 22px; height: 22px; flex: none; margin-top: 3px; accent-color: var(--accent); }
+  .choice label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice small { display: block; font-weight: 400; color: var(--muted); font-size: .85rem; }
+
+  /* sugestões rápidas */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip { min-height: 40px; padding: 6px 14px; border-radius: 99px; font-size: .85rem; }
+  .chip[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); }
+
+  /* avisos */
+  .notice {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    background: var(--accent-soft); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
+  }
+  .notice p { margin: 0; flex: 1 1 220px; }
 
   /* ---------- capítulos ---------- */
   .ch-item { cursor: pointer; }
   .ch-item:hover { border-color: var(--accent); }
-  .ch-item .num { color: var(--accent); font-weight: 700; font-size: .85rem; }
+  .ch-item .num { color: var(--accent); font-weight: 700; font-size: .8rem; letter-spacing: .04em; }
   .ch-item .preview { color: var(--muted); margin: 6px 0 10px; font-size: .95rem;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .nav-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
@@ -172,18 +201,16 @@
   .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
   .seg button { border: 0; border-radius: 0; background: var(--surface); }
   .seg button[aria-pressed=true] { background: var(--accent); color: var(--accent-text); }
-  .reader {
-    font-family: Georgia, "Times New Roman", serif; font-size: 1.1rem; line-height: 1.85;
-    max-width: 680px; margin: 0 auto;
-  }
+  .reader { font-family: Georgia, "Times New Roman", serif; font-size: 1.1rem; line-height: 1.85; max-width: 680px; margin: 0 auto; }
   .reader p { margin: 0 0 1em; white-space: pre-wrap; }
   .reader-title { font-family: Georgia, serif; text-align: center; font-size: 1.4rem; margin: 4px 0 22px; }
   .cursor::after { content: "▍"; color: var(--accent); animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
+  .thinking { color: var(--muted); font-style: italic; text-align: center; padding: 30px 0; }
 
-  /* ---------- referências ---------- */
+  /* ---------- arquivos ---------- */
   .ref-head { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
-  .ref-name { font-weight: 700; word-break: break-word; }
+  .ref-name { font-weight: 700; overflow-wrap: anywhere; }
   pre.sample {
     white-space: pre-wrap; font-family: Georgia, serif; font-size: .9rem;
     background: var(--surface-2); padding: 12px; border-radius: 10px; max-height: 260px; overflow: auto;
@@ -191,42 +218,78 @@
   .progress { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin-top: 10px; }
   .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
 
-  /* ---------- barra de escrita ---------- */
-  .bar {
-    position: fixed; left: 290px; right: 0; bottom: 0; z-index: 9;
-    background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px;
+  /* ---------- área fixa de baixo: aviso + barra ---------- */
+  .dock { position: fixed; left: var(--side); right: 0; bottom: 0; z-index: 9; }
+  @media (max-width: 900px) { .dock { left: 0; } }
+  .alert {
+    max-width: 860px; margin: 0 auto 8px; display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border);
+    box-shadow: 0 6px 20px rgba(0,0,0,.18); background: var(--surface);
   }
-  @media (max-width: 900px) { .bar { left: 0; } }
-  .bar-inner { max-width: 860px; margin: 0 auto; display: flex; gap: 10px; }
-  .bar-inner input { flex: 1; }
-  @media (max-width: 640px) {
-    .bar-inner { flex-wrap: wrap; }
-    .bar-inner input { flex-basis: 100%; }
-    .bar-inner button { flex: 1; }
-    main { padding-bottom: 190px; }
-  }
+  .dock .alert { margin-left: 16px; margin-right: 16px; }
+  @media (min-width: 893px) { .dock .alert { margin-left: auto; margin-right: auto; } }
+  .alert.err { background: var(--danger-soft); border-color: var(--danger); }
+  .alert.info { background: var(--accent-soft); border-color: var(--accent); }
+  .alert .msg { flex: 1; font-size: .95rem; }
+  .alert .msg .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .alert .close { min-height: 40px; min-width: 40px; padding: 0; background: transparent; border: 0; font-size: 1.2rem; }
+  .bar { background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; }
+  .bar-inner { max-width: 860px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
+  .bar-status { flex: 1; font-weight: 600; }
+  .spin { width: 22px; height: 22px; flex: none; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spin, .cursor::after { animation: none; } }
 
+  /* ---------- diálogos ---------- */
   dialog {
     border: 1px solid var(--border); border-radius: var(--radius);
-    background: var(--surface); color: var(--text); width: min(640px, calc(100vw - 32px));
-    padding: 20px;
+    background: var(--surface); color: var(--text); width: min(640px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px); padding: 20px;
   }
-  dialog::backdrop { background: rgba(0,0,0,.5); }
+  dialog::backdrop { background: rgba(0,0,0,.55); }
+  .dlg-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .dlg-head h2 { flex: 1; margin: 0; }
+  .dlg-head .close { min-height: 44px; min-width: 44px; padding: 0; font-size: 1.2rem; }
+  .step { color: var(--accent); font-weight: 700; font-size: .8rem; letter-spacing: .04em; margin: 0 0 4px; }
+  .steps { display: flex; gap: 6px; margin: 4px 0 16px; }
+  .steps span { height: 6px; flex: 1; border-radius: 99px; background: var(--surface-2); }
+  .steps span.done { background: var(--accent); }
+  ol.howto { padding-left: 1.3em; margin: 10px 0 16px; }
+  ol.howto li { margin-bottom: 8px; }
+  .kv { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .kv .k { color: var(--muted); font-size: .85rem; }
+  .kv .v { font-weight: 700; overflow-wrap: anywhere; }
+  .kv > div { flex: 1 1 200px; min-width: 0; }
+
+  .model-list { max-height: 42vh; overflow-y: auto; display: grid; gap: 6px; margin-top: 8px; }
+  .model-list button { justify-content: flex-start; text-align: left; display: block; padding: 10px 12px; }
+  .model-list button[aria-selected=true] { background: var(--accent-soft); border-color: var(--accent); }
+  .model-list .mid { display: block; font-weight: 400; font-size: .78rem; color: var(--muted); overflow-wrap: anywhere; }
+  .tag { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 8px; border-radius: 99px;
+    border: 1px solid var(--border); margin-left: 6px; vertical-align: middle; }
+  .tag.free { color: var(--ok); border-color: var(--ok); }
+  .success { text-align: center; padding: 10px 0; }
+  .success .big-ico { font-size: 3rem; }
+  .quote { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; font-family: Georgia, serif; margin: 12px 0; }
+
   .toast {
-    position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%); z-index: 50;
-    background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 99px;
-    font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    position: fixed; left: 50%; top: 80px; transform: translateX(-50%); z-index: 50;
+    background: var(--text); color: var(--bg); padding: 8px 8px 8px 18px; border-radius: 99px;
+    font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,.25); display: flex; align-items: center; gap: 10px;
+    width: max-content; max-width: calc(100vw - 32px);
   }
+  .toast:not(:has(button)) { padding-right: 18px; }
+  .toast button { min-height: 36px; padding: 4px 14px; border-radius: 99px; background: var(--accent); color: var(--accent-text); border: 0; }
 </style>
 </head>
 <body>
 
 <header>
-  <button id="menuBtn" aria-label="Abrir projetos">☰ Projetos</button>
+  <button id="menuBtn" aria-label="Abrir a lista de projetos">☰ <span id="menuTitle"></span></button>
   <h1>✍️ Escritor de Fanfics</h1>
   <div id="currentTitle"></div>
-  <button id="installBtn" class="primary" aria-label="Instalar app" hidden>📲 <span class="lbl">Instalar app</span></button>
-  <button id="settingsBtn">⚙ IA</button>
+  <button id="installBtn" class="primary" aria-label="Instalar app" hidden>📲</button>
+  <button id="settingsBtn" aria-label="Configurar a IA"><span class="dot off" id="aiDot"></span>IA</button>
 </header>
 
 <div class="layout">
@@ -241,178 +304,153 @@
 
   <main>
     <div class="wrap">
-      <div id="setupNotice" class="notice" hidden>
-        <strong>Primeiro passo:</strong> toque em <b>⚙ IA</b> e cole sua chave de API.
-        A chave fica salva só neste aparelho.
-      </div>
       <div id="storageNotice" class="notice" hidden>
-        Este navegador não deixou salvar dados. Seus textos vão sumir ao fechar a página;
-        baixe a história antes de sair.
+        <p>Este navegador não deixou salvar dados. Seus textos vão sumir ao fechar a página; baixe a história antes de sair.</p>
       </div>
 
       <nav class="tabs" role="tablist" id="tabs">
-        <button role="tab" data-tab="ideia">💡 Ideia</button>
-        <button role="tab" data-tab="capitulos">📖 Capítulos</button>
-        <button role="tab" data-tab="resumo">📝 Resumo</button>
-        <button role="tab" data-tab="referencias">📎 Referências</button>
+        <button role="tab" data-tab="ideia"><span class="ico">💡 </span>Ideia</button>
+        <button role="tab" data-tab="capitulos"><span class="ico">📖 </span>Capítulos <span class="count" id="countCh"></span></button>
+        <button role="tab" data-tab="resumo"><span class="ico">📝 </span>Resumo</button>
+        <button role="tab" data-tab="arquivos"><span class="ico">📎 </span>Arquivos <span class="count" id="countRefs"></span></button>
       </nav>
 
       <!-- ===== Ideia ===== -->
       <section id="tab-ideia" role="tabpanel">
+        <div class="notice" id="connectNotice" hidden>
+          <p><b>Falta conectar a IA.</b> Leva uns 2 minutos e só precisa ser feito uma vez.</p>
+          <button class="primary" id="connectBtn">Conectar a IA</button>
+        </div>
+
         <div class="card">
-          <label for="f-title" style="margin-top:0">Título do projeto</label>
-          <input type="text" id="f-title" placeholder="Ex.: Entre Rivais">
+          <label for="f-title" style="margin-top:0">Título</label>
+          <input type="text" id="f-title" data-f="title" placeholder="Ex.: Entre Rivais">
 
-          <div class="grid2">
-            <div>
-              <label for="f-fandom">Fandom / universo</label>
-              <input type="text" id="f-fandom" placeholder="Ex.: original, anime, série…">
-            </div>
-            <div>
-              <label for="f-pov">Narração</label>
-              <select id="f-pov">
-                <option>Terceira pessoa</option>
-                <option>Primeira pessoa</option>
-                <option>Segunda pessoa (você)</option>
-              </select>
-            </div>
+          <label for="f-premise">Qual é a ideia?</label>
+          <textarea id="f-premise" data-f="premise" style="min-height:140px" placeholder="Conte do jeito que vier na cabeça: onde se passa, quem são, o que acontece entre eles…"></textarea>
+
+          <label for="f-characters">Quem são os personagens?</label>
+          <textarea id="f-characters" data-f="characters" placeholder="Nome, idade, jeito de ser e a relação entre eles."></textarea>
+          <p class="hint">Todos precisam ter 18 anos ou mais.</p>
+
+          <label id="heatLabel">Intensidade</label>
+          <div class="choice" role="radiogroup" aria-labelledby="heatLabel">
+            <label><input type="radio" name="heat" value="leve"><span>🌸 Leve<small>Romance, tensão e beijos.</small></span></label>
+            <label><input type="radio" name="heat" value="picante"><span>🔥 Picante<small>Sensual, cenas quentes com sugestão.</small></span></label>
+            <label><input type="radio" name="heat" value="intenso"><span>🌶️ Intenso (+18)<small>Conteúdo adulto explícito.</small></span></label>
           </div>
 
-          <label for="f-characters">Personagens</label>
-          <textarea id="f-characters" placeholder="Nome, idade, aparência, personalidade, a relação entre eles…"></textarea>
-
-          <label for="f-premise">Ideia / enredo</label>
-          <textarea id="f-premise" style="min-height:140px" placeholder="Conte a ideia do jeito que vier na cabeça."></textarea>
-
-          <div class="grid2">
-            <div>
-              <label for="f-heat">Intensidade</label>
-              <select id="f-heat">
-                <option value="leve">🌸 Leve: romance e tensão</option>
-                <option value="picante">🔥 Picante: sensual, cenas quentes</option>
-                <option value="intenso">🌶️ Intenso: explícito (+18)</option>
-              </select>
+          <details style="margin-top:16px">
+            <summary>Mais detalhes (opcional)</summary>
+            <div class="grid2">
+              <div>
+                <label for="f-fandom">Fandom ou universo</label>
+                <input type="text" id="f-fandom" data-f="fandom" placeholder="Ex.: original, anime, série…">
+              </div>
+              <div>
+                <label for="f-lang">Idioma da história</label>
+                <select id="f-lang" data-f="lang">
+                  <option>Português do Brasil</option>
+                  <option>Português de Portugal</option>
+                  <option>English</option>
+                  <option>Español</option>
+                </select>
+              </div>
+              <div>
+                <label for="f-pov">Narração</label>
+                <select id="f-pov" data-f="pov">
+                  <option>Terceira pessoa</option>
+                  <option>Primeira pessoa</option>
+                  <option>Segunda pessoa (você)</option>
+                </select>
+              </div>
+              <div>
+                <label for="f-length">Tamanho dos capítulos</label>
+                <select id="f-length" data-f="length">
+                  <option value="800">Curto (~800 palavras)</option>
+                  <option value="1500">Médio (~1.500 palavras)</option>
+                  <option value="2500">Longo (~2.500 palavras)</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label for="f-length">Tamanho do capítulo</label>
-              <select id="f-length">
-                <option value="800">Curto (~800 palavras)</option>
-                <option value="1500">Médio (~1500 palavras)</option>
-                <option value="2500">Longo (~2500 palavras)</option>
-              </select>
-            </div>
-          </div>
+            <label for="f-tone">Tom e estilo</label>
+            <input type="text" id="f-tone" data-f="tone" placeholder="Ex.: slow burn, enemies to lovers, diálogos afiados…">
+            <label for="f-notes">O que você quer e o que não quer</label>
+            <textarea id="f-notes" data-f="notes" placeholder="Ex.: sem traição; final feliz; ele é ciumento mas respeitoso."></textarea>
+          </details>
 
-          <label for="f-tone">Tom e estilo</label>
-          <input type="text" id="f-tone" placeholder="Ex.: slow burn, enemies to lovers, diálogos afiados…">
-
-          <label for="f-notes">Regras e limites deste projeto</label>
-          <textarea id="f-notes" placeholder="O que você quer e o que NÃO quer que apareça."></textarea>
-
-          <label class="check">
+          <label class="check" for="f-adults">
             <input type="checkbox" id="f-adults">
             <span>Confirmo que todos os personagens são adultos (18+) e fictícios.</span>
           </label>
         </div>
-        <div class="row">
-          <button class="primary" id="goChaptersBtn">Ir para os capítulos →</button>
-          <button class="danger" id="deleteProjectBtn">Excluir projeto</button>
-        </div>
+
+        <div id="ideaCta"></div>
+        <p class="muted" style="text-align:center">Tudo é salvo automaticamente neste aparelho.</p>
+        <hr>
+        <div class="row end"><button class="link" id="deleteProjectBtn">Excluir este projeto</button></div>
       </section>
 
-      <!-- ===== Capítulos ===== -->
       <section id="tab-capitulos" role="tabpanel" hidden></section>
-
-      <!-- ===== Resumo ===== -->
       <section id="tab-resumo" role="tabpanel" hidden></section>
-
-      <!-- ===== Referências ===== -->
-      <section id="tab-referencias" role="tabpanel" hidden></section>
+      <section id="tab-arquivos" role="tabpanel" hidden></section>
     </div>
   </main>
 </div>
 
-<div class="bar" id="writeBar" hidden>
-  <div class="bar-inner">
-    <input type="text" id="nextDirection" placeholder="O que acontece no próximo capítulo? (opcional)">
-    <button class="primary" id="writeNextBtn">Escrever próximo capítulo</button>
-    <button id="stopBtn" class="danger" hidden>■ Parar</button>
-  </div>
-  <div class="bar-inner"><div class="status" id="globalStatus" role="status"></div></div>
+<div class="dock">
+  <div id="alertZone"></div>
+  <div class="bar" id="bar" hidden><div class="bar-inner" id="barInner"></div></div>
 </div>
 
-<!-- Configuração da IA -->
-<dialog id="settingsDlg">
-  <h2>⚙ Configurar IA</h2>
-  <p class="hint" style="font-size:.95rem">
-    Funciona com qualquer serviço compatível com a API da OpenAI.
-    Para conteúdo +18, use um provedor e um modelo cujas regras permitam conteúdo adulto.
-    Sua chave fica salva <b>só neste navegador</b>.
-  </p>
-
-  <label for="s-endpoint">Endereço da API</label>
-  <input type="text" id="s-endpoint">
-  <p class="hint">Padrão: OpenRouter. Crie a chave em openrouter.ai → Keys.</p>
-
-  <label for="s-key">Chave da API</label>
-  <input type="password" id="s-key" autocomplete="off" placeholder="sk-…">
-
-  <label for="s-model">Modelo</label>
-  <input type="text" id="s-model" placeholder="Ex.: empresa/modelo:free">
-  <button id="pickModelBtn" style="margin-top:8px">🔎 Escolher na lista de modelos</button>
-  <div id="modelPicker" hidden style="margin-top:10px">
-    <input type="text" id="modelSearch" placeholder="Buscar pelo nome…" aria-label="Buscar modelo">
-    <label class="check" style="margin-top:8px"><input type="checkbox" id="freeOnly" checked><span>Só modelos grátis</span></label>
-    <div class="status" id="modelStatus" style="margin-top:6px"></div>
-    <div id="modelList" class="model-list" role="listbox" aria-label="Modelos"></div>
+<!-- Escrever capítulo -->
+<dialog id="writeDlg" aria-labelledby="writeTitle">
+  <div class="dlg-head"><h2 id="writeTitle">Capítulo</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <label for="writeDir" style="margin-top:8px">O que deve acontecer? <span class="muted">(opcional)</span></label>
+  <textarea id="writeDir" placeholder="Deixe em branco para a IA seguir a história."></textarea>
+  <div class="chips" id="writeChips"></div>
+  <label for="writeLength">Tamanho</label>
+  <select id="writeLength">
+    <option value="800">Curto (~800 palavras)</option>
+    <option value="1500">Médio (~1.500 palavras)</option>
+    <option value="2500">Longo (~2.500 palavras)</option>
+  </select>
+  <div class="row" style="margin-top:18px">
+    <button class="primary wide" id="writeGo">✍️ Escrever</button>
   </div>
+</dialog>
 
-  <div class="grid2">
-    <div>
-      <label for="s-temp">Criatividade (0–2)</label>
-      <input type="number" id="s-temp" min="0" max="2" step="0.1">
-    </div>
-    <div>
-      <label for="s-max">Limite de tokens da resposta</label>
-      <input type="number" id="s-max" min="256" step="256">
-    </div>
+<!-- Ajustar -->
+<dialog id="adjustDlg" aria-labelledby="adjustTitle">
+  <div class="dlg-head"><h2 id="adjustTitle">Ajustar</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <p class="lead" id="adjustScope"></p>
+  <label for="adjustText" style="margin-top:0">O que mudar?</label>
+  <textarea id="adjustText" placeholder="Ex.: ele fica mais ciumento; a conversa termina em briga."></textarea>
+  <div class="chips" id="adjustChips"></div>
+  <div class="row" style="margin-top:18px">
+    <button class="primary wide" id="adjustGo">Reescrever</button>
   </div>
+</dialog>
 
-  <details style="margin-top:16px">
-    <summary><b>Avançado: instruções do escritor</b></summary>
-    <textarea id="s-system" style="min-height:220px;margin-top:10px"></textarea>
-    <button id="resetSystemBtn" style="margin-top:8px">Restaurar padrão</button>
-  </details>
+<!-- Conectar a IA (passo a passo) -->
+<dialog id="setupDlg" aria-labelledby="setupTitle">
+  <div id="setupBody"></div>
+</dialog>
 
-  <div class="status" id="settingsStatus" style="margin-top:12px"></div>
-  <div class="row" style="margin-top:14px">
-    <button class="primary" id="saveSettingsBtn">Salvar</button>
-    <button id="testBtn">Testar conexão</button>
-    <button id="closeSettingsBtn">Fechar</button>
-  </div>
+<!-- Configurações da IA -->
+<dialog id="settingsDlg" aria-labelledby="settingsTitle">
+  <div id="settingsBody"></div>
 </dialog>
 
 <!-- Instalar no iPhone -->
-<dialog id="iosDlg">
-  <h2>📲 Instalar no iPhone</h2>
-  <ol style="padding-left:1.2em;margin:0 0 14px">
+<dialog id="iosDlg" aria-labelledby="iosTitle">
+  <div class="dlg-head"><h2 id="iosTitle">📲 Instalar no iPhone</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <ol class="howto">
     <li>Abra esta página no <b>Safari</b>.</li>
-    <li>Toque no botão <b>Compartilhar</b> (o quadrado com a seta para cima).</li>
+    <li>Toque em <b>Compartilhar</b> (o quadrado com a seta para cima).</li>
     <li>Toque em <b>Adicionar à Tela de Início</b> e depois em <b>Adicionar</b>.</li>
   </ol>
-  <button id="iosCloseBtn" class="primary">Entendi</button>
-</dialog>
-
-<!-- Pedir ajuste -->
-<dialog id="reviseDlg">
-  <h2>✏️ Pedir ajuste</h2>
-  <p class="hint" id="reviseScope" style="font-size:.95rem"></p>
-  <label for="reviseText">O que mudar?</label>
-  <textarea id="reviseText" placeholder="Ex.: mais diálogo, deixa ele mais ciumento, ritmo mais lento…"></textarea>
-  <div class="row" style="margin-top:14px">
-    <button class="primary" id="reviseGoBtn">Reescrever</button>
-    <button id="reviseCancelBtn">Cancelar</button>
-  </div>
+  <button class="primary wide" data-close>Entendi</button>
 </dialog>
 
 <script>
@@ -427,10 +465,13 @@
     pdfWorker: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
     zip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
   };
+  const OPENROUTER = 'https://openrouter.ai/api/v1/chat/completions';
+  const DEFAULT_LANG = 'Português do Brasil';
 
-  const DEFAULT_SYSTEM = `Você é um escritor de fanfics e ficção romântica, especialista em português brasileiro.
-Escreva prosa envolvente, com diálogos naturais, emoção, tensão e química entre os personagens.
-Respeite exatamente o nível de intensidade, o tom, a narração e as regras pedidas pelo autor.
+  const DEFAULT_SYSTEM = `Você é um escritor de fanfics e ficção romântica.
+Escreva SEMPRE no idioma indicado pelo autor (por padrão, português do Brasil), inclusive diálogos e pensamentos. Nunca troque para o inglês por conta própria.
+Escreva prosa envolvente, com diálogos naturais, emoção, tensão e química entre os personagens. Mostre em vez de contar.
+Respeite exatamente o nível de intensidade, o tom, a narração e as regras do autor.
 Mantenha a continuidade com os capítulos anteriores e com o resumo (nomes, fatos, personalidades).
 Use o material de referência como apoio de universo, personagens e estilo, sem copiar trechos literalmente.
 
@@ -439,7 +480,7 @@ Regras inegociáveis:
 - Todo contato íntimo é consensual entre adultos.
 - Nada de conteúdo sexual com pessoas reais.
 
-Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
+Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicações.`;
 
   const HEAT = {
     leve: 'Leve: romance, tensão e beijos; sem cenas sexuais.',
@@ -447,12 +488,16 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     intenso: 'Intenso: conteúdo adulto explícito permitido, entre adultos que consentem.'
   };
 
-  const DEFAULT_SETTINGS = {
-    endpoint: 'https://openrouter.ai/api/v1/chat/completions',
-    key: '', model: '', temperature: 1.0, maxTokens: 4096, system: DEFAULT_SYSTEM
-  };
+  const CREATIVITY = [
+    { v: 0.6, label: 'Mais fiel ao pedido' },
+    { v: 0.9, label: 'Equilibrada (recomendado)' },
+    { v: 1.2, label: 'Mais criativa e solta' }
+  ];
 
-  const FIELDS = ['title', 'fandom', 'pov', 'characters', 'premise', 'heat', 'length', 'tone', 'notes'];
+  const DEFAULT_SETTINGS = {
+    endpoint: OPENROUTER, key: '', model: '', modelName: '',
+    temperature: 0.9, maxTokens: 8192, system: ''
+  };
 
   // =====================================================================
   // Utilidades
@@ -472,7 +517,7 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
       else if (v === true) e.setAttribute(k, '');
       else if (v !== false && v != null) e.setAttribute(k, v);
     }
-    for (const c of children.flat()) if (c != null) e.append(c);
+    for (const c of children.flat()) if (c != null && c !== false) e.append(c);
     return e;
   }
 
@@ -483,26 +528,49 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
   };
 
   let toastTimer;
-  function toast(msg) {
+  function toast(msg, { action, onAction, ms = 2800 } = {}) {
     document.querySelectorAll('.toast').forEach(t => t.remove());
-    const t = el('div', { class: 'toast', role: 'status', text: msg });
+    const t = el('div', { class: 'toast', role: 'status' }, el('span', { text: msg }));
+    if (action) t.append(el('button', { text: action, onclick: () => { t.remove(); onAction(); } }));
     document.body.append(t);
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.remove(), 2200);
+    toastTimer = setTimeout(() => t.remove(), action ? Math.max(ms, 7000) : ms);
   }
 
-  async function copyText(text) {
+  async function copyText(text, what = 'Copiado') {
     try { await navigator.clipboard.writeText(text); }
     catch {
       const ta = el('textarea', { style: 'position:fixed;opacity:0' });
       ta.value = text; document.body.append(ta); ta.select();
       try { document.execCommand('copy'); } finally { ta.remove(); }
     }
-    toast('Copiado! ' + fmtNum(countWords(text)) + ' palavras');
+    toast(`${what}! ${fmtNum(countWords(text))} palavras`);
   }
 
+  // fecha diálogos pelos botões marcados com data-close
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-close]');
+    if (b) b.closest('dialog')?.close();
+  });
+
   // =====================================================================
-  // Banco de dados (IndexedDB) — projetos e arquivos de referência
+  // Aviso fixo (erros e avisos com ação)
+  // =====================================================================
+  function showAlert({ msg, kind = 'info', actions = [] }) {
+    document.querySelectorAll('.toast').forEach(t => t.remove());
+    const zone = $('alertZone');
+    zone.innerHTML = '';
+    const box = el('div', { class: 'alert ' + kind, role: kind === 'err' ? 'alert' : 'status' },
+      el('div', { class: 'msg' }, el('div', { text: msg }),
+        actions.length ? el('div', { class: 'actions' }, actions.map(a =>
+          el('button', { class: a.primary ? 'primary' : '', text: a.label, onclick: () => { clearAlert(); a.onClick(); } }))) : null),
+      el('button', { class: 'close', 'aria-label': 'Fechar aviso', text: '✕', onclick: clearAlert }));
+    zone.append(box);
+  }
+  function clearAlert() { $('alertZone').innerHTML = ''; }
+
+  // =====================================================================
+  // Banco de dados (IndexedDB)
   // =====================================================================
   let dbOk = true;
   const db = {
@@ -543,20 +611,43 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
   };
 
   // =====================================================================
-  // Estado
+  // Configurações da IA
   // =====================================================================
   let settings = Object.assign({}, DEFAULT_SETTINGS, local.get('fanfic.settings', {}));
+  // versões anteriores salvavam as instruções padrão; volta a usar as novas
+  if ((settings.system || '').startsWith('Você é um escritor de fanfics e ficção romântica, especialista')) settings.system = '';
+  if (settings.maxTokens === 4096) settings.maxTokens = 8192;
+  if (!settings.endpoint) settings.endpoint = OPENROUTER;
+
+  const isConfigured = () => !!(settings.key && settings.model);
+  const getSystem = () => (settings.system || '').trim() || DEFAULT_SYSTEM;
+  const isOpenRouter = (ep = settings.endpoint) => /openrouter\.ai/.test(ep);
+
+  function saveSettings() {
+    local.set('fanfic.settings', settings);
+    renderAiDot();
+  }
+  function renderAiDot() {
+    $('aiDot').className = 'dot ' + (isConfigured() ? 'on' : 'off');
+    $('settingsBtn').setAttribute('aria-label', isConfigured() ? 'IA conectada. Abrir configurações' : 'IA não conectada. Conectar');
+    $('connectNotice').hidden = isConfigured();
+  }
+
+  // =====================================================================
+  // Estado dos projetos
+  // =====================================================================
   let projects = [];
   let currentId = local.get('fanfic.current', null);
-  const refsCache = {};          // projectId -> [refs]
+  const refsCache = {};
   let view = { tab: 'ideia', chapterId: null, mode: 'ler' };
-  let busy = null;               // AbortController enquanto a IA escreve
+  let busy = null;
 
   const cur = () => projects.find(p => p.id === currentId);
+  const chTitle = (p, c) => c.title || `Capítulo ${p.chapters.indexOf(c) + 1}`;
 
   function newProject() {
     return {
-      id: uid(), title: '', fandom: '', pov: 'Terceira pessoa', characters: '',
+      id: uid(), title: '', fandom: '', pov: 'Terceira pessoa', lang: DEFAULT_LANG, characters: '',
       premise: '', heat: 'picante', length: '1500', tone: '', notes: '', adults: false,
       chapters: [], summary: '', summaryPrev: null, summaryAt: 0, summaryChapters: 0,
       useSummary: true, refBudget: '20000', createdAt: Date.now(), updatedAt: Date.now()
@@ -579,24 +670,24 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
   addEventListener('pagehide', flushSaves);
 
   // =====================================================================
-  // Projetos (barra lateral)
+  // Projetos
   // =====================================================================
   function renderProjects() {
     const list = $('projList');
     list.innerHTML = '';
     projects.slice().sort((a, b) => b.updatedAt - a.updatedAt).forEach(p => {
       const words = p.chapters.reduce((n, c) => n + countWords(c.text), 0);
-      const btn = el('button', {
+      list.append(el('li', {}, el('button', {
         class: 'proj-item' + (p.id === currentId ? ' active' : ''),
         'aria-current': p.id === currentId ? 'true' : null,
         onclick: () => openProject(p.id)
       },
         p.title.trim() || 'Sem título',
-        el('span', { class: 'meta', text: `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}` })
-      );
-      list.append(el('li', {}, btn));
+        el('span', { class: 'meta', text: `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}` }))));
     });
-    $('currentTitle').textContent = cur()?.title.trim() || 'Sem título';
+    const t = cur()?.title.trim() || 'Sem título';
+    $('currentTitle').textContent = t;
+    $('menuTitle').textContent = t;
   }
 
   function openProject(id) {
@@ -606,9 +697,10 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     local.set('fanfic.current', id);
     const p = cur();
     view = { tab: p.chapters.length ? 'capitulos' : 'ideia', chapterId: null, mode: 'ler' };
-    closeDrawer();
+    clearAlert(); closeDrawer();
     loadForm(); renderProjects(); renderTab();
     loadRefs(id);
+    scrollTo(0, 0);
   }
 
   $('newProjectBtn').addEventListener('click', () => {
@@ -621,17 +713,18 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
 
   $('deleteProjectBtn').addEventListener('click', async () => {
     const p = cur();
-    if (!confirm(`Excluir o projeto "${p.title || 'Sem título'}" com todos os capítulos e referências? Não dá para desfazer.`)) return;
+    if (!confirm(`Excluir "${p.title || 'Sem título'}" com todos os capítulos e arquivos? Não dá para desfazer.`)) return;
     projects = projects.filter(x => x.id !== p.id);
     await db.del('projects', p.id);
     for (const r of (refsCache[p.id] || [])) await db.del('refs', r.id);
     delete refsCache[p.id];
     if (!projects.length) { const n = newProject(); projects.push(n); saveProject(n, true); }
     openProject(projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id);
+    toast('Projeto excluído.');
   });
 
   function closeDrawer() { $('projects').classList.remove('open'); $('backdrop').classList.remove('open'); }
-  $('menuBtn').addEventListener('click', () => { $('projects').classList.add('open'); $('backdrop').classList.add('open'); });
+  $('menuBtn').addEventListener('click', () => { $('projects').classList.add('open'); $('backdrop').classList.add('open'); $('newProjectBtn').focus(); });
   $('backdrop').addEventListener('click', closeDrawer);
   addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
@@ -641,21 +734,22 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
   document.querySelectorAll('#tabs [data-tab]').forEach(b => b.addEventListener('click', () => {
     view.tab = b.dataset.tab;
     if (view.tab === 'capitulos') view.chapterId = null;
-    renderTab();
+    renderTab(); scrollTo(0, 0);
   }));
 
   function renderTab() {
     const p = cur();
-    document.querySelectorAll('#tabs [data-tab]').forEach(b => {
-      b.setAttribute('aria-selected', b.dataset.tab === view.tab ? 'true' : 'false');
-      if (b.dataset.tab === 'capitulos') b.textContent = `📖 Capítulos (${p.chapters.length})`;
-      if (b.dataset.tab === 'referencias') b.textContent = `📎 Referências (${(refsCache[p.id] || []).length})`;
-    });
-    ['ideia', 'capitulos', 'resumo', 'referencias'].forEach(t => { $('tab-' + t).hidden = t !== view.tab; });
-    $('writeBar').hidden = view.tab !== 'capitulos';
+    document.querySelectorAll('#tabs [data-tab]').forEach(b =>
+      b.setAttribute('aria-selected', b.dataset.tab === view.tab ? 'true' : 'false'));
+    $('countCh').textContent = p.chapters.length ? `(${p.chapters.length})` : '';
+    const nRefs = (refsCache[p.id] || []).length;
+    $('countRefs').textContent = nRefs ? `(${nRefs})` : '';
+    ['ideia', 'capitulos', 'resumo', 'arquivos'].forEach(t => { $('tab-' + t).hidden = t !== view.tab; });
+    if (view.tab === 'ideia') renderIdeaCta();
     if (view.tab === 'capitulos') renderChapters();
     if (view.tab === 'resumo') renderSummary();
-    if (view.tab === 'referencias') renderRefs();
+    if (view.tab === 'arquivos') renderRefs();
+    renderBar();
   }
 
   // =====================================================================
@@ -663,15 +757,70 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
   // =====================================================================
   function loadForm() {
     const p = cur();
-    FIELDS.forEach(f => { $('f-' + f).value = p[f] ?? ''; });
+    document.querySelectorAll('[data-f]').forEach(inp => { inp.value = p[inp.dataset.f] ?? ''; });
+    $('f-lang').value = p.lang || DEFAULT_LANG;
+    document.querySelectorAll('input[name=heat]').forEach(r => { r.checked = r.value === p.heat; });
     $('f-adults').checked = !!p.adults;
   }
-  FIELDS.forEach(f => $('f-' + f).addEventListener('input', (e) => {
-    const p = cur(); p[f] = e.target.value; saveProject(p);
-    if (f === 'title') renderProjects();
+  document.querySelectorAll('[data-f]').forEach(inp => inp.addEventListener('input', () => {
+    const p = cur(); p[inp.dataset.f] = inp.value; saveProject(p);
+    if (inp.dataset.f === 'title') renderProjects();
   }));
-  $('f-adults').addEventListener('change', (e) => { const p = cur(); p.adults = e.target.checked; saveProject(p); });
-  $('goChaptersBtn').addEventListener('click', () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); });
+  document.querySelectorAll('input[name=heat]').forEach(r => r.addEventListener('change', () => {
+    const p = cur(); p.heat = r.value; saveProject(p);
+  }));
+  $('f-adults').addEventListener('change', (e) => { const p = cur(); p.adults = e.target.checked; saveProject(p); if (p.adults) clearAlert(); });
+  $('connectBtn').addEventListener('click', () => openSetup(1));
+
+  function renderIdeaCta() {
+    const p = cur();
+    const box = $('ideaCta');
+    box.innerHTML = '';
+    box.append(p.chapters.length
+      ? el('button', { class: 'primary wide', text: `Ver os capítulos (${p.chapters.length}) →`, onclick: () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); scrollTo(0, 0); } })
+      : el('button', { class: 'primary wide', text: '✍️ Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog }));
+    renderAiDot();
+  }
+
+  // =====================================================================
+  // Barra de baixo (ação principal ou o que a IA está fazendo)
+  // =====================================================================
+  function busyText() {
+    if (!busy) return '';
+    if (busy.thinking && !busy.words) return `${busy.label}: a IA está planejando…`;
+    return busy.words ? `${busy.label} · ${fmtNum(busy.words)} palavras` : `${busy.label}…`;
+  }
+
+  function renderBar() {
+    const bar = $('bar'), inner = $('barInner');
+    inner.innerHTML = '';
+    if (busy) {
+      bar.hidden = false;
+      inner.append(el('div', { class: 'spin', 'aria-hidden': 'true' }),
+        el('div', { class: 'bar-status', id: 'barStatus', text: busyText() }),
+        el('button', { class: 'danger', text: '■ Parar', onclick: () => busy && busy.ctrl.abort() }));
+      return;
+    }
+    if (view.tab === 'capitulos' && cur().chapters.length) {
+      bar.hidden = false;
+      inner.append(el('button', { class: 'primary wide', text: `✍️ Escrever o capítulo ${cur().chapters.length + 1}`, onclick: openWriteDialog }));
+      return;
+    }
+    bar.hidden = true;
+  }
+
+  function startBusy(kind, label, chapterId) {
+    busy = { ctrl: new AbortController(), kind, label, chapterId, words: 0, thinking: false };
+    clearAlert();
+    renderTab();
+    return busy;
+  }
+  function updateBusy(patch) {
+    if (!busy) return;
+    Object.assign(busy, patch);
+    const s = $('barStatus'); if (s) s.textContent = busyText();
+  }
+  function stopBusy() { busy = null; }
 
   // =====================================================================
   // Aba Capítulos
@@ -686,35 +835,34 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
 
     if (!p.chapters.length) {
       sec.append(el('div', { class: 'card empty' },
-        el('p', { text: 'Nenhum capítulo ainda.' }),
-        el('p', { text: 'Confira a ideia na aba 💡 Ideia e toque em “Escrever próximo capítulo”, lá embaixo.' })));
+        el('h2', { text: 'Nenhum capítulo ainda' }),
+        el('p', { text: 'A IA escreve o primeiro capítulo a partir da sua ideia. Depois você lê, ajusta e pede o próximo.' }),
+        el('button', { class: 'primary', text: '✍️ Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog })));
       return;
     }
 
     const total = p.chapters.reduce((n, c) => n + countWords(c.text), 0);
     sec.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:12px' },
-      el('span', { class: 'muted', text: `${p.chapters.length} capítulos · ${fmtNum(total)} palavras` }),
+      el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
-        el('button', { text: '📋 Copiar tudo', onclick: () => copyText(fullStoryText(p)) }),
+        el('button', { text: '📋 Copiar tudo', onclick: () => copyText(fullStoryText(p), 'História copiada') }),
         el('button', { text: '⬇ Baixar', onclick: () => exportStory(p) }))));
 
     p.chapters.forEach((c, i) => {
       const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
-      const card = el('article', { class: 'card ch-item', onclick: () => open('ler') },
+      sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
         el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` }),
-        el('h3', { text: c.title || `Capítulo ${i + 1}` }),
-        el('div', { class: 'preview', text: c.text.slice(0, 260) || '(vazio)' }),
+        el('h3', { text: chTitle(p, c) }),
+        el('div', { class: 'preview', text: c.text.slice(0, 260) || (busy && busy.chapterId === c.id ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
           el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
-          el('button', { text: '📖 Ler', onclick: (e) => { e.stopPropagation(); open('ler'); } }),
-          el('button', { text: '✏️ Editar', onclick: (e) => { e.stopPropagation(); open('editar'); } }),
-          el('button', { text: '📋 Copiar', onclick: (e) => { e.stopPropagation(); copyText(c.text); } })));
-      sec.append(card);
+          el('button', { text: '📋 Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyText(c.text, 'Capítulo copiado'); } }))));
     });
   }
 
   function renderParagraphs(container, text, streaming) {
     container.innerHTML = '';
+    if (!text && streaming) { container.append(el('p', { class: 'thinking', text: 'A IA está começando a escrever…' })); return; }
     const paras = text.split(/\n\s*\n/);
     paras.forEach((t, i) => {
       const pEl = el('p', { text: t.replace(/^\n+|\n+$/g, '') });
@@ -725,55 +873,70 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
 
   function renderChapterView(sec, p, ch) {
     const i = p.chapters.indexOf(ch);
+    const writingThis = busy && busy.chapterId === ch.id;
     const go = (j) => { view.chapterId = p.chapters[j].id; renderChapters(); scrollTo(0, 0); };
     const setMode = (m) => { view.mode = m; renderChapters(); };
 
     sec.append(el('div', { class: 'nav-row' },
-      el('button', { text: '← Capítulos', onclick: () => { view.chapterId = null; renderChapters(); } }),
+      el('button', { text: '← Capítulos', onclick: () => { view.chapterId = null; renderChapters(); scrollTo(0, 0); } }),
       el('button', { text: '◀', 'aria-label': 'Capítulo anterior', disabled: i === 0, onclick: () => go(i - 1) }),
       el('button', { text: '▶', 'aria-label': 'Próximo capítulo', disabled: i === p.chapters.length - 1, onclick: () => go(i + 1) }),
       el('span', { class: 'pos', text: `${i + 1} de ${p.chapters.length}` }),
       el('div', { class: 'seg', role: 'group', 'aria-label': 'Modo' },
         el('button', { text: '📖 Ler', 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }),
-        el('button', { text: '✏️ Editar', 'aria-pressed': String(view.mode === 'editar'), onclick: () => setMode('editar') }))));
+        el('button', { text: '✏️ Editar', 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }))));
 
     const card = el('div', { class: 'card' });
-    const words = el('span', { class: 'muted', id: 'chWords', text: fmtNum(countWords(ch.text)) + ' palavras' });
+    const words = el('div', { class: 'muted', id: 'chWords', style: 'margin-top:8px', text: fmtNum(countWords(ch.text)) + ' palavras' });
 
-    if (view.mode === 'editar') {
-      const title = el('input', { type: 'text', 'aria-label': 'Título do capítulo', style: 'font-weight:700;margin-bottom:12px' });
-      title.value = ch.title || `Capítulo ${i + 1}`;
+    if (view.mode === 'editar' && !writingThis) {
+      const title = el('input', { type: 'text', 'aria-label': 'Título do capítulo', style: 'font-weight:700;margin-bottom:12px', placeholder: `Capítulo ${i + 1}` });
+      title.value = ch.title || '';
       title.addEventListener('input', () => { ch.title = title.value; saveProject(p); });
       const ta = el('textarea', { class: 'big', id: 'chBody', 'aria-label': 'Texto do capítulo' });
       ta.value = ch.text;
       ta.addEventListener('input', () => { ch.text = ta.value; words.textContent = fmtNum(countWords(ch.text)) + ' palavras'; saveProject(p); });
-      card.append(title, ta);
+      card.append(title, ta, el('p', { class: 'hint', text: 'Dica: selecione um trecho e toque em Ajustar para a IA mudar só ele.' }));
     } else {
       const body = el('div', { class: 'reader', id: 'chBody' });
-      renderParagraphs(body, ch.text, busy && busy.chapterId === ch.id);
-      card.append(el('h2', { class: 'reader-title', text: ch.title || `Capítulo ${i + 1}` }), body);
+      renderParagraphs(body, ch.text, writingThis);
+      card.append(el('h2', { class: 'reader-title', text: chTitle(p, ch) }), body);
     }
     card.append(words);
     sec.append(card);
 
+    if (writingThis) return;
+    const ai = !!busy;
     const actions = el('div', { class: 'row' },
-      el('button', { class: 'primary', text: '📋 Copiar capítulo', onclick: () => copyText(ch.text) }),
-      el('button', { text: '✏️ Pedir ajuste', onclick: () => openRevise(ch) }));
-    if (ch.prev != null) actions.append(el('button', {
-      text: '↩ Desfazer ajuste', onclick: () => { const t = ch.text; ch.text = ch.prev; ch.prev = t; saveProject(p, true); renderChapters(); }
-    }));
-    actions.append(el('button', {
-      class: 'danger', text: '🗑 Excluir', onclick: () => {
-        if (!confirm('Excluir este capítulo?')) return;
-        p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null;
-        saveProject(p, true); renderTab(); renderProjects();
-      }
-    }));
-    sec.append(actions);
-    if (busy) sec.querySelectorAll('button').forEach(b => { if (!b.closest('.nav-row')) b.disabled = true; });
+      el('button', { class: 'primary', text: '📋 Copiar capítulo', onclick: () => copyText(ch.text, 'Capítulo copiado') }),
+      el('button', { text: '✏️ Ajustar', disabled: ai, onclick: () => openAdjust(ch) }),
+      el('button', { text: '➕ Continuar escrevendo', disabled: ai, onclick: () => continueChapter(ch) }));
+    if (ch.prev != null) actions.append(el('button', { text: '↩ Desfazer a última mudança', disabled: ai, onclick: () => undoChapter(p, ch) }));
+    sec.append(actions,
+      el('div', { class: 'row end', style: 'margin-top:20px' },
+        el('button', { class: 'link', text: 'Excluir este capítulo', disabled: ai, onclick: () => deleteChapter(p, ch) })));
   }
 
-  // atualiza o texto do capítulo na tela enquanto a IA escreve
+  function undoChapter(p, ch) {
+    const t = ch.text; ch.text = ch.prev; ch.prev = t;
+    saveProject(p, true); renderChapters();
+    toast('Mudança desfeita.');
+  }
+
+  function deleteChapter(p, ch) {
+    const i = p.chapters.indexOf(ch);
+    p.chapters.splice(i, 1);
+    view.chapterId = null;
+    saveProject(p, true); renderTab(); renderProjects();
+    toast('Capítulo excluído.', {
+      action: 'Desfazer', onAction: () => {
+        p.chapters.splice(i, 0, ch); saveProject(p, true);
+        if (currentId === p.id) { view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' }; renderTab(); renderProjects(); }
+      }
+    });
+  }
+
+  // atualiza o texto na tela enquanto a IA escreve
   let paintQueued = false, paintLatest = null;
   function paintChapter(ch, text) {
     paintLatest = { ch, text };
@@ -782,28 +945,256 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     requestAnimationFrame(() => {
       paintQueued = false;
       const { ch, text } = paintLatest;
-      // só pinta enquanto a IA ainda está escrevendo este capítulo
       if (!busy || busy.chapterId !== ch.id) return;
       if (view.tab !== 'capitulos' || view.chapterId !== ch.id) return;
       const body = $('chBody');
       if (!body) return;
-      if (body.tagName === 'TEXTAREA') body.value = text;
-      else renderParagraphs(body, text, true);
+      const follow = innerHeight + scrollY >= document.documentElement.scrollHeight - 220;
+      if (body.tagName === 'TEXTAREA') body.value = text; else renderParagraphs(body, text, true);
       const w = $('chWords'); if (w) w.textContent = fmtNum(countWords(text)) + ' palavras';
+      if (follow) scrollTo(0, document.documentElement.scrollHeight);
     });
   }
 
   function fullStoryText(p) {
-    return p.chapters.map((c, i) => `${c.title || 'Capítulo ' + (i + 1)}\n\n${c.text}`).join('\n\n\n');
+    return p.chapters.map(c => `${chTitle(p, c)}\n\n${c.text}`).join('\n\n\n');
   }
 
   function exportStory(p) {
     let md = `# ${p.title || 'Sem título'}\n\n`;
-    p.chapters.forEach((c, i) => { md += `## ${c.title || 'Capítulo ' + (i + 1)}\n\n${c.text}\n\n`; });
+    p.chapters.forEach(c => { md += `## ${chTitle(p, c)}\n\n${c.text}\n\n`; });
     const a = el('a', { download: (p.title || 'fanfic').replace(/[^\w\-]+/g, '_') + '.md' });
     a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // =====================================================================
+  // Antes de usar a IA
+  // =====================================================================
+  function ensureReady(p, then) {
+    if (!p.adults) {
+      view.tab = 'ideia'; renderTab();
+      const box = $('f-adults');
+      box.scrollIntoView({ block: 'center' }); box.focus();
+      showAlert({ kind: 'info', msg: 'Antes de escrever, marque a confirmação de que todos os personagens são adultos (18+).' });
+      return false;
+    }
+    if (!isConfigured()) { openSetup(1, then); return false; }
+    return true;
+  }
+
+  function handleAIError(e, retry) {
+    if (e.name === 'AbortError') { toast('Parado.'); return; }
+    const actions = [];
+    if (e.action === 'key') actions.push({ label: 'Trocar a chave', primary: true, onClick: () => openSetup(2) });
+    if (e.action === 'model') actions.push({ label: 'Escolher outro modelo', primary: true, onClick: () => openSetup(3) });
+    if (e.action === 'setup') actions.push({ label: 'Conectar a IA', primary: true, onClick: () => openSetup(1) });
+    if (retry && e.action !== 'key' && e.action !== 'setup') actions.push({ label: 'Tentar de novo', onClick: retry });
+    showAlert({ kind: 'err', msg: e.message, actions });
+  }
+
+  // =====================================================================
+  // Escrever capítulo
+  // =====================================================================
+  function openWriteDialog() {
+    const p = cur();
+    if (busy) return;
+    if (!ensureReady(p, openWriteDialog)) return;
+    const n = p.chapters.length + 1;
+    $('writeTitle').textContent = `✍️ Capítulo ${n}`;
+    $('writeDir').value = '';
+    $('writeLength').value = p.length || '1500';
+    const ideas = n === 1
+      ? ['Comece apresentando os personagens', 'Comece no meio da ação', 'Comece pelo primeiro encontro']
+      : ['Mais romance e tensão', 'Uma reviravolta', 'Um conflito entre eles', 'Um momento engraçado', 'Um segredo é revelado'];
+    if (n > 1 && p.heat !== 'leve') ideas.splice(1, 0, 'Uma cena quente');
+    renderChips($('writeChips'), ideas, $('writeDir'));
+    $('writeDlg').showModal();
+  }
+
+  function renderChips(box, items, target) {
+    box.innerHTML = '';
+    items.forEach(t => box.append(el('button', {
+      class: 'chip', type: 'button', 'aria-pressed': 'false', text: t,
+      onclick: (e) => {
+        const b = e.currentTarget;
+        const on = b.getAttribute('aria-pressed') !== 'true';
+        b.setAttribute('aria-pressed', String(on));
+        const parts = target.value.split(/\s*;\s*/).filter(Boolean).filter(x => x !== t);
+        if (on) parts.push(t);
+        target.value = parts.join('; ');
+      }
+    })));
+  }
+
+  $('writeGo').addEventListener('click', () => {
+    const dir = $('writeDir').value.trim();
+    const length = $('writeLength').value;
+    $('writeDlg').close();
+    writeChapter(dir, length);
+  });
+
+  function langLine(p) {
+    const lang = p.lang || DEFAULT_LANG;
+    return lang === 'English'
+      ? 'LANGUAGE: write everything in English.'
+      : `IDIOMA: escreva tudo em ${lang}, inclusive os diálogos. Não use inglês.`;
+  }
+
+  async function writeChapter(dir, length) {
+    const p = cur();
+    const n = p.chapters.length + 1;
+    const prompt = `${buildContext(p, p.chapters.length, dir)}\n\n` +
+      `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde o anterior parou') +
+      `, com cerca de ${length} palavras.` +
+      (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') +
+      `\nNão escreva o título; comece direto no texto.\n${langLine(p)}`;
+
+    const ch = { id: uid(), title: '', text: '' };
+    p.chapters.push(ch);
+    view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
+    const b = startBusy('chapter', `Escrevendo o capítulo ${n}`, ch.id);
+    renderProjects(); scrollTo(0, 0);
+    try {
+      const r = await callAI(prompt, {
+        signal: b.ctrl.signal,
+        onThinking: () => updateBusy({ thinking: true }),
+        onText: (t) => { ch.text = t; paintChapter(ch, t); updateBusy({ words: countWords(t) }); }
+      });
+      ch.text = r.text;
+      stopBusy();
+      if (r.truncated) showAlert({
+        kind: 'info', msg: 'O capítulo parou antes do fim, porque a resposta atingiu o tamanho máximo.',
+        actions: [{ label: '➕ Continuar escrevendo', primary: true, onClick: () => continueChapter(ch) }]
+      });
+      else toast(`Capítulo ${n} pronto ✓`);
+    } catch (e) {
+      stopBusy();
+      if (!ch.text.trim()) { p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null; }
+      else if (e.name === 'AbortError') { toast('Parado. O que já foi escrito ficou salvo.'); e = null; }
+      if (e) handleAIError(e, () => writeChapter(dir, length));
+    } finally {
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) { renderTab(); renderProjects(); }
+    }
+  }
+
+  // =====================================================================
+  // Continuar escrevendo (acrescenta ao fim do capítulo)
+  // =====================================================================
+  async function continueChapter(ch) {
+    const p = cur();
+    if (busy || !ensureReady(p, () => continueChapter(ch))) return;
+    const idx = p.chapters.indexOf(ch);
+    const original = ch.text;
+    const prompt = `${buildContext(p, idx, '')}\n\n` +
+      `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` +
+      `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
+      `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.\n${langLine(p)}`;
+    const sep = !original ? '' : /[.!?…"”»*)\]]\s*$/.test(original) ? '\n\n' : ' ';
+    view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
+    const b = startBusy('continue', 'Continuando o capítulo', ch.id);
+    try {
+      const r = await callAI(prompt, {
+        signal: b.ctrl.signal,
+        onThinking: () => updateBusy({ thinking: true }),
+        onText: (t) => { paintChapter(ch, original + sep + t); updateBusy({ words: countWords(original + sep + t) }); }
+      });
+      ch.prev = original;
+      ch.text = original + sep + r.text;
+      stopBusy();
+      toast('Capítulo continuado ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
+    } catch (e) {
+      ch.text = original;
+      stopBusy();
+      handleAIError(e, () => continueChapter(ch));
+    } finally {
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) renderTab();
+    }
+  }
+
+  // =====================================================================
+  // Ajustar (trecho selecionado ou capítulo inteiro)
+  // =====================================================================
+  let adjustTarget = null;
+
+  function currentSelection(ch) {
+    const body = $('chBody');
+    if (!body) return null;
+    if (body.tagName === 'TEXTAREA') {
+      const { selectionStart: s, selectionEnd: e } = body;
+      return e > s && body.value.slice(s, e).trim() ? { start: s, end: e } : null;
+    }
+    const sel = getSelection();
+    if (!sel || sel.isCollapsed || !body.contains(sel.anchorNode)) return null;
+    const txt = sel.toString().trim();
+    if (!txt) return null;
+    const at = ch.text.indexOf(txt);
+    return at >= 0 ? { start: at, end: at + txt.length } : null;
+  }
+
+  function openAdjust(ch) {
+    if (busy) return;
+    const sel = currentSelection(ch);
+    adjustTarget = { ch, start: sel ? sel.start : 0, end: sel ? sel.end : ch.text.length, partial: !!sel };
+    $('adjustTitle').textContent = sel ? '✏️ Ajustar o trecho selecionado' : '✏️ Ajustar o capítulo';
+    $('adjustScope').textContent = sel
+      ? `Só o trecho selecionado (${fmtNum(countWords(ch.text.slice(sel.start, sel.end)))} palavras) vai mudar. O resto fica igual.`
+      : 'O capítulo inteiro vai ser reescrito. Para mudar só uma parte, feche, selecione o trecho e toque em Ajustar de novo.';
+    $('adjustText').value = '';
+    renderChips($('adjustChips'), ['Mais diálogo', 'Mais sentimentos', 'Mais detalhes', 'Mais curto', 'Mais longo',
+      'Mais romântico', 'Mais intenso', 'Ritmo mais lento', 'Corrigir o português'], $('adjustText'));
+    $('adjustDlg').showModal();
+  }
+
+  $('adjustGo').addEventListener('click', () => {
+    const instr = $('adjustText').value.trim();
+    if (!instr) { $('adjustText').focus(); toast('Escreva o que mudar ou toque numa sugestão.'); return; }
+    $('adjustDlg').close();
+    runAdjust(adjustTarget, instr);
+  });
+
+  async function runAdjust(target, instr) {
+    const p = cur();
+    if (busy || !ensureReady(p, () => runAdjust(target, instr))) return;
+    const { ch, start, end, partial } = target;
+    const idx = p.chapters.indexOf(ch);
+    const original = ch.text;
+    let prompt = `${buildContext(p, idx, instr)}\n\n`;
+    if (partial) {
+      prompt += `CAPÍTULO ATUAL (contexto):\n${original}\n\n` +
+        `TRECHO A REESCREVER:\n"""\n${original.slice(start, end)}\n"""\n\n` +
+        `TAREFA: Reescreva apenas esse trecho seguindo este pedido: ${instr}\n` +
+        `Ele precisa se encaixar no texto antes e depois. Devolva só o trecho novo.\n${langLine(p)}`;
+    } else {
+      prompt += `CAPÍTULO ATUAL:\n${original}\n\n` +
+        `TAREFA: Reescreva este capítulo seguindo este pedido: ${instr}\n` +
+        `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.\n${langLine(p)}`;
+    }
+    const before = original.slice(0, start), after = original.slice(end);
+    view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
+    const b = startBusy('adjust', partial ? 'Reescrevendo o trecho' : 'Reescrevendo o capítulo', ch.id);
+    try {
+      const r = await callAI(prompt, {
+        signal: b.ctrl.signal,
+        onThinking: () => updateBusy({ thinking: true }),
+        onText: (t) => { paintChapter(ch, before + t + after); updateBusy({ words: countWords(before + t + after) }); }
+      });
+      ch.prev = original;
+      ch.text = before + r.text + after;
+      stopBusy();
+      toast('Ajuste feito ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
+    } catch (e) {
+      ch.text = original;
+      stopBusy();
+      if (e.name === 'AbortError') toast('Ajuste cancelado. O texto original foi mantido.');
+      else handleAIError(e, () => runAdjust(target, instr));
+    } finally {
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) renderTab();
+    }
   }
 
   // =====================================================================
@@ -813,26 +1204,24 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     const p = cur();
     const sec = $('tab-resumo');
     sec.innerHTML = '';
-    const card = el('div', { class: 'card' });
-    card.append(el('h2', { text: '📝 Resumo da história' }),
-      el('p', { class: 'lead', text: 'A IA lê o que você já criou e sugere um resumo: sinopse, o que aconteceu em cada capítulo, como estão os personagens e ideias para os próximos. Você pode editar à vontade.' }));
+    const card = el('div', { class: 'card' },
+      el('h2', { text: '📝 Resumo da história' }),
+      el('p', { class: 'lead', text: 'A IA lê o que você já escreveu e sugere: sinopse, o que aconteceu em cada capítulo, como estão os personagens e ideias para os próximos.' }));
 
-    const info = [];
-    if (p.summaryAt) info.push(`Gerado em ${fmtDate(p.summaryAt)}, com ${p.summaryChapters} capítulo(s).`);
-    if (p.summaryAt && p.chapters.length !== p.summaryChapters) info.push('Há mudanças nos capítulos desde então.');
-    if (info.length) card.append(el('p', { class: 'muted', text: info.join(' ') }));
+    if (!p.chapters.length) {
+      card.append(el('p', { class: 'muted', text: 'Escreva pelo menos um capítulo para gerar o resumo.' }));
+      sec.append(card);
+      return;
+    }
 
-    const gen = el('button', {
-      class: 'primary', id: 'genSummaryBtn',
-      text: p.summary.trim() ? '✨ Atualizar resumo sugerido' : '✨ Gerar resumo sugerido',
-      disabled: !!busy || !p.chapters.length, onclick: generateSummary
-    });
-    const row = el('div', { class: 'row', style: 'margin-bottom:12px' }, gen);
-    if (busy && busy.kind === 'summary') row.append(el('button', { class: 'danger', text: '■ Parar', onclick: () => busy && busy.abort() }));
-    card.append(row);
-    if (!p.chapters.length) card.append(el('p', { class: 'muted', text: 'Escreva pelo menos um capítulo primeiro.' }));
+    const outdated = p.summaryAt && p.chapters.length !== p.summaryChapters;
+    if (p.summaryAt) card.append(el('p', { class: 'muted', text: `Feito em ${fmtDate(p.summaryAt)}, com ${p.summaryChapters} capítulo(s).` + (outdated ? ' Há capítulos novos desde então.' : '') }));
+    card.append(el('button', {
+      class: 'primary wide', disabled: !!busy, onclick: generateSummary,
+      text: p.summary.trim() ? (outdated ? '✨ Atualizar com os capítulos novos' : '✨ Gerar de novo') : '✨ Gerar o resumo'
+    }));
 
-    const ta = el('textarea', { class: 'big', id: 'summaryText', style: 'min-height:45vh', 'aria-label': 'Resumo', placeholder: 'O resumo aparece aqui. Você também pode escrever o seu.' });
+    const ta = el('textarea', { class: 'big', id: 'summaryText', style: 'min-height:40vh;margin-top:14px', 'aria-label': 'Resumo', placeholder: 'O resumo aparece aqui. Você pode editar ou escrever o seu.' });
     ta.value = p.summary;
     ta.addEventListener('input', () => { p.summary = ta.value; saveProject(p); });
     card.append(ta);
@@ -841,59 +1230,63 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     use.checked = p.useSummary !== false;
     use.addEventListener('change', () => { p.useSummary = use.checked; saveProject(p); });
     card.append(el('label', { class: 'check', for: 'useSummary' }, use,
-      el('span', { text: 'Usar este resumo como memória da IA ao escrever novos capítulos' })));
+      el('span', {}, 'Usar o resumo como memória da IA', el('small', { class: 'hint', style: 'display:block', text: 'Ajuda a IA a lembrar de tudo em histórias longas.' }))));
 
     const acts = el('div', { class: 'row', style: 'margin-top:14px' },
-      el('button', { text: '📋 Copiar resumo', disabled: !p.summary.trim(), onclick: () => copyText(p.summary) }));
+      el('button', { text: '📋 Copiar resumo', disabled: !p.summary.trim(), onclick: () => copyText(p.summary, 'Resumo copiado') }));
     if (p.summaryPrev != null) acts.append(el('button', {
       text: '↩ Voltar ao resumo anterior', onclick: () => { const t = p.summary; p.summary = p.summaryPrev; p.summaryPrev = t; saveProject(p, true); renderSummary(); }
     }));
-    card.append(acts, el('div', { class: 'status', id: 'summaryStatus', role: 'status' }));
+    card.append(acts);
     sec.append(card);
   }
 
   async function generateSummary() {
     const p = cur();
-    if (busy || !checkReady(p)) return;
+    if (busy || !ensureReady(p, generateSummary)) return;
     const MAX = 60000;
     let chaptersTxt = '', truncated = false;
     for (let i = p.chapters.length - 1; i >= 0; i--) {
-      const block = `### ${p.chapters[i].title || 'Capítulo ' + (i + 1)} (capítulo ${i + 1})\n${p.chapters[i].text}\n\n`;
+      const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
       if (chaptersTxt.length + block.length > MAX) { truncated = true; break; }
       chaptersTxt = block + chaptersTxt;
     }
     const prompt = `${bible(p)}\n\n` +
       (truncated && p.summary.trim() ? `RESUMO ANTERIOR (cobre os capítulos mais antigos):\n${p.summary}\n\n` : '') +
       `CAPÍTULOS${truncated ? ' MAIS RECENTES' : ''}:\n${chaptersTxt}\n` +
-      `TAREFA: Escreva um resumo de trabalho desta história para o autor, em português brasileiro, em texto simples (sem markdown), com estas partes:\n` +
+      `TAREFA: Escreva um resumo de trabalho desta história para o autor, em português do Brasil, em texto simples (sem markdown), com estas partes:\n` +
       `SINOPSE: 3 a 5 frases.\n` +
       `CAPÍTULO A CAPÍTULO: 2 a 3 frases para cada capítulo, numerados.\n` +
       `PERSONAGENS E RELAÇÕES AGORA: como cada personagem principal está e como estão as relações.\n` +
-      `FIOS EM ABERTO: conflitos, segredos e promessas que ainda não foram resolvidos.\n` +
+      `FIOS EM ABERTO: conflitos, segredos e promessas ainda não resolvidos.\n` +
       `SUGESTÕES PARA OS PRÓXIMOS CAPÍTULOS: 3 ideias curtas.\n` +
-      `Seja fiel ao que está escrito; não invente fatos.`;
+      `Seja fiel ao que está escrito; não invente fatos. Escreva tudo em português do Brasil.`;
 
     const old = p.summary;
-    const ctrl = startBusy('summary');
-    renderSummary();
-    const st = () => $('summaryStatus');
-    if (st()) { st().textContent = 'Lendo os capítulos e escrevendo o resumo…'; st().className = 'status'; }
+    const b = startBusy('summary', 'Fazendo o resumo', null);
     try {
-      const text = await callAI(prompt, (t) => { const ta = $('summaryText'); if (ta && view.tab === 'resumo') ta.value = t; }, ctrl.signal);
+      const r = await callAI(prompt, {
+        signal: b.ctrl.signal,
+        onThinking: () => updateBusy({ thinking: true }),
+        onText: (t) => { const ta = $('summaryText'); if (ta && view.tab === 'resumo') ta.value = t; updateBusy({ words: countWords(t) }); }
+      });
       p.summaryPrev = old.trim() ? old : null;
-      p.summary = text; p.summaryAt = Date.now(); p.summaryChapters = p.chapters.length;
-      saveProject(p, true);
-      stopBusy(); renderSummary();
-      if (st()) { st().textContent = 'Resumo pronto. Revise e ajuste o que quiser.'; st().className = 'status ok'; }
+      p.summary = r.text; p.summaryAt = Date.now(); p.summaryChapters = p.chapters.length;
+      stopBusy();
+      toast('Resumo pronto ✓');
     } catch (e) {
       p.summary = old;
-      stopBusy(); renderSummary();
-      if (st()) { st().textContent = e.name === 'AbortError' ? 'Cancelado; o resumo anterior foi mantido.' : e.message; st().className = 'status' + (e.name === 'AbortError' ? '' : ' err'); }
+      stopBusy();
+      if (e.name === 'AbortError') toast('Cancelado. O resumo anterior foi mantido.');
+      else handleAIError(e, generateSummary);
+    } finally {
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) renderTab();
     }
   }
 
   // =====================================================================
-  // Aba Referências (PDF, EPUB, TXT)
+  // Aba Arquivos (PDF, EPUB, TXT)
   // =====================================================================
   async function loadRefs(pid) {
     if (!refsCache[pid]) {
@@ -905,7 +1298,7 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
 
   function renderRefs() {
     const p = cur();
-    const sec = $('tab-referencias');
+    const sec = $('tab-arquivos');
     sec.innerHTML = '';
     const refs = refsCache[p.id] || [];
 
@@ -913,25 +1306,25 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     input.addEventListener('change', () => { addFiles([...input.files]); input.value = ''; });
 
     const budget = el('select', { id: 'refBudget' },
-      el('option', { value: '8000', text: 'Pouco (~8 mil caracteres, ~3 páginas)' }),
-      el('option', { value: '20000', text: 'Médio (~20 mil caracteres, ~8 páginas)' }),
-      el('option', { value: '50000', text: 'Muito (~50 mil caracteres, ~20 páginas)' }));
+      el('option', { value: '8000', text: 'Pouco (~3 páginas)' }),
+      el('option', { value: '20000', text: 'Médio (~8 páginas) — recomendado' }),
+      el('option', { value: '50000', text: 'Muito (~20 páginas)' }));
     budget.value = p.refBudget || '20000';
     budget.addEventListener('change', () => { p.refBudget = budget.value; saveProject(p); });
 
     sec.append(el('div', { class: 'card' },
-      el('h2', { text: '📎 Material de referência' }),
-      el('p', { class: 'lead', text: 'Envie livros, capítulos ou anotações em PDF, EPUB ou TXT. A cada pedido, o sistema escolhe os trechos mais ligados ao que está sendo escrito (nomes, lugares, a direção do capítulo) e manda junto para a IA.' }),
+      el('h2', { text: '📎 Arquivos de referência' }),
+      el('p', { class: 'lead', text: 'Mande livros, capítulos ou anotações (PDF, EPUB ou TXT) para a IA usar como base de universo, personagens ou estilo. A cada pedido, ela recebe os trechos mais ligados ao que está escrevendo.' }),
       input,
-      el('div', { class: 'row' },
-        el('button', { class: 'primary', text: '📎 Adicionar PDF, EPUB ou TXT', disabled: !!busy, onclick: () => input.click() })),
-      el('div', { class: 'status', id: 'refStatus', role: 'status', style: 'margin-top:10px' }),
+      el('button', { class: 'primary wide', text: '📎 Adicionar arquivo', onclick: () => input.click() }),
+      el('div', { class: 'status', id: 'refStatus', role: 'status' }),
       el('div', { class: 'progress', id: 'refProgress', hidden: true }, el('div')),
-      el('label', { for: 'refBudget', text: 'Quanto material mandar em cada pedido' }), budget,
-      el('p', { class: 'hint', text: 'Mais material ajuda a IA a acertar detalhes, mas cada pedido fica mais caro e o modelo precisa aceitar textos longos.' })));
+      refs.length ? el('details', { style: 'margin-top:14px' },
+        el('summary', { text: 'Quanto material mandar em cada pedido' }), budget,
+        el('p', { class: 'hint', text: 'Mais material ajuda a acertar detalhes, mas o pedido fica mais lento e alguns modelos grátis não aceitam textos longos.' })) : null));
 
     if (!refs.length) {
-      sec.append(el('div', { class: 'card empty', text: 'Nenhum arquivo neste projeto ainda.' }));
+      sec.append(el('div', { class: 'card empty' }, el('p', { text: 'Nenhum arquivo neste projeto. É opcional.' })));
       return;
     }
 
@@ -939,7 +1332,7 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
       const use = el('input', { type: 'checkbox', id: 'use-' + r.id });
       use.checked = r.enabled !== false;
       use.addEventListener('change', () => { r.enabled = use.checked; db.put('refs', r); });
-      const note = el('input', { type: 'text', placeholder: 'Ex.: use para o universo e os personagens / imite o estilo de escrita' });
+      const note = el('input', { type: 'text', id: 'note-' + r.id, placeholder: 'Ex.: use para o universo / imite o estilo' });
       note.value = r.note || '';
       let t; note.addEventListener('input', () => { r.note = note.value; clearTimeout(t); t = setTimeout(() => db.put('refs', r), 400); });
 
@@ -947,20 +1340,27 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
         el('div', { class: 'ref-head' },
           el('div', {},
             el('div', { class: 'ref-name', text: r.name }),
-            el('div', { class: 'muted', text: `${r.type.toUpperCase()} · ${fmtNum(r.chars)} caracteres (~${fmtNum(Math.max(1, Math.round(r.chars / 2500)))} páginas)` })),
-          el('button', {
-            class: 'danger', text: 'Remover', onclick: async () => {
-              if (!confirm(`Remover "${r.name}" deste projeto?`)) return;
-              await db.del('refs', r.id);
-              refsCache[p.id] = refs.filter(x => x.id !== r.id);
-              renderTab();
-            }
-          })),
-        el('label', { class: 'check', for: 'use-' + r.id }, use, el('span', { text: 'Usar como referência ao escrever' })),
-        el('label', { text: 'Como a IA deve usar este material (opcional)' }), note,
-        el('details', { style: 'margin-top:12px' },
-          el('summary', { text: 'Ver o começo do texto extraído' }),
+            el('div', { class: 'muted', text: `${r.type.toUpperCase()} · ~${fmtNum(Math.max(1, Math.round(r.chars / 2500)))} páginas` })),
+          el('button', { class: 'link', text: 'Remover', onclick: () => removeRef(p, r) })),
+        el('label', { class: 'check', for: 'use-' + r.id }, use, el('span', { text: 'Usar ao escrever' })),
+        el('label', { for: 'note-' + r.id, text: 'Como a IA deve usar (opcional)' }), note,
+        el('details', { style: 'margin-top:10px' },
+          el('summary', { text: 'Ver o texto que foi lido' }),
           el('pre', { class: 'sample', text: r.text.slice(0, 2500) + (r.text.length > 2500 ? '\n…' : '') }))));
+    });
+  }
+
+  async function removeRef(p, r) {
+    await db.del('refs', r.id);
+    refsCache[p.id] = (refsCache[p.id] || []).filter(x => x.id !== r.id);
+    renderTab();
+    toast('Arquivo removido.', {
+      action: 'Desfazer', onAction: async () => {
+        await db.put('refs', r);
+        (refsCache[p.id] = refsCache[p.id] || []).push(r);
+        refsCache[p.id].sort((a, b) => a.addedAt - b.addedAt);
+        if (currentId === p.id) renderTab();
+      }
     });
   }
 
@@ -969,7 +1369,7 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     if (!libPromises[src]) libPromises[src] = new Promise((res, rej) => {
       const s = el('script', { src });
       s.onload = res;
-      s.onerror = () => { delete libPromises[src]; rej(new Error('Não consegui carregar o leitor de arquivos. Confira a internet e tente de novo.')); };
+      s.onerror = () => { delete libPromises[src]; rej(new Error('não consegui carregar o leitor de arquivos; confira a internet')); };
       document.head.append(s);
     });
     return libPromises[src];
@@ -998,7 +1398,6 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
       pages.push(txt);
       onProgress(i / pdf.numPages);
     }
-    // junta linhas quebradas dentro do mesmo parágrafo
     return cleanText(pages.join('\n\n').replace(/([^\n.!?:;"”»—])\n(?=[a-zà-ú])/g, '$1 '));
   }
 
@@ -1024,11 +1423,11 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     await loadScript(LIBS.zip);
     const zip = await window.JSZip.loadAsync(file);
     const containerFile = zip.file('META-INF/container.xml');
-    if (!containerFile) throw new Error('Este EPUB parece estar danificado.');
+    if (!containerFile) throw new Error('o EPUB parece estar danificado');
     const xml = (s) => new DOMParser().parseFromString(s, 'application/xml');
     const container = xml(await containerFile.async('string'));
     const opfPath = container.getElementsByTagNameNS('*', 'rootfile')[0]?.getAttribute('full-path');
-    if (!opfPath || !zip.file(opfPath)) throw new Error('Este EPUB parece estar danificado.');
+    if (!opfPath || !zip.file(opfPath)) throw new Error('o EPUB parece estar danificado');
     const opf = xml(await zip.file(opfPath).async('string'));
     const base = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
     const manifest = {};
@@ -1036,8 +1435,7 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     const spine = [...opf.getElementsByTagNameNS('*', 'itemref')].map(r => manifest[r.getAttribute('idref')]).filter(Boolean);
     const parts = [];
     for (let i = 0; i < spine.length; i++) {
-      const path = resolvePath(base, decodeURIComponent(spine[i].split('#')[0]));
-      const f = zip.file(path);
+      const f = zip.file(resolvePath(base, decodeURIComponent(spine[i].split('#')[0])));
       if (f) parts.push(htmlToText(await f.async('string')));
       onProgress((i + 1) / spine.length);
     }
@@ -1046,9 +1444,8 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
 
   async function addFiles(files) {
     const p = cur();
-    const st = $('refStatus'), prog = $('refProgress');
-    const setSt = (m, k) => { if (st) { st.textContent = m; st.className = 'status' + (k ? ' ' + k : ''); } };
-    const bar = (f) => { if (prog) { prog.hidden = f == null; prog.firstChild.style.width = Math.round((f || 0) * 100) + '%'; } };
+    const setSt = (m, k) => { const st = $('refStatus'); if (st) { st.textContent = m; st.className = 'status' + (k ? ' ' + k : ''); } };
+    const bar = (f) => { const pr = $('refProgress'); if (pr) { pr.hidden = f == null; pr.firstChild.style.width = Math.round((f || 0) * 100) + '%'; } };
     let added = 0;
     for (const file of files) {
       const name = file.name;
@@ -1059,31 +1456,29 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
         if (ext === 'pdf' || file.type === 'application/pdf') text = await extractPdf(file, bar);
         else if (ext === 'epub' || file.type === 'application/epub+zip') text = await extractEpub(file, bar);
         else if (ext === 'txt' || ext === 'md' || file.type.startsWith('text/')) text = cleanText(await file.text());
-        else throw new Error('formato não suportado (use PDF, EPUB ou TXT)');
-        if (text.length < 200) throw new Error('quase não tem texto. Se for um PDF escaneado (foto das páginas), ele não tem texto para ler');
+        else throw new Error('esse formato não é aceito (use PDF, EPUB ou TXT)');
+        if (text.length < 200) throw new Error('quase não tem texto. Se for um PDF escaneado (foto das páginas), não há texto para ler');
         const r = { id: uid(), projectId: p.id, name, type: ext || 'txt', text, chars: text.length, enabled: true, note: '', addedAt: Date.now() };
         await db.put('refs', r);
         (refsCache[p.id] = refsCache[p.id] || []).push(r);
         added++;
       } catch (e) {
-        bar(null);
+        if (currentId === p.id) renderTab();
         setSt(`Não consegui ler "${name}": ${e.message}.`, 'err');
-        if (view.tab === 'referencias' && currentId === p.id) { renderTab(); $('refStatus').textContent = `Não consegui ler "${name}": ${e.message}.`; $('refStatus').className = 'status err'; }
         return;
       }
     }
     if (currentId === p.id) {
       renderTab();
-      const s2 = $('refStatus');
-      if (s2) { s2.textContent = added === 1 ? 'Arquivo adicionado.' : `${added} arquivos adicionados.`; s2.className = 'status ok'; }
+      setSt(added === 1 ? 'Arquivo adicionado ✓' : `${added} arquivos adicionados ✓`, 'ok');
     }
   }
 
   // ---------- escolhe os trechos mais relevantes ----------
   const STOP = new Set(('para pela pelo pelos pelas como mais mas porque quando onde quem qual quais isso isto aquilo esse essa este esta ' +
     'eles elas dele dela deles delas nele nela seus suas meus minhas teus tuas nosso nossa sobre entre depois antes ainda ' +
-    'muito muita muitos muitas pouco tudo nada cada outro outra outros outras mesmo mesma sempre nunca agora entao também tambem ' +
-    'apenas sera seria estava estavam estou esta estao foram fosse tinha tinham tenho temos fazer feito pode podia ser ter ' +
+    'muito muita muitos muitas pouco tudo nada cada outro outra outros outras mesmo mesma sempre nunca agora entao tambem ' +
+    'apenas sera seria estava estavam estou estao foram fosse tinha tinham tenho temos fazer feito pode podia ser ter ' +
     'capitulo historia personagem personagens with that this from have they their there what which would about').split(' '));
 
   function terms(s) {
@@ -1106,7 +1501,6 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     if (!refs.length) return '';
     const budget = Number(p.refBudget) || 20000;
     const header = (r) => `[Arquivo: ${r.name}${r.note ? ' — como usar: ' + r.note : ''}]`;
-
     const total = refs.reduce((n, r) => n + r.text.length, 0);
     if (total <= budget) return refs.map(r => `${header(r)}\n${r.text}`).join('\n\n');
 
@@ -1120,7 +1514,7 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     chunks.forEach(c => {
       let s = 0;
       for (const [w, n] of Object.entries(q)) if (c.terms.has(w)) s += Math.min(n, 3) * Math.log(1 + N / df[w]);
-      c.score = s + (c.ci === 0 ? 0.5 : 0); // o começo de cada arquivo costuma apresentar o universo
+      c.score = s + (c.ci === 0 ? 0.5 : 0);
     });
     const chosen = []; let used = 0;
     for (const c of chunks.slice().sort((a, b) => b.score - a.score)) {
@@ -1144,13 +1538,14 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
   function bible(p) {
     return [
       `TÍTULO: ${p.title || '(sem título)'}`,
+      `IDIOMA DA HISTÓRIA: ${p.lang || DEFAULT_LANG}`,
       `FANDOM/UNIVERSO: ${p.fandom || 'original'}`,
       `NARRAÇÃO: ${p.pov}`,
-      `INTENSIDADE: ${HEAT[p.heat]}`,
+      `INTENSIDADE: ${HEAT[p.heat] || HEAT.picante}`,
       `TOM E ESTILO: ${p.tone || 'livre'}`,
       `PERSONAGENS (todos adultos, 18+):\n${p.characters || '(a definir)'}`,
       `IDEIA/ENREDO:\n${p.premise || '(livre)'}`,
-      p.notes ? `REGRAS E LIMITES DO AUTOR:\n${p.notes}` : ''
+      p.notes ? `O QUE O AUTOR QUER E NÃO QUER:\n${p.notes}` : ''
     ].filter(Boolean).join('\n\n');
   }
 
@@ -1158,7 +1553,7 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     let txt = '';
     for (let i = upto - 1; i >= 0; i--) {
       const c = p.chapters[i];
-      const block = `### ${c.title || 'Capítulo ' + (i + 1)}\n${c.text}\n\n`;
+      const block = `### Capítulo ${i + 1}: ${chTitle(p, c)}\n${c.text}\n\n`;
       if (txt.length + block.length > max) {
         const room = max - txt.length;
         if (room > 500) txt = '[…início do capítulo omitido…]\n' + block.slice(-room) + txt;
@@ -1184,46 +1579,55 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
   // =====================================================================
   // Chamada à IA (streaming)
   // =====================================================================
-  async function callAI(userPrompt, onText, signal) {
-    if (!settings.key || !settings.model) throw new Error('Configure a chave e o modelo em ⚙ IA.');
-    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + settings.key };
-    if (/openrouter\.ai/.test(settings.endpoint)) {
+  function apiError(status, raw) {
+    const msg = String(raw || '');
+    let text, action = null;
+    if (/management key|provisioning key/i.test(msg)) { text = 'Essa chave é de gerenciamento e não escreve. Crie uma chave comum em "API Keys" no OpenRouter.'; action = 'key'; }
+    else if (status === 401) { text = 'A chave não foi aceita. Confira se colou a chave inteira ou crie outra.'; action = 'key'; }
+    else if (status === 402) { text = 'Sem créditos para este modelo. Escolha um modelo grátis ou adicione créditos no OpenRouter.'; action = 'model'; }
+    else if (/not a valid model|no endpoints found|model.*not (found|exist)/i.test(msg) || (status === 404 && /model/i.test(msg))) { text = 'Esse modelo não existe ou está fora do ar agora. Escolha outro.'; action = 'model'; }
+    else if (status === 429 || /rate.?limit/i.test(msg)) { text = 'O modelo está no limite de uso agora. Espere um minuto ou escolha outro modelo.'; action = 'model'; }
+    else if (/max_tokens|maximum context|context length|too long/i.test(msg)) { text = 'O pedido ficou grande demais para este modelo. Escolha um modelo que lembre mais páginas, ou mande menos material na aba Arquivos.'; action = 'model'; }
+    else if (/moderat|flagged|safety|content policy/i.test(msg)) { text = 'Este modelo bloqueou o pedido pelas regras de conteúdo dele. Escolha outro modelo.'; action = 'model'; }
+    else text = `A IA respondeu com um erro${status ? ' (' + status + ')' : ''}: ${msg.slice(0, 200)}`;
+    const e = new Error(text); e.action = action; e.status = status;
+    return e;
+  }
+
+  async function callAI(userPrompt, { onText, onThinking, signal, override } = {}) {
+    const cfg = Object.assign({}, settings, override || {});
+    if (!cfg.key || !cfg.model) { const e = new Error('A IA ainda não está conectada.'); e.action = 'setup'; throw e; }
+    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key };
+    if (isOpenRouter(cfg.endpoint)) {
       headers['HTTP-Referer'] = location.origin;
       headers['X-Title'] = 'Escritor de Fanfics';
     }
     let res;
     try {
-      res = await fetch(settings.endpoint, {
+      res = await fetch(cfg.endpoint, {
         method: 'POST', headers, signal,
         body: JSON.stringify({
-          model: settings.model, stream: true,
-          temperature: Number(settings.temperature), max_tokens: Number(settings.maxTokens),
+          model: cfg.model, stream: true,
+          temperature: Number(cfg.temperature) || 0.9,
+          max_tokens: Number(cfg.maxTokens) || 8192,
           messages: [
-            { role: 'system', content: settings.system || DEFAULT_SYSTEM },
+            { role: 'system', content: getSystem() },
             { role: 'user', content: userPrompt }
           ]
         })
       });
     } catch (e) {
       if (e.name === 'AbortError') throw e;
-      throw new Error('Não consegui falar com a IA. Confira a internet e o endereço da API.');
+      throw new Error('Não consegui falar com a IA. Confira a internet e tente de novo.');
     }
     if (!res.ok) {
       let msg = await res.text();
-      try { const j = JSON.parse(msg); msg = j.error?.message || msg; } catch {}
-      msg = String(msg);
-      let dica = '';
-      if (/management key|provisioning key/i.test(msg)) dica = 'Essa é uma chave de gerenciamento, que não escreve. No OpenRouter, crie uma chave comum em “API Keys” e cole em ⚙ IA.';
-      else if (res.status === 401) dica = 'A chave não foi aceita. Confira se colou a chave inteira em ⚙ IA, ou crie outra.';
-      else if (res.status === 402) dica = 'Sem créditos para este modelo. Escolha um modelo grátis (com :free no nome) ou adicione créditos.';
-      else if (/not a valid model|model.*not (found|exist)|no endpoints found/i.test(msg) || (res.status === 404 && /model/i.test(msg)))
-        dica = 'Esse modelo não existe ou não está disponível. Em ⚙ IA, toque em “Escolher na lista de modelos” e escolha outro.';
-      else if (res.status === 429) dica = 'Limite de pedidos atingido. Espere um pouco ou troque de modelo.';
-      throw new Error(dica ? `${dica} (Erro ${res.status})` : `Erro ${res.status}: ${msg.slice(0, 300)}`);
+      try { const j = JSON.parse(msg); msg = j.error?.metadata?.raw || j.error?.message || msg; } catch {}
+      throw apiError(res.status, msg);
     }
     const reader = res.body.getReader();
     const dec = new TextDecoder();
-    let buf = '', full = '';
+    let buf = '', full = '', finish = null;
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -1236,302 +1640,299 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
         const data = line.slice(5).trim();
         if (data === '[DONE]') continue;
         let j; try { j = JSON.parse(data); } catch { continue; }
-        if (j.error) throw new Error(j.error.message || 'Erro do provedor');
-        const tok = j.choices?.[0]?.delta?.content ?? j.choices?.[0]?.message?.content ?? '';
+        if (j.error) throw apiError(j.error.code || 0, j.error.message);
+        const c = j.choices?.[0];
+        if (!c) continue;
+        if (c.finish_reason) finish = c.finish_reason;
+        const d = c.delta || {};
+        if ((d.reasoning || d.reasoning_content) && onThinking) onThinking();
+        const tok = d.content ?? c.message?.content ?? '';
         if (tok) { full += tok; onText && onText(full); }
       }
     }
-    if (!full.trim()) throw new Error('A IA não devolveu texto. Tente de novo ou troque de modelo.');
-    return full.trim();
-  }
-
-  function setStatus(msg, kind) {
-    const s = $('globalStatus');
-    s.textContent = msg || '';
-    s.className = 'status' + (kind ? ' ' + kind : '');
-  }
-
-  function startBusy(kind, chapterId) {
-    busy = new AbortController();
-    busy.kind = kind; busy.chapterId = chapterId;
-    $('writeNextBtn').disabled = true;
-    $('stopBtn').hidden = false;
-    return busy;
-  }
-  function stopBusy() {
-    busy = null;
-    $('writeNextBtn').disabled = false;
-    $('stopBtn').hidden = true;
-  }
-  $('stopBtn').addEventListener('click', () => busy && busy.abort());
-
-  function checkReady(p) {
-    if (!p.adults) {
-      view.tab = 'ideia'; renderTab();
-      $('f-adults').focus();
-      toast('Confirme que todos os personagens são adultos (18+).');
-      return false;
+    if (!full.trim()) {
+      const e = new Error('A IA não devolveu texto. Tente de novo ou escolha outro modelo.');
+      e.action = 'model'; throw e;
     }
-    if (!settings.key || !settings.model) { openSettings(); return false; }
-    return true;
+    return { text: full.trim(), truncated: finish === 'length' };
   }
 
   // =====================================================================
-  // Escrever próximo capítulo
+  // Lista de modelos
   // =====================================================================
-  $('writeNextBtn').addEventListener('click', async () => {
-    const p = cur();
-    if (busy || !checkReady(p)) return;
-    const n = p.chapters.length + 1;
-    const dir = $('nextDirection').value.trim();
-    const prompt = `${buildContext(p, p.chapters.length, dir)}\n\n` +
-      `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde parou') +
-      `, com cerca de ${p.length} palavras.` +
-      (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') +
-      `\nNão escreva o título do capítulo; comece direto no texto.`;
-
-    const ch = { id: uid(), title: `Capítulo ${n}`, text: '' };
-    p.chapters.push(ch);
-    view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
-    startBusy('chapter', ch.id);
-    renderTab(); renderProjects();
-    setStatus('Escrevendo…');
-    try {
-      const text = await callAI(prompt, (t) => { ch.text = t; paintChapter(ch, t); }, busy.signal);
-      ch.text = text;
-      $('nextDirection').value = '';
-      setStatus(`Capítulo ${n} pronto: ${fmtNum(countWords(text))} palavras. Revise à vontade.`, 'ok');
-    } catch (e) {
-      if (e.name === 'AbortError') setStatus('Parado. O que já foi escrito ficou salvo.');
-      else setStatus(e.message, 'err');
-      if (!ch.text.trim()) { p.chapters = p.chapters.filter(c => c.id !== ch.id); if (view.chapterId === ch.id) view.chapterId = null; }
-    } finally {
-      stopBusy(); saveProject(p, true);
-      if (currentId === p.id) { renderTab(); renderProjects(); }
-    }
-  });
-
-  // =====================================================================
-  // Pedir ajuste (trecho selecionado ou capítulo inteiro)
-  // =====================================================================
-  let reviseTarget = null;
-
-  function currentSelection(ch) {
-    const body = $('chBody');
-    if (!body) return null;
-    if (body.tagName === 'TEXTAREA') {
-      const { selectionStart: s, selectionEnd: e } = body;
-      return e > s && body.value.slice(s, e).trim() ? { start: s, end: e } : null;
-    }
-    const sel = getSelection();
-    if (!sel || sel.isCollapsed || !body.contains(sel.anchorNode)) return null;
-    const txt = sel.toString().trim();
-    if (!txt) return null;
-    const at = ch.text.indexOf(txt);
-    return at >= 0 ? { start: at, end: at + txt.length } : { notFound: true };
-  }
-
-  function openRevise(ch) {
-    if (busy) return;
-    const sel = currentSelection(ch);
-    if (sel && sel.notFound) { toast('Selecione dentro de um parágrafo, ou use o modo Editar.'); return; }
-    reviseTarget = { ch, start: sel ? sel.start : 0, end: sel ? sel.end : ch.text.length, partial: !!sel };
-    $('reviseScope').textContent = sel
-      ? `Só o trecho selecionado (${fmtNum(countWords(ch.text.slice(sel.start, sel.end)))} palavras) será reescrito.`
-      : 'O capítulo inteiro será reescrito. Dica: selecione um trecho antes para mudar só ele.';
-    $('reviseText').value = '';
-    $('reviseDlg').showModal();
-    $('reviseText').focus();
-  }
-
-  $('reviseCancelBtn').addEventListener('click', () => $('reviseDlg').close());
-
-  $('reviseGoBtn').addEventListener('click', async () => {
-    const instr = $('reviseText').value.trim();
-    if (!instr || !reviseTarget) { $('reviseText').focus(); return; }
-    $('reviseDlg').close();
-    const p = cur();
-    if (!checkReady(p)) return;
-
-    const { ch, start, end, partial } = reviseTarget;
-    const idx = p.chapters.indexOf(ch);
-    const original = ch.text;
-    let prompt = `${buildContext(p, idx, instr)}\n\n`;
-    if (partial) {
-      prompt += `CAPÍTULO ATUAL (contexto):\n${original}\n\n` +
-        `TRECHO A REESCREVER:\n"""\n${original.slice(start, end)}\n"""\n\n` +
-        `TAREFA: Reescreva apenas esse trecho seguindo este pedido: ${instr}\n` +
-        `Ele precisa se encaixar no texto antes e depois. Devolva só o trecho novo.`;
-    } else {
-      prompt += `CAPÍTULO ATUAL:\n${original}\n\n` +
-        `TAREFA: Reescreva este capítulo seguindo este pedido: ${instr}\n` +
-        `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
-    }
-
-    const before = original.slice(0, start), after = original.slice(end);
-    view.chapterId = ch.id;
-    startBusy('revise', ch.id);
-    renderChapters();
-    setStatus(partial ? 'Reescrevendo o trecho…' : 'Reescrevendo o capítulo…');
-    try {
-      const text = await callAI(prompt, (t) => paintChapter(ch, before + t + after), busy.signal);
-      ch.prev = original;
-      ch.text = before + text + after;
-      setStatus('Ajuste feito. Se não gostou, toque em “Desfazer ajuste”.', 'ok');
-    } catch (e) {
-      ch.text = original;
-      setStatus(e.name === 'AbortError' ? 'Ajuste cancelado; o texto original foi mantido.' : e.message, e.name === 'AbortError' ? '' : 'err');
-    } finally {
-      stopBusy(); saveProject(p, true);
-      if (currentId === p.id) renderTab();
-    }
-  });
-
-  // =====================================================================
-  // Configurações
-  // =====================================================================
-  function openSettings() {
-    $('s-endpoint').value = settings.endpoint;
-    $('s-key').value = settings.key;
-    $('s-model').value = settings.model;
-    $('s-temp').value = settings.temperature;
-    $('s-max').value = settings.maxTokens;
-    $('s-system').value = settings.system;
-    $('settingsStatus').textContent = '';
-    $('modelPicker').hidden = true;
-    $('settingsDlg').showModal();
-  }
-
-  // ---------- lista de modelos ----------
   let modelsCache = null;
+  const isFree = (m) => /:free$/.test(m.id) || (Number(m.pricing?.prompt) === 0 && Number(m.pricing?.completion) === 0);
+  const pagesOf = (m) => m.context_length ? Math.max(1, Math.round(m.context_length * 3 / 2500)) : 0;
 
-  function modelsUrl() {
-    const ep = $('s-endpoint').value.trim() || DEFAULT_SETTINGS.endpoint;
-    return ep.replace(/\/chat\/completions\/?$/, '') + '/models';
+  async function loadModels() {
+    if (modelsCache) return modelsCache;
+    const url = settings.endpoint.replace(/\/chat\/completions\/?$/, '') + '/models';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error();
+    const j = await res.json();
+    modelsCache = (j.data || []).filter(m => m && m.id)
+      .sort((a, b) => (isFree(b) - isFree(a)) || ((b.context_length || 0) - (a.context_length || 0)));
+    return modelsCache;
   }
 
-  function isFree(m) {
-    const p = m.pricing || {};
-    return /:free$/.test(m.id) || (Number(p.prompt) === 0 && Number(p.completion) === 0);
-  }
+  function buildModelPicker(container, { selected, onPick }) {
+    const search = el('input', { type: 'text', placeholder: 'Buscar pelo nome…', 'aria-label': 'Buscar modelo' });
+    const free = el('input', { type: 'checkbox', id: 'pickFree' });
+    free.checked = true;
+    const status = el('div', { class: 'status', role: 'status', text: 'Carregando a lista de modelos…' });
+    const list = el('div', { class: 'model-list', role: 'listbox', 'aria-label': 'Modelos' });
+    let sel = selected;
+    container.append(search, el('label', { class: 'check', for: 'pickFree', style: 'margin-top:10px' }, free, el('span', { text: 'Só os grátis' })), status, list);
 
-  function renderModels() {
-    const list = $('modelList');
-    list.innerHTML = '';
-    if (!modelsCache) return;
-    const q = $('modelSearch').value.trim().toLowerCase();
-    const freeOnly = $('freeOnly').checked;
-    const current = $('s-model').value.trim();
-    const found = modelsCache.filter(m =>
-      (!freeOnly || isFree(m)) &&
-      (!q || m.id.toLowerCase().includes(q) || (m.name || '').toLowerCase().includes(q)));
-    $('modelStatus').textContent = found.length
-      ? `${found.length} modelo(s). Toque em um para escolher.`
-      : 'Nenhum modelo encontrado com esse filtro.';
-    $('modelStatus').className = 'status';
-    found.slice(0, 150).forEach(m => {
-      const ctx = m.context_length ? ` · lê até ~${fmtNum(Math.round(m.context_length * 3 / 1000))} mil caracteres` : '';
-      list.append(el('button', {
-        role: 'option', 'aria-selected': String(m.id === current),
-        onclick: () => {
-          $('s-model').value = m.id;
-          renderModels();
-          $('modelStatus').textContent = `Escolhido: ${m.name || m.id}. Toque em Salvar.`;
-          $('modelStatus').className = 'status ok';
-        }
+    const render = () => {
+      list.innerHTML = '';
+      if (!modelsCache) return;
+      const q = search.value.trim().toLowerCase();
+      const found = modelsCache.filter(m => (!free.checked || isFree(m)) &&
+        (!q || m.id.toLowerCase().includes(q) || (m.name || '').toLowerCase().includes(q)));
+      status.textContent = found.length ? `${found.length} modelo(s). Os que lembram mais páginas aparecem primeiro.` : 'Nenhum modelo com esse filtro.';
+      status.className = 'status';
+      found.slice(0, 150).forEach(m => list.append(el('button', {
+        type: 'button', role: 'option', 'aria-selected': String(m.id === sel),
+        onclick: () => { sel = m.id; render(); onPick(m); }
       },
         m.name || m.id,
         el('span', { class: 'tag' + (isFree(m) ? ' free' : ''), text: isFree(m) ? 'grátis' : 'pago' }),
-        el('span', { class: 'mid', text: m.id + ctx })));
+        el('span', { class: 'mid', text: (pagesOf(m) ? `lembra ~${fmtNum(pagesOf(m))} páginas · ` : '') + m.id }))));
+    };
+    search.addEventListener('input', render);
+    free.addEventListener('change', render);
+    loadModels().then(render).catch(() => {
+      status.textContent = 'Não consegui carregar a lista. Confira a internet.';
+      status.className = 'status err';
     });
   }
 
-  $('pickModelBtn').addEventListener('click', async () => {
-    $('modelPicker').hidden = false;
-    if (modelsCache) { renderModels(); return; }
-    $('modelStatus').textContent = 'Carregando a lista…';
-    $('modelStatus').className = 'status';
-    try {
-      const res = await fetch(modelsUrl());
-      if (!res.ok) throw new Error();
-      const j = await res.json();
-      modelsCache = (j.data || []).filter(m => m && m.id)
-        .sort((a, b) => (isFree(b) - isFree(a)) || (a.name || a.id).localeCompare(b.name || b.id));
-      renderModels();
-      $('modelSearch').focus();
-    } catch {
-      $('modelStatus').textContent = 'Não consegui carregar a lista. Confira a internet e o endereço da API.';
-      $('modelStatus').className = 'status err';
-    }
-  });
-  $('modelSearch').addEventListener('input', renderModels);
-  $('freeOnly').addEventListener('change', renderModels);
+  // =====================================================================
+  // Conectar a IA: passo a passo
+  // =====================================================================
+  const setup = { step: 1, key: '', model: '', modelName: '', then: null };
 
-  function readSettings() {
-    settings = {
-      endpoint: $('s-endpoint').value.trim() || DEFAULT_SETTINGS.endpoint,
-      key: $('s-key').value.trim(),
-      model: $('s-model').value.trim(),
-      temperature: Number($('s-temp').value) || 1,
-      maxTokens: Number($('s-max').value) || 4096,
-      system: $('s-system').value.trim() || DEFAULT_SYSTEM
-    };
-    local.set('fanfic.settings', settings);
-    $('setupNotice').hidden = !!(settings.key && settings.model);
+  function openSetup(step = 1, then = null) {
+    $('settingsDlg').open && $('settingsDlg').close();
+    setup.step = step;
+    setup.key = settings.key || '';
+    setup.model = settings.model || '';
+    setup.modelName = settings.modelName || '';
+    setup.then = then;
+    renderSetup();
+    if (!$('setupDlg').open) $('setupDlg').showModal();
+  }
+
+  function setupHead(title) {
+    return [
+      el('div', { class: 'dlg-head' }, el('h2', { id: 'setupTitle', text: title }), el('button', { class: 'close', 'aria-label': 'Fechar', text: '✕', onclick: () => $('setupDlg').close() })),
+      setup.step <= 3 ? el('p', { class: 'step', text: `PASSO ${setup.step} DE 3` }) : null,
+      setup.step <= 3 ? el('div', { class: 'steps', 'aria-hidden': 'true' }, [1, 2, 3].map(i => el('span', { class: i <= setup.step ? 'done' : '' }))) : null
+    ];
+  }
+
+  function renderSetup() {
+    const b = $('setupBody');
+    b.innerHTML = '';
+
+    if (setup.step === 1) {
+      b.append(...setupHead('Conectar a IA'),
+        el('p', { text: 'O escritor usa o OpenRouter, um serviço que dá acesso a vários modelos de IA, muitos deles grátis. Você precisa de uma chave de acesso.' }),
+        el('ol', { class: 'howto' },
+          el('li', {}, 'Toque em ', el('b', { text: 'Abrir o OpenRouter' }), ' e entre com sua conta Google.'),
+          el('li', {}, 'Na página ', el('b', { text: 'API Keys' }), ', toque em ', el('b', { text: 'Create Key' }), ', dê um nome e confirme.'),
+          el('li', {}, 'Copie a chave. Ela começa com ', el('b', { text: 'sk-or-' }), '.')),
+        el('p', { class: 'hint', style: 'margin-bottom:16px', text: 'Não use as "Management keys": elas não escrevem.' }),
+        el('div', { class: 'row' },
+          el('a', { class: 'btn', href: 'https://openrouter.ai/keys', target: '_blank', rel: 'noopener', text: 'Abrir o OpenRouter ↗' }),
+          el('button', { class: 'primary', style: 'flex:1', text: 'Já copiei a chave →', onclick: () => { setup.step = 2; renderSetup(); } })));
+      return;
+    }
+
+    if (setup.step === 2) {
+      const input = el('input', { type: 'text', id: 'setupKey', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', placeholder: 'sk-or-…' });
+      input.value = setup.key;
+      const status = el('div', { class: 'status', role: 'status' });
+      const next = el('button', { class: 'primary', style: 'flex:1', text: 'Continuar →' });
+      const paste = el('button', {
+        text: '📋 Colar', onclick: async () => {
+          try { input.value = (await navigator.clipboard.readText()).trim(); }
+          catch { input.focus(); toast('Toque e segure no campo para colar.'); }
+        }
+      });
+      next.addEventListener('click', async () => {
+        const key = input.value.trim();
+        if (!key) { status.textContent = 'Cole a chave no campo acima.'; status.className = 'status err'; input.focus(); return; }
+        if (isOpenRouter() && !key.startsWith('sk-')) { status.textContent = 'Isso não parece uma chave do OpenRouter. Ela começa com sk-or-.'; status.className = 'status err'; return; }
+        next.disabled = true; status.textContent = 'Conferindo a chave…'; status.className = 'status';
+        const check = await checkKey(key);
+        next.disabled = false;
+        if (!check.ok) { status.textContent = check.msg; status.className = 'status err'; return; }
+        setup.key = key;
+        setup.step = 3; renderSetup();
+      });
+      b.append(...setupHead('Cole a chave'),
+        el('label', { for: 'setupKey', style: 'margin-top:0', text: 'Sua chave do OpenRouter' }),
+        el('div', { class: 'row', style: 'flex-wrap:nowrap' }, input, paste),
+        el('p', { class: 'hint', text: 'Ela fica salva só neste aparelho.' }),
+        status,
+        el('div', { class: 'row', style: 'margin-top:18px' },
+          el('button', { text: '← Voltar', onclick: () => { setup.step = 1; renderSetup(); } }), next));
+      setTimeout(() => input.focus(), 50);
+      return;
+    }
+
+    if (setup.step === 3) {
+      const status = el('div', { class: 'status', role: 'status' });
+      const chosen = el('p', { class: 'muted', text: setup.model ? `Escolhido: ${setup.modelName || setup.model}` : 'Nenhum modelo escolhido ainda.' });
+      const test = el('button', { class: 'primary wide', text: 'Testar e concluir', disabled: !setup.model });
+      const picker = el('div');
+      buildModelPicker(picker, {
+        selected: setup.model,
+        onPick: (m) => { setup.model = m.id; setup.modelName = m.name || m.id; chosen.textContent = `Escolhido: ${setup.modelName}`; test.disabled = false; status.textContent = ''; }
+      });
+      test.addEventListener('click', async () => {
+        test.disabled = true; status.textContent = 'Testando o modelo…'; status.className = 'status';
+        try {
+          const r = await callAI('Responda com uma única frase curta e simpática, em português do Brasil, dizendo que a conexão funcionou.', { override: { key: setup.key, model: setup.model, maxTokens: 400 } });
+          settings.key = setup.key; settings.model = setup.model; settings.modelName = setup.modelName;
+          saveSettings();
+          setup.step = 4; setup.reply = r.text; renderSetup();
+        } catch (e) {
+          test.disabled = false;
+          status.textContent = e.action === 'key' ? e.message + ' Volte um passo para trocar a chave.' : e.message;
+          status.className = 'status err';
+        }
+      });
+      b.append(...setupHead('Escolha o modelo'),
+        el('p', { class: 'lead', text: 'Cada modelo escreve de um jeito. Os grátis têm limite de uso por dia. Se um deles recusar cenas, escrever mal ou em outro idioma, é só trocar depois.' }),
+        picker, chosen, status,
+        el('div', { class: 'row', style: 'margin-top:12px' },
+          el('button', { text: '← Voltar', onclick: () => { setup.step = 2; renderSetup(); } }),
+          el('div', { style: 'flex:1' }, test)));
+      return;
+    }
+
+    // passo 4: pronto
+    b.append(...setupHead('Tudo pronto!'),
+      el('div', { class: 'success' },
+        el('div', { class: 'big-ico', text: '✅' }),
+        el('p', { text: `A IA está conectada com o modelo ${setup.modelName || setup.model}.` }),
+        setup.reply ? el('div', { class: 'quote', text: setup.reply }) : null),
+      el('button', {
+        class: 'primary wide', text: setup.then ? 'Continuar →' : 'Começar a escrever', onclick: () => {
+          $('setupDlg').close();
+          const then = setup.then; setup.then = null;
+          renderTab();
+          if (then) then();
+        }
+      }));
+  }
+
+  async function checkKey(key) {
+    if (!isOpenRouter()) return { ok: true };
+    try {
+      const r = await fetch('https://openrouter.ai/api/v1/key', { headers: { Authorization: 'Bearer ' + key } });
+      if (r.ok) return { ok: true };
+      let msg = await r.text();
+      try { msg = JSON.parse(msg).error?.message || msg; } catch {}
+      return { ok: false, msg: apiError(r.status, msg).message };
+    } catch {
+      return { ok: true }; // sem internet para conferir: segue e o teste do passo 3 confirma
+    }
+  }
+
+  // =====================================================================
+  // Configurações (quando já está conectada)
+  // =====================================================================
+  function openSettings() {
+    if (!isConfigured()) { openSetup(1); return; }
+    renderSettings();
+    $('settingsDlg').showModal();
+  }
+
+  function renderSettings() {
+    const b = $('settingsBody');
+    b.innerHTML = '';
+    const status = el('div', { class: 'status', role: 'status' });
+
+    const temp = el('select', { id: 'set-temp' }, CREATIVITY.map(c => el('option', { value: String(c.v), text: c.label })));
+    temp.value = String(CREATIVITY.reduce((a, c) => Math.abs(c.v - settings.temperature) < Math.abs(a.v - settings.temperature) ? c : a).v);
+    temp.addEventListener('change', () => { settings.temperature = Number(temp.value); saveSettings(); });
+
+    const max = el('select', { id: 'set-max' },
+      el('option', { value: '4096', text: 'Menor (4.096 tokens)' }),
+      el('option', { value: '8192', text: 'Padrão (8.192 tokens)' }),
+      el('option', { value: '16000', text: 'Maior (16.000 tokens)' }));
+    max.value = ['4096', '8192', '16000'].includes(String(settings.maxTokens)) ? String(settings.maxTokens) : '8192';
+    max.addEventListener('change', () => { settings.maxTokens = Number(max.value); saveSettings(); });
+
+    const ep = el('input', { type: 'text', id: 'set-ep' });
+    ep.value = settings.endpoint;
+    ep.addEventListener('change', () => { settings.endpoint = ep.value.trim() || OPENROUTER; modelsCache = null; saveSettings(); });
+
+    const sys = el('textarea', { id: 'set-sys', style: 'min-height:200px' });
+    sys.value = getSystem();
+    sys.addEventListener('input', () => { settings.system = sys.value.trim() === DEFAULT_SYSTEM ? '' : sys.value; saveSettings(); });
+
+    b.append(
+      el('div', { class: 'dlg-head' }, el('h2', { id: 'settingsTitle', text: 'IA' }), el('button', { class: 'close', 'aria-label': 'Fechar', text: '✕', onclick: () => $('settingsDlg').close() })),
+      el('p', { class: 'status ok', style: 'margin-top:0', text: '● Conectada' }),
+      el('div', { class: 'kv' },
+        el('div', {}, el('div', { class: 'k', text: 'Modelo' }), el('div', { class: 'v', text: settings.modelName || settings.model })),
+        el('button', { text: 'Trocar modelo', onclick: () => openSetup(3) })),
+      el('div', { class: 'kv' },
+        el('div', {}, el('div', { class: 'k', text: 'Chave' }), el('div', { class: 'v', text: '••••' + settings.key.slice(-4) })),
+        el('button', { text: 'Trocar chave', onclick: () => openSetup(2) })),
+      el('div', { class: 'row', style: 'margin-top:14px' },
+        el('button', {
+          text: 'Testar a conexão', onclick: async (e) => {
+            e.currentTarget.disabled = true;
+            status.textContent = 'Testando…'; status.className = 'status';
+            try {
+              const r = await callAI('Responda com uma única frase curta, em português do Brasil, dizendo que a conexão funcionou.', { override: { maxTokens: 400 } });
+              status.textContent = 'Funcionou! "' + r.text.slice(0, 120) + '"'; status.className = 'status ok';
+            } catch (err) { status.textContent = err.message; status.className = 'status err'; }
+            e.target.disabled = false;
+          }
+        })),
+      status,
+      el('details', { style: 'margin-top:16px' },
+        el('summary', { text: 'Opções avançadas' }),
+        el('label', { for: 'set-temp', text: 'Criatividade' }), temp,
+        el('label', { for: 'set-max', text: 'Tamanho máximo de cada resposta' }), max,
+        el('p', { class: 'hint', text: 'Se os capítulos param no meio, aumente. Se o modelo der erro de tamanho, diminua.' }),
+        el('label', { for: 'set-sys', text: 'Instruções do escritor' }), sys,
+        el('button', { style: 'margin-top:8px', text: 'Restaurar as instruções padrão', onclick: () => { settings.system = ''; sys.value = DEFAULT_SYSTEM; saveSettings(); toast('Instruções restauradas.'); } }),
+        el('label', { for: 'set-ep', text: 'Endereço da API (outro provedor)' }), ep,
+        el('p', { class: 'hint', text: 'Qualquer serviço compatível com a API da OpenAI. Padrão: OpenRouter.' }),
+        el('hr'),
+        el('button', {
+          class: 'link', text: 'Desconectar a IA deste aparelho', onclick: () => {
+            if (!confirm('Apagar a chave deste aparelho?')) return;
+            settings.key = ''; settings.model = ''; settings.modelName = ''; saveSettings();
+            $('settingsDlg').close(); renderTab(); toast('IA desconectada.');
+          }
+        })),
+      el('button', { class: 'primary wide', style: 'margin-top:16px', text: 'Fechar', onclick: () => $('settingsDlg').close() }));
   }
 
   $('settingsBtn').addEventListener('click', openSettings);
-  $('closeSettingsBtn').addEventListener('click', () => $('settingsDlg').close());
-  $('resetSystemBtn').addEventListener('click', () => { $('s-system').value = DEFAULT_SYSTEM; });
-  $('saveSettingsBtn').addEventListener('click', () => {
-    readSettings();
-    $('settingsStatus').textContent = 'Salvo neste aparelho.';
-    $('settingsStatus').className = 'status ok';
-  });
-  $('testBtn').addEventListener('click', async () => {
-    readSettings();
-    const st = $('settingsStatus');
-    st.textContent = 'Testando…'; st.className = 'status';
-    try {
-      const r = await callAI('Responda apenas: "Conexão OK".', null);
-      st.textContent = 'Funcionou! Resposta: ' + r.slice(0, 80); st.className = 'status ok';
-    } catch (e) {
-      st.textContent = e.message; st.className = 'status err';
-    }
-  });
 
   // =====================================================================
   // App instalável
   // =====================================================================
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   let installEvent = null;
-
-  addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    installEvent = e;
-    $('installBtn').hidden = false;
-  });
-  addEventListener('appinstalled', () => {
-    installEvent = null;
-    $('installBtn').hidden = true;
-    toast('App instalado! Procure “Fanfics” na tela inicial.');
-  });
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvent = e; $('installBtn').hidden = false; });
+  addEventListener('appinstalled', () => { installEvent = null; $('installBtn').hidden = true; toast('App instalado! Procure “Fanfics” na tela inicial.'); });
   if (isIOS && !standalone) $('installBtn').hidden = false;
-
   $('installBtn').addEventListener('click', async () => {
-    if (installEvent) {
-      installEvent.prompt();
-      await installEvent.userChoice;
-      installEvent = null;
-      $('installBtn').hidden = true;
-    } else if (isIOS) {
-      $('iosDlg').showModal();
-    }
+    if (installEvent) { installEvent.prompt(); await installEvent.userChoice; installEvent = null; $('installBtn').hidden = true; }
+    else if (isIOS) $('iosDlg').showModal();
   });
-  $('iosCloseBtn').addEventListener('click', () => $('iosDlg').close());
-
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     navigator.serviceWorker.register('fanfic-sw.js', { scope: './fanfic' }).catch(() => {});
   }
@@ -1542,7 +1943,7 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
   async function init() {
     projects = (await db.all('projects')) || [];
 
-    // traz histórias da versão anterior (salvas no localStorage)
+    // traz histórias da primeira versão (salvas no localStorage)
     const legacy = local.get('fanfic.stories', null);
     if (Array.isArray(legacy) && legacy.length) {
       for (const s of legacy) {
@@ -1553,10 +1954,11 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
       }
       if (dbOk) local.del('fanfic.stories');
     }
+    projects.forEach(p => { if (!p.lang) p.lang = DEFAULT_LANG; });
 
     if (!projects.length) { const p = newProject(); projects.push(p); saveProject(p, true); }
     if (!cur()) currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
-    $('setupNotice').hidden = !!(settings.key && settings.model);
+    saveSettings();
     openProject(currentId);
   }
   init();

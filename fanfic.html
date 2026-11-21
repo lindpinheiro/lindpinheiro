@@ -508,6 +508,7 @@
     zip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
   };
   const OPENROUTER = 'https://openrouter.ai/api/v1/chat/completions';
+  const CREDITS_URL = 'https://openrouter.ai/settings/credits';
   const DEFAULT_LANG = 'Português do Brasil';
 
   const DEFAULT_SYSTEM = `Você é um escritor de fanfics e ficção romântica.
@@ -1039,12 +1040,38 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   // retry: refaz o mesmo pedido; edit: reabre a janela com o pedido para mudar
+  function openCredits(retry) {
+    window.open(CREDITS_URL, '_blank', 'noopener');
+    showAlert({
+      kind: 'info',
+      msg: 'A página de créditos do OpenRouter abriu em outra aba. Depois de pagar, volte aqui: a chave continua a mesma.',
+      actions: retry ? [{ label: 'Já adicionei, tentar de novo', primary: true, onClick: retry }] : []
+    });
+  }
+
+  // saldo da conta no OpenRouter (null se não der para saber)
+  async function fetchBalance() {
+    if (!isOpenRouter() || !settings.key) return null;
+    try {
+      const r = await fetch('https://openrouter.ai/api/v1/credits', { headers: { Authorization: 'Bearer ' + settings.key } });
+      if (!r.ok) return null;
+      const d = (await r.json()).data || {};
+      if (d.total_credits == null) return null;
+      return Number(d.total_credits) - Number(d.total_usage || 0);
+    } catch { return null; }
+  }
+  const fmtUSD = (v) => 'US$ ' + v.toFixed(2).replace('.', ',');
+
   function handleAIError(e, retry, edit) {
     if (e.name === 'AbortError') { toast('Parado.'); return; }
     const actions = [];
     if (e.action === 'key') actions.push({ label: 'Trocar a chave', primary: true, onClick: () => openSetup(2, retry) });
     if (e.action === 'model') actions.push({ label: 'Escolher outro modelo', primary: true, onClick: () => openSetup(3, retry) });
     if (e.action === 'setup') actions.push({ label: 'Conectar a IA', primary: true, onClick: () => openSetup(1, retry) });
+    if (e.action === 'credits') {
+      actions.push({ label: '💳 Adicionar créditos', primary: true, onClick: () => openCredits(retry) });
+      actions.push({ label: 'Escolher um modelo grátis', onClick: () => openSetup(3, retry) });
+    }
     if (retry && e.action !== 'key' && e.action !== 'setup') actions.push({ label: 'Tentar de novo', primary: !e.action, onClick: retry });
     if (edit) actions.push({ label: '✏️ Mudar o pedido', onClick: edit });
     showAlert({ kind: 'err', msg: e.message + (edit ? ' Seu pedido ficou guardado.' : ''), actions });
@@ -1692,7 +1719,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     let text, action = null;
     if (/management key|provisioning key/i.test(msg)) { text = 'Essa chave é de gerenciamento e não escreve. Crie uma chave comum em "API Keys" no OpenRouter.'; action = 'key'; }
     else if (status === 401) { text = 'A chave não foi aceita. Confira se colou a chave inteira ou crie outra.'; action = 'key'; }
-    else if (status === 402) { text = 'Sem créditos para este modelo. Escolha um modelo grátis ou adicione créditos no OpenRouter.'; action = 'model'; }
+    else if (status === 402) { text = 'Acabaram os créditos para este modelo pago. Adicione créditos no OpenRouter (a chave continua a mesma) ou escolha um modelo grátis.'; action = 'credits'; }
     else if (/not a valid model|no endpoints found|model.*not (found|exist)/i.test(msg) || (status === 404 && /model/i.test(msg))) { text = 'Esse modelo não existe ou está fora do ar agora. Escolha outro.'; action = 'model'; }
     else if (status === 429 || /rate.?limit/i.test(msg)) { text = 'O modelo está no limite de uso agora. Espere um minuto ou escolha outro modelo.'; action = 'model'; }
     else if (/max_tokens|maximum context|context length|too long/i.test(msg)) { text = 'O pedido ficou grande demais para este modelo. Escolha um modelo que lembre mais páginas, ou mande menos material na aba Arquivos.'; action = 'model'; }
@@ -1946,6 +1973,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           test.disabled = false;
           status.textContent = e.action === 'key' ? e.message + ' Volte um passo para trocar a chave.' : e.message;
           status.className = 'status err';
+          if (e.action === 'credits') status.append(el('div', { class: 'row', style: 'margin-top:8px' },
+            el('a', { class: 'btn primary', href: CREDITS_URL, target: '_blank', rel: 'noopener', text: '💳 Adicionar créditos ↗' }),
+            el('span', { class: 'muted', text: 'Depois, toque em Testar e concluir de novo.' })));
         }
       });
       b.append(...setupHead('Escolha o modelo'),
@@ -1998,6 +2028,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function renderSettings() {
     const b = $('settingsBody');
     b.innerHTML = '';
+    fetchBalance().then(v => { const x = $('balance'); if (x) x.textContent = v == null ? 'Veja no site do OpenRouter' : fmtUSD(v); });
     const status = el('div', { class: 'status', role: 'status' });
 
     const temp = el('select', { id: 'set-temp' }, CREATIVITY.map(c => el('option', { value: String(c.v), text: c.label })));
@@ -2026,6 +2057,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Modelo' }), el('div', { class: 'v', text: settings.modelName || settings.model })),
         el('button', { text: 'Trocar modelo', onclick: () => openSetup(3) })),
+      isOpenRouter() ? el('div', { class: 'kv' },
+        el('div', {}, el('div', { class: 'k', text: 'Saldo de créditos' }), el('div', { class: 'v', id: 'balance', text: 'Carregando…' }),
+          el('div', { class: 'hint', style: 'margin:0', text: 'Modelos pagos gastam créditos. Os grátis não.' })),
+        el('a', { class: 'btn', href: CREDITS_URL, target: '_blank', rel: 'noopener', text: '💳 Adicionar' })) : null,
       el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Chave' }), el('div', { class: 'v', text: '••••' + settings.key.slice(-4) })),
         el('button', { text: 'Trocar chave', onclick: () => openSetup(2) })),

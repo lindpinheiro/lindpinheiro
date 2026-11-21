@@ -1197,7 +1197,14 @@ Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
     if (!res.ok) {
       let msg = await res.text();
       try { const j = JSON.parse(msg); msg = j.error?.message || msg; } catch {}
-      throw new Error(`Erro ${res.status}: ${String(msg).slice(0, 300)}`);
+      msg = String(msg);
+      let dica = '';
+      if (/management key|provisioning key/i.test(msg)) dica = 'Essa é uma chave de gerenciamento, que não escreve. No OpenRouter, crie uma chave comum em “API Keys” e cole em ⚙ IA.';
+      else if (res.status === 401) dica = 'A chave não foi aceita. Confira se colou a chave inteira em ⚙ IA, ou crie outra.';
+      else if (res.status === 402) dica = 'Sem créditos para este modelo. Escolha um modelo grátis (com :free no nome) ou adicione créditos.';
+      else if (res.status === 404 && /model|endpoint/i.test(msg)) dica = 'Modelo não encontrado. Confira o nome exato do modelo em ⚙ IA.';
+      else if (res.status === 429) dica = 'Limite de pedidos atingido. Espere um pouco ou troque de modelo.';
+      throw new Error(dica ? `${dica} (Erro ${res.status})` : `Erro ${res.status}: ${msg.slice(0, 300)}`);
     }
     const reader = res.body.getReader();
     const dec = new TextDecoder();

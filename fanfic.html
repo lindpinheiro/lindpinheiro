@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Escritor de Fanfics</title>
+<style>
+  :root {
+    --bg: #faf6f4;
+    --surface: #ffffff;
+    --surface-2: #f3ece9;
+    --text: #231a1c;
+    --muted: #6d5d61;
+    --border: #e2d6d3;
+    --accent: #b0234d;
+    --accent-text: #ffffff;
+    --accent-soft: #fbe5ec;
+    --danger: #a3261d;
+    --ok: #2f6b3a;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161113;
+      --surface: #211a1c;
+      --surface-2: #2b2225;
+      --text: #f4ecee;
+      --muted: #b7a6ab;
+      --border: #3d3135;
+      --accent: #ff5d8a;
+      --accent-text: #1a0d12;
+      --accent-soft: #3a1d27;
+      --danger: #ff7b70;
+      --ok: #7fd18e;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 20px; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55;
+  }
+  header {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  header h1 { font-size: 1.15rem; margin: 0 auto 0 0; }
+  main { max-width: 900px; margin: 0 auto; padding: 18px 16px 120px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 18px;
+  }
+  h2 { font-size: 1.2rem; margin: 0 0 12px; }
+  h3 { font-size: 1.05rem; margin: 0; }
+  label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  .hint { color: var(--muted); font-size: 0.85rem; font-weight: 400; margin: 4px 0 0; }
+  input[type=text], input[type=password], input[type=number], select, textarea {
+    width: 100%; font: inherit; color: var(--text); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+  }
+  textarea { resize: vertical; min-height: 90px; }
+  textarea.chapter-text {
+    min-height: 360px; font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.05rem; line-height: 1.75; background: var(--surface);
+  }
+  input:focus, select:focus, textarea:focus, button:focus-visible {
+    outline: 3px solid var(--accent); outline-offset: 1px;
+  }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 10px;
+    padding: 10px 16px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); min-height: 46px;
+  }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  button.danger { color: var(--danger); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  .chapter-head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .chapter-head input { font-weight: 700; }
+  .status { font-size: 0.9rem; color: var(--muted); min-height: 1.4em; margin-top: 8px; }
+  .status.err { color: var(--danger); }
+  .status.ok { color: var(--ok); }
+  .notice {
+    background: var(--accent-soft); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 18px; font-size: 0.95rem;
+  }
+  details summary { cursor: pointer; font-weight: 700; font-size: 1.05rem; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; margin-top: 14px; }
+  .check input { width: 24px; height: 24px; margin-top: 2px; flex: none; }
+  .words { color: var(--muted); font-size: 0.85rem; }
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px;
+  }
+  .bar-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 10px; }
+  .bar-inner input { flex: 1; }
+  dialog {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); color: var(--text); width: min(640px, calc(100vw - 32px));
+    padding: 20px;
+  }
+  dialog::backdrop { background: rgba(0,0,0,.5); }
+  .empty { text-align: center; color: var(--muted); padding: 24px 8px; }
+  #globalStatus:empty { display: none; }
+  @media (max-width: 640px) {
+    header { gap: 8px; padding: 10px 16px; }
+    header h1 { flex-basis: 100%; font-size: 1.05rem; }
+    header select { flex: 1; }
+    header button { padding: 8px 12px; }
+    .lbl { display: none; }
+    .bar-inner { flex-wrap: wrap; }
+    .bar-inner input { flex-basis: 100%; }
+    .bar-inner button { flex: 1; }
+    main { padding-bottom: 170px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✍️ Escritor de Fanfics</h1>
+  <select id="storySelect" aria-label="Escolher história" style="width:auto;max-width:220px"></select>
+  <button id="newStoryBtn">+ Nova</button>
+  <button id="settingsBtn">⚙ <span class="lbl">Configurar </span>IA</button>
+</header>
+
+<main>
+  <div id="setupNotice" class="notice" hidden>
+    <strong>Primeiro passo:</strong> clique em <b>⚙ Configurar IA</b> e cole sua chave de API.
+    A chave fica salva só neste aparelho.
+  </div>
+
+  <section class="card">
+    <details id="ideaBox" open>
+      <summary>💡 A ideia da história</summary>
+
+      <label for="f-title">Título</label>
+      <input type="text" id="f-title" placeholder="Ex.: Entre Rivais">
+
+      <div class="grid2">
+        <div>
+          <label for="f-fandom">Fandom / universo</label>
+          <input type="text" id="f-fandom" placeholder="Ex.: original, anime, série…">
+        </div>
+        <div>
+          <label for="f-pov">Narração</label>
+          <select id="f-pov">
+            <option>Terceira pessoa</option>
+            <option>Primeira pessoa</option>
+            <option>Segunda pessoa (você)</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="f-characters">Personagens</label>
+      <textarea id="f-characters" placeholder="Nome, idade, aparência, personalidade, a relação entre eles…"></textarea>
+
+      <label for="f-premise">Ideia / enredo</label>
+      <textarea id="f-premise" style="min-height:130px" placeholder="Conte a ideia do jeito que vier na cabeça."></textarea>
+
+      <div class="grid2">
+        <div>
+          <label for="f-heat">Intensidade</label>
+          <select id="f-heat">
+            <option value="leve">🌸 Leve: romance e tensão</option>
+            <option value="picante">🔥 Picante: sensual, cenas quentes</option>
+            <option value="intenso">🌶️ Intenso: explícito (+18)</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-length">Tamanho do capítulo</label>
+          <select id="f-length">
+            <option value="800">Curto (~800 palavras)</option>
+            <option value="1500" selected>Médio (~1500 palavras)</option>
+            <option value="2500">Longo (~2500 palavras)</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="f-tone">Tom e estilo</label>
+      <input type="text" id="f-tone" placeholder="Ex.: slow burn, enemies to lovers, diálogos afiados…">
+
+      <label for="f-notes">Regras e limites desta história</label>
+      <textarea id="f-notes" placeholder="O que você quer e o que NÃO quer que apareça."></textarea>
+
+      <label class="check">
+        <input type="checkbox" id="f-adults">
+        <span>Confirmo que todos os personagens são adultos (18+) e fictícios.</span>
+      </label>
+    </details>
+  </section>
+
+  <section id="chapters"></section>
+</main>
+
+<div class="bar">
+  <div class="bar-inner">
+    <input type="text" id="nextDirection" placeholder="O que acontece no próximo capítulo? (opcional)">
+    <button class="primary" id="writeNextBtn">Escrever capítulo</button>
+    <button id="stopBtn" class="danger" hidden>■ Parar</button>
+  </div>
+  <div class="bar-inner"><div class="status" id="globalStatus" role="status"></div></div>
+</div>
+
+<!-- Configuração da IA -->
+<dialog id="settingsDlg">
+  <h2>⚙ Configurar IA</h2>
+  <p class="hint" style="font-size:.95rem">
+    O sistema funciona com qualquer serviço compatível com a API da OpenAI.
+    Para conteúdo +18, use um provedor e um modelo cujas regras permitam conteúdo adulto.
+    Sua chave fica salva <b>só neste navegador</b>; ela não vai para o GitHub.
+  </p>
+
+  <label for="s-endpoint">Endereço da API</label>
+  <input type="text" id="s-endpoint">
+  <p class="hint">Padrão: OpenRouter. Crie a chave em openrouter.ai → Keys.</p>
+
+  <label for="s-key">Chave da API</label>
+  <input type="password" id="s-key" autocomplete="off" placeholder="sk-…">
+
+  <label for="s-model">Modelo</label>
+  <input type="text" id="s-model" placeholder="Copie o nome exato do modelo no site do provedor">
+
+  <div class="grid2">
+    <div>
+      <label for="s-temp">Criatividade (0–2)</label>
+      <input type="number" id="s-temp" min="0" max="2" step="0.1">
+    </div>
+    <div>
+      <label for="s-max">Limite de tokens</label>
+      <input type="number" id="s-max" min="256" step="256">
+    </div>
+  </div>
+
+  <details style="margin-top:16px">
+    <summary>Avançado: instruções do escritor</summary>
+    <textarea id="s-system" style="min-height:220px;margin-top:10px"></textarea>
+    <button id="resetSystemBtn" style="margin-top:8px">Restaurar padrão</button>
+  </details>
+
+  <div class="status" id="settingsStatus"></div>
+  <div class="row" style="margin-top:14px">
+    <button class="primary" id="saveSettingsBtn">Salvar</button>
+    <button id="testBtn">Testar conexão</button>
+    <button id="closeSettingsBtn">Fechar</button>
+  </div>
+</dialog>
+
+<!-- Pedir ajuste -->
+<dialog id="reviseDlg">
+  <h2>✏️ Pedir ajuste</h2>
+  <p class="hint" id="reviseScope" style="font-size:.95rem"></p>
+  <label for="reviseText">O que mudar?</label>
+  <textarea id="reviseText" placeholder="Ex.: mais diálogo, deixa ele mais ciumento, ritmo mais lento…"></textarea>
+  <div class="row" style="margin-top:14px">
+    <button class="primary" id="reviseGoBtn">Reescrever</button>
+    <button id="reviseCancelBtn">Cancelar</button>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  'use strict';
+
+  const DEFAULT_SYSTEM = `Você é um escritor de fanfics e ficção romântica, especialista em português brasileiro.
+Escreva prosa envolvente, com diálogos naturais, emoção, tensão e química entre os personagens.
+Respeite exatamente o nível de intensidade, o tom, a narração e as regras pedidas pelo autor.
+Mantenha a continuidade com os capítulos anteriores (nomes, fatos, personalidades).
+
+Regras inegociáveis:
+- Todos os personagens em qualquer cena romântica ou sexual são adultos (18+). Nunca envolva menores, nem por insinuação.
+- Todo contato íntimo é consensual entre adultos.
+- Nada de conteúdo sexual com pessoas reais.
+
+Devolva apenas o texto da história, sem comentários, avisos ou explicações.`;
+
+  const HEAT = {
+    leve: 'Leve: romance, tensão e beijos; sem cenas sexuais.',
+    picante: 'Picante: sensual e provocante, cenas quentes descritas com sugestão.',
+    intenso: 'Intenso: conteúdo adulto explícito permitido, entre adultos que consentem.'
+  };
+
+  const DEFAULT_SETTINGS = {
+    endpoint: 'https://openrouter.ai/api/v1/chat/completions',
+    key: '', model: '', temperature: 1.0, maxTokens: 4096, system: DEFAULT_SYSTEM
+  };
+
+  // ---------- armazenamento seguro ----------
+  const store = {
+    get(k, fallback) {
+      try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+      catch { return fallback; }
+    },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+
+  let settings = Object.assign({}, DEFAULT_SETTINGS, store.get('fanfic.settings', {}));
+  let stories = store.get('fanfic.stories', []);
+  let currentId = store.get('fanfic.current', null);
+  let busy = null; // AbortController enquanto a IA escreve
+
+  const $ = (id) => document.getElementById(id);
+  const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  const countWords = (t) => (t.trim().match(/\S+/g) || []).length;
+
+  function newStory() {
+    return {
+      id: uid(), title: '', fandom: '', pov: 'Terceira pessoa', characters: '',
+      premise: '', heat: 'picante', length: '1500', tone: '', notes: '',
+      adults: false, chapters: [], updatedAt: Date.now()
+    };
+  }
+
+  if (!stories.length) stories.push(newStory());
+  if (!stories.find(s => s.id === currentId)) currentId = stories[0].id;
+  const cur = () => stories.find(s => s.id === currentId);
+
+  let saveTimer = null;
+  function save(now) {
+    clearTimeout(saveTimer);
+    const run = () => {
+      const s = cur(); if (s) s.updatedAt = Date.now();
+      store.set('fanfic.stories', stories);
+      store.set('fanfic.current', currentId);
+    };
+    now ? run() : (saveTimer = setTimeout(run, 400));
+  }
+
+  // ---------- campos da ideia ----------
+  const FIELDS = ['title', 'fandom', 'pov', 'characters', 'premise', 'heat', 'length', 'tone', 'notes'];
+
+  function loadForm() {
+    const s = cur();
+    FIELDS.forEach(f => { $('f-' + f).value = s[f] ?? ''; });
+    $('f-adults').checked = !!s.adults;
+    $('ideaBox').open = s.chapters.length === 0;
+  }
+
+  FIELDS.forEach(f => $('f-' + f).addEventListener('input', (e) => {
+    cur()[f] = e.target.value; save();
+    if (f === 'title') renderSelect();
+  }));
+  $('f-adults').addEventListener('change', (e) => { cur().adults = e.target.checked; save(); });
+
+  function renderSelect() {
+    const sel = $('storySelect');
+    sel.innerHTML = '';
+    stories.slice().sort((a, b) => b.updatedAt - a.updatedAt).forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.id; o.textContent = s.title.trim() || 'Sem título';
+      sel.appendChild(o);
+    });
+    sel.value = currentId;
+  }
+
+  $('storySelect').addEventListener('change', (e) => {
+    if (busy) return;
+    currentId = e.target.value; save(true); loadForm(); renderChapters();
+  });
+
+  $('newStoryBtn').addEventListener('click', () => {
+    if (busy) return;
+    const s = newStory(); stories.push(s); currentId = s.id;
+    save(true); renderSelect(); loadForm(); renderChapters();
+    $('f-title').focus();
+  });
+
+  // ---------- capítulos ----------
+  function renderChapters() {
+    const wrap = $('chapters');
+    wrap.innerHTML = '';
+    const s = cur();
+
+    if (!s.chapters.length) {
+      const d = document.createElement('div');
+      d.className = 'card empty';
+      d.textContent = 'Preencha a ideia acima e toque em “Escrever capítulo”.';
+      wrap.appendChild(d);
+    }
+
+    s.chapters.forEach((ch, i) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.dataset.id = ch.id;
+
+      const head = document.createElement('div');
+      head.className = 'chapter-head';
+      const title = document.createElement('input');
+      title.type = 'text';
+      title.value = ch.title || `Capítulo ${i + 1}`;
+      title.setAttribute('aria-label', 'Título do capítulo');
+      title.addEventListener('input', () => { ch.title = title.value; save(); });
+      head.appendChild(title);
+      card.appendChild(head);
+
+      const ta = document.createElement('textarea');
+      ta.className = 'chapter-text';
+      ta.value = ch.text;
+      ta.setAttribute('aria-label', 'Texto do capítulo');
+      const words = document.createElement('div');
+      words.className = 'words';
+      words.textContent = countWords(ch.text) + ' palavras';
+      ta.addEventListener('input', () => {
+        ch.text = ta.value; words.textContent = countWords(ch.text) + ' palavras'; save();
+      });
+      card.appendChild(ta);
+      card.appendChild(words);
+
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.marginTop = '10px';
+
+      const adjust = document.createElement('button');
+      adjust.textContent = '✏️ Pedir ajuste';
+      adjust.title = 'Selecione um trecho para ajustar só ele, ou nada para o capítulo todo';
+      adjust.addEventListener('click', () => openRevise(ch, ta));
+      row.appendChild(adjust);
+
+      if (ch.prev != null) {
+        const undo = document.createElement('button');
+        undo.textContent = '↩ Desfazer ajuste';
+        undo.addEventListener('click', () => {
+          const t = ch.text; ch.text = ch.prev; ch.prev = t; save(true); renderChapters();
+        });
+        row.appendChild(undo);
+      }
+
+      const del = document.createElement('button');
+      del.className = 'danger';
+      del.textContent = 'Excluir';
+      del.addEventListener('click', () => {
+        if (!confirm('Excluir este capítulo?')) return;
+        s.chapters = s.chapters.filter(c => c.id !== ch.id); save(true); renderChapters();
+      });
+      row.appendChild(del);
+
+      card.appendChild(row);
+      wrap.appendChild(card);
+    });
+
+    if (s.chapters.length) {
+      const tools = document.createElement('div');
+      tools.className = 'row';
+      const exp = document.createElement('button');
+      exp.textContent = '⬇ Baixar história';
+      exp.addEventListener('click', exportStory);
+      const delStory = document.createElement('button');
+      delStory.className = 'danger';
+      delStory.textContent = 'Excluir história';
+      delStory.addEventListener('click', deleteStory);
+      tools.append(exp, delStory);
+      wrap.appendChild(tools);
+    }
+  }
+
+  function exportStory() {
+    const s = cur();
+    let md = `# ${s.title || 'Sem título'}\n\n`;
+    s.chapters.forEach((c, i) => { md += `## ${c.title || 'Capítulo ' + (i + 1)}\n\n${c.text}\n\n`; });
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (s.title || 'fanfic').replace(/[^\w\-]+/g, '_') + '.md';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  function deleteStory() {
+    if (!confirm('Excluir a história inteira? Não dá para desfazer.')) return;
+    stories = stories.filter(s => s.id !== currentId);
+    if (!stories.length) stories.push(newStory());
+    currentId = stories[0].id;
+    save(true); renderSelect(); loadForm(); renderChapters();
+  }
+
+  // ---------- montagem do pedido ----------
+  function bible(s) {
+    return [
+      `TÍTULO: ${s.title || '(sem título)'}`,
+      `FANDOM/UNIVERSO: ${s.fandom || 'original'}`,
+      `NARRAÇÃO: ${s.pov}`,
+      `INTENSIDADE: ${HEAT[s.heat]}`,
+      `TOM E ESTILO: ${s.tone || 'livre'}`,
+      `PERSONAGENS (todos adultos, 18+):\n${s.characters || '(a definir)'}`,
+      `IDEIA/ENREDO:\n${s.premise || '(livre)'}`,
+      s.notes ? `REGRAS E LIMITES DO AUTOR:\n${s.notes}` : ''
+    ].filter(Boolean).join('\n\n');
+  }
+
+  function previousText(s, uptoIndex) {
+    const MAX = 24000;
+    let txt = '';
+    for (let i = uptoIndex - 1; i >= 0; i--) {
+      const c = s.chapters[i];
+      const block = `### ${c.title || 'Capítulo ' + (i + 1)}\n${c.text}\n\n`;
+      if (txt.length + block.length > MAX) {
+        txt = '[…capítulos anteriores resumidos por tamanho…]\n\n' + block.slice(-(MAX - txt.length)) + txt;
+        break;
+      }
+      txt = block + txt;
+    }
+    return txt;
+  }
+
+  // ---------- chamada à IA (streaming) ----------
+  async function callAI(userPrompt, onText, signal) {
+    if (!settings.key || !settings.model) throw new Error('Configure a chave e o modelo em ⚙ Configurar IA.');
+    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + settings.key };
+    if (/openrouter\.ai/.test(settings.endpoint)) {
+      headers['HTTP-Referer'] = location.origin;
+      headers['X-Title'] = 'Escritor de Fanfics';
+    }
+    const res = await fetch(settings.endpoint, {
+      method: 'POST', headers, signal,
+      body: JSON.stringify({
+        model: settings.model, stream: true,
+        temperature: Number(settings.temperature), max_tokens: Number(settings.maxTokens),
+        messages: [
+          { role: 'system', content: settings.system || DEFAULT_SYSTEM },
+          { role: 'user', content: userPrompt }
+        ]
+      })
+    });
+    if (!res.ok) {
+      let msg = await res.text();
+      try { const j = JSON.parse(msg); msg = j.error?.message || msg; } catch {}
+      throw new Error(`Erro ${res.status}: ${String(msg).slice(0, 300)}`);
+    }
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '', full = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const raw of lines) {
+        const line = raw.trim();
+        if (!line.startsWith('data:')) continue;
+        const data = line.slice(5).trim();
+        if (data === '[DONE]') continue;
+        let j; try { j = JSON.parse(data); } catch { continue; }
+        if (j.error) throw new Error(j.error.message || 'Erro do provedor');
+        const tok = j.choices?.[0]?.delta?.content ?? j.choices?.[0]?.message?.content ?? '';
+        if (tok) { full += tok; onText && onText(full); }
+      }
+    }
+    return full.trim();
+  }
+
+  function setStatus(msg, kind) {
+    const el = $('globalStatus');
+    el.textContent = msg || '';
+    el.className = 'status' + (kind ? ' ' + kind : '');
+  }
+
+  function setBusy(ctrl) {
+    busy = ctrl;
+    $('writeNextBtn').disabled = !!ctrl;
+    $('stopBtn').hidden = !ctrl;
+    document.querySelectorAll('#chapters button').forEach(b => b.disabled = !!ctrl);
+  }
+
+  $('stopBtn').addEventListener('click', () => busy && busy.abort());
+
+  function checkReady() {
+    const s = cur();
+    if (!s.adults) {
+      $('ideaBox').open = true; $('f-adults').focus();
+      setStatus('Confirme que todos os personagens são adultos (18+).', 'err');
+      return false;
+    }
+    if (!settings.key || !settings.model) { openSettings(); return false; }
+    return true;
+  }
+
+  // ---------- escrever próximo capítulo ----------
+  $('writeNextBtn').addEventListener('click', async () => {
+    if (busy || !checkReady()) return;
+    const s = cur();
+    const n = s.chapters.length + 1;
+    const dir = $('nextDirection').value.trim();
+    const prev = previousText(s, s.chapters.length);
+
+    const prompt = `${bible(s)}\n\n` +
+      (prev ? `CAPÍTULOS ANTERIORES:\n${prev}\n` : '') +
+      `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde parou') +
+      `, com cerca de ${s.length} palavras.` +
+      (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') +
+      `\nNão escreva o título do capítulo; comece direto no texto.`;
+
+    const ch = { id: uid(), title: `Capítulo ${n}`, text: '' };
+    s.chapters.push(ch);
+    $('ideaBox').open = false;
+    renderChapters();
+    const ta = document.querySelector(`[data-id="${ch.id}"] textarea`);
+    ta.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const ctrl = new AbortController();
+    setBusy(ctrl);
+    setStatus('Escrevendo…');
+    try {
+      const text = await callAI(prompt, (t) => { ta.value = t; ch.text = t; }, ctrl.signal);
+      ch.text = text;
+      $('nextDirection').value = '';
+      setStatus(`Capítulo ${n} pronto: ${countWords(text)} palavras. Revise à vontade.`, 'ok');
+    } catch (e) {
+      if (e.name === 'AbortError') setStatus('Parado. O que já foi escrito ficou salvo.');
+      else setStatus(e.message, 'err');
+      if (!ch.text.trim()) s.chapters = s.chapters.filter(c => c.id !== ch.id);
+    } finally {
+      setBusy(null); save(true); renderChapters();
+    }
+  });
+
+  // ---------- pedir ajuste ----------
+  let reviseTarget = null;
+
+  function openRevise(ch, ta) {
+    if (busy) return;
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const hasSel = end > start && ta.value.slice(start, end).trim().length > 0;
+    reviseTarget = { ch, start: hasSel ? start : 0, end: hasSel ? end : ch.text.length, partial: hasSel };
+    $('reviseScope').textContent = hasSel
+      ? `Só o trecho selecionado (${countWords(ta.value.slice(start, end))} palavras) será reescrito.`
+      : 'O capítulo inteiro será reescrito. Dica: selecione um trecho antes para mudar só ele.';
+    $('reviseText').value = '';
+    $('reviseDlg').showModal();
+    $('reviseText').focus();
+  }
+
+  $('reviseCancelBtn').addEventListener('click', () => $('reviseDlg').close());
+
+  $('reviseGoBtn').addEventListener('click', async () => {
+    const instr = $('reviseText').value.trim();
+    if (!instr || !reviseTarget) { $('reviseText').focus(); return; }
+    $('reviseDlg').close();
+    if (!checkReady()) return;
+
+    const s = cur();
+    const { ch, start, end, partial } = reviseTarget;
+    const idx = s.chapters.indexOf(ch);
+    const original = ch.text;
+    const prev = previousText(s, idx);
+
+    let prompt = `${bible(s)}\n\n` + (prev ? `CAPÍTULOS ANTERIORES:\n${prev}\n` : '');
+    if (partial) {
+      prompt += `CAPÍTULO ATUAL (contexto):\n${original}\n\n` +
+        `TRECHO A REESCREVER:\n"""\n${original.slice(start, end)}\n"""\n\n` +
+        `TAREFA: Reescreva apenas esse trecho seguindo este pedido: ${instr}\n` +
+        `Ele precisa se encaixar no texto antes e depois. Devolva só o trecho novo.`;
+    } else {
+      prompt += `CAPÍTULO ATUAL:\n${original}\n\n` +
+        `TAREFA: Reescreva este capítulo seguindo este pedido: ${instr}\n` +
+        `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
+    }
+
+    const ta = document.querySelector(`[data-id="${ch.id}"] textarea`);
+    const before = original.slice(0, start), after = original.slice(end);
+    const ctrl = new AbortController();
+    setBusy(ctrl);
+    setStatus(partial ? 'Reescrevendo o trecho…' : 'Reescrevendo o capítulo…');
+    try {
+      const text = await callAI(prompt, (t) => { ta.value = before + t + after; }, ctrl.signal);
+      ch.prev = original;
+      ch.text = before + text + after;
+      setStatus('Ajuste feito. Se não gostou, toque em “Desfazer ajuste”.', 'ok');
+    } catch (e) {
+      ch.text = original;
+      setStatus(e.name === 'AbortError' ? 'Ajuste cancelado; o texto original foi mantido.' : e.message,
+                e.name === 'AbortError' ? '' : 'err');
+    } finally {
+      setBusy(null); save(true); renderChapters();
+    }
+  });
+
+  // ---------- configurações ----------
+  function openSettings() {
+    $('s-endpoint').value = settings.endpoint;
+    $('s-key').value = settings.key;
+    $('s-model').value = settings.model;
+    $('s-temp').value = settings.temperature;
+    $('s-max').value = settings.maxTokens;
+    $('s-system').value = settings.system;
+    $('settingsStatus').textContent = '';
+    $('settingsDlg').showModal();
+  }
+
+  function readSettings() {
+    settings = {
+      endpoint: $('s-endpoint').value.trim() || DEFAULT_SETTINGS.endpoint,
+      key: $('s-key').value.trim(),
+      model: $('s-model').value.trim(),
+      temperature: Number($('s-temp').value) || 1,
+      maxTokens: Number($('s-max').value) || 4096,
+      system: $('s-system').value.trim() || DEFAULT_SYSTEM
+    };
+    store.set('fanfic.settings', settings);
+    $('setupNotice').hidden = !!(settings.key && settings.model);
+  }
+
+  $('settingsBtn').addEventListener('click', openSettings);
+  $('closeSettingsBtn').addEventListener('click', () => $('settingsDlg').close());
+  $('resetSystemBtn').addEventListener('click', () => { $('s-system').value = DEFAULT_SYSTEM; });
+  $('saveSettingsBtn').addEventListener('click', () => {
+    readSettings();
+    const st = $('settingsStatus');
+    st.textContent = 'Salvo neste aparelho.'; st.className = 'status ok';
+  });
+  $('testBtn').addEventListener('click', async () => {
+    readSettings();
+    const st = $('settingsStatus');
+    st.textContent = 'Testando…'; st.className = 'status';
+    try {
+      const r = await callAI('Responda apenas: "Conexão OK".', null);
+      st.textContent = 'Funcionou! Resposta: ' + r.slice(0, 80); st.className = 'status ok';
+    } catch (e) {
+      st.textContent = e.message; st.className = 'status err';
+    }
+  });
+
+  // ---------- início ----------
+  $('setupNotice').hidden = !!(settings.key && settings.model);
+  renderSelect(); loadForm(); renderChapters();
+})();
+</script>
+</body>
+</html>

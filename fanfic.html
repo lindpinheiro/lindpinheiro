@@ -207,6 +207,10 @@
   .cursor::after { content: "▍"; color: var(--accent); animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
   .thinking { color: var(--muted); font-style: italic; text-align: center; padding: 30px 0; }
+  .reader p.hot-mark {
+    font-family: system-ui, sans-serif; font-size: .9rem; line-height: 1.5; white-space: normal;
+    background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 10px 12px; border-radius: 8px;
+  }
 
   /* ---------- arquivos ---------- */
   .ref-head { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
@@ -453,6 +457,10 @@
   <label for="adjustText" style="margin-top:0">O que mudar?</label>
   <textarea id="adjustText" placeholder="Ex.: ele fica mais ciumento; a conversa termina em briga."></textarea>
   <div class="chips" id="adjustChips"></div>
+  <label class="check" id="adjustHotWrap" for="adjustHot" hidden>
+    <input type="checkbox" id="adjustHot">
+    <span>🔥 Usar o escritor de cenas quentes<small class="hint" style="display:block">Marque para mexer numa cena quente ou deixar o trecho mais intenso.</small></span>
+  </label>
   <div class="row" style="margin-top:18px">
     <button class="primary wide" id="adjustGo">Reescrever</button>
   </div>
@@ -521,7 +529,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   ];
 
   const DEFAULT_SETTINGS = {
-    endpoint: OPENROUTER, key: '', model: '', modelName: '',
+    endpoint: OPENROUTER, key: '', model: '', modelName: '', hotModel: '', hotModelName: '',
     temperature: 0.9, maxTokens: 8192, system: ''
   };
 
@@ -891,7 +899,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!text && streaming) { container.append(el('p', { class: 'thinking', text: 'A IA está começando a escrever…' })); return; }
     const paras = text.split(/\n\s*\n/);
     paras.forEach((t, i) => {
-      const pEl = el('p', { text: t.replace(/^\n+|\n+$/g, '') });
+      const clean = t.replace(/^\n+|\n+$/g, '');
+      const mark = /^\s*\[\[\s*CENA QUENTE\s*:\s*([\s\S]*?)\]\]\s*$/i.exec(clean);
+      const pEl = mark
+        ? el('p', { class: 'hot-mark', text: '🔥 Cena quente a escrever: ' + mark[1].trim() })
+        : el('p', { text: clean });
       if (streaming && i === paras.length - 1) pEl.classList.add('cursor');
       container.append(pEl);
     });
@@ -912,9 +924,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }, el('span', { class: 'hide-m', text: '📖 ' }), 'Ler'),
         el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, el('span', { class: 'hide-m', text: '✏️ ' }), 'Editar'))));
 
+    if (!writingThis && !busy && hasMarks(ch.text)) sec.append(el('div', { class: 'notice' },
+      el('p', { text: 'Falta escrever a cena quente marcada neste capítulo.' }),
+      el('button', { class: 'primary', text: '🔥 Escrever a cena quente', onclick: () => writeHotScenes(ch) })));
     if (!writingThis && !busy && wrongLang(p, ch.text)) sec.append(el('div', { class: 'notice' },
       el('p', { text: `Este capítulo saiu em inglês.` }),
-      el('button', { class: 'primary', text: `Reescrever em ${langLower(p)}`, onclick: () => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
+      el('button', { class: 'primary', text: `Reescrever em ${langLower(p)}`, onclick: () => runAdjust({ ch, start: 0, end: ch.text.length, partial: false, useHot: twoWriters(p) },
         `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`) })));
 
     const card = el('div', { class: 'card' });
@@ -1027,11 +1042,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (e.name === 'AbortError') { toast('Parado.'); return; }
     const actions = [];
     if (e.action === 'key') actions.push({ label: 'Trocar a chave', primary: true, onClick: () => openSetup(2, retry) });
-    if (e.action === 'model') actions.push({ label: 'Escolher outro modelo', primary: true, onClick: () => openSetup(3, retry) });
+    if (e.action === 'model') actions.push({ label: e.role === 'hot' ? 'Trocar o escritor de cenas quentes' : 'Escolher outro modelo', primary: true, onClick: () => openSetup(3, retry, e.role || 'main') });
     if (e.action === 'setup') actions.push({ label: 'Conectar a IA', primary: true, onClick: () => openSetup(1, retry) });
     if (retry && e.action !== 'key' && e.action !== 'setup') actions.push({ label: 'Tentar de novo', primary: !e.action, onClick: retry });
     if (edit) actions.push({ label: '✏️ Mudar o pedido', onClick: edit });
-    showAlert({ kind: 'err', msg: e.message + (edit ? ' Seu pedido ficou guardado.' : ''), actions });
+    showAlert({ kind: 'err', msg: (e.role === 'hot' ? '🔥 Escritor de cenas quentes: ' : '') + e.message + (edit ? ' Seu pedido ficou guardado.' : ''), actions });
   }
 
   // =====================================================================
@@ -1120,25 +1135,114 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       } catch (e2) {
         if (e2.code !== 'lang') throw e2;
         const err = new Error(`Este modelo insiste em escrever em inglês. Escolha outro modelo, de preferência um que escreva bem em ${langLower(p)}.`);
-        err.action = 'model'; err.code = 'lang-final'; throw err;
+        err.action = 'model'; err.code = 'lang-final'; err.role = opts.role || 'main'; throw err;
       }
     }
+  }
+
+  // =====================================================================
+  // Dois escritores: um escreve a história, outro só as cenas quentes
+  // =====================================================================
+  const twoWriters = (p) => !!settings.hotModel && p.heat !== 'leve';
+  const HOT_OPTS = () => ({ role: 'hot', override: { model: settings.hotModel } });
+  const MARK_RE = /\[\[\s*CENA QUENTE\s*:\s*([\s\S]*?)\]\]/i;
+  const MARK_RE_G = /\[\[\s*CENA QUENTE\s*:\s*([\s\S]*?)\]\]/gi;
+  const hasMarks = (t) => MARK_RE.test(t || '');
+  const MARK_RULE = 'CENAS QUENTES: você não escreve cenas de sexo; outro autor escreve essas cenas. Romance, tensão, beijos e sedução você escreve normalmente. ' +
+    'Quando a história chegar a uma cena de sexo, escreva até o momento logo antes dela e coloque, sozinha numa linha, a marcação ' +
+    '[[CENA QUENTE: em uma ou duas frases, quem está na cena, o clima, o que acontece e como ela termina]]. ' +
+    'Depois da marcação, continue a partir do momento seguinte à cena, ou termine o capítulo. No máximo duas marcações por capítulo.';
+  const KEEP_RULE = 'As marcações [[CENA QUENTE JÁ ESCRITA: ...]] representam cenas que já existem: mantenha cada uma exatamente como está, no mesmo lugar.';
+  const keepTag = (hs) => `[[CENA QUENTE JÁ ESCRITA: ${hs.brief}]]`;
+  function hideHot(ch, text) { for (const hs of ch.hotScenes || []) if (hs.text) text = text.split(hs.text).join(keepTag(hs)); return text; }
+  function restoreHot(ch, text) { for (const hs of ch.hotScenes || []) text = text.split(keepTag(hs)).join(hs.text); return text; }
+  function hotRange(ch, start, end) {
+    for (const hs of ch.hotScenes || []) {
+      const i = hs.text ? ch.text.indexOf(hs.text) : -1;
+      if (i >= 0 && start < i + hs.text.length && end > i) return { hs, i };
+    }
+    return null;
+  }
+
+  function hotPrompt(p, before, after, brief, strong) {
+    const words = p.heat === 'intenso' ? 700 : 500;
+    return withLang(p, `${bible(p)}\n\n` +
+      `TRECHO ANTES DA CENA:\n${before.slice(-3500)}\n\n` +
+      (after.trim() ? `O QUE VEM DEPOIS DA CENA:\n${after.slice(0, 1500)}\n\n` : '') +
+      `TAREFA: Escreva a cena descrita abaixo, que fica entre os dois trechos, com cerca de ${words} palavras, no nível de intensidade "${HEAT[p.heat]}". ` +
+      `Comece exatamente onde o trecho anterior para e termine de forma que o trecho seguinte continue naturalmente. Devolva só a cena.\nCENA: ${brief}`, strong);
+  }
+
+  // troca cada marcação [[CENA QUENTE: ...]] pela cena do escritor de cenas quentes
+  async function fillHotScenes(p, ch, b) {
+    const total = (ch.text.match(MARK_RE_G) || []).length;
+    let k = 0, m;
+    while ((m = MARK_RE.exec(ch.text))) {
+      k++;
+      const brief = m[1].trim();
+      const before = ch.text.slice(0, m.index).replace(/\s+$/, '');
+      const after = ch.text.slice(m.index + m[0].length).replace(/^\s+/, '');
+      updateBusy({ label: `🔥 Cena quente${total > 1 ? ` ${k} de ${total}` : ''}`, words: 0, thinking: false });
+      const r = await aiWrite(p, (strong) => hotPrompt(p, before, after, brief, strong), {
+        ...HOT_OPTS(), signal: b.ctrl.signal,
+        onRetry: () => updateBusy({ words: 0 }),
+        onThinking: () => updateBusy({ thinking: true }),
+        onText: (t) => { paintChapter(ch, `${before}\n\n${t}\n\n${after}`); updateBusy({ words: countWords(t) }); }
+      });
+      const scene = r.text.trim();
+      ch.text = `${before}\n\n${scene}${after ? '\n\n' + after : ''}`;
+      (ch.hotScenes = ch.hotScenes || []).push({ brief, text: scene });
+    }
+  }
+
+  async function writeHotScenes(ch) {
+    const p = cur();
+    if (busy || !ensureReady(p, () => writeHotScenes(ch))) return;
+    if (!settings.hotModel) { setupTwoWriters(); return; }
+    const original = ch.text;
+    view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
+    const b = startBusy('hot', '🔥 Cena quente', ch.id);
+    try {
+      await fillHotScenes(p, ch, b);
+      ch.prev = original;
+      stopBusy();
+      toast('Cena quente escrita ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
+    } catch (e) {
+      stopBusy();
+      if (e.name === 'AbortError') toast('Parado. A cena que faltava continua marcada.');
+      else handleAIError(e, () => writeHotScenes(ch));
+    } finally {
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) renderTab();
+    }
+  }
+
+  function setupTwoWriters() {
+    const current = settings.modelName || settings.model;
+    settings.hotModel = settings.model; settings.hotModelName = settings.modelName;
+    saveSettings();
+    openSetup(3, null, 'main', {
+      title: 'Escritor da história', query: 'claude', free: false,
+      lead: `O modelo atual (${current}) passa a escrever só as cenas quentes. Agora escolha quem escreve o resto da história. Os modelos Claude são pagos: adicione créditos no OpenRouter antes.`
+    });
   }
 
   async function writeChapter(dir, length) {
     const p = cur();
     const n = p.chapters.length + 1;
-    const makePrompt = (strong) => withLang(p, `${buildContext(p, p.chapters.length, dir)}\n\n` +
+    const two = twoWriters(p);
+    const makePrompt = (strong) => withLang(p, `${buildContext(p, p.chapters.length, dir, two)}\n\n` +
       `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde o anterior parou') +
       `, com cerca de ${length} palavras.` +
       (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') +
-      `\nNão escreva o título; comece direto no texto.`, strong);
+      `\nNão escreva o título; comece direto no texto.` + (two ? `\n\n${MARK_RULE}` : ''), strong);
 
-    const ch = { id: uid(), title: '', text: '' };
+    const ch = { id: uid(), title: '', text: '', hotScenes: [] };
     p.chapters.push(ch);
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
     const b = startBusy('chapter', `Capítulo ${n}`, ch.id);
     renderProjects(); scrollTo(0, 0);
+    let phase = 'main', truncated = false;
     try {
       const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal,
@@ -1146,19 +1250,26 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         onThinking: () => updateBusy({ thinking: true }),
         onText: (t) => { ch.text = t; paintChapter(ch, t); updateBusy({ words: countWords(t) }); }
       });
-      ch.text = r.text;
+      ch.text = r.text; truncated = r.truncated;
+      setDraft('write:' + p.id, '');
+      if (two && hasMarks(ch.text)) { phase = 'hot'; await fillHotScenes(p, ch, b); }
       stopBusy();
-      if (r.truncated) showAlert({
+      if (truncated) showAlert({
         kind: 'info', msg: 'O capítulo parou antes do fim, porque a resposta atingiu o tamanho máximo.',
         actions: [{ label: '➕ Continuar escrevendo', primary: true, onClick: () => continueChapter(ch) }]
       });
       else toast(`Capítulo ${n} pronto ✓`);
-      setDraft('write:' + p.id, '');
     } catch (e) {
       stopBusy();
-      if (!ch.text.trim() || e.code === 'lang-final') { p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null; }
-      else if (e.name === 'AbortError') { toast('Parado. O que já foi escrito ficou salvo.'); e = null; }
-      if (e) handleAIError(e, () => writeChapter(dir, length), openWriteDialog);
+      if (phase === 'hot') {
+        // a história fica; a cena que faltou continua marcada para escrever depois
+        if (e.name === 'AbortError') toast('Parado. A cena quente continua marcada no capítulo.');
+        else handleAIError(e, () => writeHotScenes(ch));
+      } else {
+        if (!ch.text.trim() || e.code === 'lang-final') { p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null; }
+        else if (e.name === 'AbortError') { toast('Parado. O que já foi escrito ficou salvo.'); e = null; }
+        if (e) handleAIError(e, () => writeChapter(dir, length), openWriteDialog);
+      }
     } finally {
       stopBusy(); saveProject(p, true);
       if (currentId === p.id) { renderTab(); renderProjects(); }
@@ -1173,13 +1284,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (busy || !ensureReady(p, () => continueChapter(ch))) return;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
-    const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, '')}\n\n` +
-      `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` +
+    const two = twoWriters(p);
+    const shown = two ? hideHot(ch, original) : original;
+    const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, '', two)}\n\n` +
+      `CAPÍTULO ATUAL (até onde foi escrito):\n${shown}\n\n` +
       `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
-      `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.`, strong);
+      `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.` +
+      (two ? `\n\n${KEEP_RULE}\n${MARK_RULE}` : ''), strong);
     const sep = !original ? '' : /[.!?…"”»*)\]]\s*$/.test(original) ? '\n\n' : ' ';
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
     const b = startBusy('continue', 'Continuando', ch.id);
+    let phase = 'main';
     try {
       const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal,
@@ -1189,12 +1304,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       });
       ch.prev = original;
       ch.text = original + sep + r.text;
+      if (two && hasMarks(ch.text)) { phase = 'hot'; await fillHotScenes(p, ch, b); }
       stopBusy();
       toast('Capítulo continuado ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
-      ch.text = original;
       stopBusy();
-      handleAIError(e, () => continueChapter(ch));
+      if (phase === 'hot') {
+        if (e.name === 'AbortError') toast('Parado. A cena quente continua marcada no capítulo.');
+        else handleAIError(e, () => writeHotScenes(ch));
+      } else {
+        ch.text = original;
+        handleAIError(e, () => continueChapter(ch));
+      }
     } finally {
       stopBusy(); saveProject(p, true);
       if (currentId === p.id) renderTab();
@@ -1232,6 +1353,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('adjustText').value = drafts['adj:' + ch.id] || '';
     renderChips($('adjustChips'), ['Mais diálogo', 'Mais sentimentos', 'Mais detalhes', 'Mais curto', 'Mais longo',
       'Mais romântico', 'Mais intenso', 'Ritmo mais lento', 'Corrigir o português'], $('adjustText'));
+    const two = twoWriters(cur());
+    $('adjustHotWrap').hidden = !two;
+    $('adjustHot').checked = two && (preset && 'useHot' in preset ? !!preset.useHot : !!(sel && hotRange(ch, sel.start, sel.end)));
+    [...$('adjustChips').children].forEach(c => { if (c.textContent === 'Mais intenso') c.addEventListener('click', () => { if (c.getAttribute('aria-pressed') === 'true' && two) $('adjustHot').checked = true; }); });
     $('adjustDlg').showModal();
   }
 
@@ -1239,6 +1364,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const instr = $('adjustText').value.trim();
     if (!instr) { $('adjustText').focus(); toast('Escreva o que mudar ou toque numa sugestão.'); return; }
     $('adjustDlg').close();
+    adjustTarget.useHot = !$('adjustHotWrap').hidden && $('adjustHot').checked;
     runAdjust(adjustTarget, instr);
   });
 
@@ -1248,40 +1374,61 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const { ch, start, end, partial } = target;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
+    const useHot = !!(target.useHot && settings.hotModel);
+    const mainSafe = twoWriters(p) && !useHot;
+    const shown = mainSafe ? hideHot(ch, original) : original;
     const task = partial
-      ? `CAPÍTULO ATUAL (contexto):\n${original}\n\n` +
+      ? `CAPÍTULO ATUAL (contexto):\n${shown}\n\n` +
         `TRECHO A REESCREVER:\n"""\n${original.slice(start, end)}\n"""\n\n` +
         `TAREFA: Reescreva apenas esse trecho seguindo este pedido: ${instr}\n` +
         `Ele precisa se encaixar no texto antes e depois. Devolva só o trecho novo.`
-      : `CAPÍTULO ATUAL:\n${original}\n\n` +
+      : `CAPÍTULO ATUAL:\n${shown}\n\n` +
         `TAREFA: Reescreva este capítulo seguindo este pedido: ${instr}\n` +
-        `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
-    const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, instr)}\n\n${task}`, strong);
+        `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.` +
+        (mainSafe ? `\n\n${KEEP_RULE}\n${MARK_RULE}` : '');
+    const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, instr, mainSafe)}\n\n${task}`, strong);
     const before = original.slice(0, start), after = original.slice(end);
+    const inside = partial && useHot ? hotRange(ch, start, end) : null;
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
-    const b = startBusy('adjust', partial ? 'Reescrevendo o trecho' : 'Reescrevendo', ch.id);
+    const b = startBusy('adjust', (useHot ? '🔥 ' : '') + (partial ? 'Reescrevendo o trecho' : 'Reescrevendo'), ch.id);
+    let phase = 'main';
     try {
       const r = await aiWrite(p, makePrompt, {
+        ...(useHot ? HOT_OPTS() : {}),
         signal: b.ctrl.signal,
         onRetry: () => { paintChapter(ch, original); updateBusy({ words: 0 }); },
         onThinking: () => updateBusy({ thinking: true }),
-        onText: (t) => { paintChapter(ch, before + t + after); updateBusy({ words: countWords(before + t + after) }); }
+        onText: (t) => { paintChapter(ch, partial ? before + t + after : t); updateBusy({ words: countWords(partial ? before + t + after : t) }); }
       });
       ch.prev = original;
-      ch.text = before + r.text + after;
-      stopBusy();
+      if (partial) {
+        ch.text = before + r.text + after;
+        // trecho dentro de uma cena quente: a cena guardada acompanha a mudança
+        if (inside && start >= inside.i && end <= inside.i + inside.hs.text.length)
+          inside.hs.text = inside.hs.text.slice(0, start - inside.i) + r.text + inside.hs.text.slice(end - inside.i);
+      } else {
+        ch.text = mainSafe ? restoreHot(ch, r.text) : r.text;
+        if (useHot) ch.hotScenes = [];
+      }
       setDraft('adj:' + ch.id, '');
+      if (mainSafe && hasMarks(ch.text)) { phase = 'hot'; await fillHotScenes(p, ch, b); }
+      stopBusy();
       toast('Ajuste feito ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
-      ch.text = original;
       stopBusy();
-      if (e.name === 'AbortError') toast('Ajuste cancelado. O texto original foi mantido.');
-      else {
-        setDraft('adj:' + ch.id, instr);
-        handleAIError(e, () => runAdjust(target, instr), () => {
-          view = { tab: 'capitulos', chapterId: ch.id, mode: view.mode }; renderTab();
-          openAdjust(ch, target);
-        });
+      if (phase === 'hot') {
+        if (e.name === 'AbortError') toast('Parado. A cena quente continua marcada no capítulo.');
+        else handleAIError(e, () => writeHotScenes(ch));
+      } else {
+        ch.text = original;
+        if (e.name === 'AbortError') toast('Ajuste cancelado. O texto original foi mantido.');
+        else {
+          setDraft('adj:' + ch.id, instr);
+          handleAIError(e, () => runAdjust(target, instr), () => {
+            view = { tab: 'capitulos', chapterId: ch.id, mode: view.mode }; renderTab();
+            openAdjust(ch, target);
+          });
+        }
       }
     } finally {
       stopBusy(); saveProject(p, true);
@@ -1337,13 +1484,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const p = cur();
     if (busy || !ensureReady(p, generateSummary)) return;
     const MAX = 60000;
+    const two = twoWriters(p);
     let chaptersTxt = '', truncated = false;
     for (let i = p.chapters.length - 1; i >= 0; i--) {
-      const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
+      const c = p.chapters[i];
+      const block = `### Capítulo ${i + 1}: ${chTitle(p, c)}\n${two ? hideHot(c, c.text) : c.text}\n\n`;
       if (chaptersTxt.length + block.length > MAX) { truncated = true; break; }
       chaptersTxt = block + chaptersTxt;
     }
-    const prompt = `${bible(p)}\n\n` +
+    const prompt = `${bible(p, two)}\n\n` +
+      (two ? 'As marcações [[CENA QUENTE JÁ ESCRITA: ...]] são cenas íntimas; mencione-as de forma discreta.\n\n' : '') +
       (truncated && p.summary.trim() ? `RESUMO ANTERIOR (cobre os capítulos mais antigos):\n${p.summary}\n\n` : '') +
       `CAPÍTULOS${truncated ? ' MAIS RECENTES' : ''}:\n${chaptersTxt}\n` +
       `TAREFA: Escreva um resumo de trabalho desta história para o autor, em português do Brasil, em texto simples (sem markdown), com estas partes:\n` +
@@ -1627,13 +1777,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   // Montagem dos pedidos
   // =====================================================================
-  function bible(p) {
+  function bible(p, mainSafe) {
     return [
       `TÍTULO: ${p.title || '(sem título)'}`,
       `IDIOMA DA HISTÓRIA: ${p.lang || DEFAULT_LANG}`,
       `FANDOM/UNIVERSO: ${p.fandom || 'original'}`,
       `NARRAÇÃO: ${p.pov}`,
-      `INTENSIDADE: ${HEAT[p.heat] || HEAT.picante}`,
+      mainSafe ? 'INTENSIDADE: romance adulto; as cenas de sexo são escritas por outro autor (veja a regra das CENAS QUENTES).' : `INTENSIDADE: ${HEAT[p.heat] || HEAT.picante}`,
       `TOM E ESTILO: ${p.tone || 'livre'}`,
       `PERSONAGENS (todos adultos, 18+):\n${p.characters || '(a definir)'}`,
       `IDEIA/ENREDO:\n${p.premise || '(livre)'}`,
@@ -1641,11 +1791,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     ].filter(Boolean).join('\n\n');
   }
 
-  function previousText(p, upto, max) {
+  function previousText(p, upto, max, mainSafe) {
     let txt = '';
     for (let i = upto - 1; i >= 0; i--) {
       const c = p.chapters[i];
-      const block = `### Capítulo ${i + 1}: ${chTitle(p, c)}\n${c.text}\n\n`;
+      const block = `### Capítulo ${i + 1}: ${chTitle(p, c)}\n${mainSafe ? hideHot(c, c.text) : c.text}\n\n`;
       if (txt.length + block.length > max) {
         const room = max - txt.length;
         if (room > 500) txt = '[…início do capítulo omitido…]\n' + block.slice(-room) + txt;
@@ -1656,14 +1806,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return txt;
   }
 
-  function buildContext(p, upto, extraQuery) {
-    const parts = [bible(p)];
+  function buildContext(p, upto, extraQuery, mainSafe) {
+    const parts = [bible(p, mainSafe)];
     const hasSummary = p.useSummary !== false && p.summary.trim();
     if (hasSummary) parts.push(`RESUMO DA HISTÓRIA ATÉ AGORA (memória):\n${p.summary}`);
     const lastTail = upto > 0 ? p.chapters[upto - 1].text.slice(-2500) : '';
     const refs = pickReferences(p, [p.characters, p.premise, p.fandom, p.tone, lastTail, extraQuery].join('\n'));
     if (refs) parts.push(`MATERIAL DE REFERÊNCIA enviado pelo autor (apoio; não copie trechos literalmente; pode estar em outro idioma, mas a história é escrita em ${langOf(p)}):\n${refs}`);
-    const prev = previousText(p, upto, hasSummary ? 16000 : 24000);
+    const prev = previousText(p, upto, hasSummary ? 16000 : 24000, mainSafe);
     if (prev) parts.push(`CAPÍTULOS ANTERIORES (os mais recentes):\n${prev}`);
     return parts.join('\n\n');
   }
@@ -1686,7 +1836,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return e;
   }
 
-  async function callAI(userPrompt, { onText, onThinking, signal, override, guard } = {}) {
+  // role: 'main' (escritor da história) ou 'hot' (escritor de cenas quentes); vai junto no erro
+  async function callAI(prompt, opts = {}) {
+    try { return await callAIRaw(prompt, opts); }
+    catch (e) { if (e && e.name !== 'AbortError') e.role = e.role || opts.role || 'main'; throw e; }
+  }
+
+  async function callAIRaw(userPrompt, { onText, onThinking, signal, override, guard } = {}) {
     const cfg = Object.assign({}, settings, override || {});
     if (!cfg.key || !cfg.model) { const e = new Error('A IA ainda não está conectada.'); e.action = 'setup'; throw e; }
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key };
@@ -1772,10 +1928,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return modelsCache;
   }
 
-  function buildModelPicker(container, { selected, onPick }) {
+  // custo aproximado de um capítulo: ~12 mil tokens de contexto + ~2.500 de texto
+  function chapterCost(m) {
+    const c = 12000 * Number(m.pricing?.prompt || 0) + 2500 * Number(m.pricing?.completion || 0);
+    if (!(c > 0)) return '';
+    return c < 0.01 ? 'menos de US$ 0,01 por capítulo' : `~US$ ${c.toFixed(2).replace('.', ',')} por capítulo`;
+  }
+
+  function buildModelPicker(container, { selected, onPick, query = '', freeOnly = true }) {
     const search = el('input', { type: 'text', placeholder: 'Buscar pelo nome…', 'aria-label': 'Buscar modelo' });
+    search.value = query;
     const free = el('input', { type: 'checkbox', id: 'pickFree' });
-    free.checked = true;
+    free.checked = freeOnly;
     const status = el('div', { class: 'status', role: 'status', text: 'Carregando a lista de modelos…' });
     const list = el('div', { class: 'model-list', role: 'listbox', 'aria-label': 'Modelos' });
     let sel = selected;
@@ -1795,7 +1959,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       },
         m.name || m.id,
         el('span', { class: 'tag' + (isFree(m) ? ' free' : ''), text: isFree(m) ? 'grátis' : 'pago' }),
-        el('span', { class: 'mid', text: (pagesOf(m) ? `lembra ~${fmtNum(pagesOf(m))} páginas · ` : '') + m.id }))));
+        el('span', { class: 'mid', text: [pagesOf(m) ? `lembra ~${fmtNum(pagesOf(m))} páginas` : '', chapterCost(m), m.id].filter(Boolean).join(' · ') }))));
     };
     search.addEventListener('input', render);
     free.addEventListener('change', render);
@@ -1808,14 +1972,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   // Conectar a IA: passo a passo
   // =====================================================================
-  const setup = { step: 1, key: '', model: '', modelName: '', then: null };
+  const setup = { step: 1, key: '', model: '', modelName: '', then: null, role: 'main', opts: {}, showSteps: true };
 
-  function openSetup(step = 1, then = null) {
+  function openSetup(step = 1, then = null, role = 'main', opts = {}) {
     $('settingsDlg').open && $('settingsDlg').close();
+    if (!settings.key && step > 2) step = 1;
     setup.step = step;
+    setup.role = role; setup.opts = opts;
+    setup.showSteps = step < 3;
     setup.key = settings.key || '';
-    setup.model = settings.model || '';
-    setup.modelName = settings.modelName || '';
+    setup.model = (role === 'hot' ? settings.hotModel : settings.model) || '';
+    setup.modelName = (role === 'hot' ? settings.hotModelName : settings.modelName) || '';
     setup.then = then;
     renderSetup();
     if (!$('setupDlg').open) $('setupDlg').showModal();
@@ -1824,8 +1991,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function setupHead(title) {
     return [
       el('div', { class: 'dlg-head' }, el('h2', { id: 'setupTitle', text: title }), el('button', { class: 'close', 'aria-label': 'Fechar', text: '✕', onclick: () => $('setupDlg').close() })),
-      setup.step <= 3 ? el('p', { class: 'step', text: `PASSO ${setup.step} DE 3` }) : null,
-      setup.step <= 3 ? el('div', { class: 'steps', 'aria-hidden': 'true' }, [1, 2, 3].map(i => el('span', { class: i <= setup.step ? 'done' : '' }))) : null
+      setup.showSteps && setup.step <= 3 ? el('p', { class: 'step', text: `PASSO ${setup.step} DE 3` }) : null,
+      setup.showSteps && setup.step <= 3 ? el('div', { class: 'steps', 'aria-hidden': 'true' }, [1, 2, 3].map(i => el('span', { class: i <= setup.step ? 'done' : '' }))) : null
     ];
   }
 
@@ -1886,14 +2053,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const test = el('button', { class: 'primary wide', text: 'Testar e concluir', disabled: !setup.model });
       const picker = el('div');
       buildModelPicker(picker, {
-        selected: setup.model,
+        selected: setup.model, query: setup.opts.query || '', freeOnly: setup.opts.free !== false,
         onPick: (m) => { setup.model = m.id; setup.modelName = m.name || m.id; chosen.textContent = `Escolhido: ${setup.modelName}`; test.disabled = false; status.textContent = ''; }
       });
       test.addEventListener('click', async () => {
         test.disabled = true; status.textContent = 'Testando o modelo…'; status.className = 'status';
         try {
           const r = await callAI('Responda com uma única frase curta e simpática, em português do Brasil, dizendo que a conexão funcionou.', { override: { key: setup.key, model: setup.model, maxTokens: 400 } });
-          settings.key = setup.key; settings.model = setup.model; settings.modelName = setup.modelName;
+          settings.key = setup.key;
+          if (setup.role === 'hot') { settings.hotModel = setup.model; settings.hotModelName = setup.modelName; }
+          else { settings.model = setup.model; settings.modelName = setup.modelName; }
           saveSettings();
           setup.step = 4; setup.reply = r.text; renderSetup();
         } catch (e) {
@@ -1902,8 +2071,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           status.className = 'status err';
         }
       });
-      b.append(...setupHead('Escolha o modelo'),
-        el('p', { class: 'lead', text: 'Cada modelo escreve de um jeito. Os grátis têm limite de uso por dia. Se um deles recusar cenas, escrever mal ou em outro idioma, é só trocar depois.' }),
+      b.append(...setupHead(setup.opts.title || (setup.role === 'hot' ? '🔥 Escritor de cenas quentes' : 'Escolha o modelo')),
+        el('p', { class: 'lead', text: setup.opts.lead || (setup.role === 'hot'
+          ? 'Este modelo escreve só as cenas quentes; o resto da história fica com o escritor principal. Ele precisa aceitar conteúdo adulto.'
+          : 'Cada modelo escreve de um jeito. Os grátis têm limite de uso por dia. Se um deles recusar cenas, escrever mal ou em outro idioma, é só trocar depois.') }),
         picker, chosen, status,
         el('div', { class: 'row', style: 'margin-top:12px' },
           el('button', { text: '← Voltar', onclick: () => { setup.step = 2; renderSetup(); } }),
@@ -1915,7 +2086,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     b.append(...setupHead('Tudo pronto!'),
       el('div', { class: 'success' },
         el('div', { class: 'big-ico', text: '✅' }),
-        el('p', { text: `A IA está conectada com o modelo ${setup.modelName || setup.model}.` }),
+        el('p', { text: setup.role === 'hot'
+          ? `As cenas quentes agora são escritas por ${setup.modelName || setup.model}.`
+          : (settings.hotModel ? `A história agora é escrita por ${setup.modelName || setup.model}, e as cenas quentes por ${settings.hotModelName || settings.hotModel}.` : `A IA está conectada com o modelo ${setup.modelName || setup.model}.`) }),
         setup.reply ? el('div', { class: 'quote', text: setup.reply }) : null),
       el('button', {
         class: 'primary wide', text: setup.then ? 'Continuar →' : 'Começar a escrever', onclick: () => {
@@ -1977,8 +2150,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('div', { class: 'dlg-head' }, el('h2', { id: 'settingsTitle', text: 'IA' }), el('button', { class: 'close', 'aria-label': 'Fechar', text: '✕', onclick: () => $('settingsDlg').close() })),
       el('p', { class: 'status ok', style: 'margin-top:0', text: '● Conectada' }),
       el('div', { class: 'kv' },
-        el('div', {}, el('div', { class: 'k', text: 'Modelo' }), el('div', { class: 'v', text: settings.modelName || settings.model })),
-        el('button', { text: 'Trocar modelo', onclick: () => openSetup(3) })),
+        el('div', {}, el('div', { class: 'k', text: settings.hotModel ? 'Escritor da história' : 'Modelo' }), el('div', { class: 'v', text: settings.modelName || settings.model })),
+        el('button', { text: 'Trocar', onclick: () => openSetup(3, null, 'main') })),
+      settings.hotModel
+        ? el('div', { class: 'kv' },
+          el('div', {}, el('div', { class: 'k', text: '🔥 Escritor de cenas quentes' }), el('div', { class: 'v', text: settings.hotModelName || settings.hotModel }),
+            el('div', { class: 'hint', text: 'Só nos projetos Picante e Intenso.' })),
+          el('div', { class: 'row' },
+            el('button', { text: 'Trocar', onclick: () => openSetup(3, null, 'hot') }),
+            el('button', { class: 'link', text: 'Remover', onclick: () => { settings.hotModel = ''; settings.hotModelName = ''; saveSettings(); renderSettings(); toast('Agora um modelo só escreve tudo.'); } })))
+        : el('div', { class: 'kv' },
+          el('div', {}, el('div', { class: 'k', text: 'Dois escritores' }), el('div', { class: 'hint', style: 'margin:0', text: 'Um modelo escreve a história e outro só as cenas quentes.' })),
+          el('button', { text: 'Configurar', onclick: setupTwoWriters })),
       el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Chave' }), el('div', { class: 'v', text: '••••' + settings.key.slice(-4) })),
         el('button', { text: 'Trocar chave', onclick: () => openSetup(2) })),
@@ -2008,7 +2191,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', {
           class: 'link', text: 'Desconectar a IA deste aparelho', onclick: () => {
             if (!confirm('Apagar a chave deste aparelho?')) return;
-            settings.key = ''; settings.model = ''; settings.modelName = ''; saveSettings();
+            settings.key = ''; settings.model = ''; settings.modelName = ''; settings.hotModel = ''; settings.hotModelName = ''; saveSettings();
             $('settingsDlg').close(); renderTab(); toast('IA desconectada.');
           }
         })),

@@ -42,28 +42,84 @@
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     line-height: 1.55;
   }
+  [hidden] { display: none !important; }
+
+  /* ---------- estrutura ---------- */
   header {
-    position: sticky; top: 0; z-index: 5;
+    position: sticky; top: 0; z-index: 10;
     background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 12px 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 10px 16px; display: flex; gap: 10px; align-items: center;
   }
-  header h1 { font-size: 1.15rem; margin: 0 auto 0 0; }
-  main { max-width: 900px; margin: 0 auto; padding: 18px 16px 120px; }
+  header h1 { font-size: 1.1rem; margin: 0; white-space: nowrap; }
+  #currentTitle {
+    flex: 1; min-width: 0; font-weight: 700; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .layout { display: grid; grid-template-columns: 290px 1fr; min-height: calc(100vh - 67px); }
+  aside#projects {
+    background: var(--surface); border-right: 1px solid var(--border);
+    padding: 16px; overflow-y: auto;
+  }
+  main { padding: 18px 16px 150px; min-width: 0; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  #menuBtn { display: none; }
+  #backdrop { display: none; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    #menuBtn { display: inline-block; }
+    header h1 { display: none; }
+    aside#projects {
+      position: fixed; z-index: 30; top: 0; bottom: 0; left: 0;
+      width: min(340px, 86vw); transform: translateX(-105%);
+      transition: transform .2s ease; border-right: 1px solid var(--border);
+    }
+    aside#projects.open { transform: none; }
+    #backdrop.open {
+      display: block; position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.45);
+    }
+  }
+
+  /* ---------- projetos ---------- */
+  .proj-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .proj-head h2 { margin: 0; }
+  .proj-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .proj-item {
+    width: 100%; text-align: left; display: block; padding: 12px 14px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .proj-item.active { background: var(--accent-soft); border-color: var(--accent); }
+  .proj-item .meta { display: block; font-weight: 400; font-size: .8rem; color: var(--muted); }
+
+  /* ---------- abas ---------- */
+  .tabs {
+    display: flex; gap: 6px; overflow-x: auto; margin-bottom: 18px;
+    border-bottom: 1px solid var(--border); padding-bottom: 8px;
+  }
+  .tabs button { white-space: nowrap; background: transparent; border-color: transparent; }
+  .tabs button[aria-selected=true] { background: var(--accent-soft); border-color: var(--accent); }
+  @media (max-width: 640px) {
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; overflow: visible; }
+    .tabs button { padding: 8px 10px; font-size: .9rem; }
+  }
+
+  /* ---------- componentes ---------- */
   .card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 18px; margin-bottom: 18px;
+    border-radius: var(--radius); padding: 18px; margin-bottom: 16px;
   }
   h2 { font-size: 1.2rem; margin: 0 0 12px; }
   h3 { font-size: 1.05rem; margin: 0; }
   label { display: block; font-weight: 600; margin: 14px 0 6px; }
-  .hint { color: var(--muted); font-size: 0.85rem; font-weight: 400; margin: 4px 0 0; }
+  .hint { color: var(--muted); font-size: .85rem; font-weight: 400; margin: 4px 0 0; }
+  p.lead { color: var(--muted); margin: 0 0 14px; font-size: .95rem; }
   input[type=text], input[type=password], input[type=number], select, textarea {
     width: 100%; font: inherit; color: var(--text); background: var(--surface-2);
     border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
   }
   textarea { resize: vertical; min-height: 90px; }
-  textarea.chapter-text {
-    min-height: 360px; font-family: Georgia, "Times New Roman", serif;
+  textarea.big {
+    min-height: 60vh; font-family: Georgia, "Times New Roman", serif;
     font-size: 1.05rem; line-height: 1.75; background: var(--surface);
   }
   input:focus, select:focus, textarea:focus, button:focus-visible {
@@ -76,132 +132,194 @@
   }
   button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
   button.danger { color: var(--danger); }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
   @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
-  .chapter-head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-  .chapter-head input { font-weight: 700; }
-  .status { font-size: 0.9rem; color: var(--muted); min-height: 1.4em; margin-top: 8px; }
-  .status.err { color: var(--danger); }
-  .status.ok { color: var(--ok); }
-  .notice {
-    background: var(--accent-soft); border-radius: var(--radius);
-    padding: 14px 16px; margin-bottom: 18px; font-size: 0.95rem;
-  }
-  details summary { cursor: pointer; font-weight: 700; font-size: 1.05rem; }
   .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; margin-top: 14px; }
   .check input { width: 24px; height: 24px; margin-top: 2px; flex: none; }
-  .words { color: var(--muted); font-size: 0.85rem; }
+  .muted { color: var(--muted); font-size: .85rem; }
+  .status { font-size: .9rem; color: var(--muted); min-height: 1.4em; }
+  .status.err { color: var(--danger); }
+  .status.ok { color: var(--ok); }
+  .status:empty { display: none; }
+  .notice { background: var(--accent-soft); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; font-size: .95rem; }
+  .empty { text-align: center; color: var(--muted); padding: 28px 8px; }
+
+  /* ---------- capítulos ---------- */
+  .ch-item { cursor: pointer; }
+  .ch-item:hover { border-color: var(--accent); }
+  .ch-item .num { color: var(--accent); font-weight: 700; font-size: .85rem; }
+  .ch-item .preview { color: var(--muted); margin: 6px 0 10px; font-size: .95rem;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .nav-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .nav-row .pos { color: var(--muted); font-size: .9rem; margin: 0 auto 0 4px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; background: var(--surface); }
+  .seg button[aria-pressed=true] { background: var(--accent); color: var(--accent-text); }
+  .reader {
+    font-family: Georgia, "Times New Roman", serif; font-size: 1.1rem; line-height: 1.85;
+    max-width: 680px; margin: 0 auto;
+  }
+  .reader p { margin: 0 0 1em; white-space: pre-wrap; }
+  .reader-title { font-family: Georgia, serif; text-align: center; font-size: 1.4rem; margin: 4px 0 22px; }
+  .cursor::after { content: "▍"; color: var(--accent); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- referências ---------- */
+  .ref-head { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+  .ref-name { font-weight: 700; word-break: break-word; }
+  pre.sample {
+    white-space: pre-wrap; font-family: Georgia, serif; font-size: .9rem;
+    background: var(--surface-2); padding: 12px; border-radius: 10px; max-height: 260px; overflow: auto;
+  }
+  .progress { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin-top: 10px; }
+  .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+
+  /* ---------- barra de escrita ---------- */
   .bar {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    position: fixed; left: 290px; right: 0; bottom: 0; z-index: 9;
     background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px;
   }
-  .bar-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 10px; }
+  @media (max-width: 900px) { .bar { left: 0; } }
+  .bar-inner { max-width: 860px; margin: 0 auto; display: flex; gap: 10px; }
   .bar-inner input { flex: 1; }
+  @media (max-width: 640px) {
+    .bar-inner { flex-wrap: wrap; }
+    .bar-inner input { flex-basis: 100%; }
+    .bar-inner button { flex: 1; }
+    main { padding-bottom: 190px; }
+  }
+
   dialog {
     border: 1px solid var(--border); border-radius: var(--radius);
     background: var(--surface); color: var(--text); width: min(640px, calc(100vw - 32px));
     padding: 20px;
   }
   dialog::backdrop { background: rgba(0,0,0,.5); }
-  .empty { text-align: center; color: var(--muted); padding: 24px 8px; }
-  #globalStatus:empty { display: none; }
-  @media (max-width: 640px) {
-    header { gap: 8px; padding: 10px 16px; }
-    header h1 { flex-basis: 100%; font-size: 1.05rem; }
-    header select { flex: 1; }
-    header button { padding: 8px 12px; }
-    .lbl { display: none; }
-    .bar-inner { flex-wrap: wrap; }
-    .bar-inner input { flex-basis: 100%; }
-    .bar-inner button { flex: 1; }
-    main { padding-bottom: 170px; }
+  .toast {
+    position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%); z-index: 50;
+    background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 99px;
+    font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,.25);
   }
 </style>
 </head>
 <body>
 
 <header>
+  <button id="menuBtn" aria-label="Abrir projetos">☰ Projetos</button>
   <h1>✍️ Escritor de Fanfics</h1>
-  <select id="storySelect" aria-label="Escolher história" style="width:auto;max-width:220px"></select>
-  <button id="newStoryBtn">+ Nova</button>
-  <button id="settingsBtn">⚙ <span class="lbl">Configurar </span>IA</button>
+  <div id="currentTitle"></div>
+  <button id="settingsBtn">⚙ IA</button>
 </header>
 
-<main>
-  <div id="setupNotice" class="notice" hidden>
-    <strong>Primeiro passo:</strong> clique em <b>⚙ Configurar IA</b> e cole sua chave de API.
-    A chave fica salva só neste aparelho.
-  </div>
+<div class="layout">
+  <aside id="projects" aria-label="Projetos">
+    <div class="proj-head">
+      <h2>Projetos</h2>
+      <button id="newProjectBtn" class="primary">+ Novo</button>
+    </div>
+    <ul class="proj-list" id="projList"></ul>
+  </aside>
+  <div id="backdrop"></div>
 
-  <section class="card">
-    <details id="ideaBox" open>
-      <summary>💡 A ideia da história</summary>
-
-      <label for="f-title">Título</label>
-      <input type="text" id="f-title" placeholder="Ex.: Entre Rivais">
-
-      <div class="grid2">
-        <div>
-          <label for="f-fandom">Fandom / universo</label>
-          <input type="text" id="f-fandom" placeholder="Ex.: original, anime, série…">
-        </div>
-        <div>
-          <label for="f-pov">Narração</label>
-          <select id="f-pov">
-            <option>Terceira pessoa</option>
-            <option>Primeira pessoa</option>
-            <option>Segunda pessoa (você)</option>
-          </select>
-        </div>
+  <main>
+    <div class="wrap">
+      <div id="setupNotice" class="notice" hidden>
+        <strong>Primeiro passo:</strong> toque em <b>⚙ IA</b> e cole sua chave de API.
+        A chave fica salva só neste aparelho.
+      </div>
+      <div id="storageNotice" class="notice" hidden>
+        Este navegador não deixou salvar dados. Seus textos vão sumir ao fechar a página;
+        baixe a história antes de sair.
       </div>
 
-      <label for="f-characters">Personagens</label>
-      <textarea id="f-characters" placeholder="Nome, idade, aparência, personalidade, a relação entre eles…"></textarea>
+      <nav class="tabs" role="tablist" id="tabs">
+        <button role="tab" data-tab="ideia">💡 Ideia</button>
+        <button role="tab" data-tab="capitulos">📖 Capítulos</button>
+        <button role="tab" data-tab="resumo">📝 Resumo</button>
+        <button role="tab" data-tab="referencias">📎 Referências</button>
+      </nav>
 
-      <label for="f-premise">Ideia / enredo</label>
-      <textarea id="f-premise" style="min-height:130px" placeholder="Conte a ideia do jeito que vier na cabeça."></textarea>
+      <!-- ===== Ideia ===== -->
+      <section id="tab-ideia" role="tabpanel">
+        <div class="card">
+          <label for="f-title" style="margin-top:0">Título do projeto</label>
+          <input type="text" id="f-title" placeholder="Ex.: Entre Rivais">
 
-      <div class="grid2">
-        <div>
-          <label for="f-heat">Intensidade</label>
-          <select id="f-heat">
-            <option value="leve">🌸 Leve: romance e tensão</option>
-            <option value="picante">🔥 Picante: sensual, cenas quentes</option>
-            <option value="intenso">🌶️ Intenso: explícito (+18)</option>
-          </select>
+          <div class="grid2">
+            <div>
+              <label for="f-fandom">Fandom / universo</label>
+              <input type="text" id="f-fandom" placeholder="Ex.: original, anime, série…">
+            </div>
+            <div>
+              <label for="f-pov">Narração</label>
+              <select id="f-pov">
+                <option>Terceira pessoa</option>
+                <option>Primeira pessoa</option>
+                <option>Segunda pessoa (você)</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="f-characters">Personagens</label>
+          <textarea id="f-characters" placeholder="Nome, idade, aparência, personalidade, a relação entre eles…"></textarea>
+
+          <label for="f-premise">Ideia / enredo</label>
+          <textarea id="f-premise" style="min-height:140px" placeholder="Conte a ideia do jeito que vier na cabeça."></textarea>
+
+          <div class="grid2">
+            <div>
+              <label for="f-heat">Intensidade</label>
+              <select id="f-heat">
+                <option value="leve">🌸 Leve: romance e tensão</option>
+                <option value="picante">🔥 Picante: sensual, cenas quentes</option>
+                <option value="intenso">🌶️ Intenso: explícito (+18)</option>
+              </select>
+            </div>
+            <div>
+              <label for="f-length">Tamanho do capítulo</label>
+              <select id="f-length">
+                <option value="800">Curto (~800 palavras)</option>
+                <option value="1500">Médio (~1500 palavras)</option>
+                <option value="2500">Longo (~2500 palavras)</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="f-tone">Tom e estilo</label>
+          <input type="text" id="f-tone" placeholder="Ex.: slow burn, enemies to lovers, diálogos afiados…">
+
+          <label for="f-notes">Regras e limites deste projeto</label>
+          <textarea id="f-notes" placeholder="O que você quer e o que NÃO quer que apareça."></textarea>
+
+          <label class="check">
+            <input type="checkbox" id="f-adults">
+            <span>Confirmo que todos os personagens são adultos (18+) e fictícios.</span>
+          </label>
         </div>
-        <div>
-          <label for="f-length">Tamanho do capítulo</label>
-          <select id="f-length">
-            <option value="800">Curto (~800 palavras)</option>
-            <option value="1500" selected>Médio (~1500 palavras)</option>
-            <option value="2500">Longo (~2500 palavras)</option>
-          </select>
+        <div class="row">
+          <button class="primary" id="goChaptersBtn">Ir para os capítulos →</button>
+          <button class="danger" id="deleteProjectBtn">Excluir projeto</button>
         </div>
-      </div>
+      </section>
 
-      <label for="f-tone">Tom e estilo</label>
-      <input type="text" id="f-tone" placeholder="Ex.: slow burn, enemies to lovers, diálogos afiados…">
+      <!-- ===== Capítulos ===== -->
+      <section id="tab-capitulos" role="tabpanel" hidden></section>
 
-      <label for="f-notes">Regras e limites desta história</label>
-      <textarea id="f-notes" placeholder="O que você quer e o que NÃO quer que apareça."></textarea>
+      <!-- ===== Resumo ===== -->
+      <section id="tab-resumo" role="tabpanel" hidden></section>
 
-      <label class="check">
-        <input type="checkbox" id="f-adults">
-        <span>Confirmo que todos os personagens são adultos (18+) e fictícios.</span>
-      </label>
-    </details>
-  </section>
+      <!-- ===== Referências ===== -->
+      <section id="tab-referencias" role="tabpanel" hidden></section>
+    </div>
+  </main>
+</div>
 
-  <section id="chapters"></section>
-</main>
-
-<div class="bar">
+<div class="bar" id="writeBar" hidden>
   <div class="bar-inner">
     <input type="text" id="nextDirection" placeholder="O que acontece no próximo capítulo? (opcional)">
-    <button class="primary" id="writeNextBtn">Escrever capítulo</button>
+    <button class="primary" id="writeNextBtn">Escrever próximo capítulo</button>
     <button id="stopBtn" class="danger" hidden>■ Parar</button>
   </div>
   <div class="bar-inner"><div class="status" id="globalStatus" role="status"></div></div>
@@ -211,9 +329,9 @@
 <dialog id="settingsDlg">
   <h2>⚙ Configurar IA</h2>
   <p class="hint" style="font-size:.95rem">
-    O sistema funciona com qualquer serviço compatível com a API da OpenAI.
+    Funciona com qualquer serviço compatível com a API da OpenAI.
     Para conteúdo +18, use um provedor e um modelo cujas regras permitam conteúdo adulto.
-    Sua chave fica salva <b>só neste navegador</b>; ela não vai para o GitHub.
+    Sua chave fica salva <b>só neste navegador</b>.
   </p>
 
   <label for="s-endpoint">Endereço da API</label>
@@ -232,18 +350,18 @@
       <input type="number" id="s-temp" min="0" max="2" step="0.1">
     </div>
     <div>
-      <label for="s-max">Limite de tokens</label>
+      <label for="s-max">Limite de tokens da resposta</label>
       <input type="number" id="s-max" min="256" step="256">
     </div>
   </div>
 
   <details style="margin-top:16px">
-    <summary>Avançado: instruções do escritor</summary>
+    <summary><b>Avançado: instruções do escritor</b></summary>
     <textarea id="s-system" style="min-height:220px;margin-top:10px"></textarea>
     <button id="resetSystemBtn" style="margin-top:8px">Restaurar padrão</button>
   </details>
 
-  <div class="status" id="settingsStatus"></div>
+  <div class="status" id="settingsStatus" style="margin-top:12px"></div>
   <div class="row" style="margin-top:14px">
     <button class="primary" id="saveSettingsBtn">Salvar</button>
     <button id="testBtn">Testar conexão</button>
@@ -267,17 +385,27 @@
 (() => {
   'use strict';
 
+  // =====================================================================
+  // Constantes
+  // =====================================================================
+  const LIBS = {
+    pdf: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+    pdfWorker: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+    zip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
+  };
+
   const DEFAULT_SYSTEM = `Você é um escritor de fanfics e ficção romântica, especialista em português brasileiro.
 Escreva prosa envolvente, com diálogos naturais, emoção, tensão e química entre os personagens.
 Respeite exatamente o nível de intensidade, o tom, a narração e as regras pedidas pelo autor.
-Mantenha a continuidade com os capítulos anteriores (nomes, fatos, personalidades).
+Mantenha a continuidade com os capítulos anteriores e com o resumo (nomes, fatos, personalidades).
+Use o material de referência como apoio de universo, personagens e estilo, sem copiar trechos literalmente.
 
 Regras inegociáveis:
 - Todos os personagens em qualquer cena romântica ou sexual são adultos (18+). Nunca envolva menores, nem por insinuação.
 - Todo contato íntimo é consensual entre adultos.
 - Nada de conteúdo sexual com pessoas reais.
 
-Devolva apenas o texto da história, sem comentários, avisos ou explicações.`;
+Devolva apenas o que foi pedido, sem comentários, avisos ou explicações.`;
 
   const HEAT = {
     leve: 'Leve: romance, tensão e beijos; sem cenas sexuais.',
@@ -290,216 +418,716 @@ Devolva apenas o texto da história, sem comentários, avisos ou explicações.`
     key: '', model: '', temperature: 1.0, maxTokens: 4096, system: DEFAULT_SYSTEM
   };
 
-  // ---------- armazenamento seguro ----------
-  const store = {
-    get(k, fallback) {
-      try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
-      catch { return fallback; }
-    },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
-  };
-
-  let settings = Object.assign({}, DEFAULT_SETTINGS, store.get('fanfic.settings', {}));
-  let stories = store.get('fanfic.stories', []);
-  let currentId = store.get('fanfic.current', null);
-  let busy = null; // AbortController enquanto a IA escreve
-
-  const $ = (id) => document.getElementById(id);
-  const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-  const countWords = (t) => (t.trim().match(/\S+/g) || []).length;
-
-  function newStory() {
-    return {
-      id: uid(), title: '', fandom: '', pov: 'Terceira pessoa', characters: '',
-      premise: '', heat: 'picante', length: '1500', tone: '', notes: '',
-      adults: false, chapters: [], updatedAt: Date.now()
-    };
-  }
-
-  if (!stories.length) stories.push(newStory());
-  if (!stories.find(s => s.id === currentId)) currentId = stories[0].id;
-  const cur = () => stories.find(s => s.id === currentId);
-
-  let saveTimer = null;
-  function save(now) {
-    clearTimeout(saveTimer);
-    const run = () => {
-      const s = cur(); if (s) s.updatedAt = Date.now();
-      store.set('fanfic.stories', stories);
-      store.set('fanfic.current', currentId);
-    };
-    now ? run() : (saveTimer = setTimeout(run, 400));
-  }
-
-  // ---------- campos da ideia ----------
   const FIELDS = ['title', 'fandom', 'pov', 'characters', 'premise', 'heat', 'length', 'tone', 'notes'];
 
-  function loadForm() {
-    const s = cur();
-    FIELDS.forEach(f => { $('f-' + f).value = s[f] ?? ''; });
-    $('f-adults').checked = !!s.adults;
-    $('ideaBox').open = s.chapters.length === 0;
+  // =====================================================================
+  // Utilidades
+  // =====================================================================
+  const $ = (id) => document.getElementById(id);
+  const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  const countWords = (t) => ((t || '').trim().match(/\S+/g) || []).length;
+  const fmtNum = (n) => n.toLocaleString('pt-BR');
+  const fmtDate = (t) => new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+  function el(tag, props = {}, ...children) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') e.className = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+      else if (v === true) e.setAttribute(k, '');
+      else if (v !== false && v != null) e.setAttribute(k, v);
+    }
+    for (const c of children.flat()) if (c != null) e.append(c);
+    return e;
   }
 
-  FIELDS.forEach(f => $('f-' + f).addEventListener('input', (e) => {
-    cur()[f] = e.target.value; save();
-    if (f === 'title') renderSelect();
-  }));
-  $('f-adults').addEventListener('change', (e) => { cur().adults = e.target.checked; save(); });
+  const local = {
+    get(k, fb) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch { return fb; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} }
+  };
 
-  function renderSelect() {
-    const sel = $('storySelect');
-    sel.innerHTML = '';
-    stories.slice().sort((a, b) => b.updatedAt - a.updatedAt).forEach(s => {
-      const o = document.createElement('option');
-      o.value = s.id; o.textContent = s.title.trim() || 'Sem título';
-      sel.appendChild(o);
+  let toastTimer;
+  function toast(msg) {
+    document.querySelectorAll('.toast').forEach(t => t.remove());
+    const t = el('div', { class: 'toast', role: 'status', text: msg });
+    document.body.append(t);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.remove(), 2200);
+  }
+
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const ta = el('textarea', { style: 'position:fixed;opacity:0' });
+      ta.value = text; document.body.append(ta); ta.select();
+      try { document.execCommand('copy'); } finally { ta.remove(); }
+    }
+    toast('Copiado! ' + fmtNum(countWords(text)) + ' palavras');
+  }
+
+  // =====================================================================
+  // Banco de dados (IndexedDB) — projetos e arquivos de referência
+  // =====================================================================
+  let dbOk = true;
+  const db = {
+    _p: null,
+    open() {
+      if (!this._p) this._p = new Promise((res, rej) => {
+        const r = indexedDB.open('fanfic-writer', 1);
+        r.onupgradeneeded = () => {
+          const d = r.result;
+          d.createObjectStore('projects', { keyPath: 'id' });
+          d.createObjectStore('refs', { keyPath: 'id' }).createIndex('projectId', 'projectId');
+        };
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+      return this._p;
+    },
+    async tx(store, mode, fn) {
+      if (!dbOk) return undefined;
+      try {
+        const d = await this.open();
+        return await new Promise((res, rej) => {
+          const t = d.transaction(store, mode);
+          const req = fn(t.objectStore(store));
+          t.oncomplete = () => res(req ? req.result : undefined);
+          t.onerror = () => rej(t.error);
+          t.onabort = () => rej(t.error);
+        });
+      } catch (e) {
+        dbOk = false; $('storageNotice').hidden = false;
+        console.error(e); return undefined;
+      }
+    },
+    all: (s) => db.tx(s, 'readonly', st => st.getAll()),
+    put: (s, v) => db.tx(s, 'readwrite', st => st.put(v)),
+    del: (s, id) => db.tx(s, 'readwrite', st => st.delete(id)),
+    refsOf: (pid) => db.tx('refs', 'readonly', st => st.index('projectId').getAll(pid))
+  };
+
+  // =====================================================================
+  // Estado
+  // =====================================================================
+  let settings = Object.assign({}, DEFAULT_SETTINGS, local.get('fanfic.settings', {}));
+  let projects = [];
+  let currentId = local.get('fanfic.current', null);
+  const refsCache = {};          // projectId -> [refs]
+  let view = { tab: 'ideia', chapterId: null, mode: 'ler' };
+  let busy = null;               // AbortController enquanto a IA escreve
+
+  const cur = () => projects.find(p => p.id === currentId);
+
+  function newProject() {
+    return {
+      id: uid(), title: '', fandom: '', pov: 'Terceira pessoa', characters: '',
+      premise: '', heat: 'picante', length: '1500', tone: '', notes: '', adults: false,
+      chapters: [], summary: '', summaryPrev: null, summaryAt: 0, summaryChapters: 0,
+      useSummary: true, refBudget: '20000', createdAt: Date.now(), updatedAt: Date.now()
+    };
+  }
+
+  const pendingSaves = new Map();
+  function saveProject(p, now) {
+    if (!p) return;
+    p.updatedAt = Date.now();
+    clearTimeout(pendingSaves.get(p.id));
+    const run = () => { pendingSaves.delete(p.id); db.put('projects', p); };
+    if (now) run(); else pendingSaves.set(p.id, setTimeout(run, 400));
+  }
+  function flushSaves() {
+    for (const [id, t] of pendingSaves) { clearTimeout(t); const p = projects.find(x => x.id === id); if (p) db.put('projects', p); }
+    pendingSaves.clear();
+  }
+  addEventListener('visibilitychange', () => { if (document.hidden) flushSaves(); });
+  addEventListener('pagehide', flushSaves);
+
+  // =====================================================================
+  // Projetos (barra lateral)
+  // =====================================================================
+  function renderProjects() {
+    const list = $('projList');
+    list.innerHTML = '';
+    projects.slice().sort((a, b) => b.updatedAt - a.updatedAt).forEach(p => {
+      const words = p.chapters.reduce((n, c) => n + countWords(c.text), 0);
+      const btn = el('button', {
+        class: 'proj-item' + (p.id === currentId ? ' active' : ''),
+        'aria-current': p.id === currentId ? 'true' : null,
+        onclick: () => openProject(p.id)
+      },
+        p.title.trim() || 'Sem título',
+        el('span', { class: 'meta', text: `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}` })
+      );
+      list.append(el('li', {}, btn));
     });
-    sel.value = currentId;
+    $('currentTitle').textContent = cur()?.title.trim() || 'Sem título';
   }
 
-  $('storySelect').addEventListener('change', (e) => {
-    if (busy) return;
-    currentId = e.target.value; save(true); loadForm(); renderChapters();
-  });
+  function openProject(id) {
+    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
+    flushSaves();
+    currentId = id;
+    local.set('fanfic.current', id);
+    const p = cur();
+    view = { tab: p.chapters.length ? 'capitulos' : 'ideia', chapterId: null, mode: 'ler' };
+    closeDrawer();
+    loadForm(); renderProjects(); renderTab();
+    loadRefs(id);
+  }
 
-  $('newStoryBtn').addEventListener('click', () => {
-    if (busy) return;
-    const s = newStory(); stories.push(s); currentId = s.id;
-    save(true); renderSelect(); loadForm(); renderChapters();
+  $('newProjectBtn').addEventListener('click', () => {
+    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
+    const p = newProject();
+    projects.push(p); saveProject(p, true);
+    openProject(p.id);
     $('f-title').focus();
   });
 
-  // ---------- capítulos ----------
-  function renderChapters() {
-    const wrap = $('chapters');
-    wrap.innerHTML = '';
-    const s = cur();
+  $('deleteProjectBtn').addEventListener('click', async () => {
+    const p = cur();
+    if (!confirm(`Excluir o projeto "${p.title || 'Sem título'}" com todos os capítulos e referências? Não dá para desfazer.`)) return;
+    projects = projects.filter(x => x.id !== p.id);
+    await db.del('projects', p.id);
+    for (const r of (refsCache[p.id] || [])) await db.del('refs', r.id);
+    delete refsCache[p.id];
+    if (!projects.length) { const n = newProject(); projects.push(n); saveProject(n, true); }
+    openProject(projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id);
+  });
 
-    if (!s.chapters.length) {
-      const d = document.createElement('div');
-      d.className = 'card empty';
-      d.textContent = 'Preencha a ideia acima e toque em “Escrever capítulo”.';
-      wrap.appendChild(d);
-    }
+  function closeDrawer() { $('projects').classList.remove('open'); $('backdrop').classList.remove('open'); }
+  $('menuBtn').addEventListener('click', () => { $('projects').classList.add('open'); $('backdrop').classList.add('open'); });
+  $('backdrop').addEventListener('click', closeDrawer);
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
-    s.chapters.forEach((ch, i) => {
-      const card = document.createElement('article');
-      card.className = 'card';
-      card.dataset.id = ch.id;
+  // =====================================================================
+  // Abas
+  // =====================================================================
+  document.querySelectorAll('#tabs [data-tab]').forEach(b => b.addEventListener('click', () => {
+    view.tab = b.dataset.tab;
+    if (view.tab === 'capitulos') view.chapterId = null;
+    renderTab();
+  }));
 
-      const head = document.createElement('div');
-      head.className = 'chapter-head';
-      const title = document.createElement('input');
-      title.type = 'text';
-      title.value = ch.title || `Capítulo ${i + 1}`;
-      title.setAttribute('aria-label', 'Título do capítulo');
-      title.addEventListener('input', () => { ch.title = title.value; save(); });
-      head.appendChild(title);
-      card.appendChild(head);
-
-      const ta = document.createElement('textarea');
-      ta.className = 'chapter-text';
-      ta.value = ch.text;
-      ta.setAttribute('aria-label', 'Texto do capítulo');
-      const words = document.createElement('div');
-      words.className = 'words';
-      words.textContent = countWords(ch.text) + ' palavras';
-      ta.addEventListener('input', () => {
-        ch.text = ta.value; words.textContent = countWords(ch.text) + ' palavras'; save();
-      });
-      card.appendChild(ta);
-      card.appendChild(words);
-
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.style.marginTop = '10px';
-
-      const adjust = document.createElement('button');
-      adjust.textContent = '✏️ Pedir ajuste';
-      adjust.title = 'Selecione um trecho para ajustar só ele, ou nada para o capítulo todo';
-      adjust.addEventListener('click', () => openRevise(ch, ta));
-      row.appendChild(adjust);
-
-      if (ch.prev != null) {
-        const undo = document.createElement('button');
-        undo.textContent = '↩ Desfazer ajuste';
-        undo.addEventListener('click', () => {
-          const t = ch.text; ch.text = ch.prev; ch.prev = t; save(true); renderChapters();
-        });
-        row.appendChild(undo);
-      }
-
-      const del = document.createElement('button');
-      del.className = 'danger';
-      del.textContent = 'Excluir';
-      del.addEventListener('click', () => {
-        if (!confirm('Excluir este capítulo?')) return;
-        s.chapters = s.chapters.filter(c => c.id !== ch.id); save(true); renderChapters();
-      });
-      row.appendChild(del);
-
-      card.appendChild(row);
-      wrap.appendChild(card);
+  function renderTab() {
+    const p = cur();
+    document.querySelectorAll('#tabs [data-tab]').forEach(b => {
+      b.setAttribute('aria-selected', b.dataset.tab === view.tab ? 'true' : 'false');
+      if (b.dataset.tab === 'capitulos') b.textContent = `📖 Capítulos (${p.chapters.length})`;
+      if (b.dataset.tab === 'referencias') b.textContent = `📎 Referências (${(refsCache[p.id] || []).length})`;
     });
-
-    if (s.chapters.length) {
-      const tools = document.createElement('div');
-      tools.className = 'row';
-      const exp = document.createElement('button');
-      exp.textContent = '⬇ Baixar história';
-      exp.addEventListener('click', exportStory);
-      const delStory = document.createElement('button');
-      delStory.className = 'danger';
-      delStory.textContent = 'Excluir história';
-      delStory.addEventListener('click', deleteStory);
-      tools.append(exp, delStory);
-      wrap.appendChild(tools);
-    }
+    ['ideia', 'capitulos', 'resumo', 'referencias'].forEach(t => { $('tab-' + t).hidden = t !== view.tab; });
+    $('writeBar').hidden = view.tab !== 'capitulos';
+    if (view.tab === 'capitulos') renderChapters();
+    if (view.tab === 'resumo') renderSummary();
+    if (view.tab === 'referencias') renderRefs();
   }
 
-  function exportStory() {
-    const s = cur();
-    let md = `# ${s.title || 'Sem título'}\n\n`;
-    s.chapters.forEach((c, i) => { md += `## ${c.title || 'Capítulo ' + (i + 1)}\n\n${c.text}\n\n`; });
-    const blob = new Blob([md], { type: 'text/markdown' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (s.title || 'fanfic').replace(/[^\w\-]+/g, '_') + '.md';
+  // =====================================================================
+  // Aba Ideia
+  // =====================================================================
+  function loadForm() {
+    const p = cur();
+    FIELDS.forEach(f => { $('f-' + f).value = p[f] ?? ''; });
+    $('f-adults').checked = !!p.adults;
+  }
+  FIELDS.forEach(f => $('f-' + f).addEventListener('input', (e) => {
+    const p = cur(); p[f] = e.target.value; saveProject(p);
+    if (f === 'title') renderProjects();
+  }));
+  $('f-adults').addEventListener('change', (e) => { const p = cur(); p.adults = e.target.checked; saveProject(p); });
+  $('goChaptersBtn').addEventListener('click', () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); });
+
+  // =====================================================================
+  // Aba Capítulos
+  // =====================================================================
+  function renderChapters() {
+    const p = cur();
+    const sec = $('tab-capitulos');
+    sec.innerHTML = '';
+    const ch = p.chapters.find(c => c.id === view.chapterId);
+    if (ch) return renderChapterView(sec, p, ch);
+    view.chapterId = null;
+
+    if (!p.chapters.length) {
+      sec.append(el('div', { class: 'card empty' },
+        el('p', { text: 'Nenhum capítulo ainda.' }),
+        el('p', { text: 'Confira a ideia na aba 💡 Ideia e toque em “Escrever próximo capítulo”, lá embaixo.' })));
+      return;
+    }
+
+    const total = p.chapters.reduce((n, c) => n + countWords(c.text), 0);
+    sec.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:12px' },
+      el('span', { class: 'muted', text: `${p.chapters.length} capítulos · ${fmtNum(total)} palavras` }),
+      el('div', { class: 'row' },
+        el('button', { text: '📋 Copiar tudo', onclick: () => copyText(fullStoryText(p)) }),
+        el('button', { text: '⬇ Baixar', onclick: () => exportStory(p) }))));
+
+    p.chapters.forEach((c, i) => {
+      const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
+      const card = el('article', { class: 'card ch-item', onclick: () => open('ler') },
+        el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` }),
+        el('h3', { text: c.title || `Capítulo ${i + 1}` }),
+        el('div', { class: 'preview', text: c.text.slice(0, 260) || '(vazio)' }),
+        el('div', { class: 'row' },
+          el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
+          el('button', { text: '📖 Ler', onclick: (e) => { e.stopPropagation(); open('ler'); } }),
+          el('button', { text: '✏️ Editar', onclick: (e) => { e.stopPropagation(); open('editar'); } }),
+          el('button', { text: '📋 Copiar', onclick: (e) => { e.stopPropagation(); copyText(c.text); } })));
+      sec.append(card);
+    });
+  }
+
+  function renderParagraphs(container, text, streaming) {
+    container.innerHTML = '';
+    const paras = text.split(/\n\s*\n/);
+    paras.forEach((t, i) => {
+      const pEl = el('p', { text: t.replace(/^\n+|\n+$/g, '') });
+      if (streaming && i === paras.length - 1) pEl.classList.add('cursor');
+      container.append(pEl);
+    });
+  }
+
+  function renderChapterView(sec, p, ch) {
+    const i = p.chapters.indexOf(ch);
+    const go = (j) => { view.chapterId = p.chapters[j].id; renderChapters(); scrollTo(0, 0); };
+    const setMode = (m) => { view.mode = m; renderChapters(); };
+
+    sec.append(el('div', { class: 'nav-row' },
+      el('button', { text: '← Capítulos', onclick: () => { view.chapterId = null; renderChapters(); } }),
+      el('button', { text: '◀', 'aria-label': 'Capítulo anterior', disabled: i === 0, onclick: () => go(i - 1) }),
+      el('button', { text: '▶', 'aria-label': 'Próximo capítulo', disabled: i === p.chapters.length - 1, onclick: () => go(i + 1) }),
+      el('span', { class: 'pos', text: `${i + 1} de ${p.chapters.length}` }),
+      el('div', { class: 'seg', role: 'group', 'aria-label': 'Modo' },
+        el('button', { text: '📖 Ler', 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }),
+        el('button', { text: '✏️ Editar', 'aria-pressed': String(view.mode === 'editar'), onclick: () => setMode('editar') }))));
+
+    const card = el('div', { class: 'card' });
+    const words = el('span', { class: 'muted', id: 'chWords', text: fmtNum(countWords(ch.text)) + ' palavras' });
+
+    if (view.mode === 'editar') {
+      const title = el('input', { type: 'text', 'aria-label': 'Título do capítulo', style: 'font-weight:700;margin-bottom:12px' });
+      title.value = ch.title || `Capítulo ${i + 1}`;
+      title.addEventListener('input', () => { ch.title = title.value; saveProject(p); });
+      const ta = el('textarea', { class: 'big', id: 'chBody', 'aria-label': 'Texto do capítulo' });
+      ta.value = ch.text;
+      ta.addEventListener('input', () => { ch.text = ta.value; words.textContent = fmtNum(countWords(ch.text)) + ' palavras'; saveProject(p); });
+      card.append(title, ta);
+    } else {
+      const body = el('div', { class: 'reader', id: 'chBody' });
+      renderParagraphs(body, ch.text, busy && busy.chapterId === ch.id);
+      card.append(el('h2', { class: 'reader-title', text: ch.title || `Capítulo ${i + 1}` }), body);
+    }
+    card.append(words);
+    sec.append(card);
+
+    const actions = el('div', { class: 'row' },
+      el('button', { class: 'primary', text: '📋 Copiar capítulo', onclick: () => copyText(ch.text) }),
+      el('button', { text: '✏️ Pedir ajuste', onclick: () => openRevise(ch) }));
+    if (ch.prev != null) actions.append(el('button', {
+      text: '↩ Desfazer ajuste', onclick: () => { const t = ch.text; ch.text = ch.prev; ch.prev = t; saveProject(p, true); renderChapters(); }
+    }));
+    actions.append(el('button', {
+      class: 'danger', text: '🗑 Excluir', onclick: () => {
+        if (!confirm('Excluir este capítulo?')) return;
+        p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null;
+        saveProject(p, true); renderTab(); renderProjects();
+      }
+    }));
+    sec.append(actions);
+    if (busy) sec.querySelectorAll('button').forEach(b => { if (!b.closest('.nav-row')) b.disabled = true; });
+  }
+
+  // atualiza o texto do capítulo na tela enquanto a IA escreve
+  let paintQueued = false, paintLatest = null;
+  function paintChapter(ch, text) {
+    paintLatest = { ch, text };
+    if (paintQueued) return;
+    paintQueued = true;
+    requestAnimationFrame(() => {
+      paintQueued = false;
+      const { ch, text } = paintLatest;
+      // só pinta enquanto a IA ainda está escrevendo este capítulo
+      if (!busy || busy.chapterId !== ch.id) return;
+      if (view.tab !== 'capitulos' || view.chapterId !== ch.id) return;
+      const body = $('chBody');
+      if (!body) return;
+      if (body.tagName === 'TEXTAREA') body.value = text;
+      else renderParagraphs(body, text, true);
+      const w = $('chWords'); if (w) w.textContent = fmtNum(countWords(text)) + ' palavras';
+    });
+  }
+
+  function fullStoryText(p) {
+    return p.chapters.map((c, i) => `${c.title || 'Capítulo ' + (i + 1)}\n\n${c.text}`).join('\n\n\n');
+  }
+
+  function exportStory(p) {
+    let md = `# ${p.title || 'Sem título'}\n\n`;
+    p.chapters.forEach((c, i) => { md += `## ${c.title || 'Capítulo ' + (i + 1)}\n\n${c.text}\n\n`; });
+    const a = el('a', { download: (p.title || 'fanfic').replace(/[^\w\-]+/g, '_') + '.md' });
+    a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
-  function deleteStory() {
-    if (!confirm('Excluir a história inteira? Não dá para desfazer.')) return;
-    stories = stories.filter(s => s.id !== currentId);
-    if (!stories.length) stories.push(newStory());
-    currentId = stories[0].id;
-    save(true); renderSelect(); loadForm(); renderChapters();
+  // =====================================================================
+  // Aba Resumo
+  // =====================================================================
+  function renderSummary() {
+    const p = cur();
+    const sec = $('tab-resumo');
+    sec.innerHTML = '';
+    const card = el('div', { class: 'card' });
+    card.append(el('h2', { text: '📝 Resumo da história' }),
+      el('p', { class: 'lead', text: 'A IA lê o que você já criou e sugere um resumo: sinopse, o que aconteceu em cada capítulo, como estão os personagens e ideias para os próximos. Você pode editar à vontade.' }));
+
+    const info = [];
+    if (p.summaryAt) info.push(`Gerado em ${fmtDate(p.summaryAt)}, com ${p.summaryChapters} capítulo(s).`);
+    if (p.summaryAt && p.chapters.length !== p.summaryChapters) info.push('Há mudanças nos capítulos desde então.');
+    if (info.length) card.append(el('p', { class: 'muted', text: info.join(' ') }));
+
+    const gen = el('button', {
+      class: 'primary', id: 'genSummaryBtn',
+      text: p.summary.trim() ? '✨ Atualizar resumo sugerido' : '✨ Gerar resumo sugerido',
+      disabled: !!busy || !p.chapters.length, onclick: generateSummary
+    });
+    const row = el('div', { class: 'row', style: 'margin-bottom:12px' }, gen);
+    if (busy && busy.kind === 'summary') row.append(el('button', { class: 'danger', text: '■ Parar', onclick: () => busy && busy.abort() }));
+    card.append(row);
+    if (!p.chapters.length) card.append(el('p', { class: 'muted', text: 'Escreva pelo menos um capítulo primeiro.' }));
+
+    const ta = el('textarea', { class: 'big', id: 'summaryText', style: 'min-height:45vh', 'aria-label': 'Resumo', placeholder: 'O resumo aparece aqui. Você também pode escrever o seu.' });
+    ta.value = p.summary;
+    ta.addEventListener('input', () => { p.summary = ta.value; saveProject(p); });
+    card.append(ta);
+
+    const use = el('input', { type: 'checkbox', id: 'useSummary' });
+    use.checked = p.useSummary !== false;
+    use.addEventListener('change', () => { p.useSummary = use.checked; saveProject(p); });
+    card.append(el('label', { class: 'check', for: 'useSummary' }, use,
+      el('span', { text: 'Usar este resumo como memória da IA ao escrever novos capítulos' })));
+
+    const acts = el('div', { class: 'row', style: 'margin-top:14px' },
+      el('button', { text: '📋 Copiar resumo', disabled: !p.summary.trim(), onclick: () => copyText(p.summary) }));
+    if (p.summaryPrev != null) acts.append(el('button', {
+      text: '↩ Voltar ao resumo anterior', onclick: () => { const t = p.summary; p.summary = p.summaryPrev; p.summaryPrev = t; saveProject(p, true); renderSummary(); }
+    }));
+    card.append(acts, el('div', { class: 'status', id: 'summaryStatus', role: 'status' }));
+    sec.append(card);
   }
 
-  // ---------- montagem do pedido ----------
-  function bible(s) {
+  async function generateSummary() {
+    const p = cur();
+    if (busy || !checkReady(p)) return;
+    const MAX = 60000;
+    let chaptersTxt = '', truncated = false;
+    for (let i = p.chapters.length - 1; i >= 0; i--) {
+      const block = `### ${p.chapters[i].title || 'Capítulo ' + (i + 1)} (capítulo ${i + 1})\n${p.chapters[i].text}\n\n`;
+      if (chaptersTxt.length + block.length > MAX) { truncated = true; break; }
+      chaptersTxt = block + chaptersTxt;
+    }
+    const prompt = `${bible(p)}\n\n` +
+      (truncated && p.summary.trim() ? `RESUMO ANTERIOR (cobre os capítulos mais antigos):\n${p.summary}\n\n` : '') +
+      `CAPÍTULOS${truncated ? ' MAIS RECENTES' : ''}:\n${chaptersTxt}\n` +
+      `TAREFA: Escreva um resumo de trabalho desta história para o autor, em português brasileiro, em texto simples (sem markdown), com estas partes:\n` +
+      `SINOPSE: 3 a 5 frases.\n` +
+      `CAPÍTULO A CAPÍTULO: 2 a 3 frases para cada capítulo, numerados.\n` +
+      `PERSONAGENS E RELAÇÕES AGORA: como cada personagem principal está e como estão as relações.\n` +
+      `FIOS EM ABERTO: conflitos, segredos e promessas que ainda não foram resolvidos.\n` +
+      `SUGESTÕES PARA OS PRÓXIMOS CAPÍTULOS: 3 ideias curtas.\n` +
+      `Seja fiel ao que está escrito; não invente fatos.`;
+
+    const old = p.summary;
+    const ctrl = startBusy('summary');
+    renderSummary();
+    const st = () => $('summaryStatus');
+    if (st()) { st().textContent = 'Lendo os capítulos e escrevendo o resumo…'; st().className = 'status'; }
+    try {
+      const text = await callAI(prompt, (t) => { const ta = $('summaryText'); if (ta && view.tab === 'resumo') ta.value = t; }, ctrl.signal);
+      p.summaryPrev = old.trim() ? old : null;
+      p.summary = text; p.summaryAt = Date.now(); p.summaryChapters = p.chapters.length;
+      saveProject(p, true);
+      stopBusy(); renderSummary();
+      if (st()) { st().textContent = 'Resumo pronto. Revise e ajuste o que quiser.'; st().className = 'status ok'; }
+    } catch (e) {
+      p.summary = old;
+      stopBusy(); renderSummary();
+      if (st()) { st().textContent = e.name === 'AbortError' ? 'Cancelado; o resumo anterior foi mantido.' : e.message; st().className = 'status' + (e.name === 'AbortError' ? '' : ' err'); }
+    }
+  }
+
+  // =====================================================================
+  // Aba Referências (PDF, EPUB, TXT)
+  // =====================================================================
+  async function loadRefs(pid) {
+    if (!refsCache[pid]) {
+      refsCache[pid] = ((await db.refsOf(pid)) || []).sort((a, b) => a.addedAt - b.addedAt);
+      if (pid === currentId) renderTab();
+    }
+    return refsCache[pid];
+  }
+
+  function renderRefs() {
+    const p = cur();
+    const sec = $('tab-referencias');
+    sec.innerHTML = '';
+    const refs = refsCache[p.id] || [];
+
+    const input = el('input', { type: 'file', id: 'refFile', accept: '.pdf,.epub,.txt,.md,application/pdf,application/epub+zip,text/plain', multiple: true, hidden: true });
+    input.addEventListener('change', () => { addFiles([...input.files]); input.value = ''; });
+
+    const budget = el('select', { id: 'refBudget' },
+      el('option', { value: '8000', text: 'Pouco (~8 mil caracteres, ~3 páginas)' }),
+      el('option', { value: '20000', text: 'Médio (~20 mil caracteres, ~8 páginas)' }),
+      el('option', { value: '50000', text: 'Muito (~50 mil caracteres, ~20 páginas)' }));
+    budget.value = p.refBudget || '20000';
+    budget.addEventListener('change', () => { p.refBudget = budget.value; saveProject(p); });
+
+    sec.append(el('div', { class: 'card' },
+      el('h2', { text: '📎 Material de referência' }),
+      el('p', { class: 'lead', text: 'Envie livros, capítulos ou anotações em PDF, EPUB ou TXT. A cada pedido, o sistema escolhe os trechos mais ligados ao que está sendo escrito (nomes, lugares, a direção do capítulo) e manda junto para a IA.' }),
+      input,
+      el('div', { class: 'row' },
+        el('button', { class: 'primary', text: '📎 Adicionar PDF, EPUB ou TXT', disabled: !!busy, onclick: () => input.click() })),
+      el('div', { class: 'status', id: 'refStatus', role: 'status', style: 'margin-top:10px' }),
+      el('div', { class: 'progress', id: 'refProgress', hidden: true }, el('div')),
+      el('label', { for: 'refBudget', text: 'Quanto material mandar em cada pedido' }), budget,
+      el('p', { class: 'hint', text: 'Mais material ajuda a IA a acertar detalhes, mas cada pedido fica mais caro e o modelo precisa aceitar textos longos.' })));
+
+    if (!refs.length) {
+      sec.append(el('div', { class: 'card empty', text: 'Nenhum arquivo neste projeto ainda.' }));
+      return;
+    }
+
+    refs.forEach(r => {
+      const use = el('input', { type: 'checkbox', id: 'use-' + r.id });
+      use.checked = r.enabled !== false;
+      use.addEventListener('change', () => { r.enabled = use.checked; db.put('refs', r); });
+      const note = el('input', { type: 'text', placeholder: 'Ex.: use para o universo e os personagens / imite o estilo de escrita' });
+      note.value = r.note || '';
+      let t; note.addEventListener('input', () => { r.note = note.value; clearTimeout(t); t = setTimeout(() => db.put('refs', r), 400); });
+
+      sec.append(el('div', { class: 'card' },
+        el('div', { class: 'ref-head' },
+          el('div', {},
+            el('div', { class: 'ref-name', text: r.name }),
+            el('div', { class: 'muted', text: `${r.type.toUpperCase()} · ${fmtNum(r.chars)} caracteres (~${fmtNum(Math.max(1, Math.round(r.chars / 2500)))} páginas)` })),
+          el('button', {
+            class: 'danger', text: 'Remover', onclick: async () => {
+              if (!confirm(`Remover "${r.name}" deste projeto?`)) return;
+              await db.del('refs', r.id);
+              refsCache[p.id] = refs.filter(x => x.id !== r.id);
+              renderTab();
+            }
+          })),
+        el('label', { class: 'check', for: 'use-' + r.id }, use, el('span', { text: 'Usar como referência ao escrever' })),
+        el('label', { text: 'Como a IA deve usar este material (opcional)' }), note,
+        el('details', { style: 'margin-top:12px' },
+          el('summary', { text: 'Ver o começo do texto extraído' }),
+          el('pre', { class: 'sample', text: r.text.slice(0, 2500) + (r.text.length > 2500 ? '\n…' : '') }))));
+    });
+  }
+
+  const libPromises = {};
+  function loadScript(src) {
+    if (!libPromises[src]) libPromises[src] = new Promise((res, rej) => {
+      const s = el('script', { src });
+      s.onload = res;
+      s.onerror = () => { delete libPromises[src]; rej(new Error('Não consegui carregar o leitor de arquivos. Confira a internet e tente de novo.')); };
+      document.head.append(s);
+    });
+    return libPromises[src];
+  }
+
+  function cleanText(t) {
+    return t.replace(/\r/g, '').replace(/[ \t ]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  async function extractPdf(file, onProgress) {
+    await loadScript(LIBS.pdf);
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = LIBS.pdfWorker;
+    const pdf = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const tc = await page.getTextContent();
+      let txt = '', lastY = null;
+      for (const it of tc.items) {
+        const y = it.transform ? it.transform[5] : null;
+        if (lastY != null && y != null && Math.abs(y - lastY) > 1 && !txt.endsWith('\n')) txt += '\n';
+        txt += it.str;
+        if (it.hasEOL) txt += '\n';
+        lastY = y;
+      }
+      pages.push(txt);
+      onProgress(i / pdf.numPages);
+    }
+    // junta linhas quebradas dentro do mesmo parágrafo
+    return cleanText(pages.join('\n\n').replace(/([^\n.!?:;"”»—])\n(?=[a-zà-ú])/g, '$1 '));
+  }
+
+  function resolvePath(base, href) {
+    const out = [];
+    for (const part of (base + href).split('/')) {
+      if (part === '..') out.pop(); else if (part && part !== '.') out.push(part);
+    }
+    return out.join('/');
+  }
+
+  function htmlToText(markup) {
+    let doc = new DOMParser().parseFromString(markup, 'application/xhtml+xml');
+    if (doc.getElementsByTagName('parsererror').length) doc = new DOMParser().parseFromString(markup, 'text/html');
+    const body = doc.body || doc.getElementsByTagNameNS('*', 'body')[0] || doc.documentElement;
+    body.querySelectorAll('script,style').forEach(n => n.remove());
+    body.querySelectorAll('br').forEach(n => n.replaceWith('\n'));
+    body.querySelectorAll('p,div,h1,h2,h3,h4,h5,h6,li,blockquote,section,tr').forEach(n => n.append('\n\n'));
+    return body.textContent;
+  }
+
+  async function extractEpub(file, onProgress) {
+    await loadScript(LIBS.zip);
+    const zip = await window.JSZip.loadAsync(file);
+    const containerFile = zip.file('META-INF/container.xml');
+    if (!containerFile) throw new Error('Este EPUB parece estar danificado.');
+    const xml = (s) => new DOMParser().parseFromString(s, 'application/xml');
+    const container = xml(await containerFile.async('string'));
+    const opfPath = container.getElementsByTagNameNS('*', 'rootfile')[0]?.getAttribute('full-path');
+    if (!opfPath || !zip.file(opfPath)) throw new Error('Este EPUB parece estar danificado.');
+    const opf = xml(await zip.file(opfPath).async('string'));
+    const base = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
+    const manifest = {};
+    for (const it of opf.getElementsByTagNameNS('*', 'item')) manifest[it.getAttribute('id')] = it.getAttribute('href');
+    const spine = [...opf.getElementsByTagNameNS('*', 'itemref')].map(r => manifest[r.getAttribute('idref')]).filter(Boolean);
+    const parts = [];
+    for (let i = 0; i < spine.length; i++) {
+      const path = resolvePath(base, decodeURIComponent(spine[i].split('#')[0]));
+      const f = zip.file(path);
+      if (f) parts.push(htmlToText(await f.async('string')));
+      onProgress((i + 1) / spine.length);
+    }
+    return cleanText(parts.join('\n\n'));
+  }
+
+  async function addFiles(files) {
+    const p = cur();
+    const st = $('refStatus'), prog = $('refProgress');
+    const setSt = (m, k) => { if (st) { st.textContent = m; st.className = 'status' + (k ? ' ' + k : ''); } };
+    const bar = (f) => { if (prog) { prog.hidden = f == null; prog.firstChild.style.width = Math.round((f || 0) * 100) + '%'; } };
+    let added = 0;
+    for (const file of files) {
+      const name = file.name;
+      const ext = (name.split('.').pop() || '').toLowerCase();
+      setSt(`Lendo "${name}"…`); bar(0);
+      try {
+        let text;
+        if (ext === 'pdf' || file.type === 'application/pdf') text = await extractPdf(file, bar);
+        else if (ext === 'epub' || file.type === 'application/epub+zip') text = await extractEpub(file, bar);
+        else if (ext === 'txt' || ext === 'md' || file.type.startsWith('text/')) text = cleanText(await file.text());
+        else throw new Error('formato não suportado (use PDF, EPUB ou TXT)');
+        if (text.length < 200) throw new Error('quase não tem texto. Se for um PDF escaneado (foto das páginas), ele não tem texto para ler');
+        const r = { id: uid(), projectId: p.id, name, type: ext || 'txt', text, chars: text.length, enabled: true, note: '', addedAt: Date.now() };
+        await db.put('refs', r);
+        (refsCache[p.id] = refsCache[p.id] || []).push(r);
+        added++;
+      } catch (e) {
+        bar(null);
+        setSt(`Não consegui ler "${name}": ${e.message}.`, 'err');
+        if (view.tab === 'referencias' && currentId === p.id) { renderTab(); $('refStatus').textContent = `Não consegui ler "${name}": ${e.message}.`; $('refStatus').className = 'status err'; }
+        return;
+      }
+    }
+    if (currentId === p.id) {
+      renderTab();
+      const s2 = $('refStatus');
+      if (s2) { s2.textContent = added === 1 ? 'Arquivo adicionado.' : `${added} arquivos adicionados.`; s2.className = 'status ok'; }
+    }
+  }
+
+  // ---------- escolhe os trechos mais relevantes ----------
+  const STOP = new Set(('para pela pelo pelos pelas como mais mas porque quando onde quem qual quais isso isto aquilo esse essa este esta ' +
+    'eles elas dele dela deles delas nele nela seus suas meus minhas teus tuas nosso nossa sobre entre depois antes ainda ' +
+    'muito muita muitos muitas pouco tudo nada cada outro outra outros outras mesmo mesma sempre nunca agora entao também tambem ' +
+    'apenas sera seria estava estavam estou esta estao foram fosse tinha tinham tenho temos fazer feito pode podia ser ter ' +
+    'capitulo historia personagem personagens with that this from have they their there what which would about').split(' '));
+
+  function terms(s) {
+    return (s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[a-z0-9]{4,}/g) || []).filter(w => !STOP.has(w));
+  }
+
+  function chunk(text, size = 1500) {
+    const out = []; let buf = '';
+    for (const para of text.split(/\n\s*\n/)) {
+      if (buf && buf.length + para.length > size) { out.push(buf); buf = ''; }
+      buf += (buf ? '\n\n' : '') + para;
+      while (buf.length > size * 2) { out.push(buf.slice(0, size)); buf = buf.slice(size); }
+    }
+    if (buf.trim()) out.push(buf);
+    return out;
+  }
+
+  function pickReferences(p, query) {
+    const refs = (refsCache[p.id] || []).filter(r => r.enabled !== false);
+    if (!refs.length) return '';
+    const budget = Number(p.refBudget) || 20000;
+    const header = (r) => `[Arquivo: ${r.name}${r.note ? ' — como usar: ' + r.note : ''}]`;
+
+    const total = refs.reduce((n, r) => n + r.text.length, 0);
+    if (total <= budget) return refs.map(r => `${header(r)}\n${r.text}`).join('\n\n');
+
+    const chunks = [];
+    refs.forEach((r, ri) => chunk(r.text).forEach((t, ci) => chunks.push({ r, ri, ci, t, terms: new Set(terms(t)) })));
+    const df = {};
+    chunks.forEach(c => c.terms.forEach(w => { df[w] = (df[w] || 0) + 1; }));
+    const q = {};
+    terms(query).forEach(w => { q[w] = (q[w] || 0) + 1; });
+    const N = chunks.length;
+    chunks.forEach(c => {
+      let s = 0;
+      for (const [w, n] of Object.entries(q)) if (c.terms.has(w)) s += Math.min(n, 3) * Math.log(1 + N / df[w]);
+      c.score = s + (c.ci === 0 ? 0.5 : 0); // o começo de cada arquivo costuma apresentar o universo
+    });
+    const chosen = []; let used = 0;
+    for (const c of chunks.slice().sort((a, b) => b.score - a.score)) {
+      if (used + c.t.length > budget) continue;
+      chosen.push(c); used += c.t.length;
+      if (used > budget * 0.95) break;
+    }
+    chosen.sort((a, b) => a.ri - b.ri || a.ci - b.ci);
+    let out = '', lastR = null;
+    for (const c of chosen) {
+      if (c.r !== lastR) { out += (out ? '\n\n' : '') + header(c.r) + '\n'; lastR = c.r; }
+      else out += '\n[…]\n';
+      out += c.t;
+    }
+    return out;
+  }
+
+  // =====================================================================
+  // Montagem dos pedidos
+  // =====================================================================
+  function bible(p) {
     return [
-      `TÍTULO: ${s.title || '(sem título)'}`,
-      `FANDOM/UNIVERSO: ${s.fandom || 'original'}`,
-      `NARRAÇÃO: ${s.pov}`,
-      `INTENSIDADE: ${HEAT[s.heat]}`,
-      `TOM E ESTILO: ${s.tone || 'livre'}`,
-      `PERSONAGENS (todos adultos, 18+):\n${s.characters || '(a definir)'}`,
-      `IDEIA/ENREDO:\n${s.premise || '(livre)'}`,
-      s.notes ? `REGRAS E LIMITES DO AUTOR:\n${s.notes}` : ''
+      `TÍTULO: ${p.title || '(sem título)'}`,
+      `FANDOM/UNIVERSO: ${p.fandom || 'original'}`,
+      `NARRAÇÃO: ${p.pov}`,
+      `INTENSIDADE: ${HEAT[p.heat]}`,
+      `TOM E ESTILO: ${p.tone || 'livre'}`,
+      `PERSONAGENS (todos adultos, 18+):\n${p.characters || '(a definir)'}`,
+      `IDEIA/ENREDO:\n${p.premise || '(livre)'}`,
+      p.notes ? `REGRAS E LIMITES DO AUTOR:\n${p.notes}` : ''
     ].filter(Boolean).join('\n\n');
   }
 
-  function previousText(s, uptoIndex) {
-    const MAX = 24000;
+  function previousText(p, upto, max) {
     let txt = '';
-    for (let i = uptoIndex - 1; i >= 0; i--) {
-      const c = s.chapters[i];
+    for (let i = upto - 1; i >= 0; i--) {
+      const c = p.chapters[i];
       const block = `### ${c.title || 'Capítulo ' + (i + 1)}\n${c.text}\n\n`;
-      if (txt.length + block.length > MAX) {
-        txt = '[…capítulos anteriores resumidos por tamanho…]\n\n' + block.slice(-(MAX - txt.length)) + txt;
+      if (txt.length + block.length > max) {
+        const room = max - txt.length;
+        if (room > 500) txt = '[…início do capítulo omitido…]\n' + block.slice(-room) + txt;
         break;
       }
       txt = block + txt;
@@ -507,25 +1135,45 @@ Devolva apenas o texto da história, sem comentários, avisos ou explicações.`
     return txt;
   }
 
-  // ---------- chamada à IA (streaming) ----------
+  function buildContext(p, upto, extraQuery) {
+    const parts = [bible(p)];
+    const hasSummary = p.useSummary !== false && p.summary.trim();
+    if (hasSummary) parts.push(`RESUMO DA HISTÓRIA ATÉ AGORA (memória):\n${p.summary}`);
+    const lastTail = upto > 0 ? p.chapters[upto - 1].text.slice(-2500) : '';
+    const refs = pickReferences(p, [p.characters, p.premise, p.fandom, p.tone, lastTail, extraQuery].join('\n'));
+    if (refs) parts.push(`MATERIAL DE REFERÊNCIA enviado pelo autor (apoio; não copie trechos literalmente):\n${refs}`);
+    const prev = previousText(p, upto, hasSummary ? 16000 : 24000);
+    if (prev) parts.push(`CAPÍTULOS ANTERIORES (os mais recentes):\n${prev}`);
+    return parts.join('\n\n');
+  }
+
+  // =====================================================================
+  // Chamada à IA (streaming)
+  // =====================================================================
   async function callAI(userPrompt, onText, signal) {
-    if (!settings.key || !settings.model) throw new Error('Configure a chave e o modelo em ⚙ Configurar IA.');
+    if (!settings.key || !settings.model) throw new Error('Configure a chave e o modelo em ⚙ IA.');
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + settings.key };
     if (/openrouter\.ai/.test(settings.endpoint)) {
       headers['HTTP-Referer'] = location.origin;
       headers['X-Title'] = 'Escritor de Fanfics';
     }
-    const res = await fetch(settings.endpoint, {
-      method: 'POST', headers, signal,
-      body: JSON.stringify({
-        model: settings.model, stream: true,
-        temperature: Number(settings.temperature), max_tokens: Number(settings.maxTokens),
-        messages: [
-          { role: 'system', content: settings.system || DEFAULT_SYSTEM },
-          { role: 'user', content: userPrompt }
-        ]
-      })
-    });
+    let res;
+    try {
+      res = await fetch(settings.endpoint, {
+        method: 'POST', headers, signal,
+        body: JSON.stringify({
+          model: settings.model, stream: true,
+          temperature: Number(settings.temperature), max_tokens: Number(settings.maxTokens),
+          messages: [
+            { role: 'system', content: settings.system || DEFAULT_SYSTEM },
+            { role: 'user', content: userPrompt }
+          ]
+        })
+      });
+    } catch (e) {
+      if (e.name === 'AbortError') throw e;
+      throw new Error('Não consegui falar com a IA. Confira a internet e o endereço da API.');
+    }
     if (!res.ok) {
       let msg = await res.text();
       try { const j = JSON.parse(msg); msg = j.error?.message || msg; } catch {}
@@ -551,84 +1199,103 @@ Devolva apenas o texto da história, sem comentários, avisos ou explicações.`
         if (tok) { full += tok; onText && onText(full); }
       }
     }
+    if (!full.trim()) throw new Error('A IA não devolveu texto. Tente de novo ou troque de modelo.');
     return full.trim();
   }
 
   function setStatus(msg, kind) {
-    const el = $('globalStatus');
-    el.textContent = msg || '';
-    el.className = 'status' + (kind ? ' ' + kind : '');
+    const s = $('globalStatus');
+    s.textContent = msg || '';
+    s.className = 'status' + (kind ? ' ' + kind : '');
   }
 
-  function setBusy(ctrl) {
-    busy = ctrl;
-    $('writeNextBtn').disabled = !!ctrl;
-    $('stopBtn').hidden = !ctrl;
-    document.querySelectorAll('#chapters button').forEach(b => b.disabled = !!ctrl);
+  function startBusy(kind, chapterId) {
+    busy = new AbortController();
+    busy.kind = kind; busy.chapterId = chapterId;
+    $('writeNextBtn').disabled = true;
+    $('stopBtn').hidden = false;
+    return busy;
   }
-
+  function stopBusy() {
+    busy = null;
+    $('writeNextBtn').disabled = false;
+    $('stopBtn').hidden = true;
+  }
   $('stopBtn').addEventListener('click', () => busy && busy.abort());
 
-  function checkReady() {
-    const s = cur();
-    if (!s.adults) {
-      $('ideaBox').open = true; $('f-adults').focus();
-      setStatus('Confirme que todos os personagens são adultos (18+).', 'err');
+  function checkReady(p) {
+    if (!p.adults) {
+      view.tab = 'ideia'; renderTab();
+      $('f-adults').focus();
+      toast('Confirme que todos os personagens são adultos (18+).');
       return false;
     }
     if (!settings.key || !settings.model) { openSettings(); return false; }
     return true;
   }
 
-  // ---------- escrever próximo capítulo ----------
+  // =====================================================================
+  // Escrever próximo capítulo
+  // =====================================================================
   $('writeNextBtn').addEventListener('click', async () => {
-    if (busy || !checkReady()) return;
-    const s = cur();
-    const n = s.chapters.length + 1;
+    const p = cur();
+    if (busy || !checkReady(p)) return;
+    const n = p.chapters.length + 1;
     const dir = $('nextDirection').value.trim();
-    const prev = previousText(s, s.chapters.length);
-
-    const prompt = `${bible(s)}\n\n` +
-      (prev ? `CAPÍTULOS ANTERIORES:\n${prev}\n` : '') +
+    const prompt = `${buildContext(p, p.chapters.length, dir)}\n\n` +
       `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde parou') +
-      `, com cerca de ${s.length} palavras.` +
+      `, com cerca de ${p.length} palavras.` +
       (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') +
       `\nNão escreva o título do capítulo; comece direto no texto.`;
 
     const ch = { id: uid(), title: `Capítulo ${n}`, text: '' };
-    s.chapters.push(ch);
-    $('ideaBox').open = false;
-    renderChapters();
-    const ta = document.querySelector(`[data-id="${ch.id}"] textarea`);
-    ta.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    const ctrl = new AbortController();
-    setBusy(ctrl);
+    p.chapters.push(ch);
+    view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
+    startBusy('chapter', ch.id);
+    renderTab(); renderProjects();
     setStatus('Escrevendo…');
     try {
-      const text = await callAI(prompt, (t) => { ta.value = t; ch.text = t; }, ctrl.signal);
+      const text = await callAI(prompt, (t) => { ch.text = t; paintChapter(ch, t); }, busy.signal);
       ch.text = text;
       $('nextDirection').value = '';
-      setStatus(`Capítulo ${n} pronto: ${countWords(text)} palavras. Revise à vontade.`, 'ok');
+      setStatus(`Capítulo ${n} pronto: ${fmtNum(countWords(text))} palavras. Revise à vontade.`, 'ok');
     } catch (e) {
       if (e.name === 'AbortError') setStatus('Parado. O que já foi escrito ficou salvo.');
       else setStatus(e.message, 'err');
-      if (!ch.text.trim()) s.chapters = s.chapters.filter(c => c.id !== ch.id);
+      if (!ch.text.trim()) { p.chapters = p.chapters.filter(c => c.id !== ch.id); if (view.chapterId === ch.id) view.chapterId = null; }
     } finally {
-      setBusy(null); save(true); renderChapters();
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) { renderTab(); renderProjects(); }
     }
   });
 
-  // ---------- pedir ajuste ----------
+  // =====================================================================
+  // Pedir ajuste (trecho selecionado ou capítulo inteiro)
+  // =====================================================================
   let reviseTarget = null;
 
-  function openRevise(ch, ta) {
+  function currentSelection(ch) {
+    const body = $('chBody');
+    if (!body) return null;
+    if (body.tagName === 'TEXTAREA') {
+      const { selectionStart: s, selectionEnd: e } = body;
+      return e > s && body.value.slice(s, e).trim() ? { start: s, end: e } : null;
+    }
+    const sel = getSelection();
+    if (!sel || sel.isCollapsed || !body.contains(sel.anchorNode)) return null;
+    const txt = sel.toString().trim();
+    if (!txt) return null;
+    const at = ch.text.indexOf(txt);
+    return at >= 0 ? { start: at, end: at + txt.length } : { notFound: true };
+  }
+
+  function openRevise(ch) {
     if (busy) return;
-    const start = ta.selectionStart, end = ta.selectionEnd;
-    const hasSel = end > start && ta.value.slice(start, end).trim().length > 0;
-    reviseTarget = { ch, start: hasSel ? start : 0, end: hasSel ? end : ch.text.length, partial: hasSel };
-    $('reviseScope').textContent = hasSel
-      ? `Só o trecho selecionado (${countWords(ta.value.slice(start, end))} palavras) será reescrito.`
+    const sel = currentSelection(ch);
+    if (sel && sel.notFound) { toast('Selecione dentro de um parágrafo, ou use o modo Editar.'); return; }
+    reviseTarget = { ch, start: sel ? sel.start : 0, end: sel ? sel.end : ch.text.length, partial: !!sel };
+    $('reviseScope').textContent = sel
+      ? `Só o trecho selecionado (${fmtNum(countWords(ch.text.slice(sel.start, sel.end)))} palavras) será reescrito.`
       : 'O capítulo inteiro será reescrito. Dica: selecione um trecho antes para mudar só ele.';
     $('reviseText').value = '';
     $('reviseDlg').showModal();
@@ -641,15 +1308,13 @@ Devolva apenas o texto da história, sem comentários, avisos ou explicações.`
     const instr = $('reviseText').value.trim();
     if (!instr || !reviseTarget) { $('reviseText').focus(); return; }
     $('reviseDlg').close();
-    if (!checkReady()) return;
+    const p = cur();
+    if (!checkReady(p)) return;
 
-    const s = cur();
     const { ch, start, end, partial } = reviseTarget;
-    const idx = s.chapters.indexOf(ch);
+    const idx = p.chapters.indexOf(ch);
     const original = ch.text;
-    const prev = previousText(s, idx);
-
-    let prompt = `${bible(s)}\n\n` + (prev ? `CAPÍTULOS ANTERIORES:\n${prev}\n` : '');
+    let prompt = `${buildContext(p, idx, instr)}\n\n`;
     if (partial) {
       prompt += `CAPÍTULO ATUAL (contexto):\n${original}\n\n` +
         `TRECHO A REESCREVER:\n"""\n${original.slice(start, end)}\n"""\n\n` +
@@ -661,26 +1326,28 @@ Devolva apenas o texto da história, sem comentários, avisos ou explicações.`
         `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
     }
 
-    const ta = document.querySelector(`[data-id="${ch.id}"] textarea`);
     const before = original.slice(0, start), after = original.slice(end);
-    const ctrl = new AbortController();
-    setBusy(ctrl);
+    view.chapterId = ch.id;
+    startBusy('revise', ch.id);
+    renderChapters();
     setStatus(partial ? 'Reescrevendo o trecho…' : 'Reescrevendo o capítulo…');
     try {
-      const text = await callAI(prompt, (t) => { ta.value = before + t + after; }, ctrl.signal);
+      const text = await callAI(prompt, (t) => paintChapter(ch, before + t + after), busy.signal);
       ch.prev = original;
       ch.text = before + text + after;
       setStatus('Ajuste feito. Se não gostou, toque em “Desfazer ajuste”.', 'ok');
     } catch (e) {
       ch.text = original;
-      setStatus(e.name === 'AbortError' ? 'Ajuste cancelado; o texto original foi mantido.' : e.message,
-                e.name === 'AbortError' ? '' : 'err');
+      setStatus(e.name === 'AbortError' ? 'Ajuste cancelado; o texto original foi mantido.' : e.message, e.name === 'AbortError' ? '' : 'err');
     } finally {
-      setBusy(null); save(true); renderChapters();
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) renderTab();
     }
   });
 
-  // ---------- configurações ----------
+  // =====================================================================
+  // Configurações
+  // =====================================================================
   function openSettings() {
     $('s-endpoint').value = settings.endpoint;
     $('s-key').value = settings.key;
@@ -701,7 +1368,7 @@ Devolva apenas o texto da história, sem comentários, avisos ou explicações.`
       maxTokens: Number($('s-max').value) || 4096,
       system: $('s-system').value.trim() || DEFAULT_SYSTEM
     };
-    store.set('fanfic.settings', settings);
+    local.set('fanfic.settings', settings);
     $('setupNotice').hidden = !!(settings.key && settings.model);
   }
 
@@ -710,8 +1377,8 @@ Devolva apenas o texto da história, sem comentários, avisos ou explicações.`
   $('resetSystemBtn').addEventListener('click', () => { $('s-system').value = DEFAULT_SYSTEM; });
   $('saveSettingsBtn').addEventListener('click', () => {
     readSettings();
-    const st = $('settingsStatus');
-    st.textContent = 'Salvo neste aparelho.'; st.className = 'status ok';
+    $('settingsStatus').textContent = 'Salvo neste aparelho.';
+    $('settingsStatus').className = 'status ok';
   });
   $('testBtn').addEventListener('click', async () => {
     readSettings();
@@ -725,9 +1392,30 @@ Devolva apenas o texto da história, sem comentários, avisos ou explicações.`
     }
   });
 
-  // ---------- início ----------
-  $('setupNotice').hidden = !!(settings.key && settings.model);
-  renderSelect(); loadForm(); renderChapters();
+  // =====================================================================
+  // Início
+  // =====================================================================
+  async function init() {
+    projects = (await db.all('projects')) || [];
+
+    // traz histórias da versão anterior (salvas no localStorage)
+    const legacy = local.get('fanfic.stories', null);
+    if (Array.isArray(legacy) && legacy.length) {
+      for (const s of legacy) {
+        if (projects.find(p => p.id === s.id)) continue;
+        if (!s.chapters?.length && !s.title && !s.premise) continue;
+        const p = Object.assign(newProject(), s);
+        projects.push(p); await db.put('projects', p);
+      }
+      if (dbOk) local.del('fanfic.stories');
+    }
+
+    if (!projects.length) { const p = newProject(); projects.push(p); saveProject(p, true); }
+    if (!cur()) currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
+    $('setupNotice').hidden = !!(settings.key && settings.model);
+    openProject(currentId);
+  }
+  init();
 })();
 </script>
 </body>

@@ -327,6 +327,9 @@
       <button id="newProjectBtn" class="primary">+ Novo</button>
     </div>
     <ul class="proj-list" id="projList"></ul>
+    <hr>
+    <button id="backupBtn" class="wide">🔄 Levar para outro aparelho</button>
+    <p class="hint">Celular ↔ computador, por arquivo de backup.</p>
   </aside>
   <div id="backdrop"></div>
 
@@ -430,6 +433,30 @@
   <div id="alertZone"></div>
   <div class="bar" id="bar" hidden><div class="bar-inner" id="barInner"></div></div>
 </div>
+
+<!-- Backup: levar para outro aparelho -->
+<dialog id="backupDlg" aria-labelledby="backupTitle">
+  <div class="dlg-head"><h2 id="backupTitle">🔄 Levar para outro aparelho</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <p class="lead">As histórias ficam salvas só neste aparelho. Para abrir em outro (do celular para o computador, por exemplo), faça um backup aqui e abra no outro.</p>
+
+  <h3>1. Neste aparelho</h3>
+  <label class="check" for="backupRefs" style="margin-top:8px">
+    <input type="checkbox" id="backupRefs">
+    <span>Incluir os arquivos de referência (PDF, EPUB)<small class="hint" style="display:block">Deixa o backup maior.</small></span>
+  </label>
+  <div class="row" style="margin-top:12px">
+    <button class="primary" id="backupShare" hidden>📤 Enviar backup</button>
+    <button id="backupSave">⬇ Salvar arquivo de backup</button>
+  </div>
+  <p class="hint">Mande o arquivo para o outro aparelho pelo WhatsApp, Google Drive ou e-mail.</p>
+
+  <h3 style="margin-top:20px">2. No outro aparelho</h3>
+  <p class="hint" style="margin-top:4px">Abra o escritor, toque em 🔄 Levar para outro aparelho e escolha o arquivo. Histórias que já existirem ficam com a versão mais nova.</p>
+  <input type="file" id="backupFile" accept=".json,application/json" hidden>
+  <button class="wide" id="backupOpen" style="margin-top:10px">⬆ Abrir arquivo de backup</button>
+  <div class="status" id="backupStatus" role="status"></div>
+  <p class="hint" style="margin-top:14px">A chave da IA não vai no backup, por segurança. No outro aparelho, conecte a IA em <b>IA</b>.</p>
+</dialog>
 
 <!-- Escrever capítulo -->
 <dialog id="writeDlg" aria-labelledby="writeTitle">
@@ -777,6 +804,97 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('menuBtn').addEventListener('click', () => { $('projects').classList.add('open'); $('backdrop').classList.add('open'); $('newProjectBtn').focus(); });
   $('backdrop').addEventListener('click', closeDrawer);
   addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+  // =====================================================================
+  // Backup: levar as histórias para outro aparelho
+  // =====================================================================
+  $('backupBtn').addEventListener('click', () => {
+    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
+    closeDrawer();
+    flushSaves();
+    $('backupStatus').textContent = '';
+    $('backupShare').hidden = !(navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.json', { type: 'application/json' })] }));
+    $('backupDlg').showModal();
+  });
+
+  async function buildBackup() {
+    const withRefs = $('backupRefs').checked;
+    const refs = [];
+    if (withRefs) for (const p of projects) refs.push(...(await loadRefs(p.id)));
+    const data = { app: 'escritor-de-fanfics', version: 1, exportedAt: Date.now(), projects, refs };
+    const day = new Date().toISOString().slice(0, 10);
+    return new File([JSON.stringify(data)], `fanfics-backup-${day}.json`, { type: 'application/json' });
+  }
+
+  $('backupSave').addEventListener('click', async () => {
+    const file = await buildBackup();
+    const a = el('a', { download: file.name });
+    a.href = URL.createObjectURL(file);
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    $('backupStatus').textContent = `Backup salvo: ${file.name} (${projects.length} projeto(s)). Agora mande o arquivo para o outro aparelho.`;
+    $('backupStatus').className = 'status ok';
+  });
+
+  $('backupShare').addEventListener('click', async () => {
+    const file = await buildBackup();
+    try {
+      await navigator.share({ files: [file], title: 'Backup das fanfics' });
+      $('backupStatus').textContent = 'Backup enviado ✓';
+      $('backupStatus').className = 'status ok';
+    } catch (e) {
+      if (e.name !== 'AbortError') { $('backupStatus').textContent = 'Não deu para enviar. Use "Salvar arquivo de backup".'; $('backupStatus').className = 'status err'; }
+    }
+  });
+
+  $('backupOpen').addEventListener('click', () => $('backupFile').click());
+  $('backupFile').addEventListener('change', async () => {
+    const f = $('backupFile').files[0];
+    $('backupFile').value = '';
+    if (!f) return;
+    const st = $('backupStatus');
+    let data;
+    try { data = JSON.parse(await f.text()); } catch { data = null; }
+    if (!data || data.app !== 'escritor-de-fanfics' || !Array.isArray(data.projects)) {
+      st.textContent = 'Esse arquivo não é um backup do escritor.'; st.className = 'status err'; return;
+    }
+    let added = 0, updated = 0, kept = 0;
+    for (const inc of data.projects) {
+      if (!inc || !inc.id || !Array.isArray(inc.chapters)) continue;
+      const p = Object.assign(newProject(), inc);
+      const at = projects.findIndex(x => x.id === p.id);
+      if (at < 0) { projects.push(p); added++; }
+      else if ((p.updatedAt || 0) > (projects[at].updatedAt || 0)) { projects[at] = p; updated++; }
+      else { kept++; continue; }
+      persist(p);
+    }
+    let refsAdded = 0;
+    for (const r of (Array.isArray(data.refs) ? data.refs : [])) {
+      if (!r || !r.id || !r.projectId || typeof r.text !== 'string') continue;
+      const list = refsCache[r.projectId] || (refsCache[r.projectId] = (await db.refsOf(r.projectId)) || []);
+      if (list.some(x => x.id === r.id)) continue;
+      await db.put('refs', r); list.push(r); refsAdded++;
+    }
+    const parts = [];
+    if (added) parts.push(`${added} novo(s)`);
+    if (updated) parts.push(`${updated} atualizado(s)`);
+    if (kept) parts.push(`${kept} mantido(s), porque a versão deste aparelho era mais nova`);
+    st.textContent = parts.length ? `Pronto: ${parts.join(', ')}.` + (refsAdded ? ` ${refsAdded} arquivo(s) de referência.` : '') : 'Nada novo nesse backup.';
+    st.className = 'status ok';
+    // tira projetos vazios deste aparelho (o "Sem título" que o site cria sozinho)
+    if (added) {
+      const fromBackup = new Set(data.projects.map(x => x && x.id));
+      const empty = projects.filter(x => !fromBackup.has(x.id) && !x.chapters.length && !x.title.trim() && !x.premise.trim() && !x.characters.trim());
+      for (const x of empty) { await db.del('projects', x.id); local.del('fanfic.bak.' + x.id); }
+      projects = projects.filter(x => !empty.includes(x));
+    }
+    renderProjects();
+    if (added || updated) {
+      // abre o projeto mais recente do backup
+      const newest = data.projects.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+      if (newest && projects.find(x => x.id === newest.id)) openProject(newest.id);
+    }
+  });
 
   // =====================================================================
   // Abas

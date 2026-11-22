@@ -55,6 +55,19 @@
     line-height: 1.55;
   }
   [hidden] { display: none !important; }
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .icon {
+    width: 1.15em; height: 1.15em; flex: none; vertical-align: -0.2em;
+    fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  h2 .icon, .lead .icon, .toast .icon, label .heat { margin-inline-end: .45em; }
+  .toast .icon { width: 1.2em; height: 1.2em; }
+  .tabs .icon { margin-inline-end: .35em; }
+  .menu-item .mi-ico .icon { width: 22px; height: 22px; color: var(--accent); }
+  .choice .heat { width: 1.2em; height: 1.2em; color: var(--accent); vertical-align: -0.25em; }
+  .big-ico .icon { width: 56px; height: 56px; color: var(--ok); }
+  .saved { display: inline-flex; align-items: center; gap: 4px; }
+  #menuBtn { display: none; align-items: center; gap: 8px; }
   .lbl-short { display: none; }
   a { color: var(--accent); }
 
@@ -120,7 +133,7 @@
     #currentTitle, header .app-name { display: none; }
     header .logo { width: 28px; height: 28px; }
     header h1 { order: -1; }
-    #menuBtn { display: block; }
+    #menuBtn { display: flex; }
     aside#projects {
       position: fixed; z-index: 30; top: 0; bottom: 0; left: 0;
       width: min(340px, 86vw); transform: translateX(-105%);
@@ -341,33 +354,71 @@
 </style>
 </head>
 <body>
+<!-- Ícones: Lucide (https://lucide.dev), licença ISC -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+<symbol id="i-archive" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1" /> <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" /> <path d="M10 12h4" /></symbol>
+<symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7" /> <path d="M19 12H5" /></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></symbol>
+<symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14" /> <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" /></symbol>
+<symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8" /> <rect width="16" height="12" x="4" y="8" rx="2" /> <path d="M2 14h2" /> <path d="M20 14h2" /> <path d="M15 13v2" /> <path d="M9 13v2" /></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+<symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></symbol>
+<symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></symbol>
+<symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="m9 12 2 2 4-4" /></symbol>
+<symbol id="i-clipboard-paste" viewBox="0 0 24 24"><path d="M15 2H9a1 1 0 0 0-1 1v2c0 .6.4 1 1 1h6c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1Z" /> <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M16 4h2a2 2 0 0 1 2 2v2M11 14h10" /> <path d="m17 10 4 4-4 4" /></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol>
+<symbol id="i-credit-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /> <line x1="2" x2="22" y1="10" y2="10" /></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /> <polyline points="7 10 12 15 17 10" /> <line x1="12" x2="12" y1="15" y2="3" /></symbol>
+<symbol id="i-external-link" viewBox="0 0 24 24"><path d="M15 3h6v6" /> <path d="M10 14 21 3" /> <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></symbol>
+<symbol id="i-flame-kindling" viewBox="0 0 24 24"><path d="M12 2c1 3 2.5 3.5 3.5 4.5A5 5 0 0 1 17 10a5 5 0 1 1-10 0c0-.3 0-.6.1-.9a2 2 0 1 0 3.3-2C8 4.5 11 2 12 2Z" /> <path d="m5 22 14-4" /> <path d="m5 18 14 4" /></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></symbol>
+<symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" x2="20" y1="12" y2="12" /> <line x1="4" x2="20" y1="6" y2="6" /> <line x1="4" x2="20" y1="18" y2="18" /></symbol>
+<symbol id="i-notebook-text" viewBox="0 0 24 24"><path d="M2 6h4" /> <path d="M2 10h4" /> <path d="M2 14h4" /> <path d="M2 18h4" /> <rect width="16" height="20" x="4" y="2" rx="2" /> <path d="M9.5 8h5" /> <path d="M9.5 12H16" /> <path d="M9.5 16H14" /></symbol>
+<symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></symbol>
+<symbol id="i-pen-line" viewBox="0 0 24 24"><path d="M12 20h9" /> <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" /></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol>
+<symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
+<symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
+<symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></symbol>
+<symbol id="i-square" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /></symbol>
+<symbol id="i-undo-2" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5" /> <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /> <polyline points="17 8 12 3 7 8" /> <line x1="12" x2="12" y1="3" y2="15" /></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /></symbol>
+<symbol id="i-wand-sparkles" viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /> <path d="m14 7 3 3" /> <path d="M5 6v4" /> <path d="M19 14v4" /> <path d="M10 2v2" /> <path d="M7 8H3" /> <path d="M21 16h-4" /> <path d="M11 3H9" /></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
+</svg>
 
 <header>
-  <button id="menuBtn" aria-label="Abrir a lista de projetos">☰ <span id="menuTitle"></span></button>
+  <button id="menuBtn" aria-label="Abrir a lista de projetos"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span id="menuTitle"></span></button>
   <h1><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Fanfic Agent</span></h1>
   <div id="currentTitle"></div>
   <div class="user">
     <button id="userBtn" class="avatar" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenu" aria-label="Seu menu: IA, sincronização, backup e app">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.4 0-8 2.2-8 5v1.5c0 .3.2.5.5.5h15c.3 0 .5-.2.5-.5V19c0-2.8-3.6-5-8-5Z"/></svg>
+      <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
       <span class="badge" id="userBadge" hidden></span>
     </button>
     <div id="userMenu" class="menu" role="menu" aria-label="Seu menu" hidden>
       <button role="menuitem" id="settingsBtn" class="menu-item">
-        <span class="mi-ico" aria-hidden="true">🤖</span>
+        <span class="mi-ico"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg></span>
         <span class="mi-text"><span class="mi-label">IA</span><span class="mi-sub" id="aiLine">Não conectada</span></span>
         <span class="dot off" id="aiDot" aria-hidden="true"></span>
       </button>
       <button role="menuitem" id="syncBtn" class="menu-item">
-        <span class="mi-ico" aria-hidden="true">☁️</span>
+        <span class="mi-ico"><svg class="icon" aria-hidden="true"><use href="#i-cloud"/></svg></span>
         <span class="mi-text"><span class="mi-label" id="syncLabel">Sincronizar com Dropbox</span><span class="mi-sub" id="syncLine">Mesmas histórias no celular e no computador</span></span>
         <span class="dot" id="syncDot" aria-hidden="true" hidden></span>
       </button>
       <button role="menuitem" id="backupBtn" class="menu-item">
-        <span class="mi-ico" aria-hidden="true">🔄</span>
+        <span class="mi-ico"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg></span>
         <span class="mi-text"><span class="mi-label">Backup em arquivo</span><span class="mi-sub">Salvar ou abrir um arquivo</span></span>
       </button>
       <button role="menuitem" id="installBtn" class="menu-item" hidden>
-        <span class="mi-ico" aria-hidden="true">📲</span>
+        <span class="mi-ico"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></span>
         <span class="mi-text"><span class="mi-label">Baixar app</span><span class="mi-sub">Instalar no celular ou no computador</span></span>
       </button>
     </div>
@@ -391,10 +442,10 @@
       </div>
 
       <nav class="tabs" role="tablist" id="tabs">
-        <button role="tab" data-tab="ideia"><span class="ico">💡 </span>Ideia</button>
-        <button role="tab" data-tab="capitulos"><span class="ico">📖 </span>Capítulos <span class="count" id="countCh"></span></button>
-        <button role="tab" data-tab="resumo"><span class="ico">📝 </span>Resumo</button>
-        <button role="tab" data-tab="arquivos"><span class="ico">📎 </span>Arquivos <span class="count" id="countRefs"></span></button>
+        <button role="tab" data-tab="ideia"><svg class="icon ico" aria-hidden="true"><use href="#i-lightbulb"/></svg>Ideia</button>
+        <button role="tab" data-tab="capitulos"><svg class="icon ico" aria-hidden="true"><use href="#i-book-open"/></svg>Capítulos <span class="count" id="countCh"></span></button>
+        <button role="tab" data-tab="resumo"><svg class="icon ico" aria-hidden="true"><use href="#i-notebook-text"/></svg>Resumo</button>
+        <button role="tab" data-tab="arquivos"><svg class="icon ico" aria-hidden="true"><use href="#i-paperclip"/></svg>Arquivos <span class="count" id="countRefs"></span></button>
       </nav>
 
       <!-- ===== Ideia ===== -->
@@ -417,9 +468,9 @@
 
           <label id="heatLabel">Intensidade</label>
           <div class="choice" role="radiogroup" aria-labelledby="heatLabel">
-            <label><input type="radio" name="heat" value="leve"><span>🌸 Leve<small>Romance, tensão e beijos.</small></span></label>
-            <label><input type="radio" name="heat" value="picante"><span>🔥 Picante<small>Sensual, cenas quentes com sugestão.</small></span></label>
-            <label><input type="radio" name="heat" value="intenso"><span>🌶️ Intenso (+18)<small>Conteúdo adulto explícito.</small></span></label>
+            <label><input type="radio" name="heat" value="leve"><span><svg class="icon heat" aria-hidden="true"><use href="#i-heart"/></svg>Leve<small>Romance, tensão e beijos.</small></span></label>
+            <label><input type="radio" name="heat" value="picante"><span><svg class="icon heat" aria-hidden="true"><use href="#i-flame"/></svg>Picante<small>Sensual, cenas quentes com sugestão.</small></span></label>
+            <label><input type="radio" name="heat" value="intenso"><span><svg class="icon heat" aria-hidden="true"><use href="#i-flame-kindling"/></svg>Intenso (+18)<small>Conteúdo adulto explícito.</small></span></label>
           </div>
 
           <details style="margin-top:16px">
@@ -492,7 +543,7 @@
 
 <!-- Backup: levar para outro aparelho -->
 <dialog id="backupDlg" aria-labelledby="backupTitle">
-  <div class="dlg-head"><h2 id="backupTitle">🔄 Levar para outro aparelho</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <div class="dlg-head"><h2 id="backupTitle"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg>Levar para outro aparelho</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <p class="lead">As histórias ficam salvas só neste aparelho. Para abrir em outro (do celular para o computador, por exemplo), faça um backup aqui e abra no outro.</p>
 
   <h3>1. Neste aparelho</h3>
@@ -501,22 +552,22 @@
     <span>Incluir os arquivos de referência (PDF, EPUB)<small class="hint" style="display:block">Deixa o backup maior.</small></span>
   </label>
   <div class="row" style="margin-top:12px">
-    <button class="primary" id="backupShare" hidden>📤 Enviar backup</button>
-    <button id="backupSave">⬇ Salvar arquivo de backup</button>
+    <button class="primary" id="backupShare" hidden><svg class="icon" aria-hidden="true"><use href="#i-share-2"/></svg>Enviar backup</button>
+    <button id="backupSave"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Salvar arquivo de backup</button>
   </div>
   <p class="hint">Mande o arquivo para o outro aparelho pelo WhatsApp, Google Drive ou e-mail.</p>
 
   <h3 style="margin-top:20px">2. No outro aparelho</h3>
-  <p class="hint" style="margin-top:4px">Abra o escritor, toque em 🔄 Levar para outro aparelho e escolha o arquivo. Histórias que já existirem ficam com a versão mais nova.</p>
+  <p class="hint" style="margin-top:4px">Abra o Fanfic Agent, toque no avatar → Backup em arquivo e escolha o arquivo. Histórias que já existirem ficam com a versão mais nova.</p>
   <input type="file" id="backupFile" accept=".json,application/json" hidden>
-  <button class="wide" id="backupOpen" style="margin-top:10px">⬆ Abrir arquivo de backup</button>
+  <button class="wide" id="backupOpen" style="margin-top:10px"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Abrir arquivo de backup</button>
   <div class="status" id="backupStatus" role="status"></div>
   <p class="hint" style="margin-top:14px">A chave da IA não vai no backup, por segurança. No outro aparelho, conecte a IA pelo seu menu (o avatar, no canto de cima).</p>
 </dialog>
 
 <!-- Escrever capítulo -->
 <dialog id="writeDlg" aria-labelledby="writeTitle">
-  <div class="dlg-head"><h2 id="writeTitle">Capítulo</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <div class="dlg-head"><h2 id="writeTitle">Capítulo</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <label for="writeDir" style="margin-top:8px">O que deve acontecer? <span class="muted">(opcional)</span></label>
   <textarea id="writeDir" placeholder="Deixe em branco para a IA seguir a história."></textarea>
   <div class="chips" id="writeChips"></div>
@@ -527,13 +578,13 @@
     <option value="2500">Longo (~2.500 palavras)</option>
   </select>
   <div class="row" style="margin-top:18px">
-    <button class="primary wide" id="writeGo">✍️ Escrever</button>
+    <button class="primary wide" id="writeGo"><svg class="icon" aria-hidden="true"><use href="#i-pen-line"/></svg>Escrever</button>
   </div>
 </dialog>
 
 <!-- Ajustar -->
 <dialog id="adjustDlg" aria-labelledby="adjustTitle">
-  <div class="dlg-head"><h2 id="adjustTitle">Ajustar</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <div class="dlg-head"><h2 id="adjustTitle">Ajustar</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <p class="lead" id="adjustScope"></p>
   <label for="adjustText" style="margin-top:0">O que mudar?</label>
   <textarea id="adjustText" placeholder="Ex.: ele fica mais ciumento; a conversa termina em briga."></textarea>
@@ -555,7 +606,7 @@
 
 <!-- Instalar no iPhone -->
 <dialog id="installDlg" aria-labelledby="installTitle">
-  <div class="dlg-head"><h2 id="installTitle">📲 Baixar o app</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
+  <div class="dlg-head"><h2 id="installTitle"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Baixar o app</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <p class="lead">O app <b>Fanfic Agent</b> fica na tela inicial com ícone próprio e abre em tela cheia. Não precisa da Play Store, e suas histórias continuam as mesmas.</p>
   <div id="installAndroid">
     <ol class="howto">
@@ -634,16 +685,32 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const fmtNum = (n) => n.toLocaleString('pt-BR');
   const fmtDate = (t) => new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+  // ícones Lucide (ISC), embutidos no sprite do topo da página
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function svgIcon(name, cls) {
+    const svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('class', 'icon' + (cls ? ' ' + cls : ''));
+    svg.setAttribute('aria-hidden', 'true');
+    const use = document.createElementNS(SVGNS, 'use');
+    use.setAttribute('href', '#i-' + name);
+    svg.append(use);
+    return svg;
+  }
+
+  // icon: ícone antes do texto; iconEnd: ícone depois
   function el(tag, props = {}, ...children) {
     const e = document.createElement(tag);
+    if (props.icon) e.append(svgIcon(props.icon));
     for (const [k, v] of Object.entries(props)) {
       if (k === 'class') e.className = v;
-      else if (k === 'text') e.textContent = v;
+      else if (k === 'icon' || k === 'iconEnd') continue;
+      else if (k === 'text') e.append(String(v));
       else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
       else if (v === true) e.setAttribute(k, '');
       else if (v !== false && v != null) e.setAttribute(k, v);
     }
     for (const c of children.flat()) if (c != null && c !== false) e.append(c);
+    if (props.iconEnd) e.append(svgIcon(props.iconEnd));
     return e;
   }
 
@@ -656,7 +723,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let toastTimer;
   function toast(msg, { action, onAction, ms = 2800 } = {}) {
     document.querySelectorAll('.toast').forEach(t => t.remove());
-    const t = el('div', { class: 'toast', role: 'status' }, el('span', { text: msg }));
+    const ok = msg.includes('✓');
+    const t = el('div', { class: 'toast', role: 'status' }, ok ? svgIcon('circle-check') : null, el('span', { text: msg.replace(/\s*✓\s*/, ok && /✓\s*\S/.test(msg) ? '. ' : '').trim() }));
     if (action) t.append(el('button', { text: action, onclick: () => { t.remove(); onAction(); } }));
     document.body.append(t);
     clearTimeout(toastTimer);
@@ -689,8 +757,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const box = el('div', { class: 'alert ' + kind, role: kind === 'err' ? 'alert' : 'status' },
       el('div', { class: 'msg' }, el('div', { text: msg }),
         actions.length ? el('div', { class: 'actions' }, actions.map(a =>
-          el('button', { class: a.primary ? 'primary' : '', text: a.label, onclick: () => { clearAlert(); a.onClick(); } }))) : null),
-      el('button', { class: 'close', 'aria-label': 'Fechar aviso', text: '✕', onclick: clearAlert }));
+          el('button', { class: a.primary ? 'primary' : '', icon: a.icon, text: a.label, onclick: () => { clearAlert(); a.onClick(); } }))) : null),
+      el('button', { class: 'close', 'aria-label': 'Fechar aviso', icon: 'x', onclick: clearAlert }));
     zone.append(box);
   }
   function clearAlert() { $('alertZone').innerHTML = ''; }
@@ -1234,8 +1302,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('syncBtn').addEventListener('click', () => { closeDrawer(); openSync(); });
   function openSync() { renderSync(); if (!$('syncDlg').open) $('syncDlg').showModal(); }
 
-  function syncHead(title) {
-    return el('div', { class: 'dlg-head' }, el('h2', { id: 'syncTitle', text: title }), el('button', { class: 'close', 'aria-label': 'Fechar', text: '✕', onclick: () => $('syncDlg').close() }));
+  function syncHead(title, ic) {
+    return el('div', { class: 'dlg-head' }, el('h2', { id: 'syncTitle', icon: ic, text: title }), el('button', { class: 'close', 'aria-label': 'Fechar', icon: 'x', onclick: () => $('syncDlg').close() }));
   }
 
   function renderSync() {
@@ -1247,19 +1315,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!sync.appKey) {
       const key = el('input', { type: 'text', id: 'syncAppKey', autocomplete: 'off', spellcheck: 'false', placeholder: 'Ex.: a1b2c3d4e5f6g7h' });
       const uri = el('input', { type: 'text', readonly: true, value: redirectUri(), 'aria-label': 'Endereço para colar no Dropbox' });
-      b.append(syncHead('☁️ Sincronizar com Dropbox'),
+      b.append(syncHead('Sincronizar com Dropbox', 'cloud'),
         el('p', { class: 'lead', text: 'Configuração de uma vez só (uns 5 minutos, de preferência no computador). Depois é só conectar cada aparelho.' }),
         el('ol', { class: 'howto' },
           el('li', {}, 'Abra ', el('a', { href: 'https://www.dropbox.com/developers/apps', target: '_blank', rel: 'noopener', text: 'dropbox.com/developers/apps' }), ' e entre na sua conta (dá para criar uma grátis).'),
           el('li', {}, 'Toque em ', el('b', { text: 'Create app' }), ', escolha ', el('b', { text: 'Scoped access' }), ' e ', el('b', { text: 'App folder' }), '. Dê um nome qualquer (ex.: fanfics-seunome) e crie.'),
           el('li', {}, 'Na aba ', el('b', { text: 'Permissions' }), ', marque ', el('b', { text: 'files.content.write' }), ' e ', el('b', { text: 'files.content.read' }), ' e toque em ', el('b', { text: 'Submit' }), '.'),
           el('li', {}, 'Na aba ', el('b', { text: 'Settings' }), ', em ', el('b', { text: 'Redirect URIs' }), ', cole o endereço abaixo e toque em ', el('b', { text: 'Add' }), '.')),
-        el('div', { class: 'row', style: 'flex-wrap:nowrap' }, uri, el('button', { text: '📋 Copiar', onclick: () => copyText(redirectUri(), 'Endereço copiado') })),
+        el('div', { class: 'row', style: 'flex-wrap:nowrap' }, uri, el('button', { icon: 'copy', text: 'Copiar', onclick: () => copyText(redirectUri(), 'Endereço copiado') })),
         el('ol', { class: 'howto', start: '5' },
           el('li', {}, 'Ainda em ', el('b', { text: 'Settings' }), ', copie o ', el('b', { text: 'App key' }), ' e cole aqui:')),
         el('label', { for: 'syncAppKey', style: 'margin-top:0', text: 'App key do Dropbox' }), key, status,
         el('button', {
-          class: 'primary wide', style: 'margin-top:14px', text: 'Salvar e conectar o Dropbox →', onclick: () => {
+          class: 'primary wide', style: 'margin-top:14px', iconEnd: 'arrow-right', text: 'Salvar e conectar o Dropbox', onclick: () => {
             const v = key.value.trim();
             if (!/^[a-z0-9]{8,32}$/i.test(v)) { syncStatusMsg('Isso não parece uma App key (são letras e números, sem espaços).', 'err'); key.focus(); return; }
             sync.appKey = v; saveSync(); startDropboxLogin();
@@ -1270,10 +1338,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
     // 2. conectar este aparelho
     if (!sync.refresh) {
-      b.append(syncHead('☁️ Conectar o Dropbox'),
+      b.append(syncHead('Conectar o Dropbox', 'cloud'),
         el('p', { class: 'lead', text: 'Você vai para o Dropbox, autoriza o escritor e volta para cá. É uma vez em cada aparelho.' }),
         status,
-        el('button', { class: 'primary wide', text: 'Conectar o Dropbox →', onclick: startDropboxLogin }),
+        el('button', { class: 'primary wide', iconEnd: 'arrow-right', text: 'Conectar o Dropbox', onclick: startDropboxLogin }),
         el('details', { style: 'margin-top:14px' }, el('summary', { text: 'Trocar a App key' }),
           el('button', { class: 'link', text: 'Apagar a App key deste aparelho', onclick: () => { sync.appKey = ''; saveSync(); renderSync(); } })));
       return;
@@ -1281,20 +1349,20 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
     // 3. senha de sincronização
     if (!sync.key) {
-      b.append(syncHead('🔒 Senha de sincronização'), el('p', { class: 'lead', text: 'Conferindo o seu Dropbox…' }), status);
+      b.append(syncHead('Senha de sincronização', 'lock'), el('p', { class: 'lead', text: 'Conferindo o seu Dropbox…' }), status);
       dbxMeta(SYNC_FILES.projects).then(meta => renderPassword(meta)).catch(e => { b.querySelector('.lead').textContent = ''; syncStatusMsg(e.message, 'err'); });
       return;
     }
 
     // 4. tudo pronto
-    b.append(syncHead('☁️ Sincronização'),
-      el('p', { class: 'status ok', style: 'margin-top:0', text: '● Conectado ao Dropbox, com criptografia' }),
+    b.append(syncHead('Sincronização', 'cloud'),
+      el('p', { class: 'status ok', style: 'margin-top:0' }, el('span', { class: 'dot on' }), 'Conectado ao Dropbox, com criptografia'),
       el('p', { class: 'lead', text: 'As histórias são sincronizadas sozinhas: ao abrir o app, ao voltar para ele e alguns segundos depois de cada mudança. Se o mesmo projeto mudar em dois aparelhos, fica a versão mais nova.' }),
       el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Última sincronização' }),
           el('div', { class: 'v', text: syncing ? 'Sincronizando…' : sync.lastSync ? new Date(sync.lastSync).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Ainda não' }),
           sync.lastError ? el('div', { class: 'status err', style: 'margin-top:4px', text: sync.lastError }) : null),
-        el('button', { class: 'primary', text: '⟳ Sincronizar agora', disabled: syncing, onclick: () => syncNow() })),
+        el('button', { class: 'primary', icon: 'refresh-cw', text: 'Sincronizar agora', disabled: syncing, onclick: () => syncNow() })),
       status,
       el('details', { style: 'margin-top:16px' }, el('summary', { text: 'Mais opções' }),
         el('p', { class: 'hint', text: 'Esqueceu a senha? Crie uma nova: a cópia da nuvem é substituída pelas histórias deste aparelho. Nos outros aparelhos, digite a senha nova.' }),
@@ -1361,7 +1429,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       } catch (e) { go.disabled = false; syncStatusMsg(e.message, 'err'); }
     });
 
-    b.append(syncHead('🔒 Senha de sincronização'),
+    b.append(syncHead('Senha de sincronização', 'lock'),
       el('p', { class: 'lead', text: creating
         ? 'Crie uma senha para embaralhar as histórias antes de irem para o Dropbox. Nem o Dropbox consegue ler. Você vai digitar a mesma senha nos outros aparelhos.'
         : 'Já existem histórias no seu Dropbox. Digite a senha de sincronização que você criou no outro aparelho.' }),
@@ -1408,7 +1476,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const file = await buildBackup();
     try {
       await navigator.share({ files: [file], title: 'Backup das fanfics' });
-      $('backupStatus').textContent = 'Backup enviado ✓';
+      $('backupStatus').textContent = 'Backup enviado.';
       $('backupStatus').className = 'status ok';
     } catch (e) {
       if (e.name !== 'AbortError') { $('backupStatus').textContent = 'Não deu para enviar. Use "Salvar arquivo de backup".'; $('backupStatus').className = 'status err'; }
@@ -1513,8 +1581,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const box = $('ideaCta');
     box.innerHTML = '';
     box.append(p.chapters.length
-      ? el('button', { class: 'primary wide', text: `Ver os capítulos (${p.chapters.length}) →`, onclick: () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); scrollTo(0, 0); } })
-      : el('button', { class: 'primary wide', text: '✍️ Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog }));
+      ? el('button', { class: 'primary wide', iconEnd: 'arrow-right', text: `Ver os capítulos (${p.chapters.length})`, onclick: () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); scrollTo(0, 0); } })
+      : el('button', { class: 'primary wide', icon: 'pen-line', text: 'Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog }));
     renderAiDot();
   }
 
@@ -1534,7 +1602,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       bar.hidden = false;
       inner.append(el('div', { class: 'spin', 'aria-hidden': 'true' }),
         el('div', { class: 'bar-status', id: 'barStatus', text: busyText() }),
-        el('button', { class: 'danger', text: '■ Parar', onclick: () => busy && busy.ctrl.abort() }));
+        el('button', { class: 'danger', icon: 'square', text: 'Parar', onclick: () => busy && busy.ctrl.abort() }));
       return;
     }
     const editing = view.tab === 'capitulos' && view.mode === 'editar' && cur().chapters.find(c => c.id === view.chapterId);
@@ -1543,19 +1611,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const saveNow = () => { flushSaves(); saveProject(p, true); view.mode = 'ler'; renderChapters(); };
       bar.hidden = false;
       inner.append(el('button', {
-        class: 'primary', style: 'flex:1', text: '✅ Salvar', onclick: () => {
+        class: 'primary', style: 'flex:1', icon: 'check', text: 'Salvar', onclick: () => {
           saveNow(); scrollTo(0, 0);
           toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.');
         }
       }));
       if (p.chapters[p.chapters.length - 1] === editing) inner.append(el('button', {
-        style: 'flex:1', text: `✍️ Salvar e escrever o cap. ${p.chapters.length + 1}`, onclick: () => { saveNow(); openWriteDialog(); }
+        style: 'flex:1', icon: 'pen-line', text: `Salvar e escrever o cap. ${p.chapters.length + 1}`, onclick: () => { saveNow(); openWriteDialog(); }
       }));
       return;
     }
     if (view.tab === 'capitulos' && cur().chapters.length) {
       bar.hidden = false;
-      inner.append(el('button', { class: 'primary wide', text: `✍️ Escrever o capítulo ${cur().chapters.length + 1}`, onclick: openWriteDialog }));
+      inner.append(el('button', { class: 'primary wide', icon: 'pen-line', text: `Escrever o capítulo ${cur().chapters.length + 1}`, onclick: openWriteDialog }));
       return;
     }
     bar.hidden = true;
@@ -1589,7 +1657,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       sec.append(el('div', { class: 'card empty' },
         el('h2', { text: 'Nenhum capítulo ainda' }),
         el('p', { text: 'A IA escreve o primeiro capítulo a partir da sua ideia. Depois você lê, ajusta e pede o próximo.' }),
-        el('button', { class: 'primary', text: '✍️ Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog })));
+        el('button', { class: 'primary', icon: 'pen-line', text: 'Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog })));
       return;
     }
 
@@ -1597,8 +1665,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     sec.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:12px' },
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
-        el('button', { text: '📋 Copiar tudo', onclick: () => copyText(fullStoryText(p), 'História copiada') }),
-        el('button', { text: '⬇ Baixar', onclick: () => exportStory(p) }))));
+        el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyText(fullStoryText(p), 'História copiada') }),
+        el('button', { icon: 'download', text: 'Baixar', onclick: () => exportStory(p) }))));
 
     p.chapters.forEach((c, i) => {
       const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
@@ -1608,7 +1676,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('div', { class: 'preview', text: c.text.slice(0, 260) || (busy && busy.chapterId === c.id ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
           el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
-          el('button', { text: '📋 Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyText(c.text, 'Capítulo copiado'); } }))));
+          el('button', { icon: 'copy', text: 'Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyText(c.text, 'Capítulo copiado'); } }))));
     });
   }
 
@@ -1630,13 +1698,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const setMode = (m) => { view.mode = m; renderChapters(); };
 
     sec.append(el('div', { class: 'nav-row' },
-      el('button', { 'aria-label': 'Voltar para todos os capítulos', onclick: () => { view.chapterId = null; renderChapters(); scrollTo(0, 0); } }, '←', el('span', { class: 'hide-m', text: ' Capítulos' })),
-      el('button', { text: '◀', 'aria-label': 'Capítulo anterior', disabled: i === 0, onclick: () => go(i - 1) }),
-      el('button', { text: '▶', 'aria-label': 'Próximo capítulo', disabled: i === p.chapters.length - 1, onclick: () => go(i + 1) }),
+      el('button', { 'aria-label': 'Voltar para todos os capítulos', onclick: () => { view.chapterId = null; renderChapters(); scrollTo(0, 0); } }, svgIcon('arrow-left'), el('span', { class: 'hide-m', text: 'Capítulos' })),
+      el('button', { icon: 'chevron-left', 'aria-label': 'Capítulo anterior', disabled: i === 0, onclick: () => go(i - 1) }),
+      el('button', { icon: 'chevron-right', 'aria-label': 'Próximo capítulo', disabled: i === p.chapters.length - 1, onclick: () => go(i + 1) }),
       el('span', { class: 'pos', text: `${i + 1}/${p.chapters.length}` }),
       el('div', { class: 'seg', role: 'group', 'aria-label': 'Modo' },
-        el('button', { 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }, el('span', { class: 'hide-m', text: '📖 ' }), 'Ler'),
-        el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, el('span', { class: 'hide-m', text: '✏️ ' }), 'Editar'))));
+        el('button', { 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }, svgIcon('book-open', 'hide-m'), 'Ler'),
+        el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar'))));
 
     if (!writingThis && !busy && wrongLang(p, ch.text)) sec.append(el('div', { class: 'notice' },
       el('p', { text: `Este capítulo saiu em inglês.` }),
@@ -1652,14 +1720,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       title.addEventListener('input', () => { ch.title = title.value; saveProject(p); });
       const ta = el('textarea', { class: 'big', id: 'chBody', 'aria-label': 'Texto do capítulo' });
       ta.value = ch.text;
-      const saved = el('span', { class: 'muted', role: 'status', text: '✓ Salvo' });
+      const saved = el('span', { class: 'muted saved', role: 'status' }, svgIcon('check'), 'Salvo');
       let savedTimer;
       ta.addEventListener('input', () => {
         ch.text = ta.value; ch.editedAt = Date.now();
         words.textContent = fmtNum(countWords(ch.text)) + ' palavras';
-        saved.textContent = 'Salvando…';
+        saved.replaceChildren('Salvando…');
         saveProject(p);
-        clearTimeout(savedTimer); savedTimer = setTimeout(() => { saved.textContent = '✓ Salvo'; }, 500);
+        clearTimeout(savedTimer); savedTimer = setTimeout(() => { saved.replaceChildren(svgIcon('check'), 'Salvo'); }, 500);
       });
       card.append(title, ta,
         el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' },
@@ -1676,10 +1744,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (writingThis) return;
     const ai = !!busy;
     const actions = el('div', { class: 'row' },
-      el('button', { class: 'primary', text: '📋 Copiar capítulo', onclick: () => copyText(ch.text, 'Capítulo copiado') }),
-      el('button', { text: '✏️ Ajustar', disabled: ai, onclick: () => openAdjust(ch) }),
-      el('button', { text: '➕ Continuar escrevendo', disabled: ai, onclick: () => continueChapter(ch) }));
-    if (ch.prev != null) actions.append(el('button', { text: '↩ Desfazer a última mudança', disabled: ai, onclick: () => undoChapter(p, ch) }));
+      el('button', { class: 'primary', icon: 'copy', text: 'Copiar capítulo', onclick: () => copyText(ch.text, 'Capítulo copiado') }),
+      el('button', { icon: 'wand-sparkles', text: 'Ajustar', disabled: ai, onclick: () => openAdjust(ch) }),
+      el('button', { icon: 'plus', text: 'Continuar escrevendo', disabled: ai, onclick: () => continueChapter(ch) }));
+    if (ch.prev != null) actions.append(el('button', { icon: 'undo-2', text: 'Desfazer a última mudança', disabled: ai, onclick: () => undoChapter(p, ch) }));
     sec.append(actions,
       el('div', { class: 'row end', style: 'margin-top:20px' },
         el('button', { class: 'link', text: 'Excluir este capítulo', disabled: ai, onclick: () => deleteChapter(p, ch) })));
@@ -1789,11 +1857,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (e.action === 'model') actions.push({ label: 'Escolher outro modelo', primary: true, onClick: () => openSetup(3, retry) });
     if (e.action === 'setup') actions.push({ label: 'Conectar a IA', primary: true, onClick: () => openSetup(1, retry) });
     if (e.action === 'credits') {
-      actions.push({ label: '💳 Adicionar créditos', primary: true, onClick: () => openCredits(retry) });
+      actions.push({ icon: 'credit-card', label: 'Adicionar créditos', primary: true, onClick: () => openCredits(retry) });
       actions.push({ label: 'Escolher um modelo grátis', onClick: () => openSetup(3, retry) });
     }
     if (retry && e.action !== 'key' && e.action !== 'setup') actions.push({ label: 'Tentar de novo', primary: !e.action, onClick: retry });
-    if (edit) actions.push({ label: '✏️ Mudar o pedido', onClick: edit });
+    if (edit) actions.push({ icon: 'pencil', label: 'Mudar o pedido', onClick: edit });
     showAlert({ kind: 'err', msg: e.message + (edit ? ' Seu pedido ficou guardado.' : ''), actions });
   }
 
@@ -1805,7 +1873,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (busy) return;
     if (!ensureReady(p, openWriteDialog)) return;
     const n = p.chapters.length + 1;
-    $('writeTitle').textContent = `✍️ Capítulo ${n}`;
+    $('writeTitle').replaceChildren(svgIcon('pen-line'), `Capítulo ${n}`);
     $('writeDir').value = drafts['write:' + p.id] || '';
     $('writeLength').value = p.length || '1500';
     const ideas = n === 1
@@ -1913,7 +1981,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       stopBusy();
       if (r.truncated) showAlert({
         kind: 'info', msg: 'O capítulo parou antes do fim, porque a resposta atingiu o tamanho máximo.',
-        actions: [{ label: '➕ Continuar escrevendo', primary: true, onClick: () => continueChapter(ch) }]
+        actions: [{ icon: 'plus', label: 'Continuar escrevendo', primary: true, onClick: () => continueChapter(ch) }]
       });
       else toast(`Capítulo ${n} pronto ✓`);
       setDraft('write:' + p.id, '');
@@ -1988,7 +2056,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (busy) return;
     const sel = preset ? (preset.partial ? { start: preset.start, end: preset.end } : null) : currentSelection(ch);
     adjustTarget = { ch, start: sel ? sel.start : 0, end: sel ? sel.end : ch.text.length, partial: !!sel };
-    $('adjustTitle').textContent = sel ? '✏️ Ajustar o trecho selecionado' : '✏️ Ajustar o capítulo';
+    $('adjustTitle').replaceChildren(svgIcon('wand-sparkles'), sel ? 'Ajustar o trecho selecionado' : 'Ajustar o capítulo');
     $('adjustScope').textContent = sel
       ? `Só o trecho selecionado (${fmtNum(countWords(ch.text.slice(sel.start, sel.end)))} palavras) vai mudar. O resto fica igual.`
       : 'O capítulo inteiro vai ser reescrito. Para mudar só uma parte, feche, selecione o trecho e toque em Ajustar de novo.';
@@ -2060,7 +2128,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const sec = $('tab-resumo');
     sec.innerHTML = '';
     const card = el('div', { class: 'card' },
-      el('h2', { text: '📝 Resumo da história' }),
+      el('h2', { icon: 'notebook-text', text: 'Resumo da história' }),
       el('p', { class: 'lead', text: 'A IA lê o que você já escreveu e sugere: sinopse, o que aconteceu em cada capítulo, como estão os personagens e ideias para os próximos.' }));
 
     if (!p.chapters.length) {
@@ -2075,7 +2143,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       (p.chapters.length !== p.summaryChapters ? ' Há capítulos novos desde então.' : edited ? ' Você editou capítulos desde então.' : '') }));
     card.append(el('button', {
       class: 'primary wide', disabled: !!busy, onclick: generateSummary,
-      text: p.summary.trim() ? (outdated ? '✨ Atualizar o resumo' : '✨ Gerar de novo') : '✨ Gerar o resumo'
+      icon: 'sparkles', text: p.summary.trim() ? (outdated ? 'Atualizar o resumo' : 'Gerar de novo') : 'Gerar o resumo'
     }));
 
     const ta = el('textarea', { class: 'big', id: 'summaryText', style: 'min-height:40vh;margin-top:14px', 'aria-label': 'Resumo', placeholder: 'O resumo aparece aqui. Você pode editar ou escrever o seu.' });
@@ -2090,9 +2158,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('span', {}, 'Usar o resumo como memória da IA', el('small', { class: 'hint', style: 'display:block', text: 'Ajuda a IA a lembrar de tudo em histórias longas.' }))));
 
     const acts = el('div', { class: 'row', style: 'margin-top:14px' },
-      el('button', { text: '📋 Copiar resumo', disabled: !p.summary.trim(), onclick: () => copyText(p.summary, 'Resumo copiado') }));
+      el('button', { icon: 'copy', text: 'Copiar resumo', disabled: !p.summary.trim(), onclick: () => copyText(p.summary, 'Resumo copiado') }));
     if (p.summaryPrev != null) acts.append(el('button', {
-      text: '↩ Voltar ao resumo anterior', onclick: () => { const t = p.summary; p.summary = p.summaryPrev; p.summaryPrev = t; saveProject(p, true); renderSummary(); }
+      icon: 'undo-2', text: 'Voltar ao resumo anterior', onclick: () => { const t = p.summary; p.summary = p.summaryPrev; p.summaryPrev = t; saveProject(p, true); renderSummary(); }
     }));
     card.append(acts);
     sec.append(card);
@@ -2170,10 +2238,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     budget.addEventListener('change', () => { p.refBudget = budget.value; saveProject(p); });
 
     sec.append(el('div', { class: 'card' },
-      el('h2', { text: '📎 Arquivos de referência' }),
+      el('h2', { icon: 'paperclip', text: 'Arquivos de referência' }),
       el('p', { class: 'lead', text: 'Mande livros, capítulos ou anotações (PDF, EPUB ou TXT) para a IA usar como base de universo, personagens ou estilo. A cada pedido, ela recebe os trechos mais ligados ao que está escrevendo.' }),
       input,
-      el('button', { class: 'primary wide', text: '📎 Adicionar arquivo', onclick: () => input.click() }),
+      el('button', { class: 'primary wide', icon: 'paperclip', text: 'Adicionar arquivo', onclick: () => input.click() }),
       el('div', { class: 'status', id: 'refStatus', role: 'status' }),
       el('div', { class: 'progress', id: 'refProgress', hidden: true }, el('div')),
       refs.length ? el('details', { style: 'margin-top:14px' },
@@ -2331,7 +2399,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
     if (currentId === p.id) {
       renderTab();
-      setSt(added === 1 ? 'Arquivo adicionado ✓' : `${added} arquivos adicionados ✓`, 'ok');
+      setSt(added === 1 ? 'Arquivo adicionado.' : `${added} arquivos adicionados.`, 'ok');
     }
   }
 
@@ -2622,7 +2690,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   function setupHead(title) {
     return [
-      el('div', { class: 'dlg-head' }, el('h2', { id: 'setupTitle', text: title }), el('button', { class: 'close', 'aria-label': 'Fechar', text: '✕', onclick: () => $('setupDlg').close() })),
+      el('div', { class: 'dlg-head' }, el('h2', { id: 'setupTitle', text: title }), el('button', { class: 'close', 'aria-label': 'Fechar', icon: 'x', onclick: () => $('setupDlg').close() })),
       setup.step <= 3 ? el('p', { class: 'step', text: `PASSO ${setup.step} DE 3` }) : null,
       setup.step <= 3 ? el('div', { class: 'steps', 'aria-hidden': 'true' }, [1, 2, 3].map(i => el('span', { class: i <= setup.step ? 'done' : '' }))) : null
     ];
@@ -2641,8 +2709,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           el('li', {}, 'Copie a chave. Ela começa com ', el('b', { text: 'sk-or-' }), '.')),
         el('p', { class: 'hint', style: 'margin-bottom:16px', text: 'Não use as "Management keys": elas não escrevem.' }),
         el('div', { class: 'row' },
-          el('a', { class: 'btn', href: 'https://openrouter.ai/keys', target: '_blank', rel: 'noopener', text: 'Abrir o OpenRouter ↗' }),
-          el('button', { class: 'primary', style: 'flex:1', text: 'Já copiei a chave →', onclick: () => { setup.step = 2; renderSetup(); } })));
+          el('a', { class: 'btn', href: 'https://openrouter.ai/keys', target: '_blank', rel: 'noopener', iconEnd: 'external-link', text: 'Abrir o OpenRouter' }),
+          el('button', { class: 'primary', style: 'flex:1', iconEnd: 'arrow-right', text: 'Já copiei a chave', onclick: () => { setup.step = 2; renderSetup(); } })));
       return;
     }
 
@@ -2650,9 +2718,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const input = el('input', { type: 'text', id: 'setupKey', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', placeholder: 'sk-or-…' });
       input.value = setup.key;
       const status = el('div', { class: 'status', role: 'status' });
-      const next = el('button', { class: 'primary', style: 'flex:1', text: 'Continuar →' });
+      const next = el('button', { class: 'primary', style: 'flex:1', iconEnd: 'arrow-right', text: 'Continuar' });
       const paste = el('button', {
-        text: '📋 Colar', onclick: async () => {
+        icon: 'clipboard-paste', text: 'Colar', onclick: async () => {
           try { input.value = (await navigator.clipboard.readText()).trim(); }
           catch { input.focus(); toast('Toque e segure no campo para colar.'); }
         }
@@ -2674,7 +2742,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('p', { class: 'hint', text: 'Ela fica salva só neste aparelho.' }),
         status,
         el('div', { class: 'row', style: 'margin-top:18px' },
-          el('button', { text: '← Voltar', onclick: () => { setup.step = 1; renderSetup(); } }), next));
+          el('button', { icon: 'arrow-left', text: 'Voltar', onclick: () => { setup.step = 1; renderSetup(); } }), next));
       setTimeout(() => input.focus(), 50);
       return;
     }
@@ -2700,7 +2768,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           status.textContent = e.action === 'key' ? e.message + ' Volte um passo para trocar a chave.' : e.message;
           status.className = 'status err';
           if (e.action === 'credits') status.append(el('div', { class: 'row', style: 'margin-top:8px' },
-            el('a', { class: 'btn primary', href: CREDITS_URL, target: '_blank', rel: 'noopener', text: '💳 Adicionar créditos ↗' }),
+            el('a', { class: 'btn primary', href: CREDITS_URL, target: '_blank', rel: 'noopener', icon: 'credit-card', iconEnd: 'external-link', text: 'Adicionar créditos' }),
             el('span', { class: 'muted', text: 'Depois, toque em Testar e concluir de novo.' })));
         }
       });
@@ -2708,7 +2776,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('p', { class: 'lead', text: 'Cada modelo escreve de um jeito. Se um deles recusar cenas, escrever mal ou em outro idioma, é só trocar depois pelo seu menu (avatar → IA).' }),
         picker, chosen, status,
         el('div', { class: 'row', style: 'margin-top:12px' },
-          el('button', { text: '← Voltar', onclick: () => { setup.step = 2; renderSetup(); } }),
+          el('button', { icon: 'arrow-left', text: 'Voltar', onclick: () => { setup.step = 2; renderSetup(); } }),
           el('div', { style: 'flex:1' }, test)));
       return;
     }
@@ -2716,11 +2784,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     // passo 4: pronto
     b.append(...setupHead('Tudo pronto!'),
       el('div', { class: 'success' },
-        el('div', { class: 'big-ico', text: '✅' }),
+        el('div', { class: 'big-ico' }, svgIcon('circle-check')),
         el('p', { text: `A IA está conectada com o modelo ${setup.modelName || setup.model}.` }),
         setup.reply ? el('div', { class: 'quote', text: setup.reply }) : null),
       el('button', {
-        class: 'primary wide', text: setup.then ? 'Continuar →' : 'Começar a escrever', onclick: () => {
+        class: 'primary wide', iconEnd: setup.then ? 'arrow-right' : null, text: setup.then ? 'Continuar' : 'Começar a escrever', onclick: () => {
           $('setupDlg').close();
           const then = setup.then; setup.then = null;
           renderTab();
@@ -2778,15 +2846,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     sys.addEventListener('input', () => { settings.system = sys.value.trim() === DEFAULT_SYSTEM ? '' : sys.value; saveSettings(); });
 
     b.append(
-      el('div', { class: 'dlg-head' }, el('h2', { id: 'settingsTitle', text: 'IA' }), el('button', { class: 'close', 'aria-label': 'Fechar', text: '✕', onclick: () => $('settingsDlg').close() })),
-      el('p', { class: 'status ok', style: 'margin-top:0', text: '● Conectada' }),
+      el('div', { class: 'dlg-head' }, el('h2', { id: 'settingsTitle', text: 'IA' }), el('button', { class: 'close', 'aria-label': 'Fechar', icon: 'x', onclick: () => $('settingsDlg').close() })),
+      el('p', { class: 'status ok', style: 'margin-top:0' }, el('span', { class: 'dot on' }), 'Conectada'),
       el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Modelo' }), el('div', { class: 'v', text: settings.modelName || settings.model })),
         el('button', { text: 'Trocar modelo', onclick: () => openSetup(3) })),
       isOpenRouter() ? el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Saldo de créditos' }), el('div', { class: 'v', id: 'balance', text: 'Carregando…' }),
           el('div', { class: 'hint', style: 'margin:0', text: 'Modelos pagos gastam créditos. Os grátis não.' })),
-        el('a', { class: 'btn', href: CREDITS_URL, target: '_blank', rel: 'noopener', text: '💳 Adicionar' })) : null,
+        el('a', { class: 'btn', href: CREDITS_URL, target: '_blank', rel: 'noopener', icon: 'credit-card', text: 'Adicionar' })) : null,
       el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Chave' }), el('div', { class: 'v', text: '••••' + settings.key.slice(-4) })),
         el('button', { text: 'Trocar chave', onclick: () => openSetup(2) })),

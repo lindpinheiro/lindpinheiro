@@ -223,6 +223,7 @@
   button.link { background: none; border: 0; color: var(--danger); font-weight: 600; padding: 8px 4px; min-height: 44px; }
   button.wide, .btn.wide { width: 100%; }
   button:disabled { opacity: .5; cursor: not-allowed; }
+  button.primary:disabled { background: var(--surface-2); color: var(--muted); border-color: var(--border); opacity: 1; }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .row.end { justify-content: flex-end; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
@@ -272,6 +273,28 @@
   .ch-toolbar .nav, .ch-toolbar .tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .ch-toolbar .pos { color: var(--muted); font-size: .9rem; margin-left: 4px; }
   .saved.dirty { color: var(--accent); font-weight: 600; }
+  .info-head { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .info-head h2 { margin: 0; }
+  .info-field { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .info-field .k { color: var(--muted); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .info-field .v { white-space: pre-wrap; margin-top: 4px; }
+  .info-meta { margin-top: 10px; }
+  .reader strong { font-weight: 700; }
+  .reader p.scene-break { text-align: center; letter-spacing: .5em; color: var(--muted); }
+  .reader mark, .hl-item mark { background: #fff2a8; color: #231a1c; border-radius: 3px; padding: 0 2px; cursor: pointer; }
+  .reader mark.important, .hl-item mark.important { background: #ffd6e3; box-shadow: inset 0 -2px 0 var(--accent); }
+  .hl-list h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .hl-item { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; text-align: left; background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 10px 0; font-weight: 400; }
+  .hl-item .hl-note { color: var(--muted); font-size: .9rem; }
+  .tag.mem { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); border-color: var(--accent); margin: 0; }
+  .note-quote { margin: 8px 0 0; padding: 10px 14px; border-left: 4px solid #e5c43a; background: var(--surface-2); border-radius: 8px; font-family: Georgia, serif; white-space: pre-wrap; }
+  .edit-tools { position: sticky; top: 72px; z-index: 5; margin-bottom: 8px; }
+  .edit-toolbar { display: flex; gap: 4px; flex-wrap: wrap; padding: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
+  .edit-toolbar button { min-height: 38px; min-width: 40px; padding: 4px 10px; background: transparent; border-color: transparent; font-size: 1rem; }
+  .edit-toolbar button:hover { background: var(--surface); }
+  .emoji-grid { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px; margin-top: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; max-width: 420px; }
+  .sel-bar .emoji-grid { flex-basis: 100%; max-width: none; margin-top: 2px; }
+  .emoji { min-height: 38px; min-width: 38px; padding: 0; background: transparent; border: 0; font-size: 1.25rem; }
   button.link.plain { color: var(--muted); }
   .sel-bar {
     position: fixed; z-index: 45; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
@@ -285,7 +308,7 @@
   .nav-row .pos { color: var(--muted); font-size: .9rem; margin: 0 auto 0 4px; }
   .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
   .seg button { border: 0; border-radius: 0; background: var(--surface); }
-  .seg button[aria-pressed=true] { background: var(--accent); color: var(--accent-text); }
+  .seg button[aria-pressed=true] { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
   .reader { font-family: Georgia, "Times New Roman", serif; font-size: 1.1rem; line-height: 1.85; max-width: 680px; margin: 0 auto; }
   .reader p { margin: 0 0 1em; white-space: pre-wrap; }
   .reader-title { font-family: Georgia, serif; text-align: center; font-size: 1.4rem; margin: 4px 0 22px; }
@@ -370,6 +393,7 @@
     .lbl-short { display: inline; }
     .nav-row { gap: 6px; flex-wrap: nowrap; margin-bottom: 10px; }
     .ch-toolbar { margin-bottom: 10px; }
+    .edit-tools { top: 8px; }
     .ch-toolbar .tools { width: 100%; }
     .ch-toolbar .tools > button:last-child { flex: 1; }
     .ch-toolbar .nav > button { min-width: 42px; padding: 6px 10px; }
@@ -439,6 +463,14 @@
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
 <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></symbol>
+<symbol id="i-bold" viewBox="0 0 24 24"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8" /></symbol>
+<symbol id="i-brain" viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" /> <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" /> <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" /> <path d="M17.599 6.5a3 3 0 0 0 .399-1.375" /> <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" /> <path d="M3.477 10.896a4 4 0 0 1 .585-.396" /> <path d="M19.938 10.5a4 4 0 0 1 .585.396" /> <path d="M6 18a4 4 0 0 1-1.967-.516" /> <path d="M19.967 17.484A4 4 0 0 1 18 18" /></symbol>
+<symbol id="i-highlighter" viewBox="0 0 24 24"><path d="m9 11-6 6v3h9l3-3" /> <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" /></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 16v-4" /> <path d="M12 8h.01" /></symbol>
+<symbol id="i-italic" viewBox="0 0 24 24"><line x1="19" x2="10" y1="4" y2="4" /> <line x1="14" x2="5" y1="20" y2="20" /> <line x1="15" x2="9" y1="4" y2="20" /></symbol>
+<symbol id="i-library" viewBox="0 0 24 24"><path d="m16 6 4 14" /> <path d="M12 6v14" /> <path d="M8 8v12" /> <path d="M4 4v16" /></symbol>
+<symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M8 14s1.5 2 4 2 4-2 4-2" /> <line x1="9" x2="9.01" y1="9" y2="9" /> <line x1="15" x2="15.01" y1="9" y2="9" /></symbol>
+<symbol id="i-sticky-note" viewBox="0 0 24 24"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z" /> <path d="M15 3v4a2 2 0 0 0 2 2h4" /></symbol>
 </svg>
 
 <header>
@@ -493,11 +525,10 @@
 
       <h1 class="proj-heading" id="projHeading"></h1>
       <nav class="tabs" role="tablist" id="tabs">
-        <button role="tab" data-tab="ideia"><svg class="icon ico" aria-hidden="true"><use href="#i-lightbulb"/></svg>Ideia</button>
+        <button role="tab" data-tab="ideia"><svg class="icon ico" aria-hidden="true"><use href="#i-info"/></svg>Infos da Obra</button>
         <button role="tab" data-tab="capitulos"><svg class="icon ico" aria-hidden="true"><use href="#i-book-open"/></svg>Capítulos <span class="count" id="countCh"></span></button>
         <button role="tab" data-tab="mundo"><svg class="icon ico" aria-hidden="true"><use href="#i-globe"/></svg>Mundo</button>
-        <button role="tab" data-tab="resumo"><svg class="icon ico" aria-hidden="true"><use href="#i-notebook-text"/></svg>Resumo</button>
-        <button role="tab" data-tab="arquivos"><svg class="icon ico" aria-hidden="true"><use href="#i-paperclip"/></svg>Arquivos <span class="count" id="countRefs"></span></button>
+        <button role="tab" data-tab="arquivos"><svg class="icon ico" aria-hidden="true"><use href="#i-library"/></svg>Referências <span class="count" id="countRefs"></span></button>
       </nav>
 
       <!-- ===== Ideia ===== -->
@@ -507,6 +538,8 @@
           <button class="primary" id="connectBtn">Conectar a IA</button>
         </div>
 
+        <div id="infoView"></div>
+        <div id="infoForm">
         <div class="card">
           <div class="grid2">
             <div>
@@ -577,16 +610,17 @@
             <span>Confirmo que todos os personagens são adultos (18+) e fictícios.</span>
           </label>
         </div>
+        <div class="row" style="margin-bottom:16px"><button class="primary" id="infoSaveBtn"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Salvar</button></div>
+        </div>
 
         <div id="ideaCta"></div>
-        <p class="muted" style="text-align:center">Tudo é salvo automaticamente neste aparelho.</p>
+        <div id="infoSummary" style="margin-top:16px"></div>
         <hr>
         <div class="row end"><button class="link" id="deleteProjectBtn">Excluir este projeto</button></div>
       </section>
 
       <section id="tab-capitulos" role="tabpanel" hidden></section>
       <section id="tab-mundo" role="tabpanel" hidden></section>
-      <section id="tab-resumo" role="tabpanel" hidden></section>
       <section id="tab-arquivos" role="tabpanel" hidden></section>
     </div>
   </main>
@@ -639,6 +673,19 @@
 
 <!-- Opções da IA para o trecho selecionado -->
 <div id="selBar" class="sel-bar" role="toolbar" aria-label="Ajustar o trecho selecionado" hidden></div>
+
+<!-- Anotação de um trecho marcado -->
+<dialog id="noteDlg" aria-labelledby="noteTitle">
+  <div class="dlg-head"><h2 id="noteTitle"><svg class="icon" aria-hidden="true"><use href="#i-sticky-note"/></svg>Anotação</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <blockquote class="note-quote" id="noteQuote"></blockquote>
+  <label for="noteText" style="margin-top:8px">Sua anotação</label>
+  <textarea id="noteText" placeholder="Ex.: isso precisa voltar no final; ele mente aqui."></textarea>
+  <label class="check" for="noteImportant"><input type="checkbox" id="noteImportant"><span>Importante: guardar na memória da IA<small class="hint" style="display:block">A IA vai lembrar disso ao escrever os próximos capítulos.</small></span></label>
+  <div class="row" style="margin-top:16px">
+    <button class="primary" id="noteSave">Salvar</button>
+    <button class="link" id="noteRemove">Remover marcação</button>
+  </div>
+</dialog>
 
 <!-- Escrever capítulo -->
 <dialog id="writeDlg" aria-labelledby="writeTitle">
@@ -1037,6 +1084,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   function openProject(id) {
+    infoEditing = null;
     if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
     flushSaves();
     currentId = id;
@@ -1685,11 +1733,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('countCh').textContent = p.chapters.length ? `(${p.chapters.length})` : '';
     const nRefs = (refsCache[p.id] || []).length;
     $('countRefs').textContent = nRefs ? `(${nRefs})` : '';
-    ['ideia', 'capitulos', 'mundo', 'resumo', 'arquivos'].forEach(t => { $('tab-' + t).hidden = t !== view.tab; });
-    if (view.tab === 'ideia') renderIdeaCta();
+    ['ideia', 'capitulos', 'mundo', 'arquivos'].forEach(t => { $('tab-' + t).hidden = t !== view.tab; });
+    if (view.tab === 'ideia') { renderInfo(); renderSummary(); }
     if (view.tab === 'capitulos') renderChapters();
     if (view.tab === 'mundo') renderWorld();
-    if (view.tab === 'resumo') renderSummary();
     if (view.tab === 'arquivos') renderRefs();
     renderBar();
   }
@@ -1714,14 +1761,88 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('f-adults').addEventListener('change', (e) => { const p = cur(); p.adults = e.target.checked; saveProject(p); if (p.adults) clearAlert(); });
   $('connectBtn').addEventListener('click', () => openSetup(1));
 
-  function renderIdeaCta() {
+  // Infos da Obra: abre em leitura; Editar mostra o formulário; Salvar volta para a leitura
+  let infoEditing = null; // null: decide sozinho (projeto vazio abre em edição)
+  const HEAT_LABEL = { leve: 'Leve', picante: 'Picante', intenso: 'Intenso (+18)' };
+  const LEN_LABEL = { 800: 'Curto (~800 palavras)', 1500: 'Médio (~1.500 palavras)', 2500: 'Longo (~2.500 palavras)' };
+
+  function renderInfo() {
     const p = cur();
+    const editing = infoEditing ?? !((p.premise || '').trim() || (p.characters || '').trim());
+    $('infoForm').hidden = !editing;
+    const v = $('infoView');
+    v.hidden = editing;
+    v.innerHTML = '';
+    if (!editing) {
+      const field = (label, value) => (value || '').trim() ? el('div', { class: 'info-field' }, el('div', { class: 'k', text: label }), el('div', { class: 'v', text: value.trim() })) : null;
+      const hasStory = p.chapters.length || worldText(p) || (refsCache[p.id] || []).length;
+      v.append(el('div', { class: 'card' },
+        el('div', { class: 'info-head' },
+          el('h2', { icon: 'info', text: 'Infos da Obra' }),
+          el('div', { class: 'row' },
+            el('button', { icon: 'pencil', text: 'Editar', onclick: () => { infoEditing = true; renderTab(); $('f-title').focus(); } }),
+            el('button', { icon: 'sparkles', text: 'Atualizar com base na história', disabled: !!busy || !hasStory, title: hasStory ? '' : 'Escreva um capítulo ou adicione referências primeiro', onclick: updateInfoFromStory }))),
+        p.infoPrev ? el('div', { class: 'row', style: 'margin-bottom:8px' }, el('button', { class: 'link plain', icon: 'undo-2', text: 'Voltar às infos anteriores', onclick: () => {
+          const now = { premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes };
+          Object.assign(p, p.infoPrev); p.infoPrev = now; saveProject(p, true); loadForm(); renderTab();
+        } })) : null,
+        field('Categoria', p.category),
+        field('Qual é a ideia', p.premise),
+        field('Personagens', p.characters),
+        field('Intensidade', HEAT_LABEL[p.heat] || ''),
+        field('Tom e estilo', p.tone),
+        field('O que quero e o que não quero', p.notes),
+        el('div', { class: 'info-meta muted', text: [p.fandom ? 'Universo: ' + p.fandom : '', p.lang || DEFAULT_LANG, p.pov, LEN_LABEL[p.length] || ''].filter(Boolean).join(' · ') }),
+        p.adults ? null : el('p', { class: 'status err', text: 'Falta confirmar, em Editar, que todos os personagens são adultos (18+).' })));
+    }
+    // ação principal: escrever o primeiro capítulo (fora da edição)
     const box = $('ideaCta');
     box.innerHTML = '';
-    box.append(p.chapters.length
-      ? el('button', { class: 'primary wide', iconEnd: 'arrow-right', text: `Ver os capítulos (${p.chapters.length})`, onclick: () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); scrollTo(0, 0); } })
+    // na edição de um projeto sem capítulos, a ação principal é salvar e já escrever
+    $('infoSaveBtn').classList.toggle('primary', !(editing && !p.chapters.length));
+    if (editing && !p.chapters.length) box.append(el('button', { class: 'primary wide', icon: 'pen-line', text: 'Salvar e escrever o primeiro capítulo', disabled: !!busy,
+      onclick: () => { flushSaves(); infoEditing = false; renderTab(); openWriteDialog(); } }));
+    if (!editing) box.append(p.chapters.length
+      ? el('button', { class: 'wide', iconEnd: 'arrow-right', text: `Ver os capítulos (${p.chapters.length})`, onclick: () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); scrollTo(0, 0); } })
       : el('button', { class: 'primary wide', icon: 'pen-line', text: 'Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog }));
     renderAiDot();
+  }
+  $('infoSaveBtn').addEventListener('click', () => { flushSaves(); infoEditing = false; renderTab(); scrollTo(0, 0); toast('Infos salvas ✓'); });
+
+  // atualiza ideia, personagens, tom e regras com o que a história já tem
+  async function updateInfoFromStory() {
+    const p = cur();
+    if (busy || !ensureReady(p, updateInfoFromStory)) return;
+    let chaptersTxt = '';
+    for (let i = p.chapters.length - 1; i >= 0; i--) {
+      const block = `### Capítulo ${i + 1}\n${p.chapters[i].text}\n\n`;
+      if (chaptersTxt.length + block.length > 40000) break;
+      chaptersTxt = block + chaptersTxt;
+    }
+    const refs = pickReferences(Object.assign({}, p, { refBudget: '12000' }), [p.premise, p.characters].join('\n'));
+    const prompt = `INFOS ATUAIS DA OBRA (o autor escreveu; têm prioridade):\n${JSON.stringify({ premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes }, null, 1)}\n\n` +
+      (worldText(p) ? `MUNDO DA HISTÓRIA:\n${worldText(p)}\n\n` : '') +
+      ((p.summary || '').trim() ? `RESUMO:\n${p.summary}\n\n` : '') +
+      (imageNotes(p) ? `REFERÊNCIAS VISUAIS:\n${imageNotes(p)}\n\n` : '') +
+      (refs ? `REFERÊNCIAS:\n${refs}\n\n` : '') +
+      (chaptersTxt ? `CAPÍTULOS:\n${chaptersTxt}\n` : '') +
+      `TAREFA: Atualize as infos desta obra com o que a história já mostra. Responda SOMENTE com um objeto JSON com as chaves premise, characters, tone, notes. ` +
+      `premise: a ideia/enredo em um ou dois parágrafos. characters: os personagens (nome, idade 18+, jeito, relações, poderes/classe se houver), um por linha começando com "- ". ` +
+      `tone: tom e estilo em uma linha. notes: o que o autor quer e não quer (mantenha o que já existe). ` +
+      `Mantenha tudo o que o autor escreveu; só acrescente e esclareça com base nos capítulos, no mundo e nas referências. Não invente. Escreva em português do Brasil.`;
+    const b = startBusy('info', 'Infos da Obra', null);
+    try {
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
+      if (!data) throw Object.assign(new Error('A IA não devolveu as infos no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
+      p.infoPrev = { premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes };
+      ['premise', 'characters', 'tone', 'notes'].forEach(k => { const v = data[k]; if (v != null && String(v).trim()) p[k] = Array.isArray(v) ? v.map(x => '- ' + String(x).replace(/^-\s*/, '')).join('\n') : String(v); });
+      stopBusy(); loadForm();
+      toast('Infos atualizadas ✓', { action: 'Desfazer', onAction: () => { const t = p.infoPrev; p.infoPrev = null; Object.assign(p, t); saveProject(p, true); loadForm(); renderTab(); } });
+    } catch (e) {
+      stopBusy();
+      if (e.name === 'AbortError') toast('Parado. As infos não mudaram.'); else handleAIError(e, updateInfoFromStory);
+    } finally { stopBusy(); saveProject(p, true); if (currentId === p.id) renderTab(); }
   }
 
   // =====================================================================
@@ -1795,21 +1916,59 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     });
   }
 
-  function renderParagraphs(container, text, streaming) {
+  // **negrito**, *itálico* / _itálico_ viram formatação; "* * *" vira quebra de cena
+  function parseMd(t) {
+    const segs = []; const re = /\*\*([^*\n]+?)\*\*|\*([^*\n]+?)\*|_([^_\n]+?)_/g; let last = 0, m;
+    while ((m = re.exec(t))) {
+      if (m.index > last) segs.push({ t: t.slice(last, m.index) });
+      segs.push(m[1] != null ? { t: m[1], b: true } : { t: m[2] ?? m[3], i: true });
+      last = re.lastIndex;
+    }
+    if (last < t.length) segs.push({ t: t.slice(last) });
+    return segs;
+  }
+  // monta o parágrafo com a formatação e as marcações (marca-texto) do autor
+  function mdParagraph(raw, highlights) {
+    const pEl = document.createElement('p');
+    if (/^\s*(\*\s*\*\s*\*|-{3,}|⁂)\s*$/.test(raw)) { pEl.className = 'scene-break'; pEl.textContent = '⁂'; return pEl; }
+    const segs = parseMd(raw), disp = segs.map(x => x.t).join('');
+    const ranges = [];
+    (highlights || []).forEach(h => {
+      const at = h.quote ? disp.indexOf(h.quote) : -1;
+      if (at >= 0 && !ranges.some(r => at < r.e && at + h.quote.length > r.s)) ranges.push({ s: at, e: at + h.quote.length, h });
+    });
+    let pos = 0;
+    segs.forEach(seg => {
+      const s0 = pos, s1 = pos + seg.t.length;
+      const cuts = [s0, s1, ...ranges.flatMap(r => [r.s, r.e]).filter(x => x > s0 && x < s1)].sort((a, b) => a - b);
+      for (let k = 0; k < cuts.length - 1; k++) {
+        const a = cuts[k], b = cuts[k + 1]; if (a === b) continue;
+        let node = document.createTextNode(seg.t.slice(a - s0, b - s0));
+        if (seg.b) { const w = document.createElement('strong'); w.append(node); node = w; }
+        if (seg.i) { const w = document.createElement('em'); w.append(node); node = w; }
+        const r = ranges.find(r => a >= r.s && b <= r.e);
+        if (r) { const w = document.createElement('mark'); w.dataset.hl = r.h.id; if (r.h.important) w.className = 'important'; w.title = r.h.note || 'Marcação'; w.append(node); node = w; }
+        pEl.append(node);
+      }
+      pos = s1;
+    });
+    return pEl;
+  }
+  function renderParagraphs(container, text, streaming, highlights) {
     container.innerHTML = '';
     if (!text && streaming) { container.append(el('p', { class: 'thinking', text: 'A IA está começando a escrever…' })); return; }
     const paras = text.split(/\n\s*\n/);
     paras.forEach((t, i) => {
-      const pEl = el('p', { text: t.replace(/^\n+|\n+$/g, '') });
+      const pEl = mdParagraph(t.replace(/^\n+|\n+$/g, ''), highlights);
       if (streaming && i === paras.length - 1) pEl.classList.add('cursor');
       container.append(pEl);
     });
   }
 
   // botão "Escrever o capítulo N" (no celular, "Escrever cap. N")
-  function writeButton(p) {
+  function writeButton(p, primary = true) {
     const n = p.chapters.length + 1;
-    return el('button', { class: 'primary', icon: 'pen-line', 'aria-label': `Escrever o capítulo ${n}`, disabled: !!busy, onclick: () => guardEdit(openWriteDialog) },
+    return el('button', { class: primary ? 'primary' : '', icon: 'pen-line', 'aria-label': `Escrever o capítulo ${n}`, disabled: !!busy, onclick: () => guardEdit(openWriteDialog) },
       el('span', { class: 'lbl-long', text: `Escrever o capítulo ${n}` }), el('span', { class: 'lbl-short', text: `Escrever cap. ${n}` }));
   }
 
@@ -1826,7 +1985,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
     if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { saveEdit(); view.mode = 'ler'; renderChapters(); scrollTo(0, 0); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
     else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyText(ch.text, 'Capítulo copiado') }, el('span', { text: 'Copiar' })));
-    tools.append(writeButton(p));
+    tools.append(writeButton(p, !editing));
 
     sec.append(el('div', { class: 'ch-toolbar' },
       el('div', { class: 'nav' },
@@ -1850,6 +2009,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       title.value = d.title;
       const ta = el('textarea', { class: 'big', id: 'chBody', 'aria-label': 'Texto do capítulo' });
       ta.value = d.text;
+      ta.addEventListener('keydown', (e) => {
+        if (!(e.ctrlKey || e.metaKey)) return;
+        const k = e.key.toLowerCase();
+        if (k === 'b') { e.preventDefault(); fmtWrap(ta, '**'); }
+        if (k === 'i') { e.preventDefault(); fmtWrap(ta, '*'); }
+      });
       const state = el('span', { class: 'muted saved', id: 'editState', role: 'status' });
       const refresh = () => {
         words.textContent = fmtNum(countWords(d.text)) + ' palavras';
@@ -1860,18 +2025,20 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       };
       title.addEventListener('input', () => { d.title = title.value; keepDraft(); refresh(); });
       ta.addEventListener('input', () => { d.text = ta.value; keepDraft(); refresh(); });
-      card.append(title, ta, el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' }, words, state),
-        el('p', { class: 'hint', text: 'Selecione um trecho para ver as opções de ajuste da IA.' }));
+      card.append(title, editToolbar(ta), ta, el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' }, words, state),
+        el('p', { class: 'hint', text: 'Selecione um trecho para formatar ou pedir ajuste à IA. Atalhos: Ctrl+B negrito, Ctrl+I itálico.' }));
       refresh();
     } else {
       const body = el('div', { class: 'reader', id: 'chBody' });
-      renderParagraphs(body, ch.text, writingThis);
+      renderParagraphs(body, ch.text, writingThis, writingThis ? [] : ch.highlights);
+      body.addEventListener('click', (e) => { const m = e.target.closest('mark[data-hl]'); if (m) openNote(p, ch, m.dataset.hl); });
       words.textContent = fmtNum(countWords(ch.text)) + ' palavras';
       card.append(el('h2', { class: 'reader-title', text: chTitle(p, ch) }), body,
         el('div', { class: 'row', style: 'justify-content:space-between;margin-top:8px' }, words,
-          writingThis ? null : el('span', { class: 'hint', style: 'margin:0', text: 'Selecione um trecho para a IA ajustar.' })));
+          writingThis ? null : el('span', { class: 'hint', style: 'margin:0', text: 'Selecione um trecho para marcar ou anotar.' })));
     }
     sec.append(card);
+    if (!editing && !writingThis && (ch.highlights || []).length) sec.append(highlightList(p, ch));
 
     renderBar();
     if (writingThis) return;
@@ -1934,9 +2101,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   addEventListener('beforeunload', (e) => { if (editDirty()) { e.preventDefault(); e.returnValue = ''; } });
 
   // =====================================================================
-  // Opções da IA ao selecionar um trecho (no modo Ler e no Editar)
+  // Seleção de trecho: formatação no Editar, marca-texto e anotação no Ler
   // =====================================================================
-  const SEL_ACTIONS = ['Mais diálogo', 'Mais sentimentos', 'Mais detalhes', 'Mais curto', 'Mais intenso', 'Corrigir o português'];
   let selInfo = null, selTimer = null;
 
   function selectionInChapter() {
@@ -1947,16 +2113,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (body.tagName === 'TEXTAREA') {
       if (document.activeElement !== body) return null;
       const { selectionStart: a, selectionEnd: b } = body;
-      if (b - a < 2 || !body.value.slice(a, b).trim()) return null;
+      if (b - a < 1 || !body.value.slice(a, b).trim()) return null;
       return { p, ch, start: a, end: b, editing: true, rect: textareaRect(body, a, b) };
     }
     const sel = getSelection();
     if (!sel || sel.isCollapsed || !sel.rangeCount || !body.contains(sel.anchorNode) || !body.contains(sel.focusNode)) return null;
-    const txt = sel.toString().trim();
-    if (txt.length < 2) return null;
-    const at = ch.text.indexOf(txt);
-    if (at < 0) return null;
-    return { p, ch, start: at, end: at + txt.length, editing: false, rect: sel.getRangeAt(0).getBoundingClientRect() };
+    const quote = sel.toString().trim();
+    if (quote.length < 2) return null;
+    const pA = (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement).closest('p');
+    const pB = (sel.focusNode.nodeType === 1 ? sel.focusNode : sel.focusNode.parentElement).closest('p');
+    return { p, ch, quote, editing: false, multi: pA !== pB, rect: sel.getRangeAt(0).getBoundingClientRect() };
   }
 
   // posição na tela de um trecho dentro da textarea (cópia invisível com o mesmo estilo)
@@ -1971,12 +2137,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return { top: Math.max(top, r.top), bottom: Math.min(bottom, r.bottom), left: r.left, width: r.width };
   }
 
-  function hideSelBar() { $('selBar').hidden = true; selInfo = null; }
+  function hideSelBar() { const b = $('selBar'); b.hidden = true; b.dataset.mode = ''; selInfo = null; }
   function updateSelBar() {
     const info = selectionInChapter();
     if (!info) { hideSelBar(); return; }
     selInfo = info;
     const bar = $('selBar');
+    fillSelBar(info);
     bar.hidden = false;
     const coarse = matchMedia('(pointer: coarse)').matches;
     bar.classList.toggle('docked', coarse);
@@ -1996,24 +2163,112 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   document.addEventListener('keyup', (e) => { if (e.shiftKey || e.key.startsWith('Arrow')) scheduleSelBar(); });
   addEventListener('scroll', () => { if (!$('selBar').hidden) updateSelBar(); }, true);
 
-  // aplica o pedido ao trecho escolhido
-  function adjustSelection(instr) {
-    const info = selInfo;
-    hideSelBar();
-    if (!info) return;
-    if (info.editing) saveEdit(); // a IA trabalha sobre o texto salvo
-    const target = { ch: info.ch, start: info.start, end: info.end, partial: true };
-    if (instr) runAdjust(target, instr); else openAdjust(info.ch, target);
+  // ---------- formatação no Editar (texto com **negrito** e *itálico*) ----------
+  const EMOJIS = ['❤️', '💕', '💔', '😍', '😘', '🥰', '😏', '😳', '🥺', '😭', '😂', '🙄', '😈', '🔥', '✨', '💋', '👀', '🫣', '😤', '😱', '🌙', '☀️', '🌧️', '🌹', '🍷', '🍺', '☕', '🎶', '⚔️', '🛡️', '🪄', '👑', '💀', '⭐', '🖤', '💙'];
+  function fmtWrap(ta, mk) {
+    const a = ta.selectionStart, b = ta.selectionEnd, v = ta.value, sel = v.slice(a, b);
+    if (v.slice(a - mk.length, a) === mk && v.slice(b, b + mk.length) === mk) {
+      ta.setRangeText(sel, a - mk.length, b + mk.length, 'select');
+    } else if (sel.length > 2 * mk.length && sel.startsWith(mk) && sel.endsWith(mk)) {
+      ta.setRangeText(sel.slice(mk.length, -mk.length), a, b, 'select');
+    } else {
+      const inner = sel || 'texto';
+      ta.setRangeText(mk + inner + mk, a, b, 'end');
+      ta.setSelectionRange(a + mk.length, a + mk.length + inner.length);
+    }
+    ta.focus(); ta.dispatchEvent(new Event('input'));
   }
-  function buildSelBar() {
-    const bar = $('selBar');
-    bar.append(el('span', { class: 'sel-title' }, svgIcon('wand-sparkles'), 'Ajustar trecho:'),
-      ...SEL_ACTIONS.map(a => el('button', { type: 'button', class: 'chip', text: a, onclick: () => adjustSelection(a) })),
-      el('button', { type: 'button', class: 'chip strong', icon: 'pencil', text: 'Outro pedido…', onclick: () => adjustSelection(null) }));
-    // não deixa o toque na barra apagar a seleção antes do clique
-    bar.addEventListener('mousedown', (e) => e.preventDefault());
+  function fmtInsert(ta, str) {
+    ta.focus();
+    ta.setRangeText(str, ta.selectionStart, ta.selectionEnd, 'end');
+    ta.dispatchEvent(new Event('input'));
   }
-  buildSelBar();
+  function emojiGrid(ta, onPick) {
+    return el('div', { class: 'emoji-grid', role: 'group', 'aria-label': 'Emojis' },
+      EMOJIS.map(e => el('button', { type: 'button', class: 'emoji', text: e, 'aria-label': 'Inserir ' + e, onclick: () => { fmtInsert(ta, e); onPick && onPick(); } })));
+  }
+  // barrinha fixa acima do texto
+  function editToolbar(ta) {
+    const grid = emojiGrid(ta, () => { grid.hidden = true; });
+    grid.hidden = true;
+    const bar = el('div', { class: 'edit-toolbar', role: 'toolbar', 'aria-label': 'Formatação' },
+      el('button', { type: 'button', icon: 'bold', 'aria-label': 'Negrito (Ctrl+B)', title: 'Negrito (Ctrl+B)', onclick: () => fmtWrap(ta, '**') }),
+      el('button', { type: 'button', icon: 'italic', 'aria-label': 'Itálico (Ctrl+I)', title: 'Itálico (Ctrl+I)', onclick: () => fmtWrap(ta, '*') }),
+      el('button', { type: 'button', text: '—', 'aria-label': 'Travessão de fala', title: 'Travessão de fala', onclick: () => fmtInsert(ta, '— ') }),
+      el('button', { type: 'button', text: '⁂', 'aria-label': 'Quebra de cena', title: 'Quebra de cena', onclick: () => fmtInsert(ta, '\n\n* * *\n\n') }),
+      el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; } }));
+    bar.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+    return el('div', { class: 'edit-tools' }, bar, grid);
+  }
+
+  // conteúdo da barra flutuante conforme o modo
+  function fillSelBar(info) {
+    const bar = $('selBar'), mode = info.editing ? 'edit' : (info.multi ? 'multi' : 'read');
+    if (bar.dataset.mode === mode) return;
+    bar.dataset.mode = mode;
+    bar.innerHTML = '';
+    if (mode === 'edit') {
+      const ta = $('chBody');
+      const grid = emojiGrid(ta, () => hideSelBar()); grid.hidden = true;
+      bar.append(
+        el('button', { type: 'button', class: 'chip', icon: 'bold', 'aria-label': 'Negrito', onclick: () => fmtWrap($('chBody'), '**') }),
+        el('button', { type: 'button', class: 'chip', icon: 'italic', 'aria-label': 'Itálico', onclick: () => fmtWrap($('chBody'), '*') }),
+        el('button', { type: 'button', class: 'chip', icon: 'smile', 'aria-label': 'Emojis', onclick: () => { grid.hidden = !grid.hidden; updateSelBar(); } }),
+        el('button', { type: 'button', class: 'chip strong', icon: 'wand-sparkles', text: 'Ajustar com IA', onclick: aiOnSelection }),
+        grid);
+    } else if (mode === 'multi') {
+      bar.append(el('span', { class: 'sel-title', text: 'Para marcar, selecione dentro de um parágrafo.' }));
+    } else {
+      bar.append(
+        el('button', { type: 'button', class: 'chip', icon: 'highlighter', text: 'Marcar', onclick: () => addHighlight(false) }),
+        el('button', { type: 'button', class: 'chip strong', icon: 'sticky-note', text: 'Anotar', onclick: () => addHighlight(true) }));
+    }
+  }
+  function aiOnSelection() {
+    const info = selInfo; hideSelBar();
+    if (!info || !info.editing) return;
+    saveEdit(); // a IA trabalha sobre o texto salvo
+    openAdjust(info.ch, { ch: info.ch, start: info.start, end: info.end, partial: true });
+  }
+  $('selBar').addEventListener('mousedown', (e) => e.preventDefault()); // não apaga a seleção antes do clique
+
+  // ---------- marca-texto e anotações (modo Ler) ----------
+  function addHighlight(withNote) {
+    const info = selInfo; hideSelBar();
+    if (!info || info.editing || info.multi) return;
+    const h = { id: uid(), quote: info.quote, note: '', important: false, at: Date.now() };
+    (info.ch.highlights = info.ch.highlights || []).push(h);
+    getSelection().removeAllRanges();
+    saveProject(info.p, true); renderChapters();
+    if (withNote) openNote(info.p, info.ch, h.id, true); else toast('Trecho marcado.');
+  }
+  function openNote(p, ch, id, isNew) {
+    const h = (ch.highlights || []).find(x => x.id === id);
+    if (!h) return;
+    const dlg = $('noteDlg');
+    $('noteQuote').textContent = h.quote;
+    $('noteText').value = h.note || '';
+    $('noteImportant').checked = !!h.important;
+    $('noteSave').onclick = () => { h.note = $('noteText').value.trim(); h.important = $('noteImportant').checked; dlg.close(); saveProject(p, true); renderChapters(); toast(h.important ? 'Anotação salva. A IA vai lembrar disso ✓' : 'Anotação salva ✓'); };
+    $('noteRemove').onclick = () => { ch.highlights = ch.highlights.filter(x => x.id !== id); dlg.close(); saveProject(p, true); renderChapters(); toast('Marcação removida.', { action: 'Desfazer', onAction: () => { ch.highlights.push(h); saveProject(p, true); renderChapters(); } }); };
+    $('noteRemove').hidden = !!isNew && !h.note;
+    dlg.showModal(); $('noteText').focus();
+  }
+  function highlightList(p, ch) {
+    const list = el('div', { class: 'card hl-list' }, el('h3', { icon: 'highlighter', text: `Marcações (${ch.highlights.length})` }));
+    ch.highlights.forEach(h => list.append(el('button', { class: 'hl-item', type: 'button', onclick: () => openNote(p, ch, h.id) },
+      el('mark', { class: h.important ? 'important' : '', text: h.quote.length > 140 ? h.quote.slice(0, 140) + '…' : h.quote }),
+      h.note ? el('span', { class: 'hl-note', text: h.note }) : null,
+      h.important ? el('span', { class: 'tag mem' }, svgIcon('brain'), ' Memória da IA') : null)));
+    return list;
+  }
+  // anotações marcadas como importantes vão para a IA em todos os capítulos
+  function importantNotes(p) {
+    const out = [];
+    p.chapters.forEach((c, i) => (c.highlights || []).filter(h => h.important).forEach(h =>
+      out.push(`- Capítulo ${i + 1}: “${h.quote.slice(0, 300)}”${h.note ? ' — ' + h.note : ''}`)));
+    return out.join('\n');
+  }
 
   function undoChapter(p, ch) {
     const t = ch.text; ch.text = ch.prev; ch.prev = t;
@@ -2072,7 +2327,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   function ensureReady(p, then) {
     if (!p.adults) {
-      view.tab = 'ideia'; renderTab();
+      view.tab = 'ideia'; infoEditing = true; renderTab(); // a caixa fica no formulário de edição
       const box = $('f-adults');
       box.scrollIntoView({ block: 'center' }); box.focus();
       showAlert({ kind: 'info', msg: 'Antes de escrever, marque a confirmação de que todos os personagens são adultos (18+).' });
@@ -2504,7 +2759,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   function renderSummary() {
     const p = cur();
-    const sec = $('tab-resumo');
+    const sec = $('infoSummary');
     sec.innerHTML = '';
     const card = el('div', { class: 'card' },
       el('h2', { icon: 'notebook-text', text: 'Resumo da história' }),
@@ -2572,7 +2827,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const r = await callAI(prompt, {
         signal: b.ctrl.signal,
         onThinking: () => updateBusy({ thinking: true }),
-        onText: (t) => { const ta = $('summaryText'); if (ta && view.tab === 'resumo') ta.value = t; updateBusy({ words: countWords(t) }); }
+        onText: (t) => { const ta = $('summaryText'); if (ta && view.tab === 'ideia') ta.value = t; updateBusy({ words: countWords(t) }); }
       });
       p.summaryPrev = old.trim() ? old : null;
       p.summary = r.text; p.summaryAt = Date.now(); p.summaryChapters = p.chapters.length;
@@ -2619,7 +2874,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     budget.addEventListener('change', () => { p.refBudget = budget.value; saveProject(p); });
 
     sec.append(el('div', { class: 'card' },
-      el('h2', { icon: 'paperclip', text: 'Arquivos de referência' }),
+      el('h2', { icon: 'library', text: 'Referências' }),
       el('p', { class: 'lead', text: 'Mande livros, capítulos ou anotações (PDF, EPUB ou TXT) e imagens de personagens, lugares ou do mundo. Diga para que serve cada um; a IA usa isso ao escrever.' }),
       input, imgInput,
       el('div', { class: 'row' },
@@ -2996,6 +3251,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function buildContext(p, upto, extraQuery) {
     const parts = [bible(p)];
     const hasSummary = p.useSummary !== false && p.summary.trim();
+    const notes = importantNotes(p);
+    if (notes) parts.push(`ANOTAÇÕES IMPORTANTES DO AUTOR (lembre e respeite):\n${notes}`);
     const world = worldText(p);
     if (world) parts.push(`MUNDO DA HISTÓRIA (guia do autor; siga estas informações e não as contradiga):\n${world}`);
     const visual = imageNotes(p);
@@ -3020,7 +3277,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     else if (status === 402) { text = 'Acabaram os créditos para este modelo pago. Adicione créditos no OpenRouter (a chave continua a mesma) ou escolha um modelo grátis.'; action = 'credits'; }
     else if (/not a valid model|no endpoints found|model.*not (found|exist)/i.test(msg) || (status === 404 && /model/i.test(msg))) { text = 'Esse modelo não existe ou está fora do ar agora. Escolha outro.'; action = 'model'; }
     else if (status === 429 || /rate.?limit/i.test(msg)) { text = 'O modelo está no limite de uso agora. Espere um minuto ou escolha outro modelo.'; action = 'model'; }
-    else if (/max_tokens|maximum context|context length|too long/i.test(msg)) { text = 'O pedido ficou grande demais para este modelo. Escolha um modelo que lembre mais páginas, ou mande menos material na aba Arquivos.'; action = 'model'; }
+    else if (/max_tokens|maximum context|context length|too long/i.test(msg)) { text = 'O pedido ficou grande demais para este modelo. Escolha um modelo que lembre mais páginas, ou mande menos material na aba Referências.'; action = 'model'; }
     else if (/moderat|flagged|safety|content policy/i.test(msg)) { text = 'Este modelo bloqueou o pedido pelas regras de conteúdo dele. Escolha outro modelo.'; action = 'model'; }
     else text = `A IA respondeu com um erro${status ? ' (' + status + ')' : ''}: ${msg.slice(0, 200)}`;
     const e = new Error(text); e.action = action; e.status = status;

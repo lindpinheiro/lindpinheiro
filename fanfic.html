@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Escritor de Fanfics</title>
+<title>Fanfic Agent</title>
 <link rel="manifest" href="fanfic.webmanifest">
 <meta name="theme-color" content="#b0234d">
 <link rel="icon" type="image/png" href="fanfic-icon-192.png">
 <link rel="apple-touch-icon" href="fanfic-icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fanfics">
+<meta name="apple-mobile-web-app-title" content="Fanfic Agent">
 <style>
   :root {
     --bg: #faf6f4;
@@ -64,7 +64,8 @@
     background: var(--surface); border-bottom: 1px solid var(--border);
     padding: 10px 16px; display: flex; gap: 10px; align-items: center;
   }
-  header h1 { font-size: 1.05rem; margin: 0; white-space: nowrap; }
+  header h1 { font-size: 1.05rem; margin: 0; white-space: nowrap; display: flex; align-items: center; gap: 10px; }
+  header .logo { width: 32px; height: 32px; border-radius: 8px; flex: none; }
   #currentTitle {
     flex: 1; min-width: 0; font-weight: 700; color: var(--muted);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -93,7 +94,9 @@
 
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }
-    header h1, #currentTitle { display: none; }
+    #currentTitle, header .app-name { display: none; }
+    header .logo { width: 28px; height: 28px; }
+    header h1 { order: -1; }
     #menuBtn { display: block; }
     aside#projects {
       position: fixed; z-index: 30; top: 0; bottom: 0; left: 0;
@@ -318,7 +321,7 @@
 
 <header>
   <button id="menuBtn" aria-label="Abrir a lista de projetos">☰ <span id="menuTitle"></span></button>
-  <h1>✍️ Escritor de Fanfics</h1>
+  <h1><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Fanfic Agent</span></h1>
   <div id="currentTitle"></div>
   <button id="installBtn" class="primary" aria-label="Baixar o app" hidden>📲 <span class="lbl-long">Baixar app</span><span class="lbl-short">App</span></button>
   <button id="settingsBtn" aria-label="Configurar a IA"><span class="dot off" id="aiDot"></span>IA</button>
@@ -510,7 +513,7 @@
 <!-- Instalar no iPhone -->
 <dialog id="installDlg" aria-labelledby="installTitle">
   <div class="dlg-head"><h2 id="installTitle">📲 Baixar o app</h2><button class="close" data-close aria-label="Fechar">✕</button></div>
-  <p class="lead">O app <b>Fanfics</b> fica na tela inicial com ícone próprio e abre em tela cheia. Não precisa da Play Store, e suas histórias continuam as mesmas.</p>
+  <p class="lead">O app <b>Fanfic Agent</b> fica na tela inicial com ícone próprio e abre em tela cheia. Não precisa da Play Store, e suas histórias continuam as mesmas.</p>
   <div id="installAndroid">
     <ol class="howto">
       <li>Abra esta página no <b>Chrome</b>.</li>
@@ -2379,7 +2382,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key };
     if (isOpenRouter(cfg.endpoint)) {
       headers['HTTP-Referer'] = location.origin;
-      headers['X-Title'] = 'Escritor de Fanfics';
+      headers['X-Title'] = 'Fanfic Agent';
     }
     let res;
     try {
@@ -2753,7 +2756,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // o botão aparece sempre, menos quando já está aberto como app
   $('installBtn').hidden = standalone;
   addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvent = e; });
-  addEventListener('appinstalled', () => { installEvent = null; $('installBtn').hidden = true; toast('App instalado! Procure “Fanfics” na tela inicial.'); });
+  addEventListener('appinstalled', () => { installEvent = null; $('installBtn').hidden = true; toast('App instalado! Procure “Fanfic Agent” na tela inicial.'); });
   $('installBtn').addEventListener('click', async () => {
     if (installEvent) {
       // o navegador deixa instalar direto

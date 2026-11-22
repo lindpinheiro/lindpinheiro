@@ -702,11 +702,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!p) return;
     p.updatedAt = Date.now();
     clearTimeout(pendingSaves.get(p.id));
-    const run = () => { pendingSaves.delete(p.id); db.put('projects', p); };
+    const run = () => { pendingSaves.delete(p.id); persist(p); };
     if (now) run(); else pendingSaves.set(p.id, setTimeout(run, 400));
   }
+  // grava no banco (assíncrono) e numa cópia instantânea no localStorage,
+  // para não perder a última edição se o app fechar logo depois
+  function persist(p) {
+    local.set('fanfic.bak.' + p.id, p);
+    db.put('projects', p);
+  }
   function flushSaves() {
-    for (const [id, t] of pendingSaves) { clearTimeout(t); const p = projects.find(x => x.id === id); if (p) db.put('projects', p); }
+    for (const [id, t] of pendingSaves) { clearTimeout(t); const p = projects.find(x => x.id === id); if (p) persist(p); }
     pendingSaves.clear();
   }
   addEventListener('visibilitychange', () => { if (document.hidden) flushSaves(); });
@@ -759,6 +765,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!confirm(`Excluir "${p.title || 'Sem título'}" com todos os capítulos e arquivos? Não dá para desfazer.`)) return;
     projects = projects.filter(x => x.id !== p.id);
     await db.del('projects', p.id);
+    local.del('fanfic.bak.' + p.id);
     for (const r of (refsCache[p.id] || [])) await db.del('refs', r.id);
     delete refsCache[p.id];
     if (!projects.length) { const n = newProject(); projects.push(n); saveProject(n, true); }
@@ -842,6 +849,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       inner.append(el('div', { class: 'spin', 'aria-hidden': 'true' }),
         el('div', { class: 'bar-status', id: 'barStatus', text: busyText() }),
         el('button', { class: 'danger', text: '■ Parar', onclick: () => busy && busy.ctrl.abort() }));
+      return;
+    }
+    const editing = view.tab === 'capitulos' && view.mode === 'editar' && cur().chapters.find(c => c.id === view.chapterId);
+    if (editing) {
+      const p = cur();
+      const saveNow = () => { flushSaves(); saveProject(p, true); view.mode = 'ler'; renderChapters(); };
+      bar.hidden = false;
+      inner.append(el('button', {
+        class: 'primary', style: 'flex:1', text: '✅ Salvar', onclick: () => {
+          saveNow(); scrollTo(0, 0);
+          toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.');
+        }
+      }));
+      if (p.chapters[p.chapters.length - 1] === editing) inner.append(el('button', {
+        style: 'flex:1', text: `✍️ Salvar e escrever o cap. ${p.chapters.length + 1}`, onclick: () => { saveNow(); openWriteDialog(); }
+      }));
       return;
     }
     if (view.tab === 'capitulos' && cur().chapters.length) {
@@ -943,8 +966,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       title.addEventListener('input', () => { ch.title = title.value; saveProject(p); });
       const ta = el('textarea', { class: 'big', id: 'chBody', 'aria-label': 'Texto do capítulo' });
       ta.value = ch.text;
-      ta.addEventListener('input', () => { ch.text = ta.value; words.textContent = fmtNum(countWords(ch.text)) + ' palavras'; saveProject(p); });
-      card.append(title, ta, el('p', { class: 'hint', text: 'Dica: selecione um trecho e toque em Ajustar para a IA mudar só ele.' }));
+      const saved = el('span', { class: 'muted', role: 'status', text: '✓ Salvo' });
+      let savedTimer;
+      ta.addEventListener('input', () => {
+        ch.text = ta.value; ch.editedAt = Date.now();
+        words.textContent = fmtNum(countWords(ch.text)) + ' palavras';
+        saved.textContent = 'Salvando…';
+        saveProject(p);
+        clearTimeout(savedTimer); savedTimer = setTimeout(() => { saved.textContent = '✓ Salvo'; }, 500);
+      });
+      card.append(title, ta,
+        el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' },
+          el('span', { class: 'hint', style: 'margin:0', text: 'Selecione um trecho e toque em Ajustar para a IA mudar só ele.' }), saved));
     } else {
       const body = el('div', { class: 'reader', id: 'chBody' });
       renderParagraphs(body, ch.text, writingThis);
@@ -953,6 +986,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     card.append(words);
     sec.append(card);
 
+    renderBar();
     if (writingThis) return;
     const ai = !!busy;
     const actions = el('div', { class: 'row' },
@@ -1349,11 +1383,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       return;
     }
 
-    const outdated = p.summaryAt && p.chapters.length !== p.summaryChapters;
-    if (p.summaryAt) card.append(el('p', { class: 'muted', text: `Feito em ${fmtDate(p.summaryAt)}, com ${p.summaryChapters} capítulo(s).` + (outdated ? ' Há capítulos novos desde então.' : '') }));
+    const edited = p.summaryAt && p.chapters.some(c => (c.editedAt || 0) > p.summaryAt);
+    const outdated = p.summaryAt && (p.chapters.length !== p.summaryChapters || edited);
+    if (p.summaryAt) card.append(el('p', { class: 'muted', text: `Feito em ${fmtDate(p.summaryAt)}, com ${p.summaryChapters} capítulo(s).` +
+      (p.chapters.length !== p.summaryChapters ? ' Há capítulos novos desde então.' : edited ? ' Você editou capítulos desde então.' : '') }));
     card.append(el('button', {
       class: 'primary wide', disabled: !!busy, onclick: generateSummary,
-      text: p.summary.trim() ? (outdated ? '✨ Atualizar com os capítulos novos' : '✨ Gerar de novo') : '✨ Gerar o resumo'
+      text: p.summary.trim() ? (outdated ? '✨ Atualizar o resumo' : '✨ Gerar de novo') : '✨ Gerar o resumo'
     }));
 
     const ta = el('textarea', { class: 'big', id: 'summaryText', style: 'min-height:40vh;margin-top:14px', 'aria-label': 'Resumo', placeholder: 'O resumo aparece aqui. Você pode editar ou escrever o seu.' });
@@ -1702,7 +1738,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function buildContext(p, upto, extraQuery) {
     const parts = [bible(p)];
     const hasSummary = p.useSummary !== false && p.summary.trim();
-    if (hasSummary) parts.push(`RESUMO DA HISTÓRIA ATÉ AGORA (memória):\n${p.summary}`);
+    if (hasSummary) parts.push(`RESUMO DA HISTÓRIA ATÉ AGORA (memória; se algo aqui discordar do texto dos capítulos, vale o texto dos capítulos, que o autor pode ter editado):\n${p.summary}`);
     const lastTail = upto > 0 ? p.chapters[upto - 1].text.slice(-2500) : '';
     const refs = pickReferences(p, [p.characters, p.premise, p.fandom, p.tone, lastTail, extraQuery].join('\n'));
     if (refs) parts.push(`MATERIAL DE REFERÊNCIA enviado pelo autor (apoio; não copie trechos literalmente; pode estar em outro idioma, mas a história é escrita em ${langOf(p)}):\n${refs}`);
@@ -2134,6 +2170,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   async function init() {
     projects = (await db.all('projects')) || [];
+
+    // usa a cópia instantânea quando ela é mais nova que a do banco
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith('fanfic.bak.')) continue;
+        const bak = local.get(k, null);
+        if (!bak || !bak.id) continue;
+        const at = projects.findIndex(x => x.id === bak.id);
+        if (at < 0) { projects.push(bak); db.put('projects', bak); }
+        else if ((bak.updatedAt || 0) > (projects[at].updatedAt || 0)) { projects[at] = bak; db.put('projects', bak); }
+      }
+    } catch {}
 
     // traz histórias da primeira versão (salvas no localStorage)
     const legacy = local.get('fanfic.stories', null);

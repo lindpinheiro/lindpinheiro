@@ -76,6 +76,10 @@
   .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
   .dot.on { background: var(--ok); }
   .dot.off { background: #e59a2f; }
+  .dot.err { background: var(--danger); }
+  .dot.busy { background: #e59a2f; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  @media (prefers-reduced-motion: reduce) { .dot.busy { animation: none; } }
 
   /* ---------- estrutura ---------- */
   .layout { display: grid; grid-template-columns: var(--side) 1fr; min-height: calc(100vh - 67px); }
@@ -1083,7 +1087,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       try { remote = await openJSON(await dbxDownload(path), key); }
       catch (e) {
         if (e.message && /Dropbox|internet/.test(e.message)) throw e;
-        const err = new Error('A senha de sincronização foi trocada em outro aparelho. Toque em ☁️ Sincronizar e digite a senha nova.');
+        const err = new Error('A senha foi trocada em outro aparelho. Toque em “Falta a senha” e digite a senha nova.');
         err.needPassword = true; throw err;
       }
       if (await (kind === 'projects' ? mergeProjects(remote) : mergeRefs(remote))) needPush = true;
@@ -1126,14 +1130,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   // ---------- tela ----------
+  // o botão mostra o estado com uma bolinha; a linha de baixo, o detalhe
   function renderSyncLine(text) {
-    const line = $('syncLine');
-    if (text) { line.textContent = '⟳ ' + text; return; }
-    if (!sync.appKey || !sync.refresh) line.textContent = 'Use as mesmas histórias no celular e no computador.';
-    else if (!sync.key) line.textContent = sync.lastError ? '⚠ ' + sync.lastError : 'Falta criar ou digitar a senha de sincronização.';
-    else if (sync.lastError) line.textContent = '⚠ ' + sync.lastError;
-    else if (sync.lastSync) line.textContent = '✓ Sincronizado às ' + new Date(sync.lastSync).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    else line.textContent = 'Conectado. Sincronizando em instantes…';
+    const line = $('syncLine'), btn = $('syncBtn');
+    const hhmm = (t) => new Date(t).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    let dot = '', label = '☁️ Sincronizar com Dropbox', detail;
+    if (text) { dot = 'busy'; label = 'Sincronizando…'; detail = sync.lastSync ? 'Última vez às ' + hhmm(sync.lastSync) : 'Enviando para o Dropbox…'; }
+    else if (!sync.appKey || !sync.refresh) detail = 'Use as mesmas histórias no celular e no computador.';
+    else if (!sync.key) { dot = sync.lastError ? 'err' : 'off'; label = 'Falta a senha'; detail = sync.lastError || 'Crie ou digite a senha de sincronização.'; }
+    else if (sync.lastError) { dot = 'err'; label = 'Erro na sincronização'; detail = sync.lastError; }
+    else if (sync.lastSync) { dot = 'on'; label = 'Sincronizado'; detail = 'Dropbox · às ' + hhmm(sync.lastSync); }
+    else { dot = 'busy'; label = 'Sincronizando…'; detail = 'Conectado ao Dropbox.'; }
+    btn.innerHTML = '';
+    if (dot) btn.append(el('span', { class: 'dot ' + dot, 'aria-hidden': 'true' }));
+    btn.append(label);
+    btn.setAttribute('aria-label', `${label}. ${detail}. Abrir a sincronização`);
+    line.textContent = detail;
   }
   function syncStatusMsg(msg, kind) { const st = $('syncStatus'); if (st) { st.textContent = msg; st.className = 'status' + (kind ? ' ' + kind : ''); } }
 

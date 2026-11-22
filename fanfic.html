@@ -78,6 +78,29 @@
   .dot.on { background: var(--ok); }
   .dot.off { background: #e59a2f; }
   .dot.err { background: var(--danger); }
+  .user { position: relative; margin-left: auto; flex: none; }
+  .avatar {
+    width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; position: relative;
+    background: var(--accent-soft); border-color: var(--accent);
+  }
+  .avatar svg { width: 24px; height: 24px; fill: var(--accent); }
+  .avatar .badge { position: absolute; top: -1px; right: -1px; width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--surface); }
+  .avatar .badge.off { background: #e59a2f; }
+  .avatar .badge.err { background: var(--danger); }
+  .menu {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; width: min(330px, calc(100vw - 24px));
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0,0,0,.25); padding: 6px;
+  }
+  .menu-item {
+    width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 12px; text-align: left;
+    background: transparent; border: 0; padding: 10px 12px; border-radius: 10px; min-height: 56px;
+  }
+  .menu-item:hover, .menu-item:focus-visible { background: var(--surface-2); }
+  .menu-item .mi-ico { font-size: 1.25rem; width: 28px; text-align: center; flex: none; }
+  .menu-item .mi-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .menu-item .mi-sub { font-weight: 400; font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu-item .dot { margin: 0; flex: none; }
   .dot.busy { background: #e59a2f; animation: pulse 1s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .3; } }
   @media (prefers-reduced-motion: reduce) { .dot.busy { animation: none; } }
@@ -323,8 +346,32 @@
   <button id="menuBtn" aria-label="Abrir a lista de projetos">☰ <span id="menuTitle"></span></button>
   <h1><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Fanfic Agent</span></h1>
   <div id="currentTitle"></div>
-  <button id="installBtn" class="primary" aria-label="Baixar o app" hidden>📲 <span class="lbl-long">Baixar app</span><span class="lbl-short">App</span></button>
-  <button id="settingsBtn" aria-label="Configurar a IA"><span class="dot off" id="aiDot"></span>IA</button>
+  <div class="user">
+    <button id="userBtn" class="avatar" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenu" aria-label="Seu menu: IA, sincronização, backup e app">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.4 0-8 2.2-8 5v1.5c0 .3.2.5.5.5h15c.3 0 .5-.2.5-.5V19c0-2.8-3.6-5-8-5Z"/></svg>
+      <span class="badge" id="userBadge" hidden></span>
+    </button>
+    <div id="userMenu" class="menu" role="menu" aria-label="Seu menu" hidden>
+      <button role="menuitem" id="settingsBtn" class="menu-item">
+        <span class="mi-ico" aria-hidden="true">🤖</span>
+        <span class="mi-text"><span class="mi-label">IA</span><span class="mi-sub" id="aiLine">Não conectada</span></span>
+        <span class="dot off" id="aiDot" aria-hidden="true"></span>
+      </button>
+      <button role="menuitem" id="syncBtn" class="menu-item">
+        <span class="mi-ico" aria-hidden="true">☁️</span>
+        <span class="mi-text"><span class="mi-label" id="syncLabel">Sincronizar com Dropbox</span><span class="mi-sub" id="syncLine">Mesmas histórias no celular e no computador</span></span>
+        <span class="dot" id="syncDot" aria-hidden="true" hidden></span>
+      </button>
+      <button role="menuitem" id="backupBtn" class="menu-item">
+        <span class="mi-ico" aria-hidden="true">🔄</span>
+        <span class="mi-text"><span class="mi-label">Backup em arquivo</span><span class="mi-sub">Salvar ou abrir um arquivo</span></span>
+      </button>
+      <button role="menuitem" id="installBtn" class="menu-item" hidden>
+        <span class="mi-ico" aria-hidden="true">📲</span>
+        <span class="mi-text"><span class="mi-label">Baixar app</span><span class="mi-sub">Instalar no celular ou no computador</span></span>
+      </button>
+    </div>
+  </div>
 </header>
 
 <div class="layout">
@@ -334,10 +381,6 @@
       <button id="newProjectBtn" class="primary">+ Novo</button>
     </div>
     <ul class="proj-list" id="projList"></ul>
-    <hr>
-    <button id="syncBtn" class="wide">☁️ Sincronizar com Dropbox</button>
-    <p class="hint" id="syncLine">Use as mesmas histórias no celular e no computador.</p>
-    <button id="backupBtn" class="wide" style="margin-top:8px">🔄 Backup em arquivo</button>
   </aside>
   <div id="backdrop"></div>
 
@@ -468,7 +511,7 @@
   <input type="file" id="backupFile" accept=".json,application/json" hidden>
   <button class="wide" id="backupOpen" style="margin-top:10px">⬆ Abrir arquivo de backup</button>
   <div class="status" id="backupStatus" role="status"></div>
-  <p class="hint" style="margin-top:14px">A chave da IA não vai no backup, por segurança. No outro aparelho, conecte a IA em <b>IA</b>.</p>
+  <p class="hint" style="margin-top:14px">A chave da IA não vai no backup, por segurança. No outro aparelho, conecte a IA pelo seu menu (o avatar, no canto de cima).</p>
 </dialog>
 
 <!-- Escrever capítulo -->
@@ -712,9 +755,45 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function renderAiDot() {
     $('aiDot').className = 'dot ' + (isConfigured() ? 'on' : 'off');
+    $('aiLine').textContent = isConfigured() ? (settings.modelName || settings.model) : 'Não conectada · toque para conectar';
     $('settingsBtn').setAttribute('aria-label', isConfigured() ? 'IA conectada. Abrir configurações' : 'IA não conectada. Conectar');
     $('connectNotice').hidden = isConfigured();
+    renderBadge();
   }
+
+  // bolinha no avatar: só aparece quando algo precisa de atenção
+  function renderBadge() {
+    let level = '';
+    if (!isConfigured()) level = 'off';
+    try {
+      if (sync.appKey && sync.refresh && (!sync.key || sync.lastError)) level = sync.lastError ? 'err' : (level || 'off');
+    } catch {}
+    const b = $('userBadge');
+    b.hidden = !level; b.className = 'badge ' + level;
+  }
+
+  // ---------- menu do avatar ----------
+  const menuItems = () => [...$('userMenu').querySelectorAll('.menu-item')].filter(x => !x.hidden);
+  function openUserMenu() {
+    $('userMenu').hidden = false; $('userBtn').setAttribute('aria-expanded', 'true');
+    menuItems()[0]?.focus();
+  }
+  function closeUserMenu(focusBack) {
+    if ($('userMenu').hidden) return;
+    $('userMenu').hidden = true; $('userBtn').setAttribute('aria-expanded', 'false');
+    if (focusBack) $('userBtn').focus();
+  }
+  $('userBtn').addEventListener('click', (e) => { e.stopPropagation(); $('userMenu').hidden ? openUserMenu() : closeUserMenu(); });
+  // as ações dos itens continuam nos próprios botões; aqui só fecha o menu
+  $('userMenu').addEventListener('click', (e) => { if (e.target.closest('.menu-item')) closeUserMenu(); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.user')) closeUserMenu(); });
+  $('userMenu').addEventListener('keydown', (e) => {
+    const items = menuItems(), i = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    else if (e.key === 'Escape') { e.preventDefault(); closeUserMenu(true); }
+    else if (e.key === 'Tab') closeUserMenu();
+  });
 
   // =====================================================================
   // Estado dos projetos
@@ -1090,7 +1169,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       try { remote = await openJSON(await dbxDownload(path), key); }
       catch (e) {
         if (e.message && /Dropbox|internet/.test(e.message)) throw e;
-        const err = new Error('A senha foi trocada em outro aparelho. Toque em “Falta a senha” e digite a senha nova.');
+        const err = new Error('A senha foi trocada em outro aparelho. Abra o seu menu (avatar, no canto de cima), toque em Falta a senha e digite a senha nova.');
         err.needPassword = true; throw err;
       }
       if (await (kind === 'projects' ? mergeProjects(remote) : mergeRefs(remote))) needPush = true;
@@ -1133,22 +1212,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   // ---------- tela ----------
-  // o botão mostra o estado com uma bolinha; a linha de baixo, o detalhe
+  // item do menu: bolinha + estado; a linha de baixo, o detalhe
   function renderSyncLine(text) {
-    const line = $('syncLine'), btn = $('syncBtn');
     const hhmm = (t) => new Date(t).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    let dot = '', label = '☁️ Sincronizar com Dropbox', detail;
+    let dot = '', label = 'Sincronizar com Dropbox', detail;
     if (text) { dot = 'busy'; label = 'Sincronizando…'; detail = sync.lastSync ? 'Última vez às ' + hhmm(sync.lastSync) : 'Enviando para o Dropbox…'; }
-    else if (!sync.appKey || !sync.refresh) detail = 'Use as mesmas histórias no celular e no computador.';
-    else if (!sync.key) { dot = sync.lastError ? 'err' : 'off'; label = 'Falta a senha'; detail = sync.lastError || 'Crie ou digite a senha de sincronização.'; }
+    else if (!sync.appKey || !sync.refresh) detail = 'Mesmas histórias no celular e no computador';
+    else if (!sync.key) { dot = sync.lastError ? 'err' : 'off'; label = 'Falta a senha'; detail = sync.lastError || 'Crie ou digite a senha de sincronização'; }
     else if (sync.lastError) { dot = 'err'; label = 'Erro na sincronização'; detail = sync.lastError; }
     else if (sync.lastSync) { dot = 'on'; label = 'Sincronizado'; detail = 'Dropbox · às ' + hhmm(sync.lastSync); }
-    else { dot = 'busy'; label = 'Sincronizando…'; detail = 'Conectado ao Dropbox.'; }
-    btn.innerHTML = '';
-    if (dot) btn.append(el('span', { class: 'dot ' + dot, 'aria-hidden': 'true' }));
-    btn.append(label);
-    btn.setAttribute('aria-label', `${label}. ${detail}. Abrir a sincronização`);
-    line.textContent = detail;
+    else { dot = 'busy'; label = 'Sincronizando…'; detail = 'Conectado ao Dropbox'; }
+    $('syncLabel').textContent = label;
+    $('syncLine').textContent = detail;
+    $('syncLine').title = detail;
+    $('syncDot').hidden = !dot; $('syncDot').className = 'dot ' + dot;
+    $('syncBtn').setAttribute('aria-label', `${label}. ${detail}`);
+    renderBadge();
   }
   function syncStatusMsg(msg, kind) { const st = $('syncStatus'); if (st) { st.textContent = msg; st.className = 'status' + (kind ? ' ' + kind : ''); } }
 
@@ -2626,7 +2705,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         }
       });
       b.append(...setupHead('Escolha o modelo'),
-        el('p', { class: 'lead', text: 'Cada modelo escreve de um jeito. Se um deles recusar cenas, escrever mal ou em outro idioma, é só trocar depois em IA.' }),
+        el('p', { class: 'lead', text: 'Cada modelo escreve de um jeito. Se um deles recusar cenas, escrever mal ou em outro idioma, é só trocar depois pelo seu menu (avatar → IA).' }),
         picker, chosen, status,
         el('div', { class: 'row', style: 'margin-top:12px' },
           el('button', { text: '← Voltar', onclick: () => { setup.step = 2; renderSetup(); } }),

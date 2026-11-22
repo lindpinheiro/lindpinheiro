@@ -808,6 +808,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Configurações da IA
   // =====================================================================
   let settings = Object.assign({}, DEFAULT_SETTINGS, local.get('fanfic.settings', {}));
+  let syncStarted = false;
   // versões anteriores salvavam as instruções padrão; volta a usar as novas
   if ((settings.system || '').startsWith('Você é um escritor de fanfics e ficção romântica, especialista')) settings.system = '';
   if (settings.maxTokens === 4096) settings.maxTokens = 8192;
@@ -817,7 +818,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const getSystem = () => (settings.system || '').trim() || DEFAULT_SYSTEM;
   const isOpenRouter = (ep = settings.endpoint) => /openrouter\.ai/.test(ep);
 
-  function saveSettings() {
+  // changed=false: só grava (ao abrir o app ou ao receber da nuvem), sem marcar mudança
+  function saveSettings(changed = true) {
+    if (changed) { settings.updatedAt = Date.now(); if (typeof markDirty === 'function' && syncStarted) markDirty('projects'); }
     local.set('fanfic.settings', settings);
     renderAiDot();
   }
@@ -984,6 +987,32 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const redirectUri = () => location.origin + location.pathname;
   let cryptoKey = null, syncing = false, syncAgain = false, syncTimer = null;
 
+  // configuração da IA que viaja junto com as histórias (no mesmo arquivo cifrado)
+  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system'];
+  function aiForSync() {
+    if (!settings.key) return null;
+    const o = { updatedAt: settings.updatedAt || 0 };
+    AI_FIELDS.forEach(k => { o[k] = settings[k]; });
+    return o;
+  }
+  // devolve true se a versão deste aparelho é a que deve subir
+  function mergeAI(remoteAI) {
+    const mine = settings.updatedAt || 0;
+    if (remoteAI && remoteAI.key) {
+      const theirs = remoteAI.updatedAt || 0;
+      const blocked = !!settings.disconnectedAt && settings.disconnectedAt >= theirs; // só bloqueia se desconectou depois
+      if (!blocked && (theirs > mine || !settings.key)) {
+        AI_FIELDS.forEach(k => { if (remoteAI[k] !== undefined) settings[k] = remoteAI[k]; });
+        settings.updatedAt = theirs;
+        modelsCache = null;
+        saveSettings(false);
+        return false;
+      }
+      return !!settings.key && mine > theirs;
+    }
+    return !!settings.key;
+  }
+
   function markDirty(kind) {
     if (!sync.dirty) sync.dirty = {};
     if (sync.dirty[kind]) { scheduleSync(); return; }
@@ -1146,7 +1175,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // devolve true se este aparelho tem algo que a nuvem não tem
   async function mergeProjects(remote) {
     if (!remote) return false;
-    let needPush = false, touchedCurrent = false, added = 0;
+    let needPush = mergeAI(remote.ai), touchedCurrent = false, added = 0;
     mergeDeleted('projects', remote.deleted);
     if (Object.keys(sync.deleted.projects).some(id => !(remote.deleted || {})[id])) needPush = true;
     const editingNow = busy || (document.activeElement && document.activeElement.closest && document.activeElement.closest('main') &&
@@ -1223,7 +1252,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   async function payload(kind) {
-    if (kind === 'projects') return { projects: projects.filter(x => !isEmptyProject(x)), deleted: sync.deleted.projects, at: Date.now() };
+    if (kind === 'projects') return { projects: projects.filter(x => !isEmptyProject(x)), deleted: sync.deleted.projects, ai: aiForSync(), at: Date.now() };
     return { refs: (await db.all('refs')) || [], deleted: sync.deleted.refs, at: Date.now() };
   }
 
@@ -1232,6 +1261,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const key = await getKey();
     const meta = await dbxMeta(path);
     let needPush = !meta || !!sync.dirty[kind];
+    if (kind === 'projects' && settings.key && sync.aiPushedAt !== (settings.updatedAt || 0)) needPush = true;
     if (meta && meta.rev !== sync.rev[kind]) {
       let remote;
       try { remote = await openJSON(await dbxDownload(path), key); }
@@ -1248,6 +1278,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       try {
         const res = await dbxUpload(path, await sealJSON(await payload(kind), key, sync.salt), meta ? meta.rev : null);
         sync.rev[kind] = res.rev; sync.dirty[kind] = false;
+        if (kind === 'projects') sync.aiPushedAt = settings.key ? (settings.updatedAt || 0) : sync.aiPushedAt;
       } catch (e) {
         if (e.conflict && tries > 1) { sync.rev[kind] = ''; return syncFile(kind, tries - 1); } // outro aparelho enviou antes: junta e tenta de novo
         throw e;
@@ -1357,7 +1388,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     // 4. tudo pronto
     b.append(syncHead('Sincronização', 'cloud'),
       el('p', { class: 'status ok', style: 'margin-top:0' }, el('span', { class: 'dot on' }), 'Conectado ao Dropbox, com criptografia'),
-      el('p', { class: 'lead', text: 'As histórias são sincronizadas sozinhas: ao abrir o app, ao voltar para ele e alguns segundos depois de cada mudança. Se o mesmo projeto mudar em dois aparelhos, fica a versão mais nova.' }),
+      el('p', { class: 'lead', text: 'As histórias e a configuração da IA (chave e modelo) são sincronizadas sozinhas: ao abrir o app, ao voltar para ele e alguns segundos depois de cada mudança. Se o mesmo projeto mudar em dois aparelhos, fica a versão mais nova.' }),
       el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Última sincronização' }),
           el('div', { class: 'v', text: syncing ? 'Sincronizando…' : sync.lastSync ? new Date(sync.lastSync).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Ainda não' }),
@@ -2884,7 +2915,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', {
           class: 'link', text: 'Desconectar a IA deste aparelho', onclick: () => {
             if (!confirm('Apagar a chave deste aparelho?')) return;
-            settings.key = ''; settings.model = ''; settings.modelName = ''; saveSettings();
+            settings.key = ''; settings.model = ''; settings.modelName = ''; settings.disconnectedAt = Date.now(); saveSettings(false);
             $('settingsDlg').close(); renderTab(); toast('IA desconectada.');
           }
         })),
@@ -2957,7 +2988,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
     if (!projects.length) { const p = newProject(); projects.push(p); saveProject(p, true); }
     if (!cur()) currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
-    saveSettings();
+    saveSettings(false);
+    syncStarted = true;
     openProject(currentId);
     await finishDropboxLogin();
     renderSyncLine();

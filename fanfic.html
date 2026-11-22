@@ -241,6 +241,20 @@
   .ch-item .preview { color: var(--muted); margin: 6px 0 10px; font-size: .95rem;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .nav-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .ch-toolbar { display: flex; gap: 8px 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 14px; }
+  .ch-toolbar .nav, .ch-toolbar .tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .ch-toolbar .pos { color: var(--muted); font-size: .9rem; margin-left: 4px; }
+  .saved.dirty { color: var(--accent); font-weight: 600; }
+  button.link.plain { color: var(--muted); }
+  .sel-bar {
+    position: fixed; z-index: 45; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    max-width: min(620px, calc(100vw - 24px)); padding: 8px; border-radius: var(--radius);
+    background: var(--surface); border: 1px solid var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,.28);
+  }
+  .sel-bar.docked { left: 12px !important; right: 12px; bottom: 12px; top: auto !important; max-width: none; flex-wrap: nowrap; overflow-x: auto; }
+  .sel-bar .sel-title { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: .85rem; color: var(--accent); padding: 0 4px; white-space: nowrap; }
+  .sel-bar .chip { min-height: 36px; white-space: nowrap; flex: none; }
+  .sel-bar .chip.strong { border-color: var(--accent); }
   .nav-row .pos { color: var(--muted); font-size: .9rem; margin: 0 auto 0 4px; }
   .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
   .seg button { border: 0; border-radius: 0; background: var(--surface); }
@@ -328,6 +342,10 @@
     .hide-m, .lbl-long { display: none; }
     .lbl-short { display: inline; }
     .nav-row { gap: 6px; flex-wrap: nowrap; margin-bottom: 10px; }
+    .ch-toolbar { margin-bottom: 10px; }
+    .ch-toolbar .tools { width: 100%; }
+    .ch-toolbar .tools > button:last-child { flex: 1; }
+    .ch-toolbar .nav > button { min-width: 42px; padding: 6px 10px; }
     .nav-row > button { min-width: 42px; padding: 6px 10px; }
     .nav-row .pos { margin: 0 auto 0 2px; }
     .seg button { padding: 6px 12px; }
@@ -564,6 +582,20 @@
   <div class="status" id="backupStatus" role="status"></div>
   <p class="hint" style="margin-top:14px">A chave da IA não vai no backup, por segurança. No outro aparelho, conecte a IA pelo seu menu (o avatar, no canto de cima).</p>
 </dialog>
+
+<!-- Sair da edição com alterações -->
+<dialog id="leaveDlg" aria-labelledby="leaveTitle">
+  <div class="dlg-head"><h2 id="leaveTitle">Salvar as alterações?</h2></div>
+  <p class="lead">Você mudou este capítulo e ainda não salvou.</p>
+  <div class="row">
+    <button class="primary" id="leaveSave">Salvar</button>
+    <button id="leaveStay">Continuar editando</button>
+    <button class="link" id="leaveDiscard">Descartar alterações</button>
+  </div>
+</dialog>
+
+<!-- Opções da IA para o trecho selecionado -->
+<div id="selBar" class="sel-bar" role="toolbar" aria-label="Ajustar o trecho selecionado" hidden></div>
 
 <!-- Escrever capítulo -->
 <dialog id="writeDlg" aria-labelledby="writeTitle">
@@ -920,7 +952,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       list.append(el('li', {}, el('button', {
         class: 'proj-item' + (p.id === currentId ? ' active' : ''),
         'aria-current': p.id === currentId ? 'true' : null,
-        onclick: () => openProject(p.id)
+        onclick: () => guardEdit(() => openProject(p.id))
       },
         p.title.trim() || 'Sem título',
         el('span', { class: 'meta', text: `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}` }))));
@@ -943,13 +975,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     scrollTo(0, 0);
   }
 
-  $('newProjectBtn').addEventListener('click', () => {
+  $('newProjectBtn').addEventListener('click', () => guardEdit(() => {
     if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
     const p = newProject();
     projects.push(p); saveProject(p, true);
     openProject(p.id);
     $('f-title').focus();
-  });
+  }));
 
   $('deleteProjectBtn').addEventListener('click', async () => {
     const p = cur();
@@ -1566,11 +1598,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   // Abas
   // =====================================================================
-  document.querySelectorAll('#tabs [data-tab]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#tabs [data-tab]').forEach(b => b.addEventListener('click', () => guardEdit(() => {
     view.tab = b.dataset.tab;
     if (view.tab === 'capitulos') view.chapterId = null;
     renderTab(); scrollTo(0, 0);
-  }));
+  })));
 
   function renderTab() {
     const p = cur();
@@ -1629,35 +1661,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function renderBar() {
     const bar = $('bar'), inner = $('barInner');
     inner.innerHTML = '';
-    if (busy) {
-      bar.hidden = false;
-      inner.append(el('div', { class: 'spin', 'aria-hidden': 'true' }),
-        el('div', { class: 'bar-status', id: 'barStatus', text: busyText() }),
-        el('button', { class: 'danger', icon: 'square', text: 'Parar', onclick: () => busy && busy.ctrl.abort() }));
-      return;
-    }
-    const editing = view.tab === 'capitulos' && view.mode === 'editar' && cur().chapters.find(c => c.id === view.chapterId);
-    if (editing) {
-      const p = cur();
-      const saveNow = () => { flushSaves(); saveProject(p, true); view.mode = 'ler'; renderChapters(); };
-      bar.hidden = false;
-      inner.append(el('button', {
-        class: 'primary', style: 'flex:1', icon: 'check', text: 'Salvar', onclick: () => {
-          saveNow(); scrollTo(0, 0);
-          toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.');
-        }
-      }));
-      if (p.chapters[p.chapters.length - 1] === editing) inner.append(el('button', {
-        style: 'flex:1', icon: 'pen-line', text: `Salvar e escrever o cap. ${p.chapters.length + 1}`, onclick: () => { saveNow(); openWriteDialog(); }
-      }));
-      return;
-    }
-    if (view.tab === 'capitulos' && cur().chapters.length) {
-      bar.hidden = false;
-      inner.append(el('button', { class: 'primary wide', icon: 'pen-line', text: `Escrever o capítulo ${cur().chapters.length + 1}`, onclick: openWriteDialog }));
-      return;
-    }
-    bar.hidden = true;
+    bar.hidden = !busy;
+    if (!busy) return;
+    inner.append(el('div', { class: 'spin', 'aria-hidden': 'true' }),
+      el('div', { class: 'bar-status', id: 'barStatus', text: busyText() }),
+      el('button', { class: 'danger', icon: 'square', text: 'Parar', onclick: () => busy && busy.ctrl.abort() }));
   }
 
   function startBusy(kind, label, chapterId) {
@@ -1697,7 +1705,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
         el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyText(fullStoryText(p), 'História copiada') }),
-        el('button', { icon: 'download', text: 'Baixar', onclick: () => exportStory(p) }))));
+        el('button', { icon: 'download', text: 'Baixar', onclick: () => exportStory(p) }),
+        writeButton(p))));
 
     p.chapters.forEach((c, i) => {
       const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
@@ -1722,67 +1731,214 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     });
   }
 
+  // botão "Escrever o capítulo N" (no celular, "Escrever cap. N")
+  function writeButton(p) {
+    const n = p.chapters.length + 1;
+    return el('button', { class: 'primary', icon: 'pen-line', 'aria-label': `Escrever o capítulo ${n}`, disabled: !!busy, onclick: () => guardEdit(openWriteDialog) },
+      el('span', { class: 'lbl-long', text: `Escrever o capítulo ${n}` }), el('span', { class: 'lbl-short', text: `Escrever cap. ${n}` }));
+  }
+
   function renderChapterView(sec, p, ch) {
     const i = p.chapters.indexOf(ch);
     const writingThis = busy && busy.chapterId === ch.id;
-    const go = (j) => { view.chapterId = p.chapters[j].id; renderChapters(); scrollTo(0, 0); };
-    const setMode = (m) => { view.mode = m; renderChapters(); };
+    const editing = view.mode === 'editar' && !writingThis;
+    const go = (j) => guardEdit(() => { view.chapterId = p.chapters[j].id; renderChapters(); scrollTo(0, 0); });
+    const setMode = (m) => m === view.mode ? null : (m === 'ler' ? guardEdit(() => { view.mode = 'ler'; renderChapters(); }) : (view.mode = m, renderChapters()));
 
-    sec.append(el('div', { class: 'nav-row' },
-      el('button', { 'aria-label': 'Voltar para todos os capítulos', onclick: () => { view.chapterId = null; renderChapters(); scrollTo(0, 0); } }, svgIcon('arrow-left'), el('span', { class: 'hide-m', text: 'Capítulos' })),
-      el('button', { icon: 'chevron-left', 'aria-label': 'Capítulo anterior', disabled: i === 0, onclick: () => go(i - 1) }),
-      el('button', { icon: 'chevron-right', 'aria-label': 'Próximo capítulo', disabled: i === p.chapters.length - 1, onclick: () => go(i + 1) }),
-      el('span', { class: 'pos', text: `${i + 1}/${p.chapters.length}` }),
+    const tools = el('div', { class: 'tools' },
       el('div', { class: 'seg', role: 'group', 'aria-label': 'Modo' },
         el('button', { 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }, svgIcon('book-open', 'hide-m'), 'Ler'),
-        el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar'))));
+        el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
+    if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { saveEdit(); view.mode = 'ler'; renderChapters(); scrollTo(0, 0); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
+    else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyText(ch.text, 'Capítulo copiado') }, el('span', { text: 'Copiar' })));
+    tools.append(writeButton(p));
+
+    sec.append(el('div', { class: 'ch-toolbar' },
+      el('div', { class: 'nav' },
+        el('button', { 'aria-label': 'Voltar para todos os capítulos', onclick: () => guardEdit(() => { view.chapterId = null; renderChapters(); scrollTo(0, 0); }) }, svgIcon('arrow-left'), el('span', { class: 'hide-m', text: 'Capítulos' })),
+        el('button', { icon: 'chevron-left', 'aria-label': 'Capítulo anterior', disabled: i === 0, onclick: () => go(i - 1) }),
+        el('button', { icon: 'chevron-right', 'aria-label': 'Próximo capítulo', disabled: i === p.chapters.length - 1, onclick: () => go(i + 1) }),
+        el('span', { class: 'pos', text: `${i + 1}/${p.chapters.length}` })),
+      tools));
 
     if (!writingThis && !busy && wrongLang(p, ch.text)) sec.append(el('div', { class: 'notice' },
       el('p', { text: `Este capítulo saiu em inglês.` }),
-      el('button', { class: 'primary', text: `Reescrever em ${langLower(p)}`, onclick: () => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
-        `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`) })));
+      el('button', { class: 'primary', text: `Reescrever em ${langLower(p)}`, onclick: () => guardEdit(() => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
+        `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`)) })));
 
     const card = el('div', { class: 'card' });
-    const words = el('div', { class: 'muted', id: 'chWords', style: 'margin-top:8px', text: fmtNum(countWords(ch.text)) + ' palavras' });
+    const words = el('span', { class: 'muted', id: 'chWords' });
 
-    if (view.mode === 'editar' && !writingThis) {
+    if (editing) {
+      const d = startEdit(p, ch);
       const title = el('input', { type: 'text', 'aria-label': 'Título do capítulo', style: 'font-weight:700;margin-bottom:12px', placeholder: `Capítulo ${i + 1}` });
-      title.value = ch.title || '';
-      title.addEventListener('input', () => { ch.title = title.value; saveProject(p); });
+      title.value = d.title;
       const ta = el('textarea', { class: 'big', id: 'chBody', 'aria-label': 'Texto do capítulo' });
-      ta.value = ch.text;
-      const saved = el('span', { class: 'muted saved', role: 'status' }, svgIcon('check'), 'Salvo');
-      let savedTimer;
-      ta.addEventListener('input', () => {
-        ch.text = ta.value; ch.editedAt = Date.now();
-        words.textContent = fmtNum(countWords(ch.text)) + ' palavras';
-        saved.replaceChildren('Salvando…');
-        saveProject(p);
-        clearTimeout(savedTimer); savedTimer = setTimeout(() => { saved.replaceChildren(svgIcon('check'), 'Salvo'); }, 500);
-      });
-      card.append(title, ta,
-        el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' },
-          el('span', { class: 'hint', style: 'margin:0', text: 'Selecione um trecho e toque em Ajustar para a IA mudar só ele.' }), saved));
+      ta.value = d.text;
+      const state = el('span', { class: 'muted saved', id: 'editState', role: 'status' });
+      const refresh = () => {
+        words.textContent = fmtNum(countWords(d.text)) + ' palavras';
+        const dirty = editDirty();
+        state.replaceChildren(...(dirty ? ['Alterações não salvas'] : [svgIcon('check'), 'Salvo']));
+        state.classList.toggle('dirty', dirty);
+        const b = $('saveEditBtn'); if (b) b.disabled = !dirty;
+      };
+      title.addEventListener('input', () => { d.title = title.value; keepDraft(); refresh(); });
+      ta.addEventListener('input', () => { d.text = ta.value; keepDraft(); refresh(); });
+      card.append(title, ta, el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' }, words, state),
+        el('p', { class: 'hint', text: 'Selecione um trecho para ver as opções de ajuste da IA.' }));
+      refresh();
     } else {
       const body = el('div', { class: 'reader', id: 'chBody' });
       renderParagraphs(body, ch.text, writingThis);
-      card.append(el('h2', { class: 'reader-title', text: chTitle(p, ch) }), body);
+      words.textContent = fmtNum(countWords(ch.text)) + ' palavras';
+      card.append(el('h2', { class: 'reader-title', text: chTitle(p, ch) }), body,
+        el('div', { class: 'row', style: 'justify-content:space-between;margin-top:8px' }, words,
+          writingThis ? null : el('span', { class: 'hint', style: 'margin:0', text: 'Selecione um trecho para a IA ajustar.' })));
     }
-    card.append(words);
     sec.append(card);
 
     renderBar();
     if (writingThis) return;
     const ai = !!busy;
-    const actions = el('div', { class: 'row' },
-      el('button', { class: 'primary', icon: 'copy', text: 'Copiar capítulo', onclick: () => copyText(ch.text, 'Capítulo copiado') }),
-      el('button', { icon: 'wand-sparkles', text: 'Ajustar', disabled: ai, onclick: () => openAdjust(ch) }),
-      el('button', { icon: 'plus', text: 'Continuar escrevendo', disabled: ai, onclick: () => continueChapter(ch) }));
-    if (ch.prev != null) actions.append(el('button', { icon: 'undo-2', text: 'Desfazer a última mudança', disabled: ai, onclick: () => undoChapter(p, ch) }));
-    sec.append(actions,
-      el('div', { class: 'row end', style: 'margin-top:20px' },
-        el('button', { class: 'link', text: 'Excluir este capítulo', disabled: ai, onclick: () => deleteChapter(p, ch) })));
+    const foot = el('div', { class: 'row end', style: 'margin-top:12px' });
+    if (ch.prev != null && !editing) foot.append(el('button', { class: 'link plain', icon: 'undo-2', text: 'Desfazer a última mudança da IA', disabled: ai, onclick: () => undoChapter(p, ch) }));
+    foot.append(el('button', { class: 'link', text: 'Excluir este capítulo', disabled: ai, onclick: () => guardEdit(() => { discardEdit(); deleteChapter(p, ch); }, true) }));
+    sec.append(foot);
   }
+
+  // =====================================================================
+  // Edição: rascunho até a pessoa salvar (guardado também se o app fechar)
+  // =====================================================================
+  let edit = local.get('fanfic.editdraft', null); // { projectId, chId, title, text }
+  function startEdit(p, ch) {
+    if (!edit || edit.chId !== ch.id || edit.projectId !== p.id) {
+      edit = { projectId: p.id, chId: ch.id, title: ch.title || '', text: ch.text };
+      keepDraft();
+    }
+    return edit;
+  }
+  function keepDraft() { if (edit) local.set('fanfic.editdraft', edit); }
+  function editTarget() {
+    if (!edit) return null;
+    const p = projects.find(x => x.id === edit.projectId);
+    const ch = p && p.chapters.find(c => c.id === edit.chId);
+    return ch ? { p, ch } : null;
+  }
+  function editDirty() {
+    const t = editTarget();
+    return !!t && (edit.text !== t.ch.text || edit.title !== (t.ch.title || ''));
+  }
+  function saveEdit() {
+    const t = editTarget();
+    if (t && editDirty()) { t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); saveProject(t.p, true); }
+    discardEdit();
+  }
+  function discardEdit() { edit = null; local.del('fanfic.editdraft'); }
+
+  // antes de sair do modo editar com alterações, pergunta o que fazer
+  async function guardEdit(next, keepIfNoChanges) {
+    if (!editDirty()) { if (!keepIfNoChanges) discardEdit(); return next(); }
+    const r = await askLeave();
+    if (r === 'stay') return;
+    if (r === 'save') { saveEdit(); toast('Salvo ✓'); } else discardEdit();
+    next();
+  }
+  function askLeave() {
+    return new Promise(res => {
+      const dlg = $('leaveDlg');
+      const done = (v) => { dlg.close(); res(v); };
+      $('leaveSave').onclick = () => done('save');
+      $('leaveDiscard').onclick = () => done('discard');
+      $('leaveStay').onclick = () => done('stay');
+      dlg.oncancel = (e) => { e.preventDefault(); done('stay'); };
+      dlg.showModal();
+      $('leaveSave').focus();
+    });
+  }
+  addEventListener('beforeunload', (e) => { if (editDirty()) { e.preventDefault(); e.returnValue = ''; } });
+
+  // =====================================================================
+  // Opções da IA ao selecionar um trecho (no modo Ler e no Editar)
+  // =====================================================================
+  const SEL_ACTIONS = ['Mais diálogo', 'Mais sentimentos', 'Mais detalhes', 'Mais curto', 'Mais intenso', 'Corrigir o português'];
+  let selInfo = null, selTimer = null;
+
+  function selectionInChapter() {
+    if (view.tab !== 'capitulos' || !view.chapterId || busy) return null;
+    const p = cur(), ch = p.chapters.find(c => c.id === view.chapterId);
+    const body = $('chBody');
+    if (!ch || !body) return null;
+    if (body.tagName === 'TEXTAREA') {
+      if (document.activeElement !== body) return null;
+      const { selectionStart: a, selectionEnd: b } = body;
+      if (b - a < 2 || !body.value.slice(a, b).trim()) return null;
+      return { p, ch, start: a, end: b, editing: true, rect: textareaRect(body, a, b) };
+    }
+    const sel = getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount || !body.contains(sel.anchorNode) || !body.contains(sel.focusNode)) return null;
+    const txt = sel.toString().trim();
+    if (txt.length < 2) return null;
+    const at = ch.text.indexOf(txt);
+    if (at < 0) return null;
+    return { p, ch, start: at, end: at + txt.length, editing: false, rect: sel.getRangeAt(0).getBoundingClientRect() };
+  }
+
+  // posição na tela de um trecho dentro da textarea (cópia invisível com o mesmo estilo)
+  function textareaRect(ta, a, b) {
+    const cs = getComputedStyle(ta), r = ta.getBoundingClientRect();
+    const m = document.createElement('div');
+    ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+      'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth', 'boxSizing', 'wordSpacing', 'textIndent'].forEach(k => { m.style[k] = cs[k]; });
+    Object.assign(m.style, { position: 'fixed', visibility: 'hidden', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', top: '0', left: '-9999px', width: r.width + 'px' });
+    const mark = (pos) => { m.textContent = ta.value.slice(0, pos); const s = document.createElement('span'); s.textContent = '​'; m.append(s); document.body.append(m); const t = s.offsetTop; m.remove(); return t; };
+    const top = r.top + mark(a) - ta.scrollTop, bottom = r.top + mark(b) - ta.scrollTop + parseFloat(cs.lineHeight || 24);
+    return { top: Math.max(top, r.top), bottom: Math.min(bottom, r.bottom), left: r.left, width: r.width };
+  }
+
+  function hideSelBar() { $('selBar').hidden = true; selInfo = null; }
+  function updateSelBar() {
+    const info = selectionInChapter();
+    if (!info) { hideSelBar(); return; }
+    selInfo = info;
+    const bar = $('selBar');
+    bar.hidden = false;
+    const coarse = matchMedia('(pointer: coarse)').matches;
+    bar.classList.toggle('docked', coarse);
+    if (coarse) return; // no celular fica preso embaixo, longe do menu do sistema
+    const h = bar.offsetHeight, w = bar.offsetWidth, rc = info.rect;
+    // acima do trecho; se cobriria os botões do topo do capítulo, vai para baixo
+    const bodyTop = $('chBody').getBoundingClientRect().top;
+    let top = rc.top - h - 10;
+    if (top < Math.max(70, bodyTop - 4)) top = rc.bottom + 10;
+    top = Math.min(top, innerHeight - h - 10);
+    const left = Math.max(12, Math.min(innerWidth - w - 12, (rc.left + (rc.width || 0) / 2) - w / 2));
+    bar.style.top = top + 'px'; bar.style.left = left + 'px';
+  }
+  const scheduleSelBar = () => { clearTimeout(selTimer); selTimer = setTimeout(updateSelBar, 120); };
+  document.addEventListener('selectionchange', scheduleSelBar);
+  document.addEventListener('mouseup', scheduleSelBar);
+  document.addEventListener('keyup', (e) => { if (e.shiftKey || e.key.startsWith('Arrow')) scheduleSelBar(); });
+  addEventListener('scroll', () => { if (!$('selBar').hidden) updateSelBar(); }, true);
+
+  // aplica o pedido ao trecho escolhido
+  function adjustSelection(instr) {
+    const info = selInfo;
+    hideSelBar();
+    if (!info) return;
+    if (info.editing) saveEdit(); // a IA trabalha sobre o texto salvo
+    const target = { ch: info.ch, start: info.start, end: info.end, partial: true };
+    if (instr) runAdjust(target, instr); else openAdjust(info.ch, target);
+  }
+  function buildSelBar() {
+    const bar = $('selBar');
+    bar.append(el('span', { class: 'sel-title' }, svgIcon('wand-sparkles'), 'Ajustar trecho:'),
+      ...SEL_ACTIONS.map(a => el('button', { type: 'button', class: 'chip', text: a, onclick: () => adjustSelection(a) })),
+      el('button', { type: 'button', class: 'chip strong', icon: 'pencil', text: 'Outro pedido…', onclick: () => adjustSelection(null) }));
+    // não deixa o toque na barra apagar a seleção antes do clique
+    bar.addEventListener('mousedown', (e) => e.preventDefault());
+  }
+  buildSelBar();
 
   function undoChapter(p, ch) {
     const t = ch.text; ch.text = ch.prev; ch.prev = t;
@@ -2120,7 +2276,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
     const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, instr)}\n\n${task}`, strong);
     const before = original.slice(0, start), after = original.slice(end);
-    view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
+    if (edit && edit.chId === ch.id) discardEdit();
+    view = { tab: 'capitulos', chapterId: ch.id, mode: view.mode };
     const b = startBusy('adjust', partial ? 'Reescrevendo o trecho' : 'Reescrevendo', ch.id);
     try {
       const r = await aiWrite(p, makePrompt, {

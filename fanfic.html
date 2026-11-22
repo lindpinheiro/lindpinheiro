@@ -328,8 +328,9 @@
     </div>
     <ul class="proj-list" id="projList"></ul>
     <hr>
-    <button id="backupBtn" class="wide">🔄 Levar para outro aparelho</button>
-    <p class="hint">Celular ↔ computador, por arquivo de backup.</p>
+    <button id="syncBtn" class="wide">☁️ Sincronizar com Dropbox</button>
+    <p class="hint" id="syncLine">Use as mesmas histórias no celular e no computador.</p>
+    <button id="backupBtn" class="wide" style="margin-top:8px">🔄 Backup em arquivo</button>
   </aside>
   <div id="backdrop"></div>
 
@@ -433,6 +434,11 @@
   <div id="alertZone"></div>
   <div class="bar" id="bar" hidden><div class="bar-inner" id="barInner"></div></div>
 </div>
+
+<!-- Sincronização com Dropbox -->
+<dialog id="syncDlg" aria-labelledby="syncTitle">
+  <div id="syncBody"></div>
+</dialog>
 
 <!-- Backup: levar para outro aparelho -->
 <dialog id="backupDlg" aria-labelledby="backupTitle">
@@ -728,6 +734,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function saveProject(p, now) {
     if (!p) return;
     p.updatedAt = Date.now();
+    markDirty('projects');
     clearTimeout(pendingSaves.get(p.id));
     const run = () => { pendingSaves.delete(p.id); persist(p); };
     if (now) run(); else pendingSaves.set(p.id, setTimeout(run, 400));
@@ -742,7 +749,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     for (const [id, t] of pendingSaves) { clearTimeout(t); const p = projects.find(x => x.id === id); if (p) persist(p); }
     pendingSaves.clear();
   }
-  addEventListener('visibilitychange', () => { if (document.hidden) flushSaves(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) flushSaves(); });
   addEventListener('pagehide', flushSaves);
 
   // =====================================================================
@@ -793,7 +800,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     projects = projects.filter(x => x.id !== p.id);
     await db.del('projects', p.id);
     local.del('fanfic.bak.' + p.id);
-    for (const r of (refsCache[p.id] || [])) await db.del('refs', r.id);
+    tombstone('projects', p.id);
+    for (const r of (refsCache[p.id] || [])) { await db.del('refs', r.id); tombstone('refs', r.id); }
     delete refsCache[p.id];
     if (!projects.length) { const n = newProject(); projects.push(n); saveProject(n, true); }
     openProject(projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id);
@@ -804,6 +812,472 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('menuBtn').addEventListener('click', () => { $('projects').classList.add('open'); $('backdrop').classList.add('open'); $('newProjectBtn').focus(); });
   $('backdrop').addEventListener('click', closeDrawer);
   addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+  // =====================================================================
+  // Sincronização com Dropbox, criptografada no aparelho
+  // =====================================================================
+  // O arquivo que vai para o Dropbox é JSON comprimido e cifrado com AES-GCM 256.
+  // A chave sai da senha de sincronização (PBKDF2-SHA256, 310 mil rodadas, sal no arquivo).
+  // A senha nunca sai do aparelho; o Dropbox só guarda bytes embaralhados.
+  const SYNC_FILES = { projects: '/fanfics.enc', refs: '/referencias.enc' };
+  const sync = Object.assign({
+    appKey: '', refresh: '', access: '', accessExp: 0, key: '', salt: '',
+    rev: {}, dirty: { projects: false, refs: false }, deleted: { projects: {}, refs: {} }, lastSync: 0, lastError: ''
+  }, local.get('fanfic.sync', {}));
+  sync.rev = sync.rev || {}; sync.dirty = sync.dirty || {}; sync.deleted = Object.assign({ projects: {}, refs: {} }, sync.deleted || {});
+  const saveSync = () => local.set('fanfic.sync', sync);
+  const syncReady = () => !!(sync.appKey && sync.refresh && sync.key);
+  const redirectUri = () => location.origin + location.pathname;
+  let cryptoKey = null, syncing = false, syncAgain = false, syncTimer = null;
+
+  function markDirty(kind) {
+    if (!sync.dirty) sync.dirty = {};
+    if (sync.dirty[kind]) { scheduleSync(); return; }
+    sync.dirty[kind] = true; saveSync(); scheduleSync();
+  }
+  function tombstone(kind, id) { sync.deleted[kind][id] = Date.now(); markDirty(kind); }
+  function scheduleSync(ms = 4000) {
+    if (!syncReady()) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => syncNow(), ms);
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && syncReady()) syncNow(); });
+  addEventListener('online', () => { if (syncReady()) syncNow(); });
+
+  // ---------- base64, compressão e criptografia ----------
+  const te = new TextEncoder(), td = new TextDecoder();
+  function b64(buf) {
+    const bytes = new Uint8Array(buf); let str = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) str += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(str);
+  }
+  const unb64 = (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+  const b64url = (buf) => b64(buf).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  async function gzip(bytes) {
+    if (!window.CompressionStream) return null;
+    return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+  }
+  async function gunzip(bytes) {
+    return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+  }
+  async function deriveKey(password, salt) {
+    const base = await crypto.subtle.importKey('raw', te.encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 310000, hash: 'SHA-256' }, base,
+      { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  }
+  async function getKey() {
+    if (!cryptoKey && sync.key) cryptoKey = await crypto.subtle.importKey('raw', unb64(sync.key), 'AES-GCM', true, ['encrypt', 'decrypt']);
+    return cryptoKey;
+  }
+  async function sealJSON(obj, key, saltB64) {
+    let bytes = te.encode(JSON.stringify(obj));
+    const z = await gzip(bytes);
+    if (z) bytes = z;
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes);
+    return JSON.stringify({ app: 'escritor-de-fanfics', v: 1, z: z ? 1 : 0, salt: saltB64, iv: b64(iv), data: b64(ct) });
+  }
+  async function openJSON(text, key) {
+    const f = JSON.parse(text);
+    let bytes = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(f.iv) }, key, unb64(f.data)));
+    if (f.z) bytes = await gunzip(bytes);
+    return JSON.parse(td.decode(bytes));
+  }
+
+  // ---------- login no Dropbox (OAuth com PKCE, sem servidor) ----------
+  async function startDropboxLogin() {
+    const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+    const challenge = b64url(await crypto.subtle.digest('SHA-256', te.encode(verifier)));
+    const state = b64url(crypto.getRandomValues(new Uint8Array(16)));
+    try { sessionStorage.setItem('fanfic.pkce', JSON.stringify({ verifier, state })); } catch {}
+    local.set('fanfic.pkce', { verifier, state });
+    const u = new URL('https://www.dropbox.com/oauth2/authorize');
+    Object.entries({ client_id: sync.appKey, response_type: 'code', code_challenge: challenge, code_challenge_method: 'S256',
+      redirect_uri: redirectUri(), token_access_type: 'offline', state }).forEach(([k, v]) => u.searchParams.set(k, v));
+    flushSaves();
+    location.href = u.toString();
+  }
+
+  async function tokenRequest(params) {
+    const r = await fetch('https://api.dropboxapi.com/oauth2/token', {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ client_id: sync.appKey, ...params })
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { const e = new Error(j.error_description || j.error || 'Falha no login do Dropbox'); e.code = j.error; throw e; }
+    return j;
+  }
+
+  async function finishDropboxLogin() {
+    const q = new URLSearchParams(location.search);
+    if (!q.has('code') && !q.has('error')) return;
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem('fanfic.pkce') || 'null'); } catch {}
+    saved = saved || local.get('fanfic.pkce', null);
+    history.replaceState(null, '', location.pathname);
+    local.del('fanfic.pkce');
+    if (q.has('error')) { toast('Login no Dropbox cancelado.'); return; }
+    if (!saved || saved.state !== q.get('state')) { toast('Não deu para concluir o login no Dropbox. Tente de novo.'); return; }
+    try {
+      const t = await tokenRequest({ code: q.get('code'), grant_type: 'authorization_code', code_verifier: saved.verifier, redirect_uri: redirectUri() });
+      sync.refresh = t.refresh_token; sync.access = t.access_token; sync.accessExp = Date.now() + (t.expires_in || 14400) * 1000;
+      saveSync();
+      openSync(); // segue para a senha
+    } catch (e) {
+      openSync();
+      syncStatusMsg('Não deu para concluir o login: ' + e.message, 'err');
+    }
+  }
+
+  async function accessToken() {
+    if (sync.access && sync.accessExp > Date.now() + 60000) return sync.access;
+    try {
+      const t = await tokenRequest({ grant_type: 'refresh_token', refresh_token: sync.refresh });
+      sync.access = t.access_token; sync.accessExp = Date.now() + (t.expires_in || 14400) * 1000; saveSync();
+      return sync.access;
+    } catch (e) {
+      if (e.code === 'invalid_grant') { sync.refresh = ''; sync.access = ''; saveSync(); renderSyncLine(); }
+      const err = new Error('A conexão com o Dropbox expirou. Conecte de novo.'); err.relogin = true; throw err;
+    }
+  }
+
+  // ---------- chamadas ao Dropbox ----------
+  async function dbxFetch(url, opts, retry = true) {
+    const token = await accessToken();
+    let r;
+    try { r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: 'Bearer ' + token } }); }
+    catch { throw new Error('Sem internet para sincronizar agora.'); }
+    if (r.status === 401 && retry) { sync.accessExp = 0; return dbxFetch(url, opts, false); }
+    return r;
+  }
+  async function dbxMeta(path) {
+    const r = await dbxFetch('https://api.dropboxapi.com/2/files/get_metadata', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path })
+    });
+    if (r.status === 409) return null; // não existe
+    if (!r.ok) throw new Error('O Dropbox respondeu com erro (' + r.status + ').');
+    return r.json();
+  }
+  async function dbxDownload(path) {
+    const r = await dbxFetch('https://content.dropboxapi.com/2/files/download', {
+      method: 'POST', headers: { 'Dropbox-API-Arg': JSON.stringify({ path }) }
+    });
+    if (!r.ok) throw new Error('Não deu para baixar do Dropbox (' + r.status + ').');
+    return r.text();
+  }
+  async function dbxUpload(path, text, rev) {
+    const r = await dbxFetch('https://content.dropboxapi.com/2/files/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Dropbox-API-Arg': JSON.stringify({ path, mode: rev ? { '.tag': 'update', update: rev } : 'add', mute: true, autorename: false })
+      },
+      body: text
+    });
+    if (r.status === 409) { const e = new Error('conflito'); e.conflict = true; throw e; }
+    if (!r.ok) throw new Error('Não deu para enviar ao Dropbox (' + r.status + ').');
+    return r.json();
+  }
+
+  // ---------- juntar o que veio da nuvem com o que está no aparelho ----------
+  const isEmptyProject = (x) => !x.chapters.length && !(x.title || '').trim() && !(x.premise || '').trim() && !(x.characters || '').trim();
+
+  function mergeDeleted(kind, remoteDeleted) {
+    let changed = false;
+    for (const [id, t] of Object.entries(remoteDeleted || {}))
+      if (!(sync.deleted[kind][id] >= t)) { sync.deleted[kind][id] = t; changed = true; }
+    return changed;
+  }
+
+  // devolve true se este aparelho tem algo que a nuvem não tem
+  async function mergeProjects(remote) {
+    if (!remote) return false;
+    let needPush = false, touchedCurrent = false, added = 0;
+    mergeDeleted('projects', remote.deleted);
+    if (Object.keys(sync.deleted.projects).some(id => !(remote.deleted || {})[id])) needPush = true;
+    const editingNow = busy || (document.activeElement && document.activeElement.closest && document.activeElement.closest('main') &&
+      /^(TEXTAREA|INPUT|SELECT)$/.test(document.activeElement.tagName));
+
+    // excluídos em outro aparelho
+    for (const [id, t] of Object.entries(sync.deleted.projects)) {
+      const at = projects.findIndex(x => x.id === id);
+      if (at >= 0 && (projects[at].updatedAt || 0) <= t) {
+        if (id === currentId && editingNow) continue;
+        projects.splice(at, 1); await db.del('projects', id); local.del('fanfic.bak.' + id);
+        if (id === currentId) touchedCurrent = true;
+      }
+    }
+    const remoteIds = new Set();
+    for (const inc of remote.projects || []) {
+      if (!inc || !inc.id || !Array.isArray(inc.chapters)) continue;
+      remoteIds.add(inc.id);
+      if ((sync.deleted.projects[inc.id] || 0) >= (inc.updatedAt || 0)) continue;
+      const rp = Object.assign(newProject(), inc);
+      const at = projects.findIndex(x => x.id === rp.id);
+      if (at < 0) { projects.push(rp); persist(rp); added++; }
+      else if ((rp.updatedAt || 0) > (projects[at].updatedAt || 0)) {
+        if (rp.id === currentId && editingNow) { continue; } // não troca o texto enquanto a pessoa digita
+        projects[at] = rp; persist(rp);
+        if (rp.id === currentId) touchedCurrent = true;
+      } else if ((projects[at].updatedAt || 0) > (rp.updatedAt || 0)) needPush = true;
+    }
+    for (const lp of projects) if (!remoteIds.has(lp.id) && !isEmptyProject(lp)) needPush = true;
+
+    // o projeto vazio que o site cria sozinho sai quando chegam projetos da nuvem
+    if (added) {
+      const empty = projects.filter(x => !remoteIds.has(x.id) && isEmptyProject(x) && !(x.id === currentId && editingNow));
+      for (const x of empty) { await db.del('projects', x.id); local.del('fanfic.bak.' + x.id); if (x.id === currentId) touchedCurrent = true; }
+      projects = projects.filter(x => !empty.includes(x));
+    }
+    if (!projects.length) { const n = newProject(); projects.push(n); persist(n); }
+    if (added || touchedCurrent || !cur()) {
+      if (!cur()) { currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id; local.set('fanfic.current', currentId); view = { tab: 'ideia', chapterId: null, mode: 'ler' }; }
+      if (!busy) { loadForm(); renderTab(); loadRefs(currentId); }
+    }
+    renderProjects();
+    return needPush;
+  }
+
+  async function mergeRefs(remote) {
+    if (!remote) return false;
+    let needPush = false;
+    mergeDeleted('refs', remote.deleted);
+    if (Object.keys(sync.deleted.refs).some(id => !(remote.deleted || {})[id])) needPush = true;
+    const local_ = (await db.all('refs')) || [];
+    const byId = new Map(local_.map(r => [r.id, r]));
+    for (const [id, t] of Object.entries(sync.deleted.refs)) {
+      const r = byId.get(id);
+      if (r && (r.updatedAt || r.addedAt || 0) <= t) { await db.del('refs', id); byId.delete(id); if (refsCache[r.projectId]) refsCache[r.projectId] = refsCache[r.projectId].filter(x => x.id !== id); }
+    }
+    const remoteIds = new Set();
+    for (const r of remote.refs || []) {
+      if (!r || !r.id || typeof r.text !== 'string') continue;
+      remoteIds.add(r.id);
+      if ((sync.deleted.refs[r.id] || 0) >= (r.updatedAt || r.addedAt || 0)) continue;
+      const mine = byId.get(r.id);
+      const tr = r.updatedAt || r.addedAt || 0, tm = mine ? (mine.updatedAt || mine.addedAt || 0) : -1;
+      if (!mine || tr > tm) {
+        await db.put('refs', r); byId.set(r.id, r);
+        if (refsCache[r.projectId]) { refsCache[r.projectId] = refsCache[r.projectId].filter(x => x.id !== r.id).concat(r).sort((a, b) => a.addedAt - b.addedAt); }
+      } else if (tm > tr) needPush = true;
+    }
+    for (const id of byId.keys()) if (!remoteIds.has(id)) needPush = true;
+    delete refsCache[currentId];
+    await loadRefs(currentId);
+    if (!busy) renderTab();
+    return needPush;
+  }
+
+  async function payload(kind) {
+    if (kind === 'projects') return { projects: projects.filter(x => !isEmptyProject(x)), deleted: sync.deleted.projects, at: Date.now() };
+    return { refs: (await db.all('refs')) || [], deleted: sync.deleted.refs, at: Date.now() };
+  }
+
+  async function syncFile(kind, tries = 2) {
+    const path = SYNC_FILES[kind];
+    const key = await getKey();
+    const meta = await dbxMeta(path);
+    let needPush = !meta || !!sync.dirty[kind];
+    if (meta && meta.rev !== sync.rev[kind]) {
+      let remote;
+      try { remote = await openJSON(await dbxDownload(path), key); }
+      catch (e) {
+        if (e.message && /Dropbox|internet/.test(e.message)) throw e;
+        const err = new Error('A senha de sincronização foi trocada em outro aparelho. Toque em ☁️ Sincronizar e digite a senha nova.');
+        err.needPassword = true; throw err;
+      }
+      if (await (kind === 'projects' ? mergeProjects(remote) : mergeRefs(remote))) needPush = true;
+      sync.rev[kind] = meta.rev;
+    }
+    if (needPush) {
+      if (kind === 'refs' && !meta && !((await db.all('refs')) || []).length && !Object.keys(sync.deleted.refs).length) { sync.dirty.refs = false; saveSync(); return; }
+      try {
+        const res = await dbxUpload(path, await sealJSON(await payload(kind), key, sync.salt), meta ? meta.rev : null);
+        sync.rev[kind] = res.rev; sync.dirty[kind] = false;
+      } catch (e) {
+        if (e.conflict && tries > 1) { sync.rev[kind] = ''; return syncFile(kind, tries - 1); } // outro aparelho enviou antes: junta e tenta de novo
+        throw e;
+      }
+    }
+    saveSync();
+  }
+
+  async function syncNow() {
+    if (!syncReady()) return;
+    if (syncing) { syncAgain = true; return; }
+    syncing = true; clearTimeout(syncTimer);
+    renderSyncLine('Sincronizando…');
+    try {
+      flushSaves();
+      await syncFile('projects');
+      await syncFile('refs');
+      sync.lastSync = Date.now(); sync.lastError = ''; saveSync();
+    } catch (e) {
+      if (e.needPassword) { sync.key = ''; sync.salt = ''; sync.rev = {}; cryptoKey = null; }
+      sync.lastError = e.message === 'conflito' ? 'Outro aparelho enviou ao mesmo tempo; tento de novo em instantes.' : (e.message || 'Não deu para sincronizar agora.');
+      saveSync();
+      if (e.message === 'conflito') scheduleSync(3000);
+    } finally {
+      syncing = false;
+      renderSyncLine();
+      if ($('syncDlg').open) renderSync();
+      if (syncAgain) { syncAgain = false; scheduleSync(1000); }
+    }
+  }
+
+  // ---------- tela ----------
+  function renderSyncLine(text) {
+    const line = $('syncLine');
+    if (text) { line.textContent = '⟳ ' + text; return; }
+    if (!sync.appKey || !sync.refresh) line.textContent = 'Use as mesmas histórias no celular e no computador.';
+    else if (!sync.key) line.textContent = sync.lastError ? '⚠ ' + sync.lastError : 'Falta criar ou digitar a senha de sincronização.';
+    else if (sync.lastError) line.textContent = '⚠ ' + sync.lastError;
+    else if (sync.lastSync) line.textContent = '✓ Sincronizado às ' + new Date(sync.lastSync).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    else line.textContent = 'Conectado. Sincronizando em instantes…';
+  }
+  function syncStatusMsg(msg, kind) { const st = $('syncStatus'); if (st) { st.textContent = msg; st.className = 'status' + (kind ? ' ' + kind : ''); } }
+
+  $('syncBtn').addEventListener('click', () => { closeDrawer(); openSync(); });
+  function openSync() { renderSync(); if (!$('syncDlg').open) $('syncDlg').showModal(); }
+
+  function syncHead(title) {
+    return el('div', { class: 'dlg-head' }, el('h2', { id: 'syncTitle', text: title }), el('button', { class: 'close', 'aria-label': 'Fechar', text: '✕', onclick: () => $('syncDlg').close() }));
+  }
+
+  function renderSync() {
+    const b = $('syncBody');
+    b.innerHTML = '';
+    const status = el('div', { class: 'status', id: 'syncStatus', role: 'status' });
+
+    // 1. chave do app (uma vez, no site do Dropbox)
+    if (!sync.appKey) {
+      const key = el('input', { type: 'text', id: 'syncAppKey', autocomplete: 'off', spellcheck: 'false', placeholder: 'Ex.: a1b2c3d4e5f6g7h' });
+      const uri = el('input', { type: 'text', readonly: true, value: redirectUri(), 'aria-label': 'Endereço para colar no Dropbox' });
+      b.append(syncHead('☁️ Sincronizar com Dropbox'),
+        el('p', { class: 'lead', text: 'Configuração de uma vez só (uns 5 minutos, de preferência no computador). Depois é só conectar cada aparelho.' }),
+        el('ol', { class: 'howto' },
+          el('li', {}, 'Abra ', el('a', { href: 'https://www.dropbox.com/developers/apps', target: '_blank', rel: 'noopener', text: 'dropbox.com/developers/apps' }), ' e entre na sua conta (dá para criar uma grátis).'),
+          el('li', {}, 'Toque em ', el('b', { text: 'Create app' }), ', escolha ', el('b', { text: 'Scoped access' }), ' e ', el('b', { text: 'App folder' }), '. Dê um nome qualquer (ex.: fanfics-seunome) e crie.'),
+          el('li', {}, 'Na aba ', el('b', { text: 'Permissions' }), ', marque ', el('b', { text: 'files.content.write' }), ' e ', el('b', { text: 'files.content.read' }), ' e toque em ', el('b', { text: 'Submit' }), '.'),
+          el('li', {}, 'Na aba ', el('b', { text: 'Settings' }), ', em ', el('b', { text: 'Redirect URIs' }), ', cole o endereço abaixo e toque em ', el('b', { text: 'Add' }), '.')),
+        el('div', { class: 'row', style: 'flex-wrap:nowrap' }, uri, el('button', { text: '📋 Copiar', onclick: () => copyText(redirectUri(), 'Endereço copiado') })),
+        el('ol', { class: 'howto', start: '5' },
+          el('li', {}, 'Ainda em ', el('b', { text: 'Settings' }), ', copie o ', el('b', { text: 'App key' }), ' e cole aqui:')),
+        el('label', { for: 'syncAppKey', style: 'margin-top:0', text: 'App key do Dropbox' }), key, status,
+        el('button', {
+          class: 'primary wide', style: 'margin-top:14px', text: 'Salvar e conectar o Dropbox →', onclick: () => {
+            const v = key.value.trim();
+            if (!/^[a-z0-9]{8,32}$/i.test(v)) { syncStatusMsg('Isso não parece uma App key (são letras e números, sem espaços).', 'err'); key.focus(); return; }
+            sync.appKey = v; saveSync(); startDropboxLogin();
+          }
+        }));
+      return;
+    }
+
+    // 2. conectar este aparelho
+    if (!sync.refresh) {
+      b.append(syncHead('☁️ Conectar o Dropbox'),
+        el('p', { class: 'lead', text: 'Você vai para o Dropbox, autoriza o escritor e volta para cá. É uma vez em cada aparelho.' }),
+        status,
+        el('button', { class: 'primary wide', text: 'Conectar o Dropbox →', onclick: startDropboxLogin }),
+        el('details', { style: 'margin-top:14px' }, el('summary', { text: 'Trocar a App key' }),
+          el('button', { class: 'link', text: 'Apagar a App key deste aparelho', onclick: () => { sync.appKey = ''; saveSync(); renderSync(); } })));
+      return;
+    }
+
+    // 3. senha de sincronização
+    if (!sync.key) {
+      b.append(syncHead('🔒 Senha de sincronização'), el('p', { class: 'lead', text: 'Conferindo o seu Dropbox…' }), status);
+      dbxMeta(SYNC_FILES.projects).then(meta => renderPassword(meta)).catch(e => { b.querySelector('.lead').textContent = ''; syncStatusMsg(e.message, 'err'); });
+      return;
+    }
+
+    // 4. tudo pronto
+    b.append(syncHead('☁️ Sincronização'),
+      el('p', { class: 'status ok', style: 'margin-top:0', text: '● Conectado ao Dropbox, com criptografia' }),
+      el('p', { class: 'lead', text: 'As histórias são sincronizadas sozinhas: ao abrir o app, ao voltar para ele e alguns segundos depois de cada mudança. Se o mesmo projeto mudar em dois aparelhos, fica a versão mais nova.' }),
+      el('div', { class: 'kv' },
+        el('div', {}, el('div', { class: 'k', text: 'Última sincronização' }),
+          el('div', { class: 'v', text: syncing ? 'Sincronizando…' : sync.lastSync ? new Date(sync.lastSync).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Ainda não' }),
+          sync.lastError ? el('div', { class: 'status err', style: 'margin-top:4px', text: sync.lastError }) : null),
+        el('button', { class: 'primary', text: '⟳ Sincronizar agora', disabled: syncing, onclick: () => syncNow() })),
+      status,
+      el('details', { style: 'margin-top:16px' }, el('summary', { text: 'Mais opções' }),
+        el('p', { class: 'hint', text: 'Esqueceu a senha? Crie uma nova: a cópia da nuvem é substituída pelas histórias deste aparelho. Nos outros aparelhos, digite a senha nova.' }),
+        el('button', { text: 'Criar uma senha nova', onclick: () => { if (confirm('Substituir a cópia do Dropbox pelas histórias deste aparelho, com uma senha nova?')) renderPassword(null, true); } }),
+        el('hr'),
+        el('button', {
+          class: 'link', text: 'Desconectar o Dropbox deste aparelho', onclick: () => {
+            if (!confirm('Parar de sincronizar neste aparelho? As histórias continuam aqui.')) return;
+            Object.assign(sync, { refresh: '', access: '', accessExp: 0, key: '', salt: '', rev: {}, lastSync: 0, lastError: '' });
+            cryptoKey = null; saveSync(); renderSyncLine(); renderSync(); toast('Dropbox desconectado deste aparelho.');
+          }
+        })),
+      el('button', { class: 'wide', style: 'margin-top:16px', text: 'Fechar', onclick: () => $('syncDlg').close() }));
+    if (sync.lastError && /Conecte de novo/.test(sync.lastError)) { sync.lastError = ''; saveSync(); renderSync(); }
+  }
+
+  // meta: arquivo que já está no Dropbox (null se ainda não existe); reset: criar senha nova
+  function renderPassword(meta, reset) {
+    const b = $('syncBody');
+    b.innerHTML = '';
+    const status = el('div', { class: 'status', id: 'syncStatus', role: 'status' });
+    const pw = el('input', { type: 'password', id: 'syncPw', autocomplete: reset || !meta ? 'new-password' : 'current-password' });
+    const show = el('input', { type: 'checkbox', id: 'syncShow' });
+    show.addEventListener('change', () => { pw.type = pw2.type = show.checked ? 'text' : 'password'; });
+    const pw2 = el('input', { type: 'password', id: 'syncPw2', autocomplete: 'new-password' });
+    const creating = reset || !meta;
+    const go = el('button', { class: 'primary wide', style: 'margin-top:14px', text: creating ? 'Criar senha e sincronizar' : 'Entrar e sincronizar' });
+
+    go.addEventListener('click', async () => {
+      const v = pw.value;
+      if (v.length < 6) { syncStatusMsg('Use pelo menos 6 caracteres.', 'err'); pw.focus(); return; }
+      if (creating && v !== pw2.value) { syncStatusMsg('As duas senhas não são iguais.', 'err'); pw2.focus(); return; }
+      go.disabled = true; syncStatusMsg(creating ? 'Preparando a criptografia…' : 'Conferindo a senha…');
+      try {
+        let salt, key;
+        if (creating) {
+          salt = crypto.getRandomValues(new Uint8Array(16));
+          key = await deriveKey(v, salt);
+        } else {
+          const text = await dbxDownload(SYNC_FILES.projects);
+          const f = JSON.parse(text);
+          salt = unb64(f.salt);
+          key = await deriveKey(v, salt);
+          try { await openJSON(text, key); }
+          catch { go.disabled = false; syncStatusMsg('Senha errada. Confira e tente de novo.', 'err'); pw.select(); return; }
+        }
+        sync.key = b64(await crypto.subtle.exportKey('raw', key)); sync.salt = b64(salt); cryptoKey = key; sync.lastError = '';
+        if (creating) { sync.rev = {}; sync.dirty = { projects: true, refs: true }; sync.deleted = { projects: {}, refs: {} }; }
+        else sync.rev = {};
+        saveSync();
+        if (reset) {
+          // substitui a cópia da nuvem: envia sobre a versão atual, seja qual for
+          for (const kind of ['projects', 'refs']) {
+            const m = await dbxMeta(SYNC_FILES[kind]);
+            if (kind === 'refs' && !m && !((await db.all('refs')) || []).length) continue;
+            const res = await dbxUpload(SYNC_FILES[kind], await sealJSON(await payload(kind), key, sync.salt), m ? m.rev : null);
+            sync.rev[kind] = res.rev; sync.dirty[kind] = false;
+          }
+          saveSync();
+        }
+        renderSync();
+        await syncNow();
+        toast('Sincronização ligada ✓');
+      } catch (e) { go.disabled = false; syncStatusMsg(e.message, 'err'); }
+    });
+
+    b.append(syncHead('🔒 Senha de sincronização'),
+      el('p', { class: 'lead', text: creating
+        ? 'Crie uma senha para embaralhar as histórias antes de irem para o Dropbox. Nem o Dropbox consegue ler. Você vai digitar a mesma senha nos outros aparelhos.'
+        : 'Já existem histórias no seu Dropbox. Digite a senha de sincronização que você criou no outro aparelho.' }),
+      el('label', { for: 'syncPw', style: 'margin-top:0', text: creating ? 'Senha nova' : 'Senha de sincronização' }), pw,
+      creating ? el('label', { for: 'syncPw2', text: 'Repita a senha' }) : null, creating ? pw2 : null,
+      el('label', { class: 'check', for: 'syncShow', style: 'font-weight:400' }, show, el('span', { text: 'Mostrar a senha' })),
+      creating ? el('p', { class: 'hint', text: 'Guarde bem: se esquecer, a cópia da nuvem não abre. As histórias continuam nos seus aparelhos e dá para criar uma senha nova.' }) : null,
+      status, go);
+    setTimeout(() => pw.focus(), 50);
+  }
 
   // =====================================================================
   // Backup: levar as histórias para outro aparelho
@@ -1620,10 +2094,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     refs.forEach(r => {
       const use = el('input', { type: 'checkbox', id: 'use-' + r.id });
       use.checked = r.enabled !== false;
-      use.addEventListener('change', () => { r.enabled = use.checked; db.put('refs', r); });
+      use.addEventListener('change', () => { r.enabled = use.checked; r.updatedAt = Date.now(); db.put('refs', r); markDirty('refs'); });
       const note = el('input', { type: 'text', id: 'note-' + r.id, placeholder: 'Ex.: use para o universo / imite o estilo' });
       note.value = r.note || '';
-      let t; note.addEventListener('input', () => { r.note = note.value; clearTimeout(t); t = setTimeout(() => db.put('refs', r), 400); });
+      let t; note.addEventListener('input', () => { r.note = note.value; r.updatedAt = Date.now(); clearTimeout(t); t = setTimeout(() => { db.put('refs', r); markDirty('refs'); }, 400); });
 
       sec.append(el('div', { class: 'card' },
         el('div', { class: 'ref-head' },
@@ -1641,11 +2115,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   async function removeRef(p, r) {
     await db.del('refs', r.id);
+    tombstone('refs', r.id);
     refsCache[p.id] = (refsCache[p.id] || []).filter(x => x.id !== r.id);
     renderTab();
     toast('Arquivo removido.', {
       action: 'Desfazer', onAction: async () => {
+        r.updatedAt = Date.now();
         await db.put('refs', r);
+        markDirty('refs');
         (refsCache[p.id] = refsCache[p.id] || []).push(r);
         refsCache[p.id].sort((a, b) => a.addedAt - b.addedAt);
         if (currentId === p.id) renderTab();
@@ -1747,7 +2224,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         else if (ext === 'txt' || ext === 'md' || file.type.startsWith('text/')) text = cleanText(await file.text());
         else throw new Error('esse formato não é aceito (use PDF, EPUB ou TXT)');
         if (text.length < 200) throw new Error('quase não tem texto. Se for um PDF escaneado (foto das páginas), não há texto para ler');
-        const r = { id: uid(), projectId: p.id, name, type: ext || 'txt', text, chars: text.length, enabled: true, note: '', addedAt: Date.now() };
+        const r = { id: uid(), projectId: p.id, name, type: ext || 'txt', text, chars: text.length, enabled: true, note: '', addedAt: Date.now(), updatedAt: Date.now() };
+        markDirty('refs');
         await db.put('refs', r);
         (refsCache[p.id] = refsCache[p.id] || []).push(r);
         added++;
@@ -2319,6 +2797,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!cur()) currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
     saveSettings();
     openProject(currentId);
+    await finishDropboxLogin();
+    renderSyncLine();
+    if (syncReady()) syncNow();
   }
   init();
 })();

@@ -459,6 +459,12 @@
   .seg button { border: 0; border-radius: 0; background: var(--surface); }
   .seg button[aria-pressed=true] { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
   .reader { font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; line-height: 1.85; max-width: 680px; margin: 0 auto; }
+  textarea.doc-edit { display: block; width: 100%; max-width: 680px; margin: 0 auto; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--text);
+    font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; line-height: 1.85; resize: none; overflow: hidden; min-height: 40vh; }
+  textarea.doc-edit:focus { outline: none; }
+  input.doc-title { display: block; width: 100%; max-width: 680px; margin: 4px auto 18px; padding: 4px 0; border: 0; border-bottom: 1px dashed transparent; border-radius: 0;
+    background: transparent; color: var(--text); text-align: center; font-family: Georgia, serif; font-size: 1.4rem; font-weight: 700; }
+  input.doc-title:hover, input.doc-title:focus { outline: none; border-bottom-color: var(--border); }
   .reader p { margin: 0 0 1em; white-space: pre-wrap; }
   .reader-title { font-family: Georgia, serif; text-align: center; font-size: 1.4rem; margin: 4px 0 22px; }
   .cursor::after { content: "▍"; color: var(--accent); animation: blink 1s steps(1) infinite; }
@@ -551,7 +557,7 @@
     .nav-row > button { min-width: 42px; padding: 6px 10px; }
     .nav-row .pos { margin: 0 auto 0 2px; }
     .seg button { padding: 6px 12px; }
-    .reader { font-size: 1.12rem; line-height: 1.75; }
+    .reader, textarea.doc-edit { font-size: 1.12rem; line-height: 1.75; }
     .reader-title { font-size: 1.2rem; margin: 0 0 14px; }
     textarea.big { font-size: 1.05rem; }
     .bar { padding: 8px 12px; }
@@ -2575,10 +2581,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
     if (editing) {
       const d = startEdit(p, ch);
-      const title = el('input', { type: 'text', 'aria-label': 'Título do capítulo', style: 'font-weight:700;margin-bottom:12px', placeholder: `Capítulo ${i + 1}` });
+      const title = el('input', { type: 'text', class: 'doc-title', 'aria-label': 'Título do capítulo', placeholder: `Capítulo ${i + 1}` });
       title.value = d.title;
-      const ta = el('textarea', { class: 'big', id: 'chBody', 'aria-label': 'Texto do capítulo' });
+      const ta = el('textarea', { class: 'doc-edit', id: 'chBody', 'aria-label': 'Texto do capítulo', placeholder: 'Comece a escrever…', spellcheck: 'true' });
       ta.value = d.text;
+      // o texto cresce junto com o conteúdo: a página rola, não a caixa
+      const grow = () => { const y = scrollY; ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; if (scrollY !== y) scrollTo(scrollX, y); };
+      ta.addEventListener('input', grow);
+      requestAnimationFrame(grow);
       ta.addEventListener('keydown', (e) => {
         if (!(e.ctrlKey || e.metaKey)) return;
         const k = e.key.toLowerCase();
@@ -2803,8 +2813,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { type: 'button', class: 'chip', icon: 'bold', 'aria-label': 'Negrito', onclick: () => fmtWrap($('chBody'), '**') }),
         el('button', { type: 'button', class: 'chip', icon: 'italic', 'aria-label': 'Itálico', onclick: () => fmtWrap($('chBody'), '*') }),
         el('button', { type: 'button', class: 'chip', icon: 'smile', 'aria-label': 'Emojis', onclick: () => { grid.hidden = !grid.hidden; updateSelBar(); } }),
-        el('button', { type: 'button', class: 'chip strong', icon: 'wand-sparkles', ai: true, text: 'Ajustar com IA', onclick: aiOnSelection }),
-        el('button', { type: 'button', class: 'chip strong', icon: 'spell-check', ai: true, text: 'Corrigir', onclick: () => { const info = selInfo; hideSelBar(); if (info && info.editing) fixText(info.p, info.ch, $('chBody')); } }),
+        el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: 'Marcar', title: 'Marcar o trecho (a anotação é opcional)', onclick: markFromEditor }),
         grid);
     } else if (mode === 'multi') {
       bar.append(el('span', { class: 'sel-title', text: 'Para marcar, selecione dentro de um parágrafo.' }));
@@ -2812,12 +2821,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       bar.append(
         el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: 'Marcar', title: 'Marcar o trecho (a anotação é opcional)', onclick: () => addHighlight() }));
     }
-  }
-  function aiOnSelection() {
-    const info = selInfo; hideSelBar();
-    if (!info || !info.editing) return;
-    saveEdit(); // a IA trabalha sobre o texto salvo
-    openAdjust(info.ch, { ch: info.ch, start: info.start, end: info.end, partial: true });
   }
   $('selBar').addEventListener('mousedown', (e) => e.preventDefault()); // não apaga a seleção antes do clique
 
@@ -2834,6 +2837,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     saveProject(info.p, true);
     if (wideNotes()) { marginEdit = h.id; renderChapters(); }
     else { renderChapters(); openNote(info.p, info.ch, h.id, true); }
+  }
+  // marcar no Editar: usa o trecho selecionado no texto; a anotação abre na janela
+  function markFromEditor() {
+    const info = selInfo; hideSelBar();
+    if (!info || !info.editing) return;
+    const quote = $('chBody').value.slice(info.start, info.end).trim();
+    if (!quote) return;
+    if (/\n\s*\n/.test(quote)) { toast('Para marcar, selecione dentro de um parágrafo.'); return; }
+    const h = { id: uid(), quote, note: '', important: false, at: Date.now() };
+    (info.ch.highlights = info.ch.highlights || []).push(h);
+    saveProject(info.p, true);
+    openNote(info.p, info.ch, h.id, true);
   }
   function removeHighlight(p, ch, h) {
     ch.highlights = ch.highlights.filter(x => x.id !== h.id);
@@ -2901,7 +2916,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     aside.style.minHeight = y + 'px';
   }
   let marginTimer = null;
-  addEventListener('resize', () => { clearTimeout(marginTimer); marginTimer = setTimeout(layoutMarginNotes, 150); });
+  addEventListener('resize', () => { clearTimeout(marginTimer); marginTimer = setTimeout(() => {
+    layoutMarginNotes();
+    const ta = document.querySelector('textarea.doc-edit'); if (ta) ta.dispatchEvent(new Event('input'));
+  }, 150); });
   function openNote(p, ch, id, isNew) {
     const h = (ch.highlights || []).find(x => x.id === id);
     if (!h) return;

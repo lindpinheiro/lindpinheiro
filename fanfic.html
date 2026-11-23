@@ -273,6 +273,42 @@
   .ch-toolbar .nav, .ch-toolbar .tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .ch-toolbar .pos { color: var(--muted); font-size: .9rem; margin-left: 4px; }
   .saved.dirty { color: var(--accent); font-weight: 600; }
+  /* ícone de IA animado nos botões que usam a IA */
+  .ai-ico { display: inline-flex; margin-inline-start: 2px; }
+  .ai-ico .icon { color: #f5b83d; animation: aiGlow 2.4s ease-in-out infinite; }
+  button.primary .ai-ico .icon { color: #ffe08a; }
+  @keyframes aiGlow {
+    0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 0 rgba(255, 200, 80, 0)); opacity: .85; }
+    50% { transform: scale(1.18) rotate(14deg); filter: drop-shadow(0 0 5px rgba(255, 200, 80, .95)); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ai-ico .icon { animation: none; } }
+  .ai-cost { font-size: .9rem; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+  /* página de leitura/edição do capítulo */
+  body.focus header, body.focus aside#projects, body.focus #backdrop, body.focus .tabs, body.focus #projHeading { display: none !important; }
+  body.focus .layout { grid-template-columns: 1fr; min-height: 100vh; }
+  body.focus .dock { left: 0; }
+  body.focus main { padding-top: 0; }
+  body.focus .ch-toolbar { position: sticky; top: 0; z-index: 8; background: var(--bg); padding: 12px 0; margin: 0 0 12px; border-bottom: 1px solid var(--border); }
+  body.focus .edit-tools { top: 128px; }
+  /* lateral recolhível */
+  .side-btn { min-height: 40px; min-width: 40px; padding: 0; background: transparent; border-color: transparent; }
+  body.side-collapsed { --side: 0px; }
+  body.side-collapsed aside#projects { display: none; }
+  /* mundo: pastas e itens */
+  .folder-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .folder-head h3 { display: flex; align-items: center; gap: 8px; margin: 0; }
+  .folder-head h3 .icon { color: var(--accent); }
+  .folder-head .count { color: var(--muted); font-size: .9rem; margin-right: auto; }
+  .folder-head .folder-title { flex: 1; font-weight: 700; }
+  .add-btn { min-height: 36px; min-width: 36px; padding: 0; border-radius: 50%; }
+  .entry { border-top: 1px solid var(--border); }
+  .entry > summary { display: flex; align-items: center; gap: 8px; padding: 10px 2px; font-weight: 600; list-style: none; }
+  .entry > summary::before { content: "▸"; color: var(--muted); transition: transform .15s; }
+  .entry[open] > summary::before { transform: rotate(90deg); }
+  .entry > summary::-webkit-details-marker { display: none; }
+  .entry-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .entry-body { display: grid; gap: 8px; padding: 0 0 12px; }
+  .tag.ai-tag { color: #b8860b; border-color: #e5c43a; margin: 0; }
   .info-head { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
   .info-head h2 { margin: 0; }
   .info-field { padding: 10px 0; border-bottom: 1px solid var(--border); }
@@ -393,6 +429,8 @@
     .lbl-short { display: inline; }
     .nav-row { gap: 6px; flex-wrap: nowrap; margin-bottom: 10px; }
     .ch-toolbar { margin-bottom: 10px; }
+    .side-btn { display: none; }
+    body.focus .edit-tools { top: 120px; }
     .edit-tools { top: 8px; }
     .ch-toolbar .tools { width: 100%; }
     .ch-toolbar .tools > button:last-child { flex: 1; }
@@ -471,10 +509,23 @@
 <symbol id="i-library" viewBox="0 0 24 24"><path d="m16 6 4 14" /> <path d="M12 6v14" /> <path d="M8 8v12" /> <path d="M4 4v16" /></symbol>
 <symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M8 14s1.5 2 4 2 4-2 4-2" /> <line x1="9" x2="9.01" y1="9" y2="9" /> <line x1="15" x2="15.01" y1="9" y2="9" /></symbol>
 <symbol id="i-sticky-note" viewBox="0 0 24 24"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z" /> <path d="M15 3v4a2 2 0 0 0 2 2h4" /></symbol>
+<symbol id="i-book-a" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" /> <path d="m8 13 4-7 4 7" /> <path d="M9.1 11h5.7" /></symbol>
+<symbol id="i-circle-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /> <path d="M12 17h.01" /></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" /></symbol>
+<symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M12 10v6" /> <path d="M9 13h6" /> <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" /></symbol>
+<symbol id="i-heart-handshake" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /> <path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66" /> <path d="m18 15-2-2" /> <path d="m15 18-2-2" /></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /> <path d="M3 3v5h5" /> <path d="M12 7v5l4 2" /></symbol>
+<symbol id="i-languages" viewBox="0 0 24 24"><path d="m5 8 6 6" /> <path d="m4 14 6-6 2-3" /> <path d="M2 5h12" /> <path d="M7 2h1" /> <path d="m22 22-5-10-5 10" /> <path d="M14 18h6" /></symbol>
+<symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></symbol>
+<symbol id="i-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M9 3v18" /></symbol>
+<symbol id="i-scroll-text" viewBox="0 0 24 24"><path d="M15 12h-5" /> <path d="M15 8h-5" /> <path d="M19 17V5a2 2 0 0 0-2-2H4" /> <path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3" /></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <circle cx="9" cy="7" r="4" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /></symbol>
 </svg>
 
 <header>
   <button id="menuBtn" aria-label="Abrir a lista de projetos"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span id="menuTitle"></span></button>
+  <button id="sideBtn" class="side-btn" aria-label="Ocultar a lista de projetos" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-panel-left"/></svg></button>
   <h1><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Fanfic Agent</span></h1>
   <div id="currentTitle"></div>
   <div class="user">
@@ -687,6 +738,18 @@
   </div>
 </dialog>
 
+<!-- Confirmar uso da IA -->
+<dialog id="aiDlg" aria-labelledby="aiDlgTitle">
+  <div class="dlg-head"><h2 id="aiDlgTitle"><span class="ai-ico"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span> Usar a IA?</h2></div>
+  <p class="lead" id="aiDlgWhat"></p>
+  <p id="aiDlgCost" class="ai-cost"></p>
+  <label class="check" for="aiDlgSkip" style="font-weight:400"><input type="checkbox" id="aiDlgSkip"><span>Não perguntar de novo neste aparelho<small class="hint" style="display:block">Dá para religar em IA → Opções avançadas.</small></span></label>
+  <div class="row" style="margin-top:16px">
+    <button class="primary ai-btn" id="aiDlgGo">Usar a IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
+    <button id="aiDlgCancel">Cancelar</button>
+  </div>
+</dialog>
+
 <!-- Escrever capítulo -->
 <dialog id="writeDlg" aria-labelledby="writeTitle">
   <div class="dlg-head"><h2 id="writeTitle">Capítulo</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
@@ -700,7 +763,7 @@
     <option value="2500">Longo (~2.500 palavras)</option>
   </select>
   <div class="row" style="margin-top:18px">
-    <button class="primary wide" id="writeGo"><svg class="icon" aria-hidden="true"><use href="#i-pen-line"/></svg>Escrever</button>
+    <button class="primary wide ai-btn" id="writeGo"><svg class="icon" aria-hidden="true"><use href="#i-pen-line"/></svg>Escrever<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
   </div>
 </dialog>
 
@@ -712,7 +775,7 @@
   <textarea id="adjustText" placeholder="Ex.: ele fica mais ciumento; a conversa termina em briga."></textarea>
   <div class="chips" id="adjustChips"></div>
   <div class="row" style="margin-top:18px">
-    <button class="primary wide" id="adjustGo">Reescrever</button>
+    <button class="primary wide ai-btn" id="adjustGo"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Reescrever<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
   </div>
 </dialog>
 
@@ -825,7 +888,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (props.icon) e.append(svgIcon(props.icon));
     for (const [k, v] of Object.entries(props)) {
       if (k === 'class') e.className = v;
-      else if (k === 'icon' || k === 'iconEnd') continue;
+      else if (k === 'icon' || k === 'iconEnd' || k === 'ai') continue;
       else if (k === 'text') e.append(String(v));
       else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
       else if (v === true) e.setAttribute(k, '');
@@ -833,6 +896,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
     for (const c of children.flat()) if (c != null && c !== false) e.append(c);
     if (props.iconEnd) e.append(svgIcon(props.iconEnd));
+    if (props.ai) { e.classList.add('ai-btn'); e.append(el('span', { class: 'ai-ico', 'aria-hidden': 'true' }, svgIcon('sparkles'))); }
     return e;
   }
 
@@ -879,7 +943,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const box = el('div', { class: 'alert ' + kind, role: kind === 'err' ? 'alert' : 'status' },
       el('div', { class: 'msg' }, el('div', { text: msg }),
         actions.length ? el('div', { class: 'actions' }, actions.map(a =>
-          el('button', { class: a.primary ? 'primary' : '', icon: a.icon, text: a.label, onclick: () => { clearAlert(); a.onClick(); } }))) : null),
+          el('button', { class: a.primary ? 'primary' : '', icon: a.icon, ai: a.ai, text: a.label, onclick: () => { clearAlert(); a.onClick(); } }))) : null),
       el('button', { class: 'close', 'aria-label': 'Fechar aviso', icon: 'x', onclick: clearAlert }));
     zone.append(box);
   }
@@ -1118,6 +1182,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     openProject(projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id);
     toast('Projeto excluído.');
   });
+
+  // lateral recolhível no computador
+  function setSide(collapsed) {
+    document.body.classList.toggle('side-collapsed', collapsed);
+    $('sideBtn').setAttribute('aria-pressed', String(collapsed));
+    $('sideBtn').setAttribute('aria-label', collapsed ? 'Mostrar a lista de projetos' : 'Ocultar a lista de projetos');
+    local.set('fanfic.sideCollapsed', collapsed);
+  }
+  $('sideBtn').addEventListener('click', () => setSide(!document.body.classList.contains('side-collapsed')));
+  setSide(!!local.get('fanfic.sideCollapsed', false));
 
   function closeDrawer() { $('projects').classList.remove('open'); $('backdrop').classList.remove('open'); }
   $('menuBtn').addEventListener('click', () => { $('projects').classList.add('open'); $('backdrop').classList.add('open'); $('newProjectBtn').focus(); });
@@ -1734,6 +1808,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const nRefs = (refsCache[p.id] || []).length;
     $('countRefs').textContent = nRefs ? `(${nRefs})` : '';
     ['ideia', 'capitulos', 'mundo', 'arquivos'].forEach(t => { $('tab-' + t).hidden = t !== view.tab; });
+    if (view.tab !== 'capitulos') setFocus(false);
     if (view.tab === 'ideia') { renderInfo(); renderSummary(); }
     if (view.tab === 'capitulos') renderChapters();
     if (view.tab === 'mundo') renderWorld();
@@ -1781,7 +1856,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           el('h2', { icon: 'info', text: 'Infos da Obra' }),
           el('div', { class: 'row' },
             el('button', { icon: 'pencil', text: 'Editar', onclick: () => { infoEditing = true; renderTab(); $('f-title').focus(); } }),
-            el('button', { icon: 'sparkles', text: 'Atualizar com base na história', disabled: !!busy || !hasStory, title: hasStory ? '' : 'Escreva um capítulo ou adicione referências primeiro', onclick: updateInfoFromStory }))),
+            el('button', { icon: 'refresh-cw', ai: true, text: 'Atualizar com base na história', disabled: !!busy || !hasStory, title: hasStory ? '' : 'Escreva um capítulo ou adicione referências primeiro', onclick: updateInfoFromStory }))),
         p.infoPrev ? el('div', { class: 'row', style: 'margin-bottom:8px' }, el('button', { class: 'link plain', icon: 'undo-2', text: 'Voltar às infos anteriores', onclick: () => {
           const now = { premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes };
           Object.assign(p, p.infoPrev); p.infoPrev = now; saveProject(p, true); loadForm(); renderTab();
@@ -1813,6 +1888,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function updateInfoFromStory() {
     const p = cur();
     if (busy || !ensureReady(p, updateInfoFromStory)) return;
+    if (!(await confirmAI('Atualizar as Infos da Obra com os capítulos, o mundo e as referências.'))) return;
     let chaptersTxt = '';
     for (let i = p.chapters.length - 1; i >= 0; i--) {
       const block = `### Capítulo ${i + 1}\n${p.chapters[i].text}\n\n`;
@@ -1880,11 +1956,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   // Aba Capítulos
   // =====================================================================
+  // página de leitura/edição: esconde topo, abas e lateral
+  function setFocus(on) {
+    if (document.body.classList.contains('focus') === on) return;
+    document.body.classList.toggle('focus', on);
+    if (on) closeDrawer();
+  }
+
   function renderChapters() {
     const p = cur();
     const sec = $('tab-capitulos');
     sec.innerHTML = '';
     const ch = p.chapters.find(c => c.id === view.chapterId);
+    setFocus(!!ch);
     if (ch) return renderChapterView(sec, p, ch);
     view.chapterId = null;
 
@@ -1968,8 +2052,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // botão "Escrever o capítulo N" (no celular, "Escrever cap. N")
   function writeButton(p, primary = true) {
     const n = p.chapters.length + 1;
-    return el('button', { class: primary ? 'primary' : '', icon: 'pen-line', 'aria-label': `Escrever o capítulo ${n}`, disabled: !!busy, onclick: () => guardEdit(openWriteDialog) },
-      el('span', { class: 'lbl-long', text: `Escrever o capítulo ${n}` }), el('span', { class: 'lbl-short', text: `Escrever cap. ${n}` }));
+    return el('button', { class: primary ? 'primary' : '', icon: 'plus', 'aria-label': `Novo capítulo (capítulo ${n})`, disabled: !!busy, onclick: () => guardEdit(openWriteDialog) }, 'Novo capítulo');
   }
 
   function renderChapterView(sec, p, ch) {
@@ -1985,11 +2068,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
     if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { saveEdit(); view.mode = 'ler'; renderChapters(); scrollTo(0, 0); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
     else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyText(ch.text, 'Capítulo copiado') }, el('span', { text: 'Copiar' })));
-    tools.append(writeButton(p, !editing));
 
     sec.append(el('div', { class: 'ch-toolbar' },
       el('div', { class: 'nav' },
-        el('button', { 'aria-label': 'Voltar para todos os capítulos', onclick: () => guardEdit(() => { view.chapterId = null; renderChapters(); scrollTo(0, 0); }) }, svgIcon('arrow-left'), el('span', { class: 'hide-m', text: 'Capítulos' })),
+        el('button', { 'aria-label': 'Voltar para a lista de capítulos', onclick: () => guardEdit(() => { view.chapterId = null; renderTab(); scrollTo(0, 0); }) }, svgIcon('arrow-left'), el('span', { text: 'Voltar' })),
         el('button', { icon: 'chevron-left', 'aria-label': 'Capítulo anterior', disabled: i === 0, onclick: () => go(i - 1) }),
         el('button', { icon: 'chevron-right', 'aria-label': 'Próximo capítulo', disabled: i === p.chapters.length - 1, onclick: () => go(i + 1) }),
         el('span', { class: 'pos', text: `${i + 1}/${p.chapters.length}` })),
@@ -1997,7 +2079,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
     if (!writingThis && !busy && wrongLang(p, ch.text)) sec.append(el('div', { class: 'notice' },
       el('p', { text: `Este capítulo saiu em inglês.` }),
-      el('button', { class: 'primary', text: `Reescrever em ${langLower(p)}`, onclick: () => guardEdit(() => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
+      el('button', { class: 'primary', icon: 'languages', ai: true, text: `Reescrever em ${langLower(p)}`, onclick: () => guardEdit(() => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
         `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`)) })));
 
     const card = el('div', { class: 'card' });
@@ -2214,7 +2296,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { type: 'button', class: 'chip', icon: 'bold', 'aria-label': 'Negrito', onclick: () => fmtWrap($('chBody'), '**') }),
         el('button', { type: 'button', class: 'chip', icon: 'italic', 'aria-label': 'Itálico', onclick: () => fmtWrap($('chBody'), '*') }),
         el('button', { type: 'button', class: 'chip', icon: 'smile', 'aria-label': 'Emojis', onclick: () => { grid.hidden = !grid.hidden; updateSelBar(); } }),
-        el('button', { type: 'button', class: 'chip strong', icon: 'wand-sparkles', text: 'Ajustar com IA', onclick: aiOnSelection }),
+        el('button', { type: 'button', class: 'chip strong', icon: 'wand-sparkles', ai: true, text: 'Ajustar com IA', onclick: aiOnSelection }),
         grid);
     } else if (mode === 'multi') {
       bar.append(el('span', { class: 'sel-title', text: 'Para marcar, selecione dentro de um parágrafo.' }));
@@ -2367,6 +2449,29 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   const fmtUSD = (v) => 'US$ ' + v.toFixed(2).replace('.', ',');
 
+  // todo pedido à IA passa por aqui: avisa que pode gastar créditos e pede confirmação
+  async function confirmAI(what) {
+    if (settings.confirmAI === false) return true;
+    const dlg = $('aiDlg');
+    $('aiDlgWhat').textContent = what;
+    $('aiDlgCost').textContent = 'Conferindo o modelo…';
+    $('aiDlgSkip').checked = false;
+    loadModels().then(list => {
+      const m = list.find(x => x.id === settings.model);
+      const name = (m && m.name) || settings.modelName || settings.model;
+      $('aiDlgCost').textContent = !m ? `Modelo: ${name}. Se ele for pago, gasta créditos do OpenRouter.`
+        : isFree(m) ? `Modelo grátis (${name}): não gasta créditos, mas conta no limite de uso do dia.`
+        : `Modelo pago (${name}): gasta créditos do OpenRouter, ${chapterCost(m) || 'conforme o tamanho do pedido'}.`;
+    }).catch(() => { $('aiDlgCost').textContent = `Modelo: ${settings.modelName || settings.model}. Se ele for pago, gasta créditos do OpenRouter.`; });
+    return new Promise(res => {
+      const done = (ok) => { if (ok && $('aiDlgSkip').checked) { settings.confirmAI = false; saveSettings(); } dlg.close(); res(ok); };
+      $('aiDlgGo').onclick = () => done(true);
+      $('aiDlgCancel').onclick = () => done(false);
+      dlg.oncancel = (e) => { e.preventDefault(); done(false); };
+      dlg.showModal(); $('aiDlgGo').focus();
+    });
+  }
+
   function handleAIError(e, retry, edit) {
     if (e.name === 'AbortError') { toast('Parado.'); return; }
     const actions = [];
@@ -2476,6 +2581,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function writeChapter(dir, length) {
     const p = cur();
     const n = p.chapters.length + 1;
+    if (!(await confirmAI(n === 1 ? 'Escrever o capítulo 1. Depois dele, o mundo da história também é criado (mais um pedido).' : `Escrever o capítulo ${n}.`))) { setDraft('write:' + p.id, dir); return; }
     const makePrompt = (strong) => withLang(p, `${buildContext(p, p.chapters.length, dir)}\n\n` +
       `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde o anterior parou') +
       `, com cerca de ${length} palavras.` +
@@ -2498,7 +2604,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       stopBusy();
       if (r.truncated) showAlert({
         kind: 'info', msg: 'O capítulo parou antes do fim, porque a resposta atingiu o tamanho máximo.',
-        actions: [{ icon: 'plus', label: 'Continuar escrevendo', primary: true, onClick: () => continueChapter(ch) }]
+        actions: [{ icon: 'plus', ai: true, label: 'Continuar escrevendo', primary: true, onClick: () => continueChapter(ch) }]
       });
       else toast(`Capítulo ${n} pronto ✓`);
       setDraft('write:' + p.id, '');
@@ -2520,6 +2626,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function continueChapter(ch) {
     const p = cur();
     if (busy || !ensureReady(p, () => continueChapter(ch))) return;
+    if (!(await confirmAI('Continuar escrevendo este capítulo.'))) return;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
     const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, '')}\n\n` +
@@ -2594,6 +2701,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function runAdjust(target, instr) {
     const p = cur();
     if (busy || !ensureReady(p, () => runAdjust(target, instr))) return;
+    if (!(await confirmAI(target.partial ? `Reescrever o trecho selecionado: ${instr}` : `Reescrever o capítulo: ${instr}`))) { setDraft('adj:' + target.ch.id, instr); return; }
     const { ch, start, end, partial } = target;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
@@ -2655,13 +2763,72 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     ['glossario', 'Termos e glossário', 'Palavras, apelidos e nomes próprios do mundo.'],
     ['pendencias', 'O que falta definir', 'Pontos em aberto que valem uma decisão.']
   ];
-  const worldOf = (p) => (p.world = p.world || { s: {}, custom: [], at: 0, chapters: 0, prev: null });
+  // cada seção do mundo é uma pasta de itens { id, title, text, by: 'ai'|'user', edited }
+  const normTitle = (t) => (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+  // texto antigo ("- Nome: detalhes" por linha) vira itens
+  function splitEntries(text, by = 'user') {
+    const lines = (text || '').split('\n').map(l => l.trim()).filter(Boolean);
+    const bullets = lines.filter(l => /^[-•*]\s+/.test(l));
+    if (!bullets.length) return text.trim() ? [{ id: uid(), title: 'Notas', text: text.trim(), by, edited: by === 'user' }] : [];
+    return bullets.map(l => {
+      const t = l.replace(/^[-•*]\s+/, ''), i = t.indexOf(':');
+      const title = i > 0 && i < 60 ? t.slice(0, i).trim() : t.split(/\s+/).slice(0, 5).join(' ');
+      return { id: uid(), title, text: i > 0 && i < 60 ? t.slice(i + 1).trim() : t, by, edited: by === 'user' };
+    });
+  }
+  function worldOf(p) {
+    const w = p.world = p.world || {};
+    w.at = w.at || 0; w.chapters = w.chapters || 0;
+    if (!w.e) { w.e = {}; WORLD.forEach(([k]) => { w.e[k] = splitEntries((w.s && w.s[k]) || ''); }); w.prev = null; }
+    WORLD.forEach(([k]) => { w.e[k] = w.e[k] || []; });
+    if (!w.folders) w.folders = (w.custom || []).map(c => ({ id: c.id || uid(), title: c.title || 'Pasta', entries: splitEntries(c.text || '') }));
+    return w;
+  }
   function worldText(p) {
     if (p.useWorld === false || !p.world) return '';
-    const w = p.world, out = [];
-    WORLD.forEach(([k, label]) => { if (k !== 'pendencias' && (w.s[k] || '').trim()) out.push(`## ${label}\n${w.s[k].trim()}`); });
-    (w.custom || []).forEach(c => { if ((c.text || '').trim()) out.push(`## ${c.title || 'Outras informações'}\n${c.text.trim()}`); });
+    const w = worldOf(p), out = [];
+    const block = (label, items) => {
+      const its = items.filter(e => (e.title || '').trim() || (e.text || '').trim());
+      if (its.length) out.push(`## ${label}\n` + its.map(e => `### ${e.title || 'Sem título'}\n${(e.text || '').trim()}`).join('\n'));
+    };
+    WORLD.forEach(([k, label]) => { if (k !== 'pendencias') block(label, w.e[k]); });
+    w.folders.forEach(f => block(f.title || 'Outras informações', f.entries));
     return out.join('\n\n');
+  }
+
+  const openEntries = new Set(); // itens abertos na tela
+  function entryRow(p, list, e, refresh) {
+    const d = el('details', { class: 'entry' });
+    if (openEntries.has(e.id)) d.open = true;
+    d.addEventListener('toggle', () => { d.open ? openEntries.add(e.id) : openEntries.delete(e.id); });
+    const sumTitle = el('span', { class: 'entry-title', text: e.title || 'Sem título' });
+    const title = el('input', { type: 'text', value: e.title || '', placeholder: 'Título (ex.: nome do personagem)', 'aria-label': 'Título do item' });
+    const text = el('textarea', { rows: 5, placeholder: 'Escreva aqui tudo sobre este item.', 'aria-label': 'Texto do item' });
+    text.value = e.text || '';
+    const touch = () => { e.edited = true; saveProject(p); };
+    title.addEventListener('input', () => { e.title = title.value; sumTitle.textContent = e.title || 'Sem título'; touch(); });
+    text.addEventListener('input', () => { e.text = text.value; touch(); });
+    d.append(el('summary', {}, sumTitle, e.by === 'ai' && !e.edited ? el('span', { class: 'tag ai-tag', text: 'IA' }) : null),
+      el('div', { class: 'entry-body' }, title, text,
+        el('div', { class: 'row end' }, el('button', { class: 'link', text: 'Excluir item', onclick: () => {
+          const i = list.indexOf(e); list.splice(i, 1); saveProject(p, true); refresh();
+          toast('Item excluído.', { action: 'Desfazer', onAction: () => { list.splice(i, 0, e); saveProject(p, true); refresh(); } });
+        } }))));
+    return d;
+  }
+  function folderCard(p, label, hint, list, opts = {}) {
+    const refresh = () => renderWorld();
+    const add = () => { const e = { id: uid(), title: '', text: '', by: 'user', edited: true }; list.push(e); openEntries.add(e.id); saveProject(p, true); refresh();
+      setTimeout(() => document.querySelector(`.entry[open] input[value=""]`)?.focus(), 30); };
+    const head = el('div', { class: 'folder-head' },
+      opts.titleInput || el('h3', { icon: opts.icon || 'folder', text: label }),
+      el('span', { class: 'count', text: list.length ? `(${list.length})` : '' }),
+      el('button', { class: 'add-btn', icon: 'plus', 'aria-label': `Adicionar em ${label || 'pasta'}`, title: 'Adicionar item', onclick: add }));
+    const card = el('div', { class: 'card world-sec' + (opts.pend ? ' pend' : '') }, head);
+    if (!list.length) card.append(el('p', { class: 'hint', text: hint }));
+    list.forEach(e => card.append(entryRow(p, list, e, refresh)));
+    if (opts.footer) card.append(opts.footer);
+    return card;
   }
 
   function renderWorld() {
@@ -2672,43 +2839,35 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const outdated = w.at && (p.chapters.length !== w.chapters || edited);
     const head = el('div', { class: 'card' },
       el('h2', { icon: 'globe', text: 'Mundo da história' }),
-      el('p', { class: 'lead', text: 'Tudo o que se sabe sobre os personagens, lugares e regras deste mundo. Você pode escrever e corrigir à mão; a IA usa isto como guia ao escrever.' }),
+      el('p', { class: 'lead', text: 'Pastas com tudo o que se sabe do mundo. Toque em + para adicionar um personagem, lugar ou regra; cada item tem título e texto. A IA usa isto como guia ao escrever.' }),
       w.at ? el('p', { class: 'muted', text: `Atualizado em ${fmtDate(w.at)}, com ${w.chapters} capítulo(s).` + (outdated ? ' Há capítulos novos ou editados desde então.' : '') })
         : el('p', { class: 'muted', text: p.chapters.length ? 'Ainda não foi gerado.' : 'É criado sozinho depois do primeiro capítulo. Você também pode preencher à mão agora.' }),
       el('div', { class: 'row' },
-        el('button', { class: 'primary', icon: 'sparkles', disabled: !!busy || !p.chapters.length, text: w.at ? 'Atualizar com os capítulos' : 'Gerar a partir dos capítulos', onclick: () => generateWorld(false) }),
-        w.prev ? el('button', { icon: 'undo-2', text: 'Voltar à versão anterior', onclick: () => { const t = w.s; w.s = w.prev; w.prev = t; saveProject(p, true); renderWorld(); } }) : null),
-      el('p', { class: 'hint', text: 'Só atualiza quando você toca no botão, para não gastar créditos à toa. O que você escreveu à mão é mantido.' }));
+        el('button', { class: 'primary', icon: 'refresh-cw', ai: true, disabled: !!busy || !p.chapters.length, text: w.at ? 'Atualizar com os capítulos' : 'Gerar a partir dos capítulos', onclick: () => generateWorld(false) }),
+        w.prev ? el('button', { icon: 'undo-2', text: 'Voltar à versão anterior', onclick: () => { const t = w.e; w.e = w.prev; w.prev = t; saveProject(p, true); renderWorld(); } }) : null),
+      el('p', { class: 'hint', text: 'Só atualiza quando você toca no botão. A IA acrescenta itens novos e completa os que ela criou; o que você escreveu ou editou nunca é trocado.' }));
     const use = el('input', { type: 'checkbox', id: 'useWorld' });
     use.checked = p.useWorld !== false;
     use.addEventListener('change', () => { p.useWorld = use.checked; saveProject(p); });
     head.append(el('label', { class: 'check', for: 'useWorld' }, use, el('span', { text: 'Usar o mundo como guia da IA ao escrever' })));
     sec.append(head);
 
+    const ICON = { personagens: 'users', relacoes: 'heart-handshake', lugares: 'map-pin', regras: 'scroll-text', grupos: 'shield', historia: 'history', glossario: 'book-a', pendencias: 'circle-help' };
     const grid = el('div', { class: 'world-grid' });
-    WORLD.forEach(([k, label, hint]) => {
-      const ta = el('textarea', { id: 'w-' + k, placeholder: hint, rows: 4 });
-      ta.value = w.s[k] || '';
-      ta.addEventListener('input', () => { w.s[k] = ta.value; saveProject(p); });
-      grid.append(el('div', { class: 'card world-sec' + (k === 'pendencias' ? ' pend' : '') },
-        el('label', { for: 'w-' + k, style: 'margin-top:0', text: label }), ta,
-        k === 'pendencias' ? el('p', { class: 'hint', text: 'Lista de apoio para você; não vai para a IA como regra.' }) : null));
+    WORLD.forEach(([k, label, hint]) => grid.append(folderCard(p, label, hint, w.e[k], { icon: ICON[k], pend: k === 'pendencias',
+      footer: k === 'pendencias' ? el('p', { class: 'hint', text: 'Lista de apoio para você; não vai para a IA como regra.' }) : null })));
+    w.folders.forEach(f => {
+      const t = el('input', { type: 'text', value: f.title || '', placeholder: 'Nome da pasta', 'aria-label': 'Nome da pasta', class: 'folder-title' });
+      t.addEventListener('input', () => { f.title = t.value; saveProject(p); });
+      grid.append(folderCard(p, f.title, 'Pasta vazia. Toque em + para adicionar.', f.entries, { titleInput: t,
+        footer: el('div', { class: 'row end' }, el('button', { class: 'link', text: 'Remover pasta', onclick: () => {
+          if (!confirm(`Remover a pasta "${f.title || 'sem nome'}" e os itens dela?`)) return;
+          w.folders = w.folders.filter(x => x !== f); saveProject(p, true); renderWorld();
+        } })) }));
     });
-    (w.custom || []).forEach(c => {
-      const t = el('input', { type: 'text', value: c.title || '', placeholder: 'Nome da seção', 'aria-label': 'Nome da seção', style: 'font-weight:700' });
-      t.addEventListener('input', () => { c.title = t.value; saveProject(p); });
-      const ta = el('textarea', { rows: 4, placeholder: 'Escreva aqui.', 'aria-label': c.title || 'Seção' });
-      ta.value = c.text || '';
-      ta.addEventListener('input', () => { c.text = ta.value; saveProject(p); });
-      grid.append(el('div', { class: 'card world-sec' }, t, el('div', { style: 'height:8px' }), ta,
-        el('div', { class: 'row end' }, el('button', { class: 'link', text: 'Remover seção', onclick: () => {
-          if (!confirm('Remover esta seção?')) return;
-          w.custom = w.custom.filter(x => x !== c); saveProject(p, true); renderWorld();
-        } }))));
-    });
-    sec.append(grid, el('button', { class: 'wide', icon: 'plus', text: 'Nova seção', onclick: () => {
-      (w.custom = w.custom || []).push({ id: uid(), title: '', text: '' }); saveProject(p, true); renderWorld();
-      const inputs = sec.querySelectorAll('.world-sec input[type=text]'); inputs[inputs.length - 1]?.focus();
+    sec.append(grid, el('button', { class: 'wide', icon: 'folder-plus', text: 'Nova pasta', onclick: () => {
+      w.folders.push({ id: uid(), title: '', entries: [] }); saveProject(p, true); renderWorld();
+      const inputs = sec.querySelectorAll('.folder-title'); inputs[inputs.length - 1]?.focus();
     } }));
   }
 
@@ -2716,6 +2875,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const p = cur();
     if (busy || !ensureReady(p, () => generateWorld(auto))) return;
     const w = worldOf(p);
+    if (!auto && !(await confirmAI('Atualizar o mundo da história com os capítulos.'))) return;
     let chaptersTxt = '';
     for (let i = p.chapters.length - 1; i >= 0; i--) {
       const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
@@ -2723,16 +2883,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       chaptersTxt = block + chaptersTxt;
     }
     const current = {};
-    WORLD.forEach(([k]) => { current[k] = w.s[k] || ''; });
-    const custom = (w.custom || []).filter(c => (c.text || '').trim()).map(c => `## ${c.title}\n${c.text}`).join('\n\n');
+    WORLD.forEach(([k]) => { current[k] = w.e[k].map(e => ({ title: e.title, text: e.text })); });
+    const custom = w.folders.map(f => `## ${f.title}\n` + f.entries.map(e => `### ${e.title}\n${e.text}`).join('\n')).join('\n\n');
     const prompt = `${bible(p)}\n\n` +
       `MUNDO ATUAL (o autor pode ter escrito ou corrigido à mão; isto tem prioridade):\n${JSON.stringify(current, null, 1)}\n\n` +
       (custom ? `OUTRAS SEÇÕES DO AUTOR (só leia; não repita):\n${custom}\n\n` : '') +
       `CAPÍTULOS:\n${chaptersTxt}\n` +
       `TAREFA: Atualize o worldbuilding desta história. Responda SOMENTE com um objeto JSON com exatamente estas chaves: ` +
-      `${WORLD.map(x => x[0]).join(', ')}. Cada valor é um texto em português do Brasil, em tópicos curtos começando com "- ". ` +
-      `Mantenha tudo o que já está no MUNDO ATUAL, palavra por palavra quando possível; acrescente o que os capítulos mostram; ` +
-      `corrija só o que os capítulos contradizem claramente. Não invente fatos que não aparecem. ` +
+      `${WORLD.map(x => x[0]).join(', ')}. Cada valor é uma LISTA de itens {"title": "...", "text": "..."} em português do Brasil ` +
+      `(um personagem, lugar, regra ou termo por item; o texto com os detalhes). Mantenha os itens do MUNDO ATUAL com o mesmo título e complete o texto ` +
+      `com o que os capítulos mostram; acrescente itens novos. Não invente fatos que não aparecem. ` +
       `Em "pendencias", liste o que ainda não está definido e seria útil o autor decidir (nomes, regras, motivações, lugares).`;
     const b = startBusy('world', 'Mundo da história', null);
     try {
@@ -2741,8 +2901,23 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       let data;
       try { data = JSON.parse(r.text.slice(a, z + 1)); } catch { data = null; }
       if (!data || typeof data !== 'object') throw Object.assign(new Error('A IA não devolveu o mundo no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
-      w.prev = Object.assign({}, w.s);
-      WORLD.forEach(([k]) => { const v = data[k]; if (v != null) w.s[k] = Array.isArray(v) ? v.map(x => '- ' + String(x).replace(/^-\s*/, '')).join('\n') : String(v); });
+      w.prev = JSON.parse(JSON.stringify(w.e));
+      WORLD.forEach(([k]) => {
+        let items = data[k];
+        if (items == null) return;
+        if (!Array.isArray(items)) items = splitEntries(String(items), 'ai');
+        items = items.map(x => typeof x === 'string' ? splitEntries('- ' + x, 'ai')[0] : x).filter(x => x && (x.title || x.text));
+        const list = w.e[k];
+        if (k === 'pendencias') for (let i = list.length - 1; i >= 0; i--) if (list[i].by === 'ai' && !list[i].edited) list.splice(i, 1); // pendências da IA são refeitas
+        items.forEach(x => {
+          // "Theo (28)" e "Theo" são o mesmo item; em Personagens, vale o primeiro nome
+          const key = (t) => normTitle(t).replace(/\(.*?\)/g, '').replace(/["“”'‘’]/g, '').trim();
+          const first = (t) => key(t).split(' ')[0];
+          const mine = list.find(e => key(e.title) === key(x.title)) || (k === 'personagens' && first(x.title).length > 2 && list.find(e => first(e.title) === first(x.title)));
+          if (!mine) list.push({ id: uid(), title: String(x.title || '').trim() || 'Sem título', text: String(x.text || '').trim(), by: 'ai', edited: false });
+          else if (mine.by === 'ai' && !mine.edited) mine.text = String(x.text || mine.text).trim(); // só completa o que a IA criou
+        });
+      });
       w.at = Date.now(); w.chapters = p.chapters.length;
       stopBusy();
       toast(auto ? 'Mundo da história criado ✓ Veja na aba Mundo.' : 'Mundo atualizado ✓');
@@ -2777,7 +2952,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       (p.chapters.length !== p.summaryChapters ? ' Há capítulos novos desde então.' : edited ? ' Você editou capítulos desde então.' : '') }));
     card.append(el('button', {
       class: 'primary wide', disabled: !!busy, onclick: generateSummary,
-      icon: 'sparkles', text: p.summary.trim() ? (outdated ? 'Atualizar o resumo' : 'Gerar de novo') : 'Gerar o resumo'
+      icon: 'notebook-text', ai: true, text: p.summary.trim() ? (outdated ? 'Atualizar o resumo' : 'Gerar de novo') : 'Gerar o resumo'
     }));
 
     const ta = el('textarea', { class: 'big', id: 'summaryText', style: 'min-height:40vh;margin-top:14px', 'aria-label': 'Resumo', placeholder: 'O resumo aparece aqui. Você pode editar ou escrever o seu.' });
@@ -2803,6 +2978,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function generateSummary() {
     const p = cur();
     if (busy || !ensureReady(p, generateSummary)) return;
+    if (!(await confirmAI('Gerar o resumo da história a partir dos capítulos.'))) return;
     const MAX = 60000;
     let chaptersTxt = '', truncated = false;
     for (let i = p.chapters.length - 1; i >= 0; i--) {
@@ -2938,7 +3114,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     subject.addEventListener('input', () => { r.subject = subject.value; clearTimeout(t); t = setTimeout(save, 400); });
     note.addEventListener('input', () => { r.note = note.value; clearTimeout(t); t = setTimeout(save, 400); });
     use.addEventListener('change', () => { r.enabled = use.checked; save(); });
-    const describe = el('button', { icon: 'sparkles', text: 'Descrever com a IA', hidden: true, onclick: () => describeImage(p, r, note, describe) });
+    const describe = el('button', { icon: 'image', ai: true, text: 'Descrever com a IA', hidden: true, onclick: () => describeImage(p, r, note, describe) });
     canSeeImages().then(ok => { describe.hidden = !ok; });
     return el('div', { class: 'card img-ref' },
       el('div', { class: 'ref-head' },
@@ -3017,6 +3193,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   async function describeImage(p, r, noteEl, btn) {
     if (busy || !ensureReady(p, () => describeImage(p, r, noteEl, btn))) return;
+    if (!(await confirmAI('Descrever esta imagem de referência.'))) return;
     btn.disabled = true;
     const b = startBusy('image', 'Descrevendo a imagem', null);
     try {
@@ -3644,6 +3821,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       status,
       el('details', { style: 'margin-top:16px' },
         el('summary', { text: 'Opções avançadas' }),
+        (() => {
+          const c = el('input', { type: 'checkbox', id: 'set-confirm' });
+          c.checked = settings.confirmAI !== false;
+          c.addEventListener('change', () => { settings.confirmAI = c.checked; saveSettings(); });
+          return el('label', { class: 'check', for: 'set-confirm', style: 'margin-top:8px' }, c, el('span', { text: 'Pedir confirmação antes de usar a IA' }));
+        })(),
         el('label', { for: 'set-temp', text: 'Criatividade' }), temp,
         el('label', { for: 'set-max', text: 'Tamanho máximo de cada resposta' }), max,
         el('p', { class: 'hint', text: 'Se os capítulos param no meio, aumente. Se o modelo der erro de tamanho, diminua.' }),
@@ -3724,7 +3907,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       }
       if (dbOk) local.del('fanfic.stories');
     }
-    projects.forEach(p => { if (!p.lang) p.lang = DEFAULT_LANG; });
+    // completa campos que versões antigas não tinham (resumo, idioma etc.)
+    projects = projects.map(p => Object.assign(newProject(), p, { lang: p.lang || DEFAULT_LANG }));
 
     if (!projects.length) { const p = newProject(); projects.push(p); saveProject(p, true); }
     if (!cur()) currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id;

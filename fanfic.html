@@ -309,6 +309,26 @@
   button.ai-btn:not(:disabled):hover { filter: brightness(1.06); }
   .info-ai { display: flex; gap: 10px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 16px; }
   .info-ai p { margin: 0; flex: 1 1 260px; }
+  .spend-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
+  .spend-stats .stat { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+  .spend-stats .k { font-size: .8rem; color: var(--muted); }
+  .spend-stats .v { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .spend-list { margin-top: 12px; max-height: 50vh; overflow-y: auto; }
+  .spend-day { font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 12px 0 4px; }
+  .spend-row { display: flex; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); }
+  .spend-row .what { flex: 1; min-width: 0; }
+  .spend-row .act { font-weight: 600; }
+  .spend-row .sub { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .spend-row .val { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .spend-row .val.free { color: var(--ok); font-weight: 600; }
+  .cost-note { position: fixed; right: 16px; bottom: 16px; z-index: 55; display: flex; align-items: center; gap: 10px;
+    background: var(--surface); color: var(--text); border: 1px solid var(--ai-border); border-radius: 14px; padding: 10px 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3); max-width: calc(100vw - 32px); }
+  .cost-note .icon { color: var(--accent); }
+  .cost-note .cn-act { font-size: .8rem; color: var(--muted); display: block; }
+  .cost-note .cn-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cost-note button { min-height: 36px; padding: 4px 10px; font-size: .85rem; }
+  @media (max-width: 600px) { .cost-note { left: 12px; right: 12px; bottom: 12px; } .spend-stats .v { font-size: 1rem; } }
   .ai-cost { font-size: .9rem; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
   /* página de leitura/edição do capítulo */
   body.focus header, body.focus aside#projects, body.focus #backdrop, body.focus .tabs, body.focus #projHeading { display: none !important; }
@@ -355,7 +375,18 @@
   .reader p.scene-break { text-align: center; letter-spacing: .5em; color: var(--muted); }
   .reader mark, .hl-item mark { background: #fff2a8; color: #231a1c; border-radius: 3px; padding: 0 2px; cursor: pointer; }
   .reader mark.important, .hl-item mark.important { background: #ffd6e3; box-shadow: inset 0 -2px 0 var(--accent); }
-  .hl-list h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .hl-list h3 { display: flex; align-items: center; gap: 8px; margin: 0; }
+  .hl-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .hl-done { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
+  .hl-done summary { cursor: pointer; color: var(--muted); font-weight: 600; padding: 6px 0; }
+  .hl-done-row { display: flex; align-items: flex-start; gap: 8px; opacity: .7; }
+  .hl-done-row .hl-item { flex: 1; }
+  .resolve-list { max-height: 45vh; overflow-y: auto; display: grid; gap: 4px; }
+  .resolve-item { align-items: flex-start; border-top: 1px solid var(--border); padding: 10px 0; margin: 0; }
+  .resolve-item > span { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .resolve-item mark { background: #fff2a8; color: #231a1c; border-radius: 3px; padding: 0 2px; }
+  .resolve-item mark.important { background: #ffd6e3; box-shadow: inset 0 -2px 0 var(--accent); }
+  .resolve-item .hl-note { color: var(--muted); font-size: .9rem; font-weight: 400; }
   .hl-item { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; text-align: left; background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 10px 0; font-weight: 400; }
   .hl-item .hl-note { color: var(--muted); font-size: .9rem; }
   .tag.mem { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); border-color: var(--accent); margin: 0; }
@@ -534,7 +565,7 @@
 <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></symbol>
 <symbol id="i-pen-line" viewBox="0 0 24 24"><path d="M12 20h9" /> <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" /></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /><path d="M12 17.5v-11" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
 <symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
 <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
 <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></symbol>
@@ -589,6 +620,10 @@
         <span class="mi-ico"><svg class="icon" aria-hidden="true"><use href="#i-cloud"/></svg></span>
         <span class="mi-text"><span class="mi-label" id="syncLabel">Sincronizar com Dropbox</span><span class="mi-sub" id="syncLine">Mesmas histórias no celular e no computador</span></span>
         <span class="dot" id="syncDot" aria-hidden="true" hidden></span>
+      </button>
+      <button role="menuitem" id="spendBtn" class="menu-item">
+        <span class="mi-ico"><svg class="icon" aria-hidden="true"><use href="#i-receipt"/></svg></span>
+        <span class="mi-text"><span class="mi-label">Gastos com IA</span><span class="mi-sub" id="spendLine">Nenhum gasto ainda</span></span>
       </button>
       <button role="menuitem" id="backupBtn" class="menu-item">
         <span class="mi-ico"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg></span>
@@ -811,6 +846,29 @@
     <button id="aiDlgCancel">Cancelar</button>
   </div>
 </dialog>
+
+<!-- Resolver marcações -->
+<dialog id="resolveDlg" aria-labelledby="resolveTitle">
+  <div class="dlg-head"><h2 id="resolveTitle"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Resolver marcações com IA</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">A IA muda o capítulo para atender às anotações que você escolher. O resto do texto fica igual.</p>
+  <div id="resolveList" class="resolve-list"></div>
+  <label for="resolveExtra">Algo mais para a IA? (opcional)</label>
+  <textarea id="resolveExtra" rows="2" placeholder="Ex.: mantenha o tom mais leve nessas partes"></textarea>
+  <label class="check" for="resolveMark"><input type="checkbox" id="resolveMark" checked><span>Marcar como resolvidas depois</span></label>
+  <div class="status err" id="resolveStatus" role="status"></div>
+  <div class="row" style="margin-top:12px"><button class="primary wide ai-btn" id="resolveGo"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Resolver com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button></div>
+</dialog>
+
+<!-- Gastos com IA -->
+<dialog id="spendDlg" aria-labelledby="spendTitle">
+  <div class="dlg-head"><h2 id="spendTitle"><svg class="icon" aria-hidden="true"><use href="#i-receipt"/></svg>Gastos com IA</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="spend-stats" id="spendStats"></div>
+  <p class="muted" id="spendBalance" style="margin:6px 0 0"></p>
+  <div id="spendList" class="spend-list"></div>
+  <p class="hint">Valores em dólar, informados pelo OpenRouter a cada pedido. Quando ele não informa, o valor é estimado pelo preço do modelo (marcado com ≈). Modelos grátis aparecem como grátis.</p>
+  <div class="row end"><button class="link" id="spendClear"><svg class="icon" aria-hidden="true"><use href="#i-trash-2"/></svg>Limpar histórico</button></div>
+</dialog>
+<div class="cost-note" id="costNote" role="status" hidden></div>
 
 <!-- Item do mundo -->
 <dialog id="entryDlg" aria-labelledby="entryFolder">
@@ -1627,6 +1685,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function mergeProjects(remote) {
     if (!remote) return false;
     let needPush = mergeAI(remote.ai), touchedCurrent = false, added = 0;
+    if (mergeSpend(remote.spend)) needPush = true;
     mergeDeleted('projects', remote.deleted);
     if (Object.keys(sync.deleted.projects).some(id => !(remote.deleted || {})[id])) needPush = true;
     const editingNow = busy || (document.activeElement && document.activeElement.closest && document.activeElement.closest('main') &&
@@ -1704,7 +1763,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   async function payload(kind) {
-    if (kind === 'projects') return { projects: projects.filter(x => !isEmptyProject(x) && !x.draft), deleted: sync.deleted.projects, ai: aiForSync(), at: Date.now() };
+    if (kind === 'projects') return { projects: projects.filter(x => !isEmptyProject(x) && !x.draft), deleted: sync.deleted.projects, ai: aiForSync(), spend, at: Date.now() };
     return { refs: (await db.all('refs')) || [], deleted: sync.deleted.refs, at: Date.now() };
   }
 
@@ -2480,7 +2539,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       refresh();
     } else {
       const body = el('div', { class: 'reader', id: 'chBody' });
-      renderParagraphs(body, ch.text, writingThis, writingThis ? [] : ch.highlights);
+      renderParagraphs(body, ch.text, writingThis, writingThis ? [] : (ch.highlights || []).filter(h => !h.resolved));
       body.addEventListener('click', (e) => { const m = e.target.closest('mark[data-hl]'); if (m) openNote(p, ch, m.dataset.hl); });
       words.textContent = fmtNum(countWords(ch.text)) + ' palavras';
       card.append(el('h2', { class: 'reader-title', text: chTitle(p, ch) }), body,
@@ -2720,17 +2779,73 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     dlg.showModal(); $('noteText').focus();
   }
   function highlightList(p, ch) {
-    const list = el('div', { class: 'card hl-list' }, el('h3', { icon: 'highlighter', text: `Marcações (${ch.highlights.length})` }));
-    ch.highlights.forEach(h => list.append(el('button', { class: 'hl-item', type: 'button', onclick: () => openNote(p, ch, h.id) },
+    const open = ch.highlights.filter(h => !h.resolved), done = ch.highlights.filter(h => h.resolved);
+    const item = (h) => el('button', { class: 'hl-item', type: 'button', onclick: () => openNote(p, ch, h.id) },
       el('mark', { class: h.important ? 'important' : '', text: h.quote.length > 140 ? h.quote.slice(0, 140) + '…' : h.quote }),
       h.note ? el('span', { class: 'hl-note', text: h.note }) : null,
-      h.important ? el('span', { class: 'tag mem' }, svgIcon('brain'), ' Memória da IA') : null)));
+      h.important ? el('span', { class: 'tag mem' }, svgIcon('brain'), ' Memória da IA') : null);
+    const list = el('div', { class: 'card hl-list' },
+      el('div', { class: 'hl-head' },
+        el('h3', { icon: 'highlighter', text: `Marcações (${open.length})` }),
+        open.length ? el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, text: 'Resolver com IA', disabled: !!busy, onclick: () => openResolve(p, ch) }) : null));
+    if (!open.length) list.append(el('p', { class: 'muted', text: 'Nenhuma marcação pendente.' }));
+    open.forEach(h => list.append(item(h)));
+    if (done.length) {
+      const d = el('details', { class: 'hl-done' }, el('summary', { text: `Resolvidas (${done.length})` }));
+      done.forEach(h => d.append(el('div', { class: 'hl-done-row' }, item(h),
+        el('button', { class: 'link plain', icon: 'undo-2', text: 'Reabrir', onclick: () => { delete h.resolved; saveProject(p, true); renderChapters(); } }))));
+      list.append(d);
+    }
     return list;
   }
+
+  // resolver marcações: a IA muda o capítulo para atender às anotações escolhidas
+  let resolveCtx = null;
+  function openResolve(p, ch) {
+    if (busy) return;
+    const open = ch.highlights.filter(h => !h.resolved);
+    resolveCtx = { p, ch };
+    const box = $('resolveList');
+    box.innerHTML = '';
+    open.forEach(h => {
+      const cb = el('input', { type: 'checkbox', value: h.id });
+      cb.checked = !!(h.note || '').trim() && !h.important; // ideias para o futuro (memória) ficam desmarcadas
+      box.append(el('label', { class: 'check resolve-item' }, cb,
+        el('span', {},
+          el('mark', { class: h.important ? 'important' : '', text: h.quote.length > 120 ? h.quote.slice(0, 120) + '…' : h.quote }),
+          el('span', { class: 'hl-note', text: (h.note || '').trim() || 'Sem anotação: a IA melhora este trecho.' }),
+          h.important ? el('span', { class: 'tag mem' }, svgIcon('brain'), ' Memória da IA: ideia para os próximos capítulos') : null)));
+    });
+    $('resolveExtra').value = '';
+    $('resolveMark').checked = true;
+    $('resolveStatus').textContent = '';
+    $('resolveDlg').showModal();
+  }
+  $('resolveGo').addEventListener('click', () => {
+    const c = resolveCtx; if (!c) return;
+    const ids = [...$('resolveList').querySelectorAll('input:checked')].map(x => x.value);
+    if (!ids.length) { $('resolveStatus').textContent = 'Escolha pelo menos uma marcação.'; return; }
+    const hs = c.ch.highlights.filter(h => ids.includes(h.id));
+    const extra = $('resolveExtra').value.trim();
+    const instr = `Aplique no capítulo as anotações do autor abaixo. Para cada uma, mude o texto no trecho marcado (e só o que for preciso ao redor) para atender ao que a anotação pede. Não mude o que não foi pedido.\n` +
+      hs.map((h, i) => `${i + 1}) Trecho marcado: “${h.quote}”\n   Anotação: ${(h.note || '').trim() || 'melhore este trecho'}`).join('\n') +
+      (extra ? `\nPedido geral do autor: ${extra}` : '');
+    // uma marcação só: mexe apenas no parágrafo dela (mais barato); várias: o capítulo todo
+    let target = { ch: c.ch, start: 0, end: c.ch.text.length, partial: false };
+    if (hs.length === 1) {
+      const at = c.ch.text.indexOf(hs[0].quote);
+      if (at >= 0) {
+        const a = c.ch.text.lastIndexOf('\n\n', at), z = c.ch.text.indexOf('\n\n', at + hs[0].quote.length);
+        target = { ch: c.ch, start: a < 0 ? 0 : a + 2, end: z < 0 ? c.ch.text.length : z, partial: true };
+      }
+    }
+    $('resolveDlg').close();
+    runAdjust(target, instr, { resolve: $('resolveMark').checked ? ids : [], resolveCount: ids.length });
+  });
   // anotações marcadas como importantes vão para a IA em todos os capítulos
   function importantNotes(p) {
     const out = [];
-    p.chapters.forEach((c, i) => (c.highlights || []).filter(h => h.important).forEach(h =>
+    p.chapters.forEach((c, i) => (c.highlights || []).filter(h => h.important && !h.resolved).forEach(h =>
       out.push(`- Capítulo ${i + 1}: “${h.quote.slice(0, 300)}”${h.note ? ' — ' + h.note : ''}`)));
     return out.join('\n');
   }
@@ -3101,10 +3216,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function runAdjust(target, instr, opts = {}) {
     const p = cur();
     if (busy || !ensureReady(p, () => runAdjust(target, instr, opts))) return;
-    const ask = opts.fix
+    const ask = opts.resolveCount
+      ? `Resolver ${opts.resolveCount === 1 ? '1 marcação' : opts.resolveCount + ' marcações'} com IA: ${target.partial ? 'só o parágrafo marcado muda' : 'o capítulo é reescrito só onde as anotações pedem'}.`
+      : opts.fix
       ? (target.partial ? 'Corrigir o português e a formatação do trecho selecionado (a história não muda).' : 'Corrigir o português e a formatação do capítulo (a história não muda).')
       : (target.partial ? `Reescrever o trecho selecionado: ${instr}` : `Reescrever o capítulo: ${instr}`);
-    if (!(await confirmAI(ask))) { if (!opts.fix) setDraft('adj:' + target.ch.id, instr); return; }
+    if (!(await confirmAI(ask))) { if (!opts.fix && !opts.resolveCount) setDraft('adj:' + target.ch.id, instr); return; }
     const { ch, start, end, partial } = target;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
@@ -3121,7 +3238,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const before = original.slice(0, start), after = original.slice(end);
     if (edit && edit.chId === ch.id) discardEdit();
     view = { tab: 'capitulos', chapterId: ch.id, mode: view.mode };
-    const b = startBusy('adjust', opts.fix ? 'Corrigindo' : partial ? 'Reescrevendo o trecho' : 'Reescrevendo', ch.id);
+    const b = startBusy('adjust', opts.resolveCount ? 'Resolvendo marcações' : opts.fix ? 'Corrigindo' : partial ? 'Reescrevendo o trecho' : 'Reescrevendo', ch.id);
     try {
       const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal, images: opts.fix ? [] : pickImages(p, original.slice(start, end) + ' ' + instr),
@@ -3132,13 +3249,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ch.prev = original;
       ch.text = before + r.text + after;
       stopBusy();
-      if (!opts.fix) setDraft('adj:' + ch.id, '');
-      toast(opts.fix ? 'Correção feita ✓' : 'Ajuste feito ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
+      if (!opts.fix && !opts.resolveCount) setDraft('adj:' + ch.id, '');
+      const resolved = opts.resolve || [];
+      const at = Date.now();
+      (ch.highlights || []).forEach(h => { if (resolved.includes(h.id)) h.resolved = at; });
+      toast(opts.resolveCount ? 'Marcações resolvidas ✓' : opts.fix ? 'Correção feita ✓' : 'Ajuste feito ✓', { action: 'Desfazer', onAction: () => {
+        (ch.highlights || []).forEach(h => { if (h.resolved === at) delete h.resolved; });
+        undoChapter(p, ch);
+      } });
     } catch (e) {
       ch.text = original;
       stopBusy();
       if (e.name === 'AbortError') toast('Cancelado. O texto original foi mantido.');
-      else if (opts.fix) handleAIError(e, () => runAdjust(target, instr, opts));
+      else if (opts.fix || opts.resolveCount) handleAIError(e, () => runAdjust(target, instr, opts));
       else {
         setDraft('adj:' + ch.id, instr);
         handleAIError(e, () => runAdjust(target, instr), () => {
@@ -3970,6 +4093,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   async function callAI(userPrompt, { onText, onThinking, signal, override, guard, images, force } = {}) {
     const cfg = Object.assign({}, settings, override || {});
+    // para o histórico de gastos: qual ação e qual projeto
+    const op = busy ? (busy.op = busy.op || uid()) : uid();
+    const action = actionLabel(), projTitle = busy && busy.kind !== 'test' ? (cur()?.title || '').trim() : '';
     // imagens só vão para modelos que enxergam (force: o pedido é sobre a imagem)
     let content = userPrompt;
     if (images && images.length && (force || await canSeeImages())) {
@@ -3991,6 +4117,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         method: 'POST', headers, signal,
         body: JSON.stringify({
           model: cfg.model, stream: true,
+          ...(isOpenRouter(cfg.endpoint) ? { usage: { include: true } } : {}),
           temperature: Number(cfg.temperature) || 0.9,
           max_tokens: Number(cfg.maxTokens) || 8192,
           messages: [
@@ -4010,7 +4137,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
     const reader = res.body.getReader();
     const dec = new TextDecoder();
-    let buf = '', full = '', finish = null;
+    let buf = '', full = '', finish = null, usage = null;
+    try {
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -4024,6 +4152,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         if (data === '[DONE]') continue;
         let j; try { j = JSON.parse(data); } catch { continue; }
         if (j.error) throw apiError(j.error.code || 0, j.error.message);
+        if (j.usage) usage = j.usage;
         const c = j.choices?.[0];
         if (!c) continue;
         if (c.finish_reason) finish = c.finish_reason;
@@ -4038,12 +4167,145 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         }
       }
     }
+    } finally {
+      // o pedido chegou à IA: registra o gasto (mesmo se parou no meio)
+      recordSpend({ op, action, project: projTitle, model: cfg.model, usage,
+        promptChars: getSystem().length + userPrompt.length + (Array.isArray(content) ? content.length * 3000 : 0), outChars: full.length });
+    }
     if (!full.trim()) {
       const e = new Error('A IA não devolveu texto. Tente de novo ou escolha outro modelo.');
       e.action = 'model'; throw e;
     }
     return { text: full.trim(), truncated: finish === 'length' };
   }
+
+  // =====================================================================
+  // Histórico de gastos com IA
+  // =====================================================================
+  const SPEND_MAX = 1000;
+  let spend = local.get('fanfic.spend', { log: [], clearedAt: 0 });
+  if (Array.isArray(spend)) spend = { log: spend, clearedAt: 0 };
+  function actionLabel() {
+    if (!busy) return 'Teste da conexão';
+    const ch = busy.chapterId && cur()?.chapters.find(c => c.id === busy.chapterId);
+    const chName = ch ? ` · ${chTitle(cur(), ch)}` : '';
+    if (busy.kind === 'chapter') return 'Escrever capítulo' + chName;
+    if (busy.kind === 'continue') return 'Continuar capítulo' + chName;
+    if (busy.kind === 'adjust') return busy.label.replace('Reescrevendo o trecho', 'Ajustar trecho').replace('Reescrevendo', 'Ajustar capítulo').replace('Corrigindo', 'Corrigir texto').replace('Resolvendo marcações', 'Resolver marcações') + chName;
+    if (busy.kind === 'world') return 'Mundo da história';
+    if (busy.kind === 'info') return 'Infos da Obra';
+    if (busy.kind === 'summary') return 'Resumo';
+    if (busy.kind === 'image') return 'Descrever imagem';
+    if (busy.kind === 'entry') return 'Item do mundo';
+    return busy.label || 'IA';
+  }
+  function fmtCost(v, est) {
+    if (v == null) return 'valor desconhecido';
+    if (v === 0) return 'grátis';
+    const d = v < 0.01 ? 4 : v < 1 ? 3 : 2;
+    return (est ? '≈ ' : '') + 'US$ ' + v.toFixed(d).replace('.', ',');
+  }
+  async function recordSpend(x) {
+    try {
+      let cost = x.usage && typeof x.usage.cost === 'number' ? x.usage.cost : null, est = false;
+      const tin = x.usage?.prompt_tokens ?? Math.round(x.promptChars / 3.5);
+      const tout = x.usage?.completion_tokens ?? Math.round(x.outChars / 3.5);
+      let m = null;
+      try { m = (await loadModels()).find(mm => mm.id === x.model); } catch {}
+      if (cost == null && m) { est = true; cost = tin * Number(m.pricing?.prompt || 0) + tout * Number(m.pricing?.completion || 0); }
+      const modelName = (m && m.name) || (x.model === settings.model && settings.modelName) || x.model;
+      let e = spend.log.find(s => s.id === x.op);
+      if (e) {
+        e.cost = cost == null && e.cost == null ? null : (e.cost || 0) + (cost || 0);
+        e.tin += tin; e.tout += tout; e.est = e.est || est; e.calls = (e.calls || 1) + 1;
+      } else {
+        e = { id: x.op, at: Date.now(), action: x.action, project: x.project, model: modelName, cost, tin, tout, est, calls: 1 };
+        spend.log.unshift(e);
+        if (spend.log.length > SPEND_MAX) spend.log.length = SPEND_MAX;
+      }
+      local.set('fanfic.spend', spend);
+      markDirty('projects');
+      showCostNote(e);
+      renderSpendLine();
+      if ($('spendDlg').open) renderSpend();
+    } catch {}
+  }
+  // aviso no canto: quanto custou a última ação
+  let costNoteTimer = null;
+  function showCostNote(e) {
+    const n = $('costNote');
+    n.replaceChildren(svgIcon('receipt'),
+      el('span', {}, el('span', { class: 'cn-act', text: e.action }), el('span', { class: 'cn-val', text: e.cost === 0 ? 'Grátis' : 'Custou ' + fmtCost(e.cost, e.est) })),
+      el('button', { text: 'Ver gastos', onclick: () => { n.hidden = true; openSpend(); } }));
+    n.hidden = false;
+    clearTimeout(costNoteTimer);
+    costNoteTimer = setTimeout(() => { n.hidden = true; }, 7000);
+  }
+  const startOfDay = (d = new Date()) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  function spendTotals() {
+    const today = startOfDay(), week = today - 6 * 864e5, month = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
+    const sum = (from) => spend.log.filter(e => e.at >= from).reduce((a, e) => a + (e.cost || 0), 0);
+    return { today: sum(today), week: sum(week), month: sum(month), all: sum(0) };
+  }
+  function renderSpendLine() {
+    const t = spendTotals();
+    $('spendLine').textContent = spend.log.length ? `Hoje ${fmtCost(t.today)} · mês ${fmtCost(t.month)}`.replace(/grátis/g, 'US$ 0') : 'Nenhum gasto ainda';
+  }
+  function renderSpend() {
+    const t = spendTotals();
+    const stat = (k, v) => el('div', { class: 'stat' }, el('div', { class: 'k', text: k }), el('div', { class: 'v', text: v ? fmtCost(v) : 'US$ 0' }));
+    $('spendStats').replaceChildren(stat('Hoje', t.today), stat('Últimos 7 dias', t.week), stat('Este mês', t.month));
+    const list = $('spendList');
+    list.innerHTML = '';
+    if (!spend.log.length) { list.append(el('p', { class: 'muted', text: 'Nenhum gasto ainda. Cada vez que a IA fizer algo, aparece aqui o que foi feito e quanto custou.' })); return; }
+    let day = null;
+    spend.log.forEach(e => {
+      const d = startOfDay(new Date(e.at));
+      if (d !== day) {
+        day = d;
+        const label = d === startOfDay() ? 'Hoje' : d === startOfDay() - 864e5 ? 'Ontem' : new Date(d).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+        const dayTotal = spend.log.filter(x => startOfDay(new Date(x.at)) === d).reduce((a, x) => a + (x.cost || 0), 0);
+        list.append(el('div', { class: 'spend-day', text: `${label} · ${dayTotal ? fmtCost(dayTotal) : 'US$ 0'}` }));
+      }
+      const time = new Date(e.at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      list.append(el('div', { class: 'spend-row' },
+        el('div', { class: 'what' },
+          el('div', { class: 'act', text: e.action }),
+          el('div', { class: 'sub', text: [time, e.project, e.model, `${fmtNum((e.tin || 0) + (e.tout || 0))} tokens`].filter(Boolean).join(' · ') })),
+        el('div', { class: 'val' + (e.cost === 0 ? ' free' : ''), text: fmtCost(e.cost, e.est) })));
+    });
+    $('spendTotalAll') && ($('spendTotalAll').textContent = fmtCost(t.all));
+  }
+  function openSpend() {
+    renderSpend();
+    $('spendBalance').textContent = '';
+    fetchBalance().then(b => { if (b != null) $('spendBalance').textContent = `Saldo no OpenRouter: ${fmtUSD(b)}`; });
+    $('spendDlg').showModal();
+  }
+  $('spendBtn').addEventListener('click', openSpend);
+  $('spendClear').addEventListener('click', () => {
+    if (!confirm('Limpar o histórico de gastos? (Isso não muda seus créditos no OpenRouter.)')) return;
+    spend = { log: [], clearedAt: Date.now() };
+    local.set('fanfic.spend', spend); markDirty('projects'); renderSpend(); renderSpendLine();
+  });
+  // junta o histórico deste aparelho com o da nuvem; true se este aparelho tem algo novo
+  function mergeSpend(remote) {
+    if (!remote || !Array.isArray(remote.log)) return spend.log.length > 0 || spend.clearedAt > 0;
+    const clearedAt = Math.max(spend.clearedAt || 0, remote.clearedAt || 0);
+    const byId = new Map(), theirs = new Map(remote.log.map(r => [r.id, r]));
+    for (const e of spend.log) byId.set(e.id, e);
+    let changed = clearedAt !== spend.clearedAt;
+    for (const r of remote.log) {
+      const m = byId.get(r.id);
+      if (!m) { byId.set(r.id, r); changed = true; }
+      else if ((r.calls || 1) > (m.calls || 1)) { byId.set(r.id, r); changed = true; }
+    }
+    const push = (spend.clearedAt || 0) > (remote.clearedAt || 0) || spend.log.some(e => !theirs.has(e.id) || (e.calls || 1) > (theirs.get(e.id).calls || 1));
+    spend = { log: [...byId.values()].filter(e => e.at > clearedAt).sort((a, b) => b.at - a.at).slice(0, SPEND_MAX), clearedAt };
+    if (changed) { local.set('fanfic.spend', spend); renderSpendLine(); }
+    return push;
+  }
+  renderSpendLine();
 
   // =====================================================================
   // Lista de modelos

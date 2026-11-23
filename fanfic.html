@@ -340,6 +340,17 @@
   .cost-note .cn-val { font-weight: 700; font-variant-numeric: tabular-nums; }
   .cost-note button { min-height: 36px; padding: 4px 10px; font-size: .85rem; }
   @media (max-width: 600px) { .cost-note { left: 12px; right: 12px; bottom: 12px; } .spend-stats .v { font-size: 1rem; } }
+  .gen-kinds { display: flex; flex-wrap: wrap; margin-bottom: 6px; }
+  .gen-kinds button { flex: 1 1 auto; }
+  .gen-result { margin-top: 14px; display: grid; gap: 10px; justify-items: center; }
+  .gen-result img { max-width: 100%; max-height: 52vh; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  .cover-card { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .cover-img { width: 132px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.35); cursor: zoom-in; }
+  .cover-ph { width: 96px; aspect-ratio: 2 / 3; border-radius: 8px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); }
+  .cover-ph .icon { width: 28px; height: 28px; }
+  .cover-side { flex: 1 1 220px; }
+  .cover-side h3 { margin: 0 0 4px; }
+  .tag.gen-tag { color: var(--ai); border-color: var(--ai-border); margin: 0 0 0 6px; }
   .ai-cost { font-size: .9rem; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
   /* página de leitura/edição do capítulo */
   body.focus aside#projects, body.focus #backdrop, body.focus .tabs, body.focus #projHeading, body.focus #sideBtn, body.focus #menuBtn { display: none !important; }
@@ -898,6 +909,30 @@
     <button class="primary ai-btn" id="aiDlgGo">Usar a IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
     <button id="aiDlgCancel">Cancelar</button>
   </div>
+</dialog>
+
+<!-- Gerar imagem -->
+<dialog id="genDlg" aria-labelledby="genTitle">
+  <div class="dlg-head"><h2 id="genTitle"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>Gerar imagem com IA</h2><button class="close" id="genClose" aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="seg gen-kinds" role="group" aria-label="O que gerar">
+    <button type="button" data-gen="capa" aria-pressed="true">Capa</button>
+    <button type="button" data-gen="cena" aria-pressed="false">Cena</button>
+    <button type="button" data-gen="personagem" aria-pressed="false">Personagem</button>
+    <button type="button" data-gen="lugar" aria-pressed="false">Lugar</button>
+  </div>
+  <p class="hint" id="genWhat"></p>
+  <div id="genChWrap" hidden><label for="genCh" style="margin-top:0">Capítulo</label><select id="genCh"></select></div>
+  <div id="genSubWrap" hidden><label for="genSub" style="margin-top:0" id="genSubLabel">Quem?</label><input type="text" id="genSub" list="genSubList" autocomplete="off"><datalist id="genSubList"></datalist></div>
+  <label>Estilo</label>
+  <div class="chips" id="genStyles"></div>
+  <label for="genExtra">Algo mais? <span class="muted">(opcional)</span></label>
+  <textarea id="genExtra" rows="2" placeholder="Ex.: pôr do sol, tons quentes, os dois de costas olhando o mar"></textarea>
+  <label for="genModel">Modelo de imagem</label>
+  <select id="genModel"><option value="">Carregando…</option></select>
+  <p class="hint" id="genCost"></p>
+  <div class="gen-result" id="genResult" hidden><img id="genImg" alt="Imagem gerada"><div class="row" id="genActions"></div></div>
+  <div class="status" id="genStatus" role="status"></div>
+  <div class="row" style="margin-top:12px"><button class="primary wide ai-btn" id="genGo"></button></div>
 </dialog>
 
 <!-- Resolver marcações -->
@@ -2337,6 +2372,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     v.hidden = editing;
     v.innerHTML = '';
     if (!editing) {
+      const cover = p.coverRefId && (refsCache[p.id] || []).find(r => r.id === p.coverRefId);
+      v.append(el('div', { class: 'card cover-card' },
+        cover ? el('img', { class: 'cover-img', src: cover.data, alt: `Capa de ${p.title || 'Sem título'}`, onclick: () => window.open(cover.data, '_blank') }) : el('div', { class: 'cover-ph', 'aria-hidden': 'true' }, svgIcon('image')),
+        el('div', { class: 'cover-side' },
+          el('h3', { text: 'Capa' }),
+          el('p', { class: 'muted', style: 'margin:0 0 10px', text: cover ? 'A capa fica guardada nas Referências, junto com as outras imagens.' : 'Crie uma capa com base nas infos da obra, no mundo e nos personagens.' }),
+          el('div', { class: 'row' },
+            el('button', { class: cover ? '' : 'primary', icon: 'image', ai: true, text: cover ? 'Gerar nova capa' : 'Gerar capa com IA', disabled: !!busy, onclick: () => openImageGen(p, { kind: 'capa' }) }),
+            cover ? el('button', { icon: 'download', text: 'Baixar', onclick: () => downloadData(cover.data, `${(p.title || 'capa').replace(/[\\/:*?"<>|]+/g, '')}.jpg`) }) : null,
+            el('button', { class: 'link plain', icon: 'sparkles', text: 'Outras imagens', disabled: !!busy, onclick: () => openImageGen(p, { kind: 'personagem' }) })))));
       const field = (label, value) => (value || '').trim() ? el('div', { class: 'info-field' }, el('div', { class: 'k', text: label }), el('div', { class: 'v', text: value.trim() })) : null;
       const hasStory = p.chapters.length || worldText(p) || (refsCache[p.id] || []).length;
       v.append(el('div', { class: 'card' },
@@ -2658,6 +2703,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyChapter(ch.text) }, el('span', { text: 'Copiar' })));
     if (!writingThis) {
       const more = el('div', { class: 'menu add-menu more-menu', role: 'menu', hidden: true },
+        el('button', { role: 'menuitem', class: 'menu-item', disabled: !!busy || !ch.text.trim(), onclick: () => { closeAddMenus(); guardEdit(() => openImageGen(p, { kind: 'cena', chId: ch.id }), true); } },
+          el('span', { class: 'mi-ico' }, svgIcon('image')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Gerar imagem da cena' }))),
         el('button', { role: 'menuitem', class: 'menu-item danger-item', disabled: !!busy, onclick: () => { closeAddMenus(); guardEdit(() => { discardEdit(); deleteChapter(p, ch); }, true); } },
           el('span', { class: 'mi-ico' }, svgIcon('trash-2')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Excluir este capítulo' }))));
       const moreBtn = el('button', { icon: 'ellipsis', 'aria-label': 'Mais opções', title: 'Mais opções', 'aria-haspopup': 'menu', 'aria-expanded': 'false',
@@ -4046,7 +4093,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       input, imgInput,
       el('div', { class: 'row' },
         el('button', { class: 'primary', style: 'flex:1', icon: 'paperclip', text: 'Adicionar texto (PDF, EPUB, TXT)', onclick: () => input.click() }),
-        el('button', { style: 'flex:1', icon: 'image', text: 'Adicionar imagem', onclick: () => imgInput.click() })),
+        el('button', { style: 'flex:1', icon: 'image', text: 'Adicionar imagem', onclick: () => imgInput.click() }),
+        el('button', { style: 'flex:1', icon: 'sparkles', ai: true, text: 'Gerar imagem com IA', disabled: !!busy, onclick: () => openImageGen(p, { kind: 'personagem' }) })),
       el('div', { class: 'status', id: 'refStatus', role: 'status' }),
       el('div', { class: 'progress', id: 'refProgress', hidden: true }, el('div')),
       refs.length ? el('details', { style: 'margin-top:14px' },
@@ -4086,8 +4134,192 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     });
   }
 
+  // ---------- gerar imagens (capa, cena, personagem, lugar) ----------
+  const GEN_STYLES = ['Ilustração digital', 'Realista e cinematográfico', 'Anime', 'Aquarela', 'Pintura a óleo', 'Minimalista'];
+  const GEN_KIND = {
+    capa: { label: 'capa', what: 'Uma capa vertical com o título, feita a partir das infos da obra, do mundo e dos personagens.', aspect: '2:3' },
+    cena: { label: 'cena', what: 'Uma ilustração do momento mais marcante do capítulo escolhido.', aspect: '3:2' },
+    personagem: { label: 'personagem', what: 'Um retrato do personagem, usando o que está nas infos e no Mundo.', aspect: '2:3' },
+    lugar: { label: 'lugar', what: 'Uma ilustração do lugar, usando o que está no Mundo.', aspect: '3:2' }
+  };
+  let genCtx = null, imageModelsCache = null;
+  function downloadData(url, name) {
+    const a = el('a', { href: url, download: name || 'imagem.jpg' });
+    document.body.append(a); a.click(); a.remove();
+  }
+  async function loadImageModels() {
+    if (imageModelsCache) return imageModelsCache;
+    const isImg = (m) => ((m.architecture && m.architecture.output_modalities) || []).includes('image');
+    let list = [];
+    try {
+      const res = await fetch(settings.endpoint.replace(/\/chat\/completions\/?$/, '') + '/models?output_modalities=image');
+      if (res.ok) list = ((await res.json()).data || []).filter(m => m && m.id && isImg(m));
+    } catch {}
+    if (!list.length) { try { list = (await loadModels()).filter(isImg); } catch {} }
+    if (!list.length && isOpenRouter()) list = [{ id: 'google/gemini-2.5-flash-image', name: 'Google: Gemini 2.5 Flash Image', architecture: { input_modalities: ['text', 'image'], output_modalities: ['image', 'text'] } }];
+    imageModelsCache = list;
+    return list;
+  }
+  const genStatus = (msg, kind) => { const st = $('genStatus'); st.textContent = msg; st.className = 'status' + (kind ? ' ' + kind : ''); };
+  function genGoLabel(running) {
+    $('genGo').replaceChildren(svgIcon(running ? 'square' : 'image'), running ? 'Parar' : 'Gerar imagem',
+      ...(running ? [] : [el('span', { class: 'ai-ico', 'aria-hidden': 'true' }, svgIcon('sparkles'))]));
+  }
+  function setGenKind(k) {
+    const c = genCtx; if (!c) return;
+    c.kind = k;
+    document.querySelectorAll('[data-gen]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.gen === k)));
+    $('genWhat').textContent = GEN_KIND[k].what;
+    $('genChWrap').hidden = k !== 'cena';
+    $('genSubWrap').hidden = !(k === 'personagem' || k === 'lugar');
+    $('genSubLabel').textContent = k === 'personagem' ? 'Qual personagem?' : 'Qual lugar?';
+    $('genSub').placeholder = k === 'personagem' ? 'Ex.: Theo' : 'Ex.: Bar do Zé';
+    const w = c.p.world ? worldOf(c.p) : null;
+    const names = w ? (w.e[k === 'personagem' ? 'personagens' : 'lugares'] || []).map(e => e.title).filter(Boolean) : [];
+    $('genSubList').replaceChildren(...names.map(n => el('option', { value: n })));
+    genStatus('');
+  }
+  document.querySelectorAll('[data-gen]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.gen === 'cena' && !genCtx.p.chapters.some(c => c.text.trim())) { genStatus('Escreva um capítulo primeiro para gerar uma cena.', 'err'); return; }
+    setGenKind(b.dataset.gen);
+  }));
+  function renderGenStyles() {
+    $('genStyles').replaceChildren(...GEN_STYLES.map(st => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(genCtx.style === st), text: st,
+      onclick: () => { genCtx.style = st; settings.imageStyle = st; local.set('fanfic.settings', settings); renderGenStyles(); } })));
+  }
+  async function openImageGen(p, opts = {}) {
+    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
+    if (!isConfigured()) { openSetup(1, () => openImageGen(p, opts)); return; }
+    genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null };
+    const chs = p.chapters.filter(c => c.text.trim());
+    $('genCh').replaceChildren(...chs.map(c => el('option', { value: c.id, text: `${p.chapters.indexOf(c) + 1}. ${chTitle(p, c)}` })));
+    $('genCh').value = opts.chId || (chs.at(-1) || {}).id || '';
+    $('genSub').value = opts.subject || '';
+    $('genExtra').value = '';
+    $('genResult').hidden = true;
+    setGenKind(opts.kind === 'cena' && !chs.length ? 'capa' : (opts.kind || 'capa'));
+    renderGenStyles(); genGoLabel(false);
+    $('genDlg').showModal();
+    const sel = $('genModel');
+    const list = await loadImageModels();
+    if (!list.length) {
+      sel.replaceChildren(el('option', { value: '', text: 'Nenhum modelo de imagem encontrado' })); sel.disabled = true; $('genGo').disabled = true;
+      $('genCost').textContent = 'Gerar imagens precisa de um modelo de imagem do OpenRouter (por exemplo, o Gemini Image).';
+      return;
+    }
+    sel.disabled = false; $('genGo').disabled = false;
+    sel.replaceChildren(...list.map(m => el('option', { value: m.id, text: (m.name || m.id) + (isFree(m) ? ' · grátis' : '') })));
+    const pref = list.find(m => m.id === settings.imageModel) || list.find(m => /gemini.*image/i.test(m.id)) || list[0];
+    sel.value = pref.id;
+    const costLine = () => { const m = list.find(x => x.id === sel.value); $('genCost').textContent = m && isFree(m) ? 'Modelo grátis.' : 'Cada imagem costuma custar alguns centavos de dólar. O valor exato aparece no aviso e nos Gastos com IA.'; };
+    sel.onchange = () => { settings.imageModel = sel.value; local.set('fanfic.settings', settings); costLine(); };
+    costLine();
+  }
+  $('genClose').addEventListener('click', () => { if (genCtx && genCtx.ctrl) genCtx.ctrl.abort(); $('genDlg').close(); });
+  $('genDlg').addEventListener('cancel', () => { if (genCtx && genCtx.ctrl) genCtx.ctrl.abort(); });
+
+  function buildImagePrompt(p, kind, sub, ch, style, extra) {
+    const cut = (t, n) => { t = (t || '').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
+    const w = p.world ? worldOf(p) : null;
+    const fromWorld = (key, name) => {
+      if (!w || !name) return '';
+      const n = normTitle(name);
+      const it = (w.e[key] || []).find(e => normTitle(e.title) === n) || (w.e[key] || []).find(e => normTitle(e.title).includes(n) || n.includes(normTitle(e.title).split(' ')[0]));
+      return it ? cut(it.text, 1500) : '';
+    };
+    const title = (p.title || '').trim() || 'Sem título';
+    const ctx = [`História: "${title}"${p.category ? ` (${p.category})` : ''}${p.fandom ? `, universo: ${p.fandom}` : ''}.`,
+      p.premise ? `Enredo: ${cut(p.premise, 1200)}` : '',
+      p.characters ? `Personagens: ${cut(p.characters, 1500)}` : '',
+      p.tone ? `Tom: ${p.tone}` : ''].filter(Boolean).join('\n');
+    let task;
+    if (kind === 'capa') task = `Crie a CAPA de um livro, em formato vertical (retrato, proporção 2:3). Ela deve transmitir a essência da história, o clima e os protagonistas. Escreva o título "${title}" na capa, em tipografia elegante e bem legível. Nenhum outro texto.`;
+    else if (kind === 'cena') task = `Crie uma ILUSTRAÇÃO de uma cena do capítulo "${chTitle(p, ch)}": escolha o momento mais visual e emocionante. Formato horizontal (paisagem). Sem texto na imagem.\nTrecho do capítulo:\n${cut(ch.text, 5000)}`;
+    else if (kind === 'personagem') task = `Crie um RETRATO do personagem ${sub}. ${fromWorld('personagens', sub)} Formato vertical. Sem texto na imagem.`;
+    else task = `Crie uma ILUSTRAÇÃO do lugar ${sub}. ${fromWorld('lugares', sub)} Formato horizontal. Sem texto na imagem.`;
+    return `${task}\n\nEstilo visual: ${style}.` + (extra ? `\nPedido do autor: ${extra}` : '') +
+      `\n\nCONTEXTO DA HISTÓRIA:\n${ctx}\n\nRegras: imagem bonita e bem acabada; todos os personagens são adultos; sem nudez, sem conteúdo sexual explícito e sem violência gráfica. Sugira o clima com elegância.`;
+  }
+  async function requestImage(model, content, aspect, signal) {
+    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + settings.key };
+    if (isOpenRouter(settings.endpoint)) { headers['HTTP-Referer'] = location.origin; headers['X-Title'] = 'Writer Agent'; }
+    let res;
+    try {
+      res = await fetch(settings.endpoint, { method: 'POST', headers, signal, body: JSON.stringify({
+        model, modalities: ['image', 'text'], messages: [{ role: 'user', content }],
+        usage: { include: true }, image_config: { aspect_ratio: aspect } }) });
+    } catch (e) {
+      if (e.name === 'AbortError') throw e;
+      throw new Error('Não consegui falar com a IA. Confira a internet e tente de novo.');
+    }
+    if (!res.ok) {
+      let msg = await res.text();
+      try { const j = JSON.parse(msg); msg = j.error?.metadata?.raw || j.error?.message || msg; } catch {}
+      throw apiError(res.status, msg);
+    }
+    const j = await res.json();
+    if (j.error) throw apiError(j.error.code || 0, j.error.message);
+    const m = (j.choices && j.choices[0] && j.choices[0].message) || {};
+    const img = (m.images || [])[0];
+    const url = (img && ((img.image_url && img.image_url.url) || img.url)) || (Array.isArray(m.content) ? ((m.content.find(x => x.type === 'image_url') || {}).image_url || {}).url : null);
+    if (!url) {
+      const said = typeof m.content === 'string' ? m.content.trim() : '';
+      throw Object.assign(new Error(said ? `O modelo respondeu sem imagem: "${said.slice(0, 180)}". Tente mudar o pedido ou o estilo.` : 'O modelo não devolveu imagem. Tente de novo ou escolha outro modelo de imagem.'), { action: 'model' });
+    }
+    return { url, usage: j.usage };
+  }
+  $('genGo').addEventListener('click', async () => {
+    const c = genCtx; if (!c) return;
+    if (c.ctrl) { c.ctrl.abort(); return; }
+    if (busy) { genStatus('Espere a IA terminar o que está fazendo.', 'err'); return; }
+    const p = c.p, kind = c.kind;
+    const sub = $('genSub').value.trim();
+    const ch = kind === 'cena' ? p.chapters.find(x => x.id === $('genCh').value) : null;
+    if ((kind === 'personagem' || kind === 'lugar') && !sub) { genStatus(kind === 'personagem' ? 'Diga qual personagem.' : 'Diga qual lugar.', 'err'); $('genSub').focus(); return; }
+    if (kind === 'cena' && !ch) { genStatus('Escolha um capítulo.', 'err'); return; }
+    const model = $('genModel').value;
+    if (!model) return;
+    const name = $('genModel').selectedOptions[0]?.textContent || model;
+    const what = kind === 'capa' ? 'a capa' : kind === 'cena' ? `uma imagem da cena de "${chTitle(p, ch)}"` : `uma imagem de ${sub}`;
+    if (!(await confirmAI(`Gerar ${what} com ${name}.`))) return;
+    const prompt = buildImagePrompt(p, kind, sub, ch, c.style, $('genExtra').value.trim());
+    // referências visuais do personagem/lugar ajudam a manter a aparência
+    const mInfo = (imageModelsCache || []).find(x => x.id === model);
+    const canSee = ((mInfo && mInfo.architecture && mInfo.architecture.input_modalities) || []).includes('image');
+    const refs = canSee ? pickImages(p, [sub, kind === 'cena' ? ch.text.slice(0, 3000) : '', p.characters].join(' ')).filter(im => !im.generated).slice(0, 2) : [];
+    const content = refs.length ? [{ type: 'text', text: prompt }, ...refs.flatMap(im => [{ type: 'text', text: `Referência visual — ${im.label || 'imagem'}:` }, { type: 'image_url', image_url: { url: im.url } }])] : prompt;
+    c.ctrl = new AbortController();
+    busy = { ctrl: c.ctrl, kind: 'genimage', label: 'Gerar imagem' };
+    genGoLabel(true); $('genResult').hidden = true;
+    genStatus('Gerando a imagem… pode levar até um minuto.');
+    try {
+      const r = await requestImage(model, content, GEN_KIND[kind].aspect, c.ctrl.signal);
+      recordSpend({ op: uid(), action: `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
+      const data = await shrinkImage(await (await fetch(r.url)).blob());
+      const ref = { id: uid(), projectId: p.id, kind: 'image', name: kind === 'capa' ? 'Capa gerada' : kind === 'cena' ? `Cena · ${chTitle(p, ch)}` : `${sub} (gerada)`, type: 'img', text: '', data, chars: 0,
+        imgKind: kind, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : sub, note: '', enabled: false, generated: true, addedAt: Date.now(), updatedAt: Date.now() };
+      await db.put('refs', ref);
+      (refsCache[p.id] = refsCache[p.id] || []).push(ref);
+      markDirty('refs');
+      if (kind === 'capa' && !p.coverRefId) { p.coverRefId = ref.id; saveProject(p, true); }
+      $('genImg').src = r.url;
+      $('genActions').replaceChildren(
+        p.coverRefId === ref.id ? el('span', { class: 'tag', text: 'É a capa' }) : el('button', { icon: 'check', text: 'Usar como capa', onclick: (e) => { p.coverRefId = ref.id; saveProject(p, true); e.currentTarget.replaceWith(el('span', { class: 'tag', text: 'É a capa' })); toast('Capa definida ✓'); if (currentId === p.id) renderTab(); } }),
+        el('button', { icon: 'download', text: 'Baixar', onclick: () => downloadData(r.url, `${(ref.subject || 'imagem').replace(/[\\/:*?"<>|]+/g, '')}.png`) }),
+        el('button', { class: 'link', text: 'Excluir', onclick: () => { $('genResult').hidden = true; genStatus(''); removeRef(p, ref); } }));
+      $('genResult').hidden = false;
+      genStatus('Pronto! A imagem ficou guardada nas Referências. Toque em Gerar imagem para fazer outra.', 'ok');
+    } catch (e) {
+      if (e.name === 'AbortError') genStatus('Parado.');
+      else { genStatus(e.message || 'Não deu certo. Tente de novo.', 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
+    } finally {
+      busy = null; c.ctrl = null; genGoLabel(false);
+      if (currentId === p.id) renderTab();
+    }
+  });
+
   // ---------- imagens de referência ----------
-  const IMG_KINDS = [['personagem', 'Personagem'], ['lugar', 'Lugar'], ['mundo', 'Mundo e ambiente'], ['objeto', 'Objeto ou roupa'], ['estilo', 'Estilo visual'], ['outro', 'Outro']];
+  const IMG_KINDS = [['personagem', 'Personagem'], ['lugar', 'Lugar'], ['mundo', 'Mundo e ambiente'], ['objeto', 'Objeto ou roupa'], ['estilo', 'Estilo visual'], ['capa', 'Capa'], ['cena', 'Cena'], ['outro', 'Outro']];
   const IMG_LABEL = Object.fromEntries(IMG_KINDS);
 
   function imageCard(p, r) {
@@ -4109,8 +4341,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     canSeeImages().then(ok => { describe.hidden = !ok; });
     return el('div', { class: 'card img-ref' },
       el('div', { class: 'ref-head' },
-        el('div', { class: 'ref-name' }, svgIcon('image'), ' ', r.name),
-        el('button', { class: 'link', text: 'Remover', onclick: () => removeRef(p, r) })),
+        el('div', { class: 'ref-name' }, svgIcon('image'), ' ', r.name, r.generated ? el('span', { class: 'tag gen-tag', text: 'Gerada pela IA' }) : null),
+        el('div', { class: 'row' },
+          p.coverRefId === r.id ? el('span', { class: 'tag', text: 'Capa' }) : el('button', { class: 'link plain', text: 'Usar como capa', onclick: () => { p.coverRefId = r.id; saveProject(p, true); toast('Capa definida ✓'); renderTab(); } }),
+          el('button', { class: 'link plain', icon: 'download', 'aria-label': 'Baixar a imagem', title: 'Baixar', onclick: () => downloadData(r.data, (r.subject || r.name || 'imagem').replace(/[\\/:*?"<>|]+/g, '') + '.jpg') }),
+          el('button', { class: 'link', text: 'Remover', onclick: () => removeRef(p, r) }))),
       el('div', { class: 'img-body' },
         el('img', { src: r.data, alt: r.subject ? `Referência: ${r.subject}` : 'Imagem de referência' }),
         el('div', { class: 'img-fields' },
@@ -4198,6 +4433,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   async function removeRef(p, r) {
+    if (p.coverRefId === r.id) { delete p.coverRefId; saveProject(p, true); }
     await db.del('refs', r.id);
     tombstone('refs', r.id);
     refsCache[p.id] = (refsCache[p.id] || []).filter(x => x.id !== r.id);

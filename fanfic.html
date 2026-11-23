@@ -315,6 +315,9 @@
   button.ai-btn { background: linear-gradient(120deg, var(--accent-soft), var(--ai-soft)); border-color: var(--ai-border); }
   button.ai-btn.primary { background: linear-gradient(120deg, var(--accent), var(--ai)); border-color: transparent; color: var(--accent-text); }
   button.ai-btn:not(:disabled):hover { filter: brightness(1.06); }
+  .idea-prompt h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+  .idea-prompt h3 .icon { color: var(--accent); }
+  .idea-prompt textarea { min-height: 130px; }
   .info-ai { display: flex; gap: 10px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 16px; }
   .info-ai p { margin: 0; flex: 1 1 260px; }
   .spend-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
@@ -2359,6 +2362,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const aiBox = $('infoAiBox');
     aiBox.innerHTML = '';
     const story = p.chapters.length || worldText(p) || (refsCache[p.id] || []).length;
+    // projeto novo (ou ainda vazio): escrever a ideia num bloco só e a IA preenche os campos
+    const emptyInfo = !(p.premise || '').trim() && !(p.characters || '').trim();
+    if (editing && (p.draft || (!p.chapters.length && emptyInfo))) {
+      const ta = el('textarea', { id: 'ideaPrompt', rows: 5, placeholder: 'Ex.: Theo, 28, volta para a cidadezinha no interior do Ceará depois de terminar o noivado e reencontra Ariel, o melhor amigo de infância que virou cowboy. Slow burn, muita tensão, humor, final feliz. Não quero traição.' });
+      ta.value = drafts['idea:' + p.id] || '';
+      ta.addEventListener('input', () => setDraft('idea:' + p.id, ta.value));
+      aiBox.append(el('div', { class: 'card idea-prompt' },
+        el('h3', { icon: 'sparkles', text: 'Conte a história do seu jeito' }),
+        el('p', { class: 'muted', text: 'Escreva um pedido ou um bloco de texto com tudo o que já imaginou. A IA usa isso para preencher título, ideia, personagens, intensidade, tom e o resto. Você revisa e salva.' }),
+        ta,
+        el('div', { class: 'row', style: 'margin-top:10px' },
+          el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, disabled: !!busy, text: 'Preencher os campos com IA', onclick: () => fillInfoFromPrompt(p) }))));
+    }
     if (editing && story && !p.draft) {
       const empty = !(p.premise || '').trim() && !(p.characters || '').trim();
       aiBox.append(el('div', { class: 'notice info-ai' },
@@ -2386,6 +2402,44 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!commitDraft(p)) return;
     flushSaves(); infoEditing = false; renderTab(); scrollTo(0, 0); toast(wasDraft ? 'Projeto criado ✓' : 'Infos salvas ✓');
   });
+
+  // preenche a ficha da obra a partir do texto livre do autor
+  async function fillInfoFromPrompt(p) {
+    if (busy) return;
+    const text = (($('ideaPrompt') && $('ideaPrompt').value) || drafts['idea:' + p.id] || '').trim();
+    if (!text) { toast('Escreva sua ideia na caixa primeiro.'); $('ideaPrompt')?.focus(); return; }
+    if (!isConfigured()) { openSetup(1, () => fillInfoFromPrompt(p)); return; }
+    const filled = ['title', 'premise', 'characters', 'tone', 'notes'].some(k => (p[k] || '').trim());
+    if (!(await confirmAI(filled ? 'Preencher as Infos da Obra com o seu texto. Os campos que já têm algo são trocados (dá para desfazer).' : 'Preencher as Infos da Obra com o seu texto.'))) return;
+    const prompt = withLang(p, `TEXTO DO AUTOR (ideia, rascunho ou pedido):\n"""\n${text}\n"""\n\n` +
+      `TAREFA: A partir do texto do autor, preencha a ficha desta obra. Responda SOMENTE com um objeto JSON com estas chaves:\n` +
+      `"title": título curto e marcante (use o do autor se ele deu um),\n"category": gênero principal (ex.: Romance, Fantasia, Ficção científica),\n` +
+      `"fandom": o universo ou fandom se for fanfic de algo que existe, senão "",\n"premise": a ideia e o enredo em 1 a 3 parágrafos,\n` +
+      `"characters": um personagem por linha começando com "- " (nome, idade 18+, aparência, jeito, relação com os outros),\n` +
+      `"heat": "leve", "picante" ou "intenso",\n"tone": tom e estilo em uma linha,\n"notes": o que o autor quer e o que não quer na história,\n` +
+      `"pov": "Terceira pessoa", "Primeira pessoa" ou "Segunda pessoa (você)",\n"length": "800", "1500" ou "2500" (tamanho de capítulo que combina).\n` +
+      `Use tudo o que o autor escreveu e organize; complete o que faltar de forma coerente, sem contradizer o autor. Todos os personagens são adultos (18+).`, false);
+    const prev = {}; ['title', 'category', 'fandom', 'premise', 'characters', 'heat', 'tone', 'notes', 'pov', 'length'].forEach(k => { prev[k] = p[k]; });
+    const b = startBusy('fill', 'Preencher as infos', null);
+    try {
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
+      if (!data) throw Object.assign(new Error('A IA não devolveu as infos no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
+      const str = (v) => Array.isArray(v) ? v.map(x => '- ' + String(x).replace(/^-\s*/, '')).join('\n') : String(v ?? '').trim();
+      ['title', 'category', 'fandom', 'premise', 'characters', 'tone', 'notes'].forEach(k => { const v = str(data[k]); if (v) p[k] = v; });
+      if (['leve', 'picante', 'intenso'].includes(String(data.heat).toLowerCase())) p.heat = String(data.heat).toLowerCase();
+      if (['Terceira pessoa', 'Primeira pessoa', 'Segunda pessoa (você)'].includes(data.pov)) p.pov = data.pov;
+      if (['800', '1500', '2500'].includes(String(data.length))) p.length = String(data.length);
+      stopBusy(); loadForm();
+      toast('Campos preenchidos ✓ Revise e salve.', { action: 'Desfazer', onAction: () => { Object.assign(p, prev); saveProject(p, true); loadForm(); renderTab(); renderProjects(); } });
+    } catch (e) {
+      stopBusy();
+      if (e.name === 'AbortError') toast('Parado. Os campos não mudaram.'); else handleAIError(e, () => fillInfoFromPrompt(p));
+    } finally {
+      stopBusy(); saveProject(p, true);
+      if (currentId === p.id) { infoEditing = true; renderTab(); renderProjects(); }
+    }
+  }
 
   // atualiza ideia, personagens, tom e regras com o que a história já tem
   async function updateInfoFromStory() {

@@ -75,7 +75,9 @@ const SECOES = [
   ) },
   { id: 'peito', icone: Shirt, titulo: 'Peito que não cresce', corpo: (
     <Itens>
-      <li><b>Crossover de baixo para cima</b> (quarta): trabalha a parte de cima do peito, a que dá volume perto da clavícula. Ajuda, mas como complemento do supino inclinado.</li>
+      <li><b>Domingo é do peito superior</b>: supino inclinado, inclinado com halteres, crucifixo inclinado e crossover de baixo para cima, 13 séries antes de qualquer outra coisa. Na quarta o foco é o peito do meio.</li>
+      <li><b>Banco a 30°</b>, não 45°: mais inclinado que isso, quem trabalha é o ombro. A barra ou os halteres descem na parte de cima do peito, perto da clavícula, com os cotovelos a uns 45° do corpo.</li>
+      <li>Grave uma série de lado de vez em quando: se a barra está descendo no meio do peito, o inclinado virou supino reto.</li>
       <li><b>Execução vale mais que o exercício</b>: escápulas juntas e peito alto o tempo todo. Se o ombro vai para a frente, quem trabalha é o ombro.</li>
       <li><b>Alongue sob carga</b>: desça devagar e fundo, com pausa de 1 s embaixo. Halteres e máquinas permitem descer mais que a barra.</li>
       <li><b>Chegue perto da falha</b>: termine cada série com 1 ou 2 repetições sobrando, não 5.</li>

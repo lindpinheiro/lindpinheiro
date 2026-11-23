@@ -60,6 +60,7 @@ export const ALTERNATIVAS = {
   'abd-polia': [A('abd-maq', 'Abdominal na máquina', 'Solte o ar ao contrair.'), A('abd-bola', 'Abdominal no chão com pés apoiados', 'Mãos no peito, suba só até tirar as escápulas do chão.')],
   'elev-pernas': [A('elev-pernas-barra', 'Elevação de pernas na barra', 'Pendurado, suba os joelhos até a altura do quadril.'), A('dead-bug', 'Dead bug', 'Deitado, braço e perna opostos descem juntos, lombar colada no chão.')],
   'pallof': [A('dead-bug', 'Dead bug', 'Deitado, braço e perna opostos descem juntos, lombar colada no chão.')],
+  'crucifixo-inc': [A('crossover', 'Crossover na polia', 'Polias na altura do ombro, mãos se encontram na frente do queixo.'), A('peck-deck', 'Crucifixo na máquina', 'Banco na posição mais baixa, para as mãos passarem na altura do peito superior.')],
   'adutora': [A('aducao-cabo', 'Adução na polia', 'Tornozeleira na polia baixa, puxe a perna para dentro.'), A('sumo', 'Agachamento sumô com halter', 'Pés bem abertos, halter entre as pernas.')],
 }
 

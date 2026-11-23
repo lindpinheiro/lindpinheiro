@@ -181,15 +181,16 @@ export const PLAN = {
     ],
   },
   0: {
-    titulo: 'Peito, ombro e acessórios',
+    titulo: 'Peito superior, ombro e acessórios',
     grupo: 'peito',
     longo: true,
     cardio: { tipo: 'esteira', min: 10 },
+    // Domingo focado no peito superior: 13 séries de inclinado antes de qualquer outra coisa.
     ex: [
-      E('supino-inc', 'Supino inclinado', 4, '6–10', 120, 'Barra, Smith ou máquina.'),
-      E('supino-reto-halter', 'Supino reto com halteres', 3, '8–12', 90, 'Desça bem para alongar o peito.'),
-      E('peck-deck', 'Crucifixo na máquina', 3, '12–15', 60, 'Aperte 1 segundo no meio.'),
-      E('desenv-halter', 'Desenvolvimento com halteres', 3, '8–12', 90, 'Sentado, costas apoiadas.'),
+      E('supino-inc', 'Supino inclinado', 4, '6–10', 120, 'Banco a 30°, não mais: acima disso o ombro assume. A barra desce na parte de cima do peito, perto da clavícula, cotovelos a uns 45° do corpo.'),
+      E('supino-inc-halter', 'Supino inclinado com halteres', 3, '8–12', 90, 'Banco a 30°. Desça fundo, até sentir alongar perto da clavícula, e suba aproximando os halteres sem bater.'),
+      E('crucifixo-inc', 'Crucifixo inclinado com halteres', 3, '10–12', 75, 'Banco a 30°, cotovelos levemente dobrados. Desça até alongar e suba pensando em juntar os braços na frente do rosto.'),
+      E('crossover-baixo', 'Crossover de baixo para cima', 3, '12–15', 60, 'Polias embaixo. Suba as mãos até a altura do queixo e aperte 1 s. Acaba de esgotar o peito superior.'),
       E('elev-lateral-cabo', 'Elevação lateral na polia', 4, '12–20', 45, 'Um braço de cada vez.'),
       E('triceps-corda-alto', 'Tríceps na polia acima da cabeça', 3, '10–12', 60, 'De costas para a polia, corda atrás da cabeça. Deixa o braço grosso.'),
       E('encolh-halter', 'Encolhimento com halteres', 4, '10–15', 60, 'Suba o ombro até a orelha e segure 1 s.'),

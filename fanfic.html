@@ -27,6 +27,9 @@
     --danger-soft: #fdecea;
     --ok: #2f6b3a;
     --ok-soft: #e6f3e8;
+    --ai: #6a3fd0;
+    --ai-soft: #ece4fb;
+    --ai-border: #d9cbf3;
     --radius: 14px;
     --side: 340px;
   }
@@ -45,6 +48,9 @@
       --danger-soft: #3a1d1b;
       --ok: #7fd18e;
       --ok-soft: #1d3322;
+      --ai: #b08cff;
+      --ai-soft: #2c2342;
+      --ai-border: #4a3a6b;
     }
   }
   * { box-sizing: border-box; }
@@ -150,6 +156,23 @@
   .proj-item { width: 100%; text-align: left; display: block; padding: 12px 14px; }
   .proj-item.active { background: var(--accent-soft); border-color: var(--accent); }
   .proj-row { position: relative; }
+  .proj-head { gap: 8px; }
+  .proj-head h2 { margin-right: auto !important; }
+  .icon-btn { min-height: 44px; min-width: 44px; padding: 0; background: transparent; }
+  .icon-btn[aria-pressed=true] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .proj-row .check-dot { position: absolute; top: 14px; left: 12px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--muted);
+    display: flex; align-items: center; justify-content: center; pointer-events: none; color: var(--accent-text); }
+  .proj-row .check-dot .icon { width: 16px; height: 16px; }
+  .selecting .proj-row .proj-item { padding-left: 48px; }
+  .proj-row.picked .proj-item { border-color: var(--accent); background: var(--accent-soft); }
+  .proj-row.picked .check-dot { background: var(--accent); border-color: var(--accent); }
+  .sel-float { position: fixed; z-index: 60; left: 50%; transform: translateX(-50%); bottom: 16px; display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    max-width: calc(100vw - 24px); }
+  .sel-float .sel-count { font-weight: 700; padding: 0 8px; white-space: nowrap; }
+  .sel-float button { min-height: 44px; padding: 8px 12px; }
+  .sel-float .close { padding: 0; min-width: 44px; }
+  @media (max-width: 480px) { .sel-float button span { display: none; } .sel-float { gap: 4px; } }
   .new-wrap { position: relative; }
   .new-menu { right: 0; left: auto; width: min(320px, calc(100vw - 24px)); }
   .new-menu .mi-sub { white-space: normal; }
@@ -279,13 +302,11 @@
   .saved.dirty { color: var(--accent); font-weight: 600; }
   /* ícone de IA animado nos botões que usam a IA */
   .ai-ico { display: inline-flex; margin-inline-start: 2px; }
-  .ai-ico .icon { color: #f5b83d; animation: aiGlow 2.4s ease-in-out infinite; }
-  button.primary .ai-ico .icon { color: #ffe08a; }
-  @keyframes aiGlow {
-    0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 0 rgba(255, 200, 80, 0)); opacity: .85; }
-    50% { transform: scale(1.18) rotate(14deg); filter: drop-shadow(0 0 5px rgba(255, 200, 80, .95)); opacity: 1; }
-  }
-  @media (prefers-reduced-motion: reduce) { .ai-ico .icon { animation: none; } }
+  .ai-ico .icon { color: inherit; }
+  /* botões de IA: fundo em degradê para diferenciar */
+  button.ai-btn { background: linear-gradient(120deg, var(--accent-soft), var(--ai-soft)); border-color: var(--ai-border); }
+  button.ai-btn.primary { background: linear-gradient(120deg, var(--accent), var(--ai)); border-color: transparent; color: var(--accent-text); }
+  button.ai-btn:not(:disabled):hover { filter: brightness(1.06); }
   .ai-cost { font-size: .9rem; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
   /* página de leitura/edição do capítulo */
   body.focus header, body.focus aside#projects, body.focus #backdrop, body.focus .tabs, body.focus #projHeading { display: none !important; }
@@ -305,13 +326,21 @@
   .folder-head .count { color: var(--muted); font-size: .9rem; margin-right: auto; }
   .folder-head .folder-title { flex: 1; font-weight: 700; }
   .add-btn { min-height: 36px; min-width: 36px; padding: 0; border-radius: 50%; }
-  .entry { border-top: 1px solid var(--border); }
-  .entry > summary { display: flex; align-items: center; gap: 8px; padding: 10px 2px; font-weight: 600; list-style: none; }
-  .entry > summary::before { content: "▸"; color: var(--muted); transition: transform .15s; }
-  .entry[open] > summary::before { transform: rotate(90deg); }
-  .entry > summary::-webkit-details-marker { display: none; }
-  .entry-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .entry-body { display: grid; gap: 8px; padding: 0 0 12px; }
+  .entry { width: 100%; display: flex; align-items: center; gap: 8px; justify-content: flex-start; text-align: left;
+    background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 10px 4px; min-height: 52px; }
+  .entry:hover { background: var(--surface-2); }
+  .entry-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .entry-title, .entry-preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .entry-preview { font-weight: 400; font-size: .85rem; color: var(--muted); }
+  .add-wrap { position: relative; }
+  .add-menu { width: min(300px, calc(100vw - 48px)); }
+  .add-menu .mi-sub { white-space: normal; }
+  #entryDlg { width: min(820px, calc(100vw - 24px)); }
+  #entryText { min-height: 42vh; font-size: 1rem; line-height: 1.6; }
+  .entry-ai { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; margin-top: 10px; }
+  .entry-ai input { flex: 1 1 100%; }
+  .dlg-foot { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+  .dlg-foot .grow { flex: 1; }
   .tag.ai-tag { color: #b8860b; border-color: #e5c43a; margin: 0; }
   .info-head { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
   .info-head h2 { margin: 0; }
@@ -492,7 +521,7 @@
 <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></symbol>
 <symbol id="i-pen-line" viewBox="0 0 24 24"><path d="M12 20h9" /> <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" /></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
 <symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
 <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
 <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></symbol>
@@ -564,6 +593,7 @@
   <aside id="projects" aria-label="Projetos">
     <div class="proj-head">
       <h2>Projetos</h2>
+      <button id="selectBtn" class="icon-btn" aria-pressed="false" aria-label="Selecionar vários projetos" title="Selecionar vários"><svg class="icon" aria-hidden="true"><use href="#i-list-checks"/></svg></button>
       <div class="new-wrap">
         <button id="newProjectBtn" class="primary" aria-haspopup="menu" aria-expanded="false" aria-controls="newMenu"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Novo<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
         <div id="newMenu" class="menu new-menu" role="menu" aria-label="Novo" hidden>
@@ -687,6 +717,14 @@
   </main>
 </div>
 
+<div class="sel-float" id="selFloat" role="toolbar" aria-label="Projetos selecionados" hidden>
+  <span class="sel-count" id="selCount" aria-live="polite"></span>
+  <button type="button" id="selAll">Todos</button>
+  <button type="button" id="selFav"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg><span>Favoritar</span></button>
+  <button type="button" class="danger" id="selDel"><svg class="icon" aria-hidden="true"><use href="#i-trash-2"/></svg><span>Excluir</span></button>
+  <button type="button" class="close" id="selExit" aria-label="Sair da seleção"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+</div>
+
 <div class="dock">
   <div id="alertZone"></div>
   <div class="bar" id="bar" hidden><div class="bar-inner" id="barInner"></div></div>
@@ -757,6 +795,27 @@
   <div class="row" style="margin-top:16px">
     <button class="primary ai-btn" id="aiDlgGo">Usar a IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
     <button id="aiDlgCancel">Cancelar</button>
+  </div>
+</dialog>
+
+<!-- Item do mundo -->
+<dialog id="entryDlg" aria-labelledby="entryFolder">
+  <div class="dlg-head"><h2 id="entryFolder"></h2><button class="close" id="entryClose" aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <label for="entryTitle" style="margin-top:0">Título</label>
+  <input type="text" id="entryTitle" placeholder="Ex.: nome do personagem, do lugar ou da regra">
+  <label for="entryText">Texto</label>
+  <textarea id="entryText" placeholder="Escreva aqui tudo sobre este item."></textarea>
+  <div class="entry-ai">
+    <input type="text" id="entryAsk" aria-label="Pedido para a IA" placeholder="Pedido para a IA (opcional). Ex.: complete com o que aparece nos capítulos">
+    <button type="button" class="ai-btn" id="entryAi"></button>
+    <button type="button" id="entryUndo" hidden><svg class="icon" aria-hidden="true"><use href="#i-undo-2"/></svg>Voltar ao texto anterior</button>
+  </div>
+  <div class="status" id="entryStatus" role="status"></div>
+  <div class="dlg-foot">
+    <button type="button" class="link" id="entryDelete"><svg class="icon" aria-hidden="true"><use href="#i-trash-2"/></svg>Excluir item</button>
+    <span class="grow"></span>
+    <button type="button" id="entryCancel">Cancelar</button>
+    <button type="button" class="primary" id="entrySave"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Salvar</button>
   </div>
 </dialog>
 
@@ -1118,7 +1177,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   const pendingSaves = new Map();
   function saveProject(p, now) {
-    if (!p) return;
+    if (!p || p.draft) return;
     p.updatedAt = Date.now();
     markDirty('projects');
     clearTimeout(pendingSaves.get(p.id));
@@ -1165,27 +1224,41 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const dl = $('catList'); dl.innerHTML = ''; cats.forEach(c => dl.append(el('option', { value: c })));
 
     projects.slice()
+      .filter(p => !p.draft)
       .filter(p => projFilter === 'todos' || (projFilter === 'favoritos' ? p.pinned : (p.category || '').trim() === projFilter.slice(4)))
       .sort((a, b) => (!!b.pinned - !!a.pinned) || (b.updatedAt - a.updatedAt))
       .forEach(p => {
         const words = p.chapters.reduce((n, c) => n + countWords(c.text), 0);
-        list.append(el('li', { class: 'proj-row' },
-          el('button', {
-            class: 'proj-item' + (p.id === currentId ? ' active' : ''),
+        const picked = selecting && selected.has(p.id);
+        let pressT = null, longPressed = false;
+        const item = el('button', {
+            class: 'proj-item' + (p.id === currentId && !selecting ? ' active' : ''),
             'aria-current': p.id === currentId ? 'true' : null,
-            onclick: () => guardEdit(() => openProject(p.id))
+            'aria-pressed': selecting ? String(picked) : null,
+            onclick: () => {
+              if (longPressed) { longPressed = false; return; }
+              if (selecting) { picked ? selected.delete(p.id) : selected.add(p.id); renderProjects(); return; }
+              leaveDraft(() => guardEdit(() => openProject(p.id)));
+            }
           },
             el('span', { class: 'proj-name', text: p.title.trim() || 'Sem título' }),
             el('span', { class: 'meta' },
               (p.category || '').trim() ? el('span', { class: 'tag cat', text: p.category.trim() }) : null,
-              `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}`)),
-          el('button', {
+              `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}`));
+        // segurar o dedo no projeto também começa a seleção
+        item.addEventListener('pointerdown', () => { pressT = setTimeout(() => { pressT = null; if (!selecting) { longPressed = true; setSelecting(true, p.id); } }, 550); });
+        ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => item.addEventListener(t, () => { clearTimeout(pressT); pressT = null; }));
+        item.addEventListener('contextmenu', (ev) => { if (longPressed || selecting) ev.preventDefault(); });
+        list.append(el('li', { class: 'proj-row' + (picked ? ' picked' : '') },
+          item,
+          selecting ? el('span', { class: 'check-dot', 'aria-hidden': 'true' }, picked ? svgIcon('check') : null) : el('button', {
             class: 'star' + (p.pinned ? ' on' : ''), 'aria-label': p.pinned ? 'Tirar dos favoritos' : 'Favoritar', 'aria-pressed': String(!!p.pinned),
             onclick: () => { p.pinned = !p.pinned; saveProject(p, true); renderProjects(); toast(p.pinned ? 'Adicionado aos favoritos' : 'Tirado dos favoritos'); }
           }, svgIcon('star'))));
       });
     if (!list.children.length) list.append(el('li', { class: 'muted', style: 'padding:8px 4px', text: 'Nenhum projeto neste filtro.' }));
-    const t = cur()?.title.trim() || 'Sem título';
+    renderSelFloat();
+    const t = cur()?.title.trim() || (cur()?.draft ? 'Novo projeto' : 'Sem título');
     $('projHeading').textContent = t;
     $('menuTitle').textContent = t;
   }
@@ -1194,8 +1267,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     infoEditing = null;
     if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
     flushSaves();
+    projects = projects.filter(x => !x.draft || x.id === id);
     currentId = id;
-    local.set('fanfic.current', id);
+    if (!cur()?.draft) local.set('fanfic.current', id);
     const p = cur();
     view = { tab: p.chapters.length ? 'capitulos' : 'ideia', chapterId: null, mode: 'ler' };
     clearAlert(); closeDrawer();
@@ -1214,29 +1288,109 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   });
   document.addEventListener('click', (e) => { if (!e.target.closest('.new-wrap')) closeNewMenu(); });
   $('newMenu').addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeNewMenu(); $('newProjectBtn').focus(); } });
-  $('newImport').addEventListener('click', () => { closeNewMenu(); guardEdit(openImport); });
-  $('newBlank').addEventListener('click', () => guardEdit(() => {
-    closeNewMenu();
+  $('newImport').addEventListener('click', () => { closeNewMenu(); leaveDraft(() => guardEdit(openImport)); });
+  $('newBlank').addEventListener('click', () => { closeNewMenu(); leaveDraft(() => guardEdit(() => {
     if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
-    const p = newProject();
-    projects.push(p); saveProject(p, true);
-    openProject(p.id);
-    $('f-title').focus();
-  }));
+    startDraft();
+  })); });
 
   $('deleteProjectBtn').addEventListener('click', async () => {
     const p = cur();
     if (!confirm(`Excluir "${p.title || 'Sem título'}" com todos os capítulos e arquivos? Não dá para desfazer.`)) return;
-    projects = projects.filter(x => x.id !== p.id);
-    await db.del('projects', p.id);
-    local.del('fanfic.bak.' + p.id);
-    tombstone('projects', p.id);
-    for (const r of (refsCache[p.id] || [])) { await db.del('refs', r.id); tombstone('refs', r.id); }
-    delete refsCache[p.id];
-    if (!projects.length) { const n = newProject(); projects.push(n); saveProject(n, true); }
-    openProject(projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id);
+    await deleteProjects([p.id]);
     toast('Projeto excluído.');
   });
+
+  // ---------- seleção de vários projetos ----------
+  let selecting = false;
+  const selected = new Set();
+  function setSelecting(on, firstId) {
+    selecting = on; selected.clear();
+    if (on && firstId) selected.add(firstId);
+    $('projects').classList.toggle('selecting', on);
+    $('selectBtn').setAttribute('aria-pressed', String(on));
+    renderProjects();
+  }
+  function renderSelFloat() {
+    const f = $('selFloat');
+    f.hidden = !selecting;
+    if (!selecting) return;
+    const n = selected.size;
+    $('selCount').textContent = n === 1 ? '1 selecionado' : `${n} selecionados`;
+    const sel = projects.filter(p => selected.has(p.id));
+    const allFav = sel.length && sel.every(p => p.pinned);
+    $('selFav').lastChild.textContent = allFav ? 'Desfavoritar' : 'Favoritar';
+    $('selFav').disabled = $('selDel').disabled = !n;
+  }
+  $('selectBtn').addEventListener('click', () => setSelecting(!selecting));
+  $('selExit').addEventListener('click', () => setSelecting(false));
+  $('selAll').addEventListener('click', () => {
+    const visible = [...$('projList').querySelectorAll('.proj-item')].length;
+    const ids = projects.filter(p => !p.draft && (projFilter === 'todos' || (projFilter === 'favoritos' ? p.pinned : (p.category || '').trim() === projFilter.slice(4)))).map(p => p.id);
+    if (visible && ids.every(id => selected.has(id))) selected.clear(); else ids.forEach(id => selected.add(id));
+    renderProjects();
+  });
+  $('selFav').addEventListener('click', () => {
+    const sel = projects.filter(p => selected.has(p.id));
+    const fav = !sel.every(p => p.pinned);
+    sel.forEach(p => { p.pinned = fav; saveProject(p, true); });
+    toast(fav ? `${sel.length} adicionado(s) aos favoritos` : `${sel.length} tirado(s) dos favoritos`);
+    setSelecting(false);
+  });
+  $('selDel').addEventListener('click', async () => {
+    const sel = projects.filter(p => selected.has(p.id));
+    if (!sel.length) return;
+    const names = sel.slice(0, 3).map(p => `"${p.title.trim() || 'Sem título'}"`).join(', ') + (sel.length > 3 ? ` e mais ${sel.length - 3}` : '');
+    if (!confirm(`Excluir ${sel.length === 1 ? 'o projeto' : sel.length + ' projetos'} ${names} com todos os capítulos e arquivos? Não dá para desfazer.`)) return;
+    await deleteProjects(sel.map(p => p.id));
+    setSelecting(false);
+    toast(sel.length === 1 ? 'Projeto excluído.' : `${sel.length} projetos excluídos.`);
+  });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && selecting && !document.querySelector('dialog[open]')) setSelecting(false); });
+
+  async function deleteProjects(ids) {
+    const wasCurrent = ids.includes(currentId);
+    for (const id of ids) {
+      projects = projects.filter(x => x.id !== id);
+      await db.del('projects', id);
+      local.del('fanfic.bak.' + id);
+      tombstone('projects', id);
+      for (const r of (refsCache[id] || (await db.refsOf(id)) || [])) { await db.del('refs', r.id); tombstone('refs', r.id); }
+      delete refsCache[id];
+    }
+    const saved = projects.filter(x => !x.draft);
+    if (!saved.length) startDraft();
+    else if (wasCurrent || !cur()) openProject(saved.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id);
+    else renderProjects();
+  }
+
+  // ---------- projeto novo: só passa a existir quando a pessoa salva ----------
+  function startDraft() {
+    const p = newProject(); p.draft = true;
+    projects = projects.filter(x => !x.draft);
+    projects.push(p);
+    openProject(p.id);
+    infoEditing = true; renderTab();
+    setTimeout(() => $('f-title').focus(), 30);
+  }
+  const draftHasContent = (p) => !!(p && p.draft && ((p.title || '').trim() || (p.premise || '').trim() || (p.characters || '').trim() || (p.notes || '').trim() || (p.tone || '').trim()));
+  function leaveDraft(next) {
+    const p = cur();
+    if (draftHasContent(p) && !confirm('O projeto novo ainda não foi salvo. Descartar?')) return;
+    next();
+  }
+  function commitDraft(p) {
+    if (!p || !p.draft) return true;
+    if (!draftHasContent(p)) { toast('Escreva pelo menos o título ou a ideia antes de salvar.'); $('f-title').focus(); return false; }
+    delete p.draft; p.createdAt = Date.now();
+    saveProject(p, true); renderProjects(); renderTab();
+    return true;
+  }
+  function cancelDraft() {
+    const saved = projects.filter(x => !x.draft);
+    if (!saved.length) return;
+    leaveDraft(() => openProject(saved.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id));
+  }
 
   // lateral recolhível no computador
   function setSide(collapsed) {
@@ -1495,7 +1649,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       for (const x of empty) { await db.del('projects', x.id); local.del('fanfic.bak.' + x.id); if (x.id === currentId) touchedCurrent = true; }
       projects = projects.filter(x => !empty.includes(x));
     }
-    if (!projects.length) { const n = newProject(); projects.push(n); persist(n); }
+    if (!projects.length) { const n = newProject(); n.draft = true; projects.push(n); }
+    if (added && cur()?.draft && !draftHasContent(cur())) { projects = projects.filter(x => !x.draft); currentId = null; }
     if (added || touchedCurrent || !cur()) {
       if (!cur()) { currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id; local.set('fanfic.current', currentId); view = { tab: 'ideia', chapterId: null, mode: 'ler' }; }
       if (!busy) { loadForm(); renderTab(); loadRefs(currentId); }
@@ -1535,7 +1690,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   async function payload(kind) {
-    if (kind === 'projects') return { projects: projects.filter(x => !isEmptyProject(x)), deleted: sync.deleted.projects, ai: aiForSync(), at: Date.now() };
+    if (kind === 'projects') return { projects: projects.filter(x => !isEmptyProject(x) && !x.draft), deleted: sync.deleted.projects, ai: aiForSync(), at: Date.now() };
     return { refs: (await db.all('refs')) || [], deleted: sync.deleted.refs, at: Date.now() };
   }
 
@@ -1884,7 +2039,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const withRefs = $('backupRefs').checked;
     const refs = [];
     if (withRefs) for (const p of projects) refs.push(...(await loadRefs(p.id)));
-    const data = { app: 'escritor-de-fanfics', version: 1, exportedAt: Date.now(), projects, refs };
+    const data = { app: 'escritor-de-fanfics', version: 1, exportedAt: Date.now(), projects: projects.filter(x => !x.draft), refs };
     const day = new Date().toISOString().slice(0, 10);
     return new File([JSON.stringify(data)], `fanfics-backup-${day}.json`, { type: 'application/json' });
   }
@@ -1970,6 +2125,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   function renderTab() {
     const p = cur();
+    if (p.draft) { view.tab = 'ideia'; infoEditing = true; }
+    $('tabs').hidden = !!p.draft;
+    $('deleteProjectBtn').closest('.row').hidden = !!p.draft;
     document.querySelectorAll('#tabs [data-tab]').forEach(b =>
       b.setAttribute('aria-selected', b.dataset.tab === view.tab ? 'true' : 'false'));
     $('countCh').textContent = p.chapters.length ? `(${p.chapters.length})` : '';
@@ -2043,14 +2201,20 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     box.innerHTML = '';
     // na edição de um projeto sem capítulos, a ação principal é salvar e já escrever
     $('infoSaveBtn').classList.toggle('primary', !(editing && !p.chapters.length));
+    $('infoSaveBtn').lastChild.textContent = p.draft ? 'Salvar projeto' : 'Salvar';
     if (editing && !p.chapters.length) box.append(el('button', { class: 'primary wide', icon: 'pen-line', text: 'Salvar e escrever o primeiro capítulo', disabled: !!busy,
-      onclick: () => { flushSaves(); infoEditing = false; renderTab(); openWriteDialog(); } }));
+      onclick: () => { if (!commitDraft(p)) return; flushSaves(); infoEditing = false; renderTab(); openWriteDialog(); } }));
+    if (p.draft && projects.some(x => !x.draft)) box.append(el('button', { class: 'wide', style: 'margin-top:10px', text: 'Cancelar', onclick: cancelDraft }));
     if (!editing) box.append(p.chapters.length
       ? el('button', { class: 'wide', iconEnd: 'arrow-right', text: `Ver os capítulos (${p.chapters.length})`, onclick: () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); scrollTo(0, 0); } })
       : el('button', { class: 'primary wide', icon: 'pen-line', text: 'Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog }));
     renderAiDot();
   }
-  $('infoSaveBtn').addEventListener('click', () => { flushSaves(); infoEditing = false; renderTab(); scrollTo(0, 0); toast('Infos salvas ✓'); });
+  $('infoSaveBtn').addEventListener('click', () => {
+    const p = cur(), wasDraft = !!p.draft;
+    if (!commitDraft(p)) return;
+    flushSaves(); infoEditing = false; renderTab(); scrollTo(0, 0); toast(wasDraft ? 'Projeto criado ✓' : 'Infos salvas ✓');
+  });
 
   // atualiza ideia, personagens, tom e regras com o que a história já tem
   async function updateInfoFromStory() {
@@ -2964,40 +3128,122 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return out.join('\n\n');
   }
 
-  const openEntries = new Set(); // itens abertos na tela
-  function entryRow(p, list, e, refresh) {
-    const d = el('details', { class: 'entry' });
-    if (openEntries.has(e.id)) d.open = true;
-    d.addEventListener('toggle', () => { d.open ? openEntries.add(e.id) : openEntries.delete(e.id); });
-    const sumTitle = el('span', { class: 'entry-title', text: e.title || 'Sem título' });
-    const title = el('input', { type: 'text', value: e.title || '', placeholder: 'Título (ex.: nome do personagem)', 'aria-label': 'Título do item' });
-    const text = el('textarea', { rows: 5, placeholder: 'Escreva aqui tudo sobre este item.', 'aria-label': 'Texto do item' });
-    text.value = e.text || '';
-    const touch = () => { e.edited = true; saveProject(p); };
-    title.addEventListener('input', () => { e.title = title.value; sumTitle.textContent = e.title || 'Sem título'; touch(); });
-    text.addEventListener('input', () => { e.text = text.value; touch(); });
-    d.append(el('summary', {}, sumTitle, e.by === 'ai' && !e.edited ? el('span', { class: 'tag ai-tag', text: 'IA' }) : null),
-      el('div', { class: 'entry-body' }, title, text,
-        el('div', { class: 'row end' }, el('button', { class: 'link', text: 'Excluir item', onclick: () => {
-          const i = list.indexOf(e); list.splice(i, 1); saveProject(p, true); refresh();
-          toast('Item excluído.', { action: 'Desfazer', onAction: () => { list.splice(i, 0, e); saveProject(p, true); refresh(); } });
-        } }))));
-    return d;
+  // cada item aparece como uma linha; tocar abre a janela grande, onde se edita
+  function entryRow(p, list, e, folder) {
+    const preview = (e.text || '').trim().split('\n')[0];
+    return el('button', { type: 'button', class: 'entry', onclick: () => openEntry(p, list, e, folder) },
+      el('span', { class: 'entry-main' },
+        el('span', { class: 'entry-title', text: e.title || 'Sem título' }),
+        preview ? el('span', { class: 'entry-preview', text: preview }) : null),
+      e.by === 'ai' && !e.edited ? el('span', { class: 'tag ai-tag', text: 'IA' }) : null);
   }
+  function closeAddMenus(except) { document.querySelectorAll('.add-menu').forEach(m => { if (m !== except) { m.hidden = true; m.previousSibling?.setAttribute('aria-expanded', 'false'); } }); }
+  document.addEventListener('click', (e) => { if (!e.target.closest('.add-wrap')) closeAddMenus(); });
   function folderCard(p, label, hint, list, opts = {}) {
-    const refresh = () => renderWorld();
-    const add = () => { const e = { id: uid(), title: '', text: '', by: 'user', edited: true }; list.push(e); openEntries.add(e.id); saveProject(p, true); refresh();
-      setTimeout(() => document.querySelector(`.entry[open] input[value=""]`)?.focus(), 30); };
+    const folder = { label: label || 'Pasta', hint, key: opts.key, ref: opts.folder };
+    const menu = el('div', { class: 'menu add-menu', role: 'menu', hidden: true },
+      el('button', { role: 'menuitem', class: 'menu-item', onclick: () => { closeAddMenus(); openEntry(p, list, null, folder); } },
+        el('span', { class: 'mi-ico' }, svgIcon('file-plus')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Novo item' }), el('span', { class: 'mi-sub', text: 'Você escreve o título e o texto' }))),
+      el('button', { role: 'menuitem', class: 'menu-item', onclick: () => { closeAddMenus(); generateWorld(false, folder); } },
+        el('span', { class: 'mi-ico' }, svgIcon('sparkles')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Criar com IA' }), el('span', { class: 'mi-sub', text: 'Acrescenta o que falta, sem mexer no que já existe' }))));
+    const btn = el('button', { class: 'add-btn', icon: 'plus', 'aria-label': `Adicionar em ${label || 'pasta'}`, title: 'Adicionar', 'aria-haspopup': 'menu', 'aria-expanded': 'false',
+      onclick: (ev) => { ev.stopPropagation(); const open = menu.hidden; closeAddMenus(menu); menu.hidden = !open; btn.setAttribute('aria-expanded', String(open)); if (open) menu.querySelector('button').focus(); } });
+    menu.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { closeAddMenus(); btn.focus(); } });
     const head = el('div', { class: 'folder-head' },
       opts.titleInput || el('h3', { icon: opts.icon || 'folder', text: label }),
       el('span', { class: 'count', text: list.length ? `(${list.length})` : '' }),
-      el('button', { class: 'add-btn', icon: 'plus', 'aria-label': `Adicionar em ${label || 'pasta'}`, title: 'Adicionar item', onclick: add }));
+      el('div', { class: 'add-wrap' }, btn, menu));
     const card = el('div', { class: 'card world-sec' + (opts.pend ? ' pend' : '') }, head);
     if (!list.length) card.append(el('p', { class: 'hint', text: hint }));
-    list.forEach(e => card.append(entryRow(p, list, e, refresh)));
+    list.forEach(e => card.append(entryRow(p, list, e, folder)));
     if (opts.footer) card.append(opts.footer);
     return card;
   }
+
+  // janela grande do item: título, texto e ajuda da IA para este item
+  let entryCtx = null;
+  function openEntry(p, list, e, folder) {
+    entryCtx = { p, list, e, folder, before: null, ctrl: null };
+    $('entryFolder').textContent = folder.label + (e ? '' : ' · novo item');
+    $('entryTitle').value = e ? e.title || '' : '';
+    $('entryText').value = e ? e.text || '' : '';
+    $('entryAsk').value = '';
+    $('entryDelete').hidden = !e;
+    $('entryUndo').hidden = true;
+    entryStatus('');
+    entryAiBtn(false);
+    $('entryDlg').showModal();
+    (e ? $('entryText') : $('entryTitle')).focus();
+  }
+  const entryStatus = (msg, kind) => { const st = $('entryStatus'); st.textContent = msg; st.className = 'status' + (kind ? ' ' + kind : ''); };
+  function entryAiBtn(running) {
+    $('entryAi').replaceChildren(svgIcon(running ? 'square' : 'wand-sparkles'), running ? 'Parar' : 'Escrever com IA',
+      ...(running ? [] : [el('span', { class: 'ai-ico', 'aria-hidden': 'true' }, svgIcon('sparkles'))]));
+  }
+  const entryDirty = () => {
+    if (!entryCtx) return false;
+    const e = entryCtx.e;
+    return $('entryTitle').value !== (e ? e.title || '' : '') || $('entryText').value !== (e ? e.text || '' : '');
+  };
+  function closeEntry(force) {
+    if (entryCtx?.ctrl) entryCtx.ctrl.abort();
+    if (!force && entryDirty() && !confirm('Descartar as alterações deste item?')) return;
+    entryCtx = null; $('entryDlg').close();
+  }
+  $('entryDlg').addEventListener('cancel', (ev) => { ev.preventDefault(); closeEntry(); });
+  $('entryCancel').addEventListener('click', () => closeEntry());
+  $('entryClose').addEventListener('click', () => closeEntry());
+  $('entrySave').addEventListener('click', () => {
+    const c = entryCtx; if (!c) return;
+    const title = $('entryTitle').value.trim(), text = $('entryText').value.trim();
+    if (!title && !text) { entryStatus('Escreva pelo menos o título.', 'err'); $('entryTitle').focus(); return; }
+    if (c.e) {
+      if (c.e.title !== title || c.e.text !== text) { c.e.title = title; c.e.text = text; c.e.edited = true; }
+    } else c.list.push({ id: uid(), title: title || 'Sem título', text, by: 'user', edited: true });
+    saveProject(c.p, true); closeEntry(true); renderWorld(); toast('Item salvo ✓');
+  });
+  $('entryDelete').addEventListener('click', () => {
+    const c = entryCtx; if (!c || !c.e) return;
+    const i = c.list.indexOf(c.e), item = c.e;
+    c.list.splice(i, 1); saveProject(c.p, true); closeEntry(true); renderWorld();
+    toast('Item excluído.', { action: 'Desfazer', onAction: () => { c.list.splice(i, 0, item); saveProject(c.p, true); renderWorld(); } });
+  });
+  $('entryUndo').addEventListener('click', () => { if (entryCtx?.before != null) { $('entryText').value = entryCtx.before; entryCtx.before = null; $('entryUndo').hidden = true; } });
+  $('entryAi').addEventListener('click', async () => {
+    const c = entryCtx; if (!c) return;
+    if (c.ctrl) { c.ctrl.abort(); return; }
+    const p = c.p;
+    if (!settings.key || !settings.model) { closeEntry(true); ensureReady(p, () => {}); return; }
+    if (busy) { entryStatus('Espere a IA terminar o que está fazendo.', 'err'); return; }
+    const title = $('entryTitle').value.trim();
+    if (!title) { entryStatus('Escreva o título do item primeiro (ex.: o nome do personagem).', 'err'); $('entryTitle').focus(); return; }
+    if (!(await confirmAI(`Escrever o item "${title}" (${c.folder.label}).`))) return;
+    let chaptersTxt = '';
+    for (let i = p.chapters.length - 1; i >= 0; i--) {
+      const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
+      if (chaptersTxt.length + block.length > 40000) break;
+      chaptersTxt = block + chaptersTxt;
+    }
+    const currentText = $('entryText').value.trim(), ask = $('entryAsk').value.trim();
+    const prompt = `${bible(p)}\n\n` + (worldText(p) ? `MUNDO DA HISTÓRIA:\n${worldText(p)}\n\n` : '') + (chaptersTxt ? `CAPÍTULOS:\n${chaptersTxt}\n` : '') +
+      `TAREFA: Escreva o texto do item "${title}" da pasta "${c.folder.label}" do worldbuilding (${c.folder.hint || ''}). ` +
+      (currentText ? `Texto atual do item (mantenha o que o autor escreveu e complete):\n${currentText}\n\n` : '') +
+      (ask ? `Pedido do autor: ${ask}\n\n` : '') +
+      `Use o que os capítulos e as infos mostram; não contradiga a história. Responda SOMENTE com o texto do item, sem título e sem comentários.`;
+    c.before = $('entryText').value; c.ctrl = new AbortController();
+    busy = { ctrl: c.ctrl, kind: 'entry', label: 'Item do mundo', words: 0 };
+    entryAiBtn(true); entryStatus('A IA está escrevendo…');
+    try {
+      const r = await callAI(prompt, { signal: c.ctrl.signal, onText: (t) => { if (entryCtx === c) $('entryText').value = t; } });
+      if (entryCtx === c) { $('entryText').value = r.text.trim(); $('entryUndo').hidden = !c.before; entryStatus('Pronto. Confira e toque em Salvar.', 'ok'); }
+    } catch (err) {
+      if (entryCtx === c) { $('entryText').value = c.before; c.before = null; }
+      if (err.name === 'AbortError') entryStatus('Parado. O texto anterior foi mantido.');
+      else { entryStatus(err.message || 'Não deu certo. Tente de novo.', 'err'); if (err.action) handleAIError(err, null); }
+    } finally {
+      busy = null; c.ctrl = null; if (entryCtx === c) entryAiBtn(false);
+    }
+  });
 
   function renderWorld() {
     const p = cur(), w = worldOf(p);
@@ -3007,13 +3253,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const outdated = w.at && (p.chapters.length !== w.chapters || edited);
     const head = el('div', { class: 'card' },
       el('h2', { icon: 'globe', text: 'Mundo da história' }),
-      el('p', { class: 'lead', text: 'Pastas com tudo o que se sabe do mundo. Toque em + para adicionar um personagem, lugar ou regra; cada item tem título e texto. A IA usa isto como guia ao escrever.' }),
+      el('p', { class: 'lead', text: 'Pastas com tudo o que se sabe do mundo. Toque em + para escrever um item ou criar com IA. A IA usa isto como guia ao escrever.' }),
       w.at ? el('p', { class: 'muted', text: `Atualizado em ${fmtDate(w.at)}, com ${w.chapters} capítulo(s).` + (outdated ? ' Há capítulos novos ou editados desde então.' : '') })
         : el('p', { class: 'muted', text: p.chapters.length ? 'Ainda não foi gerado.' : 'É criado sozinho depois do primeiro capítulo. Você também pode preencher à mão agora.' }),
       el('div', { class: 'row' },
         el('button', { class: 'primary', icon: 'refresh-cw', ai: true, disabled: !!busy || !p.chapters.length, text: w.at ? 'Atualizar com os capítulos' : 'Gerar a partir dos capítulos', onclick: () => generateWorld(false) }),
-        w.prev ? el('button', { icon: 'undo-2', text: 'Voltar à versão anterior', onclick: () => { const t = w.e; w.e = w.prev; w.prev = t; saveProject(p, true); renderWorld(); } }) : null),
-      el('p', { class: 'hint', text: 'Só atualiza quando você toca no botão. A IA acrescenta itens novos e completa os que ela criou; o que você escreveu ou editou nunca é trocado.' }));
+        w.prev ? el('button', { icon: 'undo-2', text: 'Desfazer a última atualização', onclick: () => {
+        const pr = w.prev.e ? w.prev : { e: w.prev, folders: w.folders };
+        w.prev = { e: w.e, folders: w.folders }; w.e = pr.e; w.folders = pr.folders; saveProject(p, true); renderWorld();
+      } }) : null),
+      el('p', { class: 'hint', text: 'Só atualiza quando você toca no botão. A IA só acrescenta o que falta: nunca muda o que já está criado. Para editar um item, toque nele.' }));
     const use = el('input', { type: 'checkbox', id: 'useWorld' });
     use.checked = p.useWorld !== false;
     use.addEventListener('change', () => { p.useWorld = use.checked; saveProject(p); });
@@ -3022,12 +3271,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
     const ICON = { personagens: 'users', relacoes: 'heart-handshake', lugares: 'map-pin', regras: 'scroll-text', grupos: 'shield', historia: 'history', glossario: 'book-a', pendencias: 'circle-help' };
     const grid = el('div', { class: 'world-grid' });
-    WORLD.forEach(([k, label, hint]) => grid.append(folderCard(p, label, hint, w.e[k], { icon: ICON[k], pend: k === 'pendencias',
+    WORLD.forEach(([k, label, hint]) => grid.append(folderCard(p, label, hint, w.e[k], { key: k, icon: ICON[k], pend: k === 'pendencias',
       footer: k === 'pendencias' ? el('p', { class: 'hint', text: 'Lista de apoio para você; não vai para a IA como regra.' }) : null })));
     w.folders.forEach(f => {
       const t = el('input', { type: 'text', value: f.title || '', placeholder: 'Nome da pasta', 'aria-label': 'Nome da pasta', class: 'folder-title' });
       t.addEventListener('input', () => { f.title = t.value; saveProject(p); });
-      grid.append(folderCard(p, f.title, 'Pasta vazia. Toque em + para adicionar.', f.entries, { titleInput: t,
+      grid.append(folderCard(p, f.title, 'Pasta vazia. Toque em + para adicionar.', f.entries, { folder: f, titleInput: t,
         footer: el('div', { class: 'row end' }, el('button', { class: 'link', text: 'Remover pasta', onclick: () => {
           if (!confirm(`Remover a pasta "${f.title || 'sem nome'}" e os itens dela?`)) return;
           w.folders = w.folders.filter(x => x !== f); saveProject(p, true); renderWorld();
@@ -3039,11 +3288,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     } }));
   }
 
-  async function generateWorld(auto) {
+  async function generateWorld(auto, target) {
     const p = cur();
-    if (busy || !ensureReady(p, () => generateWorld(auto))) return;
+    if (busy || !ensureReady(p, () => generateWorld(auto, target))) return;
     const w = worldOf(p);
-    if (!auto && !(await confirmAI('Atualizar o mundo da história com os capítulos.'))) return;
+    if (!auto && !(await confirmAI(target ? `Criar com IA o que falta em "${target.label}". Nada do que já existe é mudado.` : 'Atualizar o mundo da história com os capítulos.'))) return;
     let chaptersTxt = '';
     for (let i = p.chapters.length - 1; i >= 0; i--) {
       const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
@@ -3053,15 +3302,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const current = {};
     WORLD.forEach(([k]) => { current[k] = w.e[k].map(e => ({ title: e.title, text: e.text })); });
     const custom = w.folders.map(f => `## ${f.title}\n` + f.entries.map(e => `### ${e.title}\n${e.text}`).join('\n')).join('\n\n');
+    const targetList = target ? (target.key ? w.e[target.key] : target.ref.entries) : null;
     const prompt = `${bible(p)}\n\n` +
       `MUNDO ATUAL (o autor pode ter escrito ou corrigido à mão; isto tem prioridade):\n${JSON.stringify(current, null, 1)}\n\n` +
-      (custom ? `OUTRAS SEÇÕES DO AUTOR (só leia; não repita):\n${custom}\n\n` : '') +
-      `CAPÍTULOS:\n${chaptersTxt}\n` +
-      `TAREFA: Atualize o worldbuilding desta história. Responda SOMENTE com um objeto JSON com exatamente estas chaves: ` +
-      `${WORLD.map(x => x[0]).join(', ')}. Cada valor é uma LISTA de itens {"title": "...", "text": "..."} em português do Brasil ` +
-      `(um personagem, lugar, regra ou termo por item; o texto com os detalhes). Mantenha os itens do MUNDO ATUAL com o mesmo título e complete o texto ` +
-      `com o que os capítulos mostram; acrescente itens novos. Não invente fatos que não aparecem. ` +
-      `Em "pendencias", liste o que ainda não está definido e seria útil o autor decidir (nomes, regras, motivações, lugares).`;
+      (custom ? `OUTRAS SEÇÕES DO AUTOR:\n${custom}\n\n` : '') +
+      (chaptersTxt ? `CAPÍTULOS:\n${chaptersTxt}\n` : '') +
+      (target
+        ? `TAREFA: Crie itens NOVOS para a pasta "${target.label}" do worldbuilding (${target.hint || 'itens desta pasta'}). ` +
+          `Itens que já existem nela: ${targetList.map(e => e.title).filter(Boolean).join('; ') || 'nenhum'}. NÃO repita nem reescreva esses itens; só traga o que falta. ` +
+          `Responda SOMENTE com um objeto JSON {"itens": [{"title": "...", "text": "..."}]} em português do Brasil, um item por elemento, com os detalhes no texto. ` +
+          `Baseie-se nos capítulos e nas infos da obra; não contradiga a história.` +
+          (target.key === 'pendencias' ? ' Liste o que ainda não está definido e seria útil o autor decidir.' : '')
+        : `TAREFA: Complete o worldbuilding desta história com o que FALTA. Responda SOMENTE com um objeto JSON com exatamente estas chaves: ` +
+          `${WORLD.map(x => x[0]).join(', ')}. Cada valor é uma LISTA de itens NOVOS {"title": "...", "text": "..."} em português do Brasil ` +
+          `(um personagem, lugar, regra ou termo por item; o texto com os detalhes). NÃO repita nem reescreva os itens do MUNDO ATUAL; ` +
+          `traga só o que os capítulos mostram e ainda não está lá. Não invente fatos que não aparecem. ` +
+          `Em "pendencias", liste o que ainda não está definido e seria útil o autor decidir (nomes, regras, motivações, lugares).`);
     const b = startBusy('world', 'Mundo da história', null);
     try {
       const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
@@ -3069,31 +3325,31 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       let data;
       try { data = JSON.parse(r.text.slice(a, z + 1)); } catch { data = null; }
       if (!data || typeof data !== 'object') throw Object.assign(new Error('A IA não devolveu o mundo no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
-      w.prev = JSON.parse(JSON.stringify(w.e));
-      WORLD.forEach(([k]) => {
-        let items = data[k];
+      w.prev = JSON.parse(JSON.stringify({ e: w.e, folders: w.folders }));
+      let added = 0;
+      // só acrescenta: o que já existe nunca é mudado
+      const addTo = (list, items, isChars) => {
         if (items == null) return;
         if (!Array.isArray(items)) items = splitEntries(String(items), 'ai');
         items = items.map(x => typeof x === 'string' ? splitEntries('- ' + x, 'ai')[0] : x).filter(x => x && (x.title || x.text));
-        const list = w.e[k];
-        if (k === 'pendencias') for (let i = list.length - 1; i >= 0; i--) if (list[i].by === 'ai' && !list[i].edited) list.splice(i, 1); // pendências da IA são refeitas
         items.forEach(x => {
           // "Theo (28)" e "Theo" são o mesmo item; em Personagens, vale o primeiro nome
           const key = (t) => normTitle(t).replace(/\(.*?\)/g, '').replace(/["“”'‘’]/g, '').trim();
           const first = (t) => key(t).split(' ')[0];
-          const mine = list.find(e => key(e.title) === key(x.title)) || (k === 'personagens' && first(x.title).length > 2 && list.find(e => first(e.title) === first(x.title)));
-          if (!mine) list.push({ id: uid(), title: String(x.title || '').trim() || 'Sem título', text: String(x.text || '').trim(), by: 'ai', edited: false });
-          else if (mine.by === 'ai' && !mine.edited) mine.text = String(x.text || mine.text).trim(); // só completa o que a IA criou
+          const mine = list.find(e => key(e.title) === key(x.title)) || (isChars && first(x.title).length > 2 && list.find(e => first(e.title) === first(x.title)));
+          if (!mine) { list.push({ id: uid(), title: String(x.title || '').trim() || 'Sem título', text: String(x.text || '').trim(), by: 'ai', edited: false }); added++; }
         });
-      });
-      w.at = Date.now(); w.chapters = p.chapters.length;
+      };
+      if (target) addTo(targetList, data.itens || data[target.key] || Object.values(data).find(Array.isArray), target.key === 'personagens');
+      else WORLD.forEach(([k]) => addTo(w.e[k], data[k], k === 'personagens'));
+      if (!target) { w.at = Date.now(); w.chapters = p.chapters.length; }
       stopBusy();
-      toast(auto ? 'Mundo da história criado ✓ Veja na aba Mundo.' : 'Mundo atualizado ✓');
+      toast(auto ? 'Mundo da história criado ✓ Veja na aba Mundo.' : added ? `${added} item(ns) novo(s) ✓` : 'Nada novo para acrescentar.');
     } catch (e) {
       stopBusy();
       if (e.name === 'AbortError') toast('Parado. O mundo anterior foi mantido.');
       else if (auto) toast('Não deu para criar o mundo agora. Tente depois na aba Mundo.'); // automático: sem aviso de erro grande
-      else handleAIError(e, () => generateWorld(auto));
+      else handleAIError(e, () => generateWorld(auto, target));
     } finally {
       stopBusy(); saveProject(p, true);
       if (currentId === p.id) renderTab();
@@ -4088,11 +4344,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     // completa campos que versões antigas não tinham (resumo, idioma etc.)
     projects = projects.map(p => Object.assign(newProject(), p, { lang: p.lang || DEFAULT_LANG }));
 
-    if (!projects.length) { const p = newProject(); projects.push(p); saveProject(p, true); }
-    if (!cur()) currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
+    // projetos vazios criados pelas versões antigas saem sozinhos
+    const blank = [];
+    for (const x of projects) {
+      const hasWorld = x.world && (Object.values(x.world.e || {}).some(l => l.length) || (x.world.folders || []).length || Object.values(x.world.s || {}).some(Boolean));
+      if (isEmptyProject(x) && !hasWorld && !(x.notes || '').trim() && !((await db.refsOf(x.id)) || []).length) blank.push(x);
+    }
+    for (const x of blank) { await db.del('projects', x.id); local.del('fanfic.bak.' + x.id); }
+    projects = projects.filter(x => !blank.includes(x));
     saveSettings(false);
     syncStarted = true;
-    openProject(currentId);
+    if (!projects.length) startDraft();
+    else { if (!cur()) currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id; openProject(currentId); }
     await finishDropboxLogin();
     renderSyncLine();
     if (syncReady()) syncNow();

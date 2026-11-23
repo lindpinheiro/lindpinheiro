@@ -375,6 +375,29 @@
   .info-meta { margin-top: 10px; }
   .reader strong { font-weight: 700; }
   .reader p.scene-break { text-align: center; letter-spacing: .5em; color: var(--muted); }
+  /* anotações na margem (tela larga, página do capítulo) */
+  .margin-notes { display: none; }
+  @media (min-width: 1180px) {
+    body.focus .wrap:has(.doc-wrap.has-notes) { max-width: 1160px; }
+    body.focus .wrap:has(.doc-wrap.has-notes) #tab-capitulos > :not(.doc-wrap) { max-width: 860px; }
+    .doc-wrap.has-notes { display: grid; grid-template-columns: minmax(0, 860px) 284px; gap: 16px; align-items: start; }
+    .doc-wrap.has-notes > .card { margin-bottom: 16px; }
+    .doc-wrap.has-notes .margin-notes { display: block; position: relative; }
+    body.focus .wrap:has(.doc-wrap.has-notes) .hl-list > .hl-item.in-margin { display: none; }
+  }
+  .mnote { position: absolute; left: 0; right: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left;
+    background: var(--surface); border: 1px solid var(--border); border-left: 3px solid #e5c43a; border-radius: 10px; padding: 10px 12px;
+    font-weight: 400; font-size: .9rem; line-height: 1.45; min-height: 0; box-shadow: 0 2px 10px rgba(0,0,0,.18); transition: top .15s; }
+  .mnote.important { border-left-color: var(--accent); }
+  .mnote:hover { border-color: var(--accent); }
+  .mnote-text { white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+  .mnote.editing { border-color: var(--accent); z-index: 2; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+  .mnote.editing textarea { width: 100%; min-height: 72px; font-size: .9rem; }
+  .mnote-mem { margin: 0; font-size: .85rem; }
+  .mnote-actions { display: flex; gap: 6px; align-items: center; width: 100%; }
+  .mnote-actions button { min-height: 32px; padding: 4px 10px; font-size: .85rem; }
+  .mnote-actions .link { margin-left: auto; color: var(--danger); }
+  .reader mark.active { outline: 2px solid var(--accent); }
   .reader mark, .hl-item mark { background: #fff2a8; color: #231a1c; border-radius: 3px; padding: 0 2px; cursor: pointer; }
   .reader mark.important, .hl-item mark.important { background: #ffd6e3; box-shadow: inset 0 -2px 0 var(--accent); }
   .hl-list h3 { display: flex; align-items: center; gap: 8px; margin: 0; }
@@ -837,13 +860,14 @@
 
 <!-- Anotação de um trecho marcado -->
 <dialog id="noteDlg" aria-labelledby="noteTitle">
-  <div class="dlg-head"><h2 id="noteTitle"><svg class="icon" aria-hidden="true"><use href="#i-sticky-note"/></svg>Anotação</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="dlg-head"><h2 id="noteTitle"><svg class="icon" aria-hidden="true"><use href="#i-highlighter"/></svg>Marcação</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <blockquote class="note-quote" id="noteQuote"></blockquote>
-  <label for="noteText" style="margin-top:8px">Sua anotação</label>
+  <label for="noteText" style="margin-top:8px">Anotação <span class="muted">(opcional)</span></label>
   <textarea id="noteText" placeholder="Ex.: isso precisa voltar no final; ele mente aqui."></textarea>
   <label class="check" for="noteImportant"><input type="checkbox" id="noteImportant"><span>Importante: guardar na memória da IA<small class="hint" style="display:block">A IA vai lembrar disso ao escrever os próximos capítulos.</small></span></label>
   <div class="row" style="margin-top:16px">
     <button class="primary" id="noteSave">Salvar</button>
+    <button id="noteSkip">Só marcar</button>
     <button class="link" id="noteRemove">Remover marcação</button>
   </div>
 </dialog>
@@ -2577,13 +2601,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     } else {
       const body = el('div', { class: 'reader', id: 'chBody' });
       renderParagraphs(body, ch.text, writingThis, writingThis ? [] : (ch.highlights || []).filter(h => !h.resolved));
-      body.addEventListener('click', (e) => { const m = e.target.closest('mark[data-hl]'); if (m) openNote(p, ch, m.dataset.hl); });
+      body.addEventListener('click', (e) => { const m = e.target.closest('mark[data-hl]'); if (m && !String(getSelection())) openHighlight(p, ch, m.dataset.hl); });
       words.textContent = fmtNum(countWords(ch.text)) + ' palavras';
       card.append(el('h2', { class: 'reader-title', text: chTitle(p, ch) }), body,
         el('div', { class: 'row', style: 'justify-content:space-between;margin-top:8px' }, words,
-          writingThis ? null : el('span', { class: 'hint', style: 'margin:0', text: 'Selecione um trecho para marcar ou anotar.' })));
+          writingThis ? null : el('span', { class: 'hint', style: 'margin:0', text: 'Selecione um trecho para marcar e, se quiser, anotar.' })));
     }
-    sec.append(card);
+    if (!editing && !writingThis) {
+      const notes = marginNotes(p, ch);
+      sec.append(el('div', { class: 'doc-wrap' + (notes.children.length ? ' has-notes' : '') }, card, notes));
+      requestAnimationFrame(layoutMarginNotes);
+    } else sec.append(card);
     if (!editing && !writingThis && (ch.highlights || []).length) sec.append(highlightList(p, ch));
     if (!editing && !writingThis && ch.text.trim()) sec.append(suggestionsCard(p, ch));
 
@@ -2782,8 +2810,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       bar.append(el('span', { class: 'sel-title', text: 'Para marcar, selecione dentro de um parágrafo.' }));
     } else {
       bar.append(
-        el('button', { type: 'button', class: 'chip', icon: 'highlighter', text: 'Marcar', onclick: () => addHighlight(false) }),
-        el('button', { type: 'button', class: 'chip strong', icon: 'sticky-note', text: 'Anotar', onclick: () => addHighlight(true) }));
+        el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: 'Marcar', title: 'Marcar o trecho (a anotação é opcional)', onclick: () => addHighlight() }));
     }
   }
   function aiOnSelection() {
@@ -2795,15 +2822,86 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('selBar').addEventListener('mousedown', (e) => e.preventDefault()); // não apaga a seleção antes do clique
 
   // ---------- marca-texto e anotações (modo Ler) ----------
-  function addHighlight(withNote) {
+  // marcar: cria a marcação e já abre a anotação (opcional). Tela larga: na margem, como no Google Docs
+  const wideNotes = () => document.body.classList.contains('focus') && matchMedia('(min-width: 1180px)').matches;
+  let marginEdit = null;
+  function addHighlight() {
     const info = selInfo; hideSelBar();
     if (!info || info.editing || info.multi) return;
     const h = { id: uid(), quote: info.quote, note: '', important: false, at: Date.now() };
     (info.ch.highlights = info.ch.highlights || []).push(h);
     getSelection().removeAllRanges();
-    saveProject(info.p, true); renderChapters();
-    if (withNote) openNote(info.p, info.ch, h.id, true); else toast('Trecho marcado.');
+    saveProject(info.p, true);
+    if (wideNotes()) { marginEdit = h.id; renderChapters(); }
+    else { renderChapters(); openNote(info.p, info.ch, h.id, true); }
   }
+  function removeHighlight(p, ch, h) {
+    ch.highlights = ch.highlights.filter(x => x.id !== h.id);
+    if (marginEdit === h.id) marginEdit = null;
+    saveProject(p, true); renderChapters();
+    toast('Marcação removida.', { action: 'Desfazer', onAction: () => { ch.highlights.push(h); saveProject(p, true); renderChapters(); } });
+  }
+  function openHighlight(p, ch, id) {
+    if (wideNotes()) { marginEdit = id; renderChapters(); } else openNote(p, ch, id);
+  }
+  // anotações na margem, ao lado do trecho marcado
+  function marginNotes(p, ch) {
+    const aside = el('aside', { class: 'margin-notes', 'aria-label': 'Anotações' });
+    (ch.highlights || []).filter(h => !h.resolved && ((h.note || '').trim() || h.id === marginEdit)).forEach(h => aside.append(marginCard(p, ch, h)));
+    return aside;
+  }
+  function marginCard(p, ch, h) {
+    let card;
+    if (h.id === marginEdit) {
+      const ta = el('textarea', { rows: 3, placeholder: 'Anotação (opcional)', 'aria-label': 'Anotação' });
+      ta.value = h.note || '';
+      const imp = el('input', { type: 'checkbox' });
+      imp.checked = !!h.important;
+      const save = () => {
+        h.note = ta.value.trim(); h.important = imp.checked; marginEdit = null;
+        saveProject(p, true); renderChapters();
+        toast(h.note ? (h.important ? 'Anotação salva. A IA vai lembrar disso ✓' : 'Anotação salva ✓') : 'Trecho marcado ✓');
+      };
+      const cancel = () => { marginEdit = null; renderChapters(); };
+      ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); } if (e.key === 'Escape') cancel(); });
+      card = el('div', { class: 'mnote editing', 'data-hl': h.id }, ta,
+        el('label', { class: 'check mnote-mem' }, imp, el('span', { text: 'Memória da IA' })),
+        el('div', { class: 'mnote-actions' },
+          el('button', { class: 'primary', text: 'Salvar', onclick: save }),
+          el('button', { text: 'Cancelar', onclick: cancel }),
+          el('button', { class: 'link plain', icon: 'trash-2', 'aria-label': 'Remover marcação', title: 'Remover marcação', onclick: () => removeHighlight(p, ch, h) })));
+      setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 40);
+    } else {
+      card = el('button', { type: 'button', class: 'mnote' + (h.important ? ' important' : ''), 'data-hl': h.id, title: 'Editar a anotação', onclick: () => { marginEdit = h.id; renderChapters(); } },
+        el('span', { class: 'mnote-text', text: h.note }),
+        h.important ? el('span', { class: 'tag mem' }, svgIcon('brain'), ' Memória da IA') : null);
+    }
+    const marks = () => document.querySelectorAll(`#chBody mark[data-hl="${h.id}"]`);
+    card.addEventListener('mouseenter', () => marks().forEach(m => m.classList.add('active')));
+    card.addEventListener('mouseleave', () => marks().forEach(m => m.classList.remove('active')));
+    return card;
+  }
+  // põe cada anotação na altura do trecho; se duas se encontram, a de baixo desce
+  function layoutMarginNotes() {
+    const wrap = document.querySelector('.doc-wrap.has-notes');
+    if (!wrap) return;
+    const aside = wrap.querySelector('.margin-notes');
+    if (!aside || getComputedStyle(aside).display === 'none') return;
+    const base = aside.getBoundingClientRect().top;
+    const markTop = (c) => { const m = wrap.querySelector(`mark[data-hl="${c.dataset.hl}"]`); return m ? m.getBoundingClientRect().top - base : 0; };
+    const cards = [...aside.children].map(c => ({ c, want: markTop(c), h: c.offsetHeight })).sort((a, b) => a.want - b.want);
+    // a que está sendo editada fica na altura exata do trecho; as de cima sobem, as de baixo descem
+    let k = cards.findIndex(x => x.c.classList.contains('editing'));
+    if (k < 0) k = 0;
+    if (cards.length) cards[k].top = Math.max(0, cards[k].want);
+    for (let j = k - 1; j >= 0; j--) cards[j].top = Math.min(cards[j].want, cards[j + 1].top - cards[j].h - 8);
+    for (let j = k + 1; j < cards.length; j++) cards[j].top = Math.max(cards[j].want, cards[j - 1].top + cards[j - 1].h + 8);
+    let y = 0;
+    cards.forEach(x => { x.c.style.top = x.top + 'px'; y = Math.max(y, x.top + x.h + 8); });
+    aside.style.minHeight = y + 'px';
+  }
+  let marginTimer = null;
+  addEventListener('resize', () => { clearTimeout(marginTimer); marginTimer = setTimeout(layoutMarginNotes, 150); });
   function openNote(p, ch, id, isNew) {
     const h = (ch.highlights || []).find(x => x.id === id);
     if (!h) return;
@@ -2811,14 +2909,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('noteQuote').textContent = h.quote;
     $('noteText').value = h.note || '';
     $('noteImportant').checked = !!h.important;
-    $('noteSave').onclick = () => { h.note = $('noteText').value.trim(); h.important = $('noteImportant').checked; dlg.close(); saveProject(p, true); renderChapters(); toast(h.important ? 'Anotação salva. A IA vai lembrar disso ✓' : 'Anotação salva ✓'); };
-    $('noteRemove').onclick = () => { ch.highlights = ch.highlights.filter(x => x.id !== id); dlg.close(); saveProject(p, true); renderChapters(); toast('Marcação removida.', { action: 'Desfazer', onAction: () => { ch.highlights.push(h); saveProject(p, true); renderChapters(); } }); };
-    $('noteRemove').hidden = !!isNew && !h.note;
+    $('noteSave').onclick = () => { h.note = $('noteText').value.trim(); h.important = $('noteImportant').checked; dlg.close(); saveProject(p, true); renderChapters(); toast(h.note ? (h.important ? 'Anotação salva. A IA vai lembrar disso ✓' : 'Anotação salva ✓') : 'Trecho marcado ✓'); };
+    $('noteSkip').onclick = () => { dlg.close(); toast('Trecho marcado ✓'); };
+    $('noteSkip').hidden = !isNew;
+    $('noteRemove').onclick = () => { dlg.close(); removeHighlight(p, ch, h); };
+    $('noteRemove').hidden = !!isNew;
     dlg.showModal(); $('noteText').focus();
   }
   function highlightList(p, ch) {
     const open = ch.highlights.filter(h => !h.resolved), done = ch.highlights.filter(h => h.resolved);
-    const item = (h) => el('button', { class: 'hl-item', type: 'button', onclick: () => openNote(p, ch, h.id) },
+    const item = (h) => el('button', { class: 'hl-item' + ((h.note || '').trim() && !h.resolved ? ' in-margin' : ''), type: 'button', onclick: () => h.resolved ? openNote(p, ch, h.id) : openHighlight(p, ch, h.id) },
       el('mark', { class: h.important ? 'important' : '', text: h.quote.length > 140 ? h.quote.slice(0, 140) + '…' : h.quote }),
       h.note ? el('span', { class: 'hl-note', text: h.note }) : null,
       h.important ? el('span', { class: 'tag mem' }, svgIcon('brain'), ' Memória da IA') : null);

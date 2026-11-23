@@ -307,6 +307,8 @@
   button.ai-btn { background: linear-gradient(120deg, var(--accent-soft), var(--ai-soft)); border-color: var(--ai-border); }
   button.ai-btn.primary { background: linear-gradient(120deg, var(--accent), var(--ai)); border-color: transparent; color: var(--accent-text); }
   button.ai-btn:not(:disabled):hover { filter: brightness(1.06); }
+  .info-ai { display: flex; gap: 10px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 16px; }
+  .info-ai p { margin: 0; flex: 1 1 260px; }
   .ai-cost { font-size: .9rem; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
   /* página de leitura/edição do capítulo */
   body.focus header, body.focus aside#projects, body.focus #backdrop, body.focus .tabs, body.focus #projHeading { display: none !important; }
@@ -360,6 +362,9 @@
   .note-quote { margin: 8px 0 0; padding: 10px 14px; border-left: 4px solid #e5c43a; background: var(--surface-2); border-radius: 8px; font-family: Georgia, serif; white-space: pre-wrap; }
   .edit-tools { position: sticky; top: 72px; z-index: 5; margin-bottom: 8px; }
   .edit-toolbar .grow { flex: 1; }
+  .edit-toolbar .tb-sep { width: 1px; align-self: stretch; background: var(--border); margin: 4px 4px; }
+  .edit-toolbar .tb-ai { padding: 6px 12px; font-size: .9rem; }
+  .edit-toolbar button.ai-btn { background: linear-gradient(120deg, var(--accent-soft), var(--ai-soft)); border-color: var(--ai-border); }
   .edit-tools.collapsed { position: static; display: flex; justify-content: flex-end; margin: -4px 0 6px; }
   .fmt-show { min-height: 36px; padding: 4px 10px; font-size: .85rem; font-weight: 600; background: transparent; border-color: transparent; color: var(--muted); }
   .fmt-show:hover { color: var(--text); background: var(--surface-2); }
@@ -529,7 +534,7 @@
 <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></symbol>
 <symbol id="i-pen-line" viewBox="0 0 24 24"><path d="M12 20h9" /> <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" /></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
 <symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
 <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
 <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></symbol>
@@ -639,6 +644,7 @@
 
         <div id="infoView"></div>
         <div id="infoForm">
+        <div id="infoAiBox"></div>
         <div class="card">
           <div class="grid2">
             <div>
@@ -2204,6 +2210,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('div', { class: 'info-meta muted', text: [p.fandom ? 'Universo: ' + p.fandom : '', p.lang || DEFAULT_LANG, p.pov, LEN_LABEL[p.length] || ''].filter(Boolean).join(' · ') }),
         p.adults ? null : el('p', { class: 'status err', text: 'Falta confirmar, em Editar, que todos os personagens são adultos (18+).' })));
     }
+    // no formulário: preencher as infos a partir do que a história já tem
+    const aiBox = $('infoAiBox');
+    aiBox.innerHTML = '';
+    const story = p.chapters.length || worldText(p) || (refsCache[p.id] || []).length;
+    if (editing && story && !p.draft) {
+      const empty = !(p.premise || '').trim() && !(p.characters || '').trim();
+      aiBox.append(el('div', { class: 'notice info-ai' },
+        el('p', { text: empty
+          ? `Esta obra já tem ${p.chapters.length ? p.chapters.length + ' capítulo(s)' : 'conteúdo'}. A IA pode ler e preencher as infos para você.`
+          : 'A IA pode completar as infos com o que os capítulos, o mundo e as referências mostram. O que você escreveu é mantido.' }),
+        el('button', { class: empty ? 'primary' : '', icon: 'notebook-text', ai: true, disabled: !!busy, text: empty ? 'Gerar infos com base nos capítulos' : 'Completar com base na história', onclick: updateInfoFromStory })));
+    }
     // ação principal: escrever o primeiro capítulo (fora da edição)
     const box = $('ideaCta');
     box.innerHTML = '';
@@ -2228,13 +2246,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function updateInfoFromStory() {
     const p = cur();
     if (busy || !ensureReady(p, updateInfoFromStory)) return;
-    if (!(await confirmAI('Atualizar as Infos da Obra com os capítulos, o mundo e as referências.'))) return;
-    let chaptersTxt = '';
-    for (let i = p.chapters.length - 1; i >= 0; i--) {
-      const block = `### Capítulo ${i + 1}\n${p.chapters[i].text}\n\n`;
-      if (chaptersTxt.length + block.length > 40000) break;
-      chaptersTxt = block + chaptersTxt;
-    }
+    if (!(await confirmAI('Preencher as Infos da Obra com os capítulos, o mundo e as referências.'))) return;
+    // começo da história (apresenta personagens e mundo) + fim (onde ela está agora)
+    const blocks = p.chapters.map((c, i) => `### Capítulo ${i + 1}: ${chTitle(p, c)}\n${c.text}\n\n`);
+    const head = [], tail = []; let hn = 0, tn = 0, hi = 0, ti = blocks.length - 1;
+    while (hi <= ti && hn + blocks[hi].length <= 18000) { hn += blocks[hi].length; head.push(blocks[hi++]); }
+    while (ti >= hi && tn + blocks[ti].length <= 24000) { tn += blocks[ti].length; tail.unshift(blocks[ti--]); }
+    if (!head.length && blocks.length) head.push(blocks[0].slice(0, 18000) + '\n[...]\n\n');
+    const chaptersTxt = head.join('') + (hi <= ti ? `[... ${ti - hi + 1} capítulo(s) do meio omitidos ...]\n\n` : '') + tail.join('');
     const refs = pickReferences(Object.assign({}, p, { refBudget: '12000' }), [p.premise, p.characters].join('\n'));
     const prompt = `INFOS ATUAIS DA OBRA (o autor escreveu; têm prioridade):\n${JSON.stringify({ premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes }, null, 1)}\n\n` +
       (worldText(p) ? `MUNDO DA HISTÓRIA:\n${worldText(p)}\n\n` : '') +
@@ -2456,7 +2475,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       };
       title.addEventListener('input', () => { d.title = title.value; keepDraft(); refresh(); });
       ta.addEventListener('input', () => { d.text = ta.value; keepDraft(); refresh(); });
-      card.append(title, editToolbar(ta), ta, el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' }, words, state),
+      card.append(title, editToolbar(ta, p, ch), ta, el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' }, words, state),
         el('p', { class: 'hint', text: 'Selecione um trecho para formatar ou pedir ajuste à IA. Atalhos: Ctrl+B negrito, Ctrl+I itálico.' }));
       refresh();
     } else {
@@ -2618,7 +2637,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       EMOJIS.map(e => el('button', { type: 'button', class: 'emoji', text: e, 'aria-label': 'Inserir ' + e, onclick: () => { fmtInsert(ta, e); onPick && onPick(); } })));
   }
   // barrinha fixa acima do texto
-  function editToolbar(ta) {
+  function editToolbar(ta, p, ch) {
     const grid = emojiGrid(ta, () => { grid.hidden = true; });
     grid.hidden = true;
     const bar = el('div', { class: 'edit-toolbar', role: 'toolbar', 'aria-label': 'Formatação' },
@@ -2626,7 +2645,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('button', { type: 'button', icon: 'italic', 'aria-label': 'Itálico (Ctrl+I)', title: 'Itálico (Ctrl+I)', onclick: () => fmtWrap(ta, '*') }),
       el('button', { type: 'button', text: '—', 'aria-label': 'Travessão de fala', title: 'Travessão de fala', onclick: () => fmtInsert(ta, '— ') }),
       el('button', { type: 'button', text: '⁂', 'aria-label': 'Quebra de cena', title: 'Quebra de cena', onclick: () => fmtInsert(ta, '\n\n* * *\n\n') }),
-      el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; } }));
+      el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; } }),
+      el('span', { class: 'tb-sep', 'aria-hidden': 'true' }),
+      el('button', { type: 'button', class: 'tb-ai', icon: 'wand-sparkles', ai: true, text: 'Ajustar', disabled: !!busy, title: 'Ajustar com IA o trecho selecionado ou o capítulo', onclick: () => adjustFromEditor(ch, ta) }),
+      el('button', { type: 'button', class: 'tb-ai', icon: 'spell-check', ai: true, text: 'Corrigir', disabled: !!busy, title: 'Corrigir o português e organizar no formato de livro (o trecho selecionado ou o capítulo)', onclick: () => fixText(p, ch, ta) }));
     bar.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
     const wrap = el('div', { class: 'edit-tools' });
     const paint = () => {
@@ -2657,6 +2679,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { type: 'button', class: 'chip', icon: 'italic', 'aria-label': 'Itálico', onclick: () => fmtWrap($('chBody'), '*') }),
         el('button', { type: 'button', class: 'chip', icon: 'smile', 'aria-label': 'Emojis', onclick: () => { grid.hidden = !grid.hidden; updateSelBar(); } }),
         el('button', { type: 'button', class: 'chip strong', icon: 'wand-sparkles', ai: true, text: 'Ajustar com IA', onclick: aiOnSelection }),
+        el('button', { type: 'button', class: 'chip strong', icon: 'spell-check', ai: true, text: 'Corrigir', onclick: () => { const info = selInfo; hideSelBar(); if (info && info.editing) fixText(info.p, info.ch, $('chBody')); } }),
         grid);
     } else if (mode === 'multi') {
       bar.append(el('span', { class: 'sel-title', text: 'Para marcar, selecione dentro de um parágrafo.' }));
@@ -3058,10 +3081,30 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     runAdjust(adjustTarget, instr);
   });
 
-  async function runAdjust(target, instr) {
+  // Corrigir: português e formato de livro, sem mudar a história
+  const FIX_INSTR = 'Revise o texto como um revisor de livro. Corrija ortografia, acentuação, concordância, pontuação e erros de digitação em português do Brasil. Organize no formato padrão de livro: parágrafos separados por uma linha em branco (quebre blocos longos em parágrafos onde a cena muda de foco), cada fala de personagem em seu próprio parágrafo começando com travessão (—), e quebras de cena como * * *. NÃO mude a história, os acontecimentos, as falas, o estilo, a voz nem o vocabulário do autor; não acrescente nem corte conteúdo. Mantenha **negrito** e *itálico*.';
+  function fixText(p, ch, ta) {
+    if (busy) return;
+    const s = ta ? ta.selectionStart : 0, e = ta ? ta.selectionEnd : 0;
+    const partial = !!ta && e > s && ta.value.slice(s, e).trim().length > 0;
+    saveEdit(); // a IA trabalha sobre o texto salvo
+    runAdjust({ ch, start: partial ? s : 0, end: partial ? e : ch.text.length, partial }, FIX_INSTR, { fix: true });
+  }
+  function adjustFromEditor(ch, ta) {
+    if (busy) return;
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    const partial = e > s && ta.value.slice(s, e).trim().length > 0;
+    saveEdit();
+    openAdjust(ch, partial ? { ch, start: s, end: e, partial: true } : { ch, start: 0, end: ch.text.length, partial: false });
+  }
+
+  async function runAdjust(target, instr, opts = {}) {
     const p = cur();
-    if (busy || !ensureReady(p, () => runAdjust(target, instr))) return;
-    if (!(await confirmAI(target.partial ? `Reescrever o trecho selecionado: ${instr}` : `Reescrever o capítulo: ${instr}`))) { setDraft('adj:' + target.ch.id, instr); return; }
+    if (busy || !ensureReady(p, () => runAdjust(target, instr, opts))) return;
+    const ask = opts.fix
+      ? (target.partial ? 'Corrigir o português e a formatação do trecho selecionado (a história não muda).' : 'Corrigir o português e a formatação do capítulo (a história não muda).')
+      : (target.partial ? `Reescrever o trecho selecionado: ${instr}` : `Reescrever o capítulo: ${instr}`);
+    if (!(await confirmAI(ask))) { if (!opts.fix) setDraft('adj:' + target.ch.id, instr); return; }
     const { ch, start, end, partial } = target;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
@@ -3073,14 +3116,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       : `CAPÍTULO ATUAL:\n${original}\n\n` +
         `TAREFA: Reescreva este capítulo seguindo este pedido: ${instr}\n` +
         `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
-    const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, instr)}\n\n${task}`, strong);
+    // na correção não precisa do contexto da obra (mais barato)
+    const makePrompt = (strong) => withLang(p, opts.fix ? task : `${buildContext(p, idx, instr)}\n\n${task}`, strong);
     const before = original.slice(0, start), after = original.slice(end);
     if (edit && edit.chId === ch.id) discardEdit();
     view = { tab: 'capitulos', chapterId: ch.id, mode: view.mode };
-    const b = startBusy('adjust', partial ? 'Reescrevendo o trecho' : 'Reescrevendo', ch.id);
+    const b = startBusy('adjust', opts.fix ? 'Corrigindo' : partial ? 'Reescrevendo o trecho' : 'Reescrevendo', ch.id);
     try {
       const r = await aiWrite(p, makePrompt, {
-        signal: b.ctrl.signal, images: pickImages(p, original.slice(start, end) + ' ' + instr),
+        signal: b.ctrl.signal, images: opts.fix ? [] : pickImages(p, original.slice(start, end) + ' ' + instr),
         onRetry: () => { paintChapter(ch, original); updateBusy({ words: 0 }); },
         onThinking: () => updateBusy({ thinking: true }),
         onText: (t) => { paintChapter(ch, before + t + after); updateBusy({ words: countWords(before + t + after) }); }
@@ -3088,12 +3132,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ch.prev = original;
       ch.text = before + r.text + after;
       stopBusy();
-      setDraft('adj:' + ch.id, '');
-      toast('Ajuste feito ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
+      if (!opts.fix) setDraft('adj:' + ch.id, '');
+      toast(opts.fix ? 'Correção feita ✓' : 'Ajuste feito ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
       ch.text = original;
       stopBusy();
-      if (e.name === 'AbortError') toast('Ajuste cancelado. O texto original foi mantido.');
+      if (e.name === 'AbortError') toast('Cancelado. O texto original foi mantido.');
+      else if (opts.fix) handleAIError(e, () => runAdjust(target, instr, opts));
       else {
         setDraft('adj:' + ch.id, instr);
         handleAIError(e, () => runAdjust(target, instr), () => {

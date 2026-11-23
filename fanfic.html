@@ -98,6 +98,12 @@
   .dot.off { background: #e59a2f; }
   .dot.err { background: var(--danger); }
   .user { position: relative; margin-left: auto; flex: none; }
+  .credit-chip { margin-left: auto; min-height: 32px; padding: 4px 12px; border-radius: 99px; font-size: .85rem; font-weight: 700;
+    background: var(--surface-2); border-color: var(--border); color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .credit-chip .icon { color: var(--accent); width: 1em; height: 1em; }
+  .credit-chip.low { border-color: var(--danger); color: var(--danger); }
+  .credit-chip.low .icon { color: var(--danger); }
+  .credit-chip:not([hidden]) + .user { margin-left: 8px; }
   .avatar {
     width: 38px; height: 38px; min-height: 38px; padding: 0; border-radius: 50%; position: relative;
     background: var(--accent-soft); border-color: var(--accent);
@@ -333,12 +339,12 @@
   @media (max-width: 600px) { .cost-note { left: 12px; right: 12px; bottom: 12px; } .spend-stats .v { font-size: 1rem; } }
   .ai-cost { font-size: .9rem; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
   /* página de leitura/edição do capítulo */
-  body.focus header, body.focus aside#projects, body.focus #backdrop, body.focus .tabs, body.focus #projHeading { display: none !important; }
+  body.focus aside#projects, body.focus #backdrop, body.focus .tabs, body.focus #projHeading, body.focus #sideBtn, body.focus #menuBtn { display: none !important; }
   body.focus .layout { grid-template-columns: 1fr; min-height: 100vh; }
   body.focus .dock { left: 0; }
   body.focus main { padding-top: 0; }
-  body.focus .ch-toolbar { position: sticky; top: 0; z-index: 8; background: var(--bg); padding: 12px 0; margin: 0 0 12px; border-bottom: 1px solid var(--border); }
-  body.focus .edit-tools { top: 128px; }
+  body.focus .ch-toolbar { position: sticky; top: var(--hdr, 0px); z-index: 8; background: var(--bg); padding: 12px 0; margin: 0 0 12px; border-bottom: 1px solid var(--border); }
+  body.focus .edit-tools { top: calc(var(--hdr, 0px) + var(--tbar, 64px) + 8px); }
   /* lateral recolhível */
   .side-btn { min-height: 40px; min-width: 40px; padding: 0; background: transparent; border-color: transparent; }
   body.side-collapsed { --side: 0px; }
@@ -549,7 +555,7 @@
     .nav-row { gap: 6px; flex-wrap: nowrap; margin-bottom: 10px; }
     .ch-toolbar { margin-bottom: 10px; }
     .side-btn { display: none; }
-    body.focus .edit-tools { top: 120px; }
+    body.focus .edit-tools { top: calc(var(--tbar, 64px) + 8px); }
     .edit-tools { top: 8px; }
     .ch-toolbar .tools { width: 100%; }
     .ch-toolbar .tools > button:last-child { flex: 1; }
@@ -607,7 +613,7 @@
 <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></symbol>
 <symbol id="i-pen-line" viewBox="0 0 24 24"><path d="M12 20h9" /> <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" /></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /><path d="M12 17.5v-11" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /><path d="M12 17.5v-11" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
 <symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
 <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
 <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></symbol>
@@ -647,6 +653,7 @@
   <button id="sideBtn" class="side-btn" aria-label="Ocultar a lista de projetos" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-panel-left"/></svg></button>
   <h1><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Writer Agent</span></h1>
   <div id="currentTitle"></div>
+  <button id="creditBtn" class="credit-chip" hidden><svg class="icon" aria-hidden="true"><use href="#i-wallet"/></svg><span id="creditVal"></span></button>
   <div class="user">
     <button id="userBtn" class="avatar" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenu" aria-label="Seu menu: IA, sincronização, backup e app">
       <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
@@ -1227,6 +1234,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (changed) { settings.updatedAt = Date.now(); if (typeof markDirty === 'function' && syncStarted) markDirty('projects'); }
     local.set('fanfic.settings', settings);
     renderAiDot();
+    scheduleBalance(800);
   }
   function renderAiDot() {
     $('aiDot').className = 'dot ' + (isConfigured() ? 'on' : 'off');
@@ -2419,6 +2427,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Aba Capítulos
   // =====================================================================
   // página de leitura/edição: esconde topo, abas e lateral
+  function measureBars() {
+    const h = document.querySelector('header'), cs = h && getComputedStyle(h);
+    document.documentElement.style.setProperty('--hdr', (cs && cs.position === 'sticky' ? h.offsetHeight : 0) + 'px');
+    const tb = document.querySelector('body.focus .ch-toolbar');
+    if (tb) document.documentElement.style.setProperty('--tbar', tb.offsetHeight + 'px');
+  }
+  addEventListener('resize', () => measureBars());
   function setFocus(on) {
     if (document.body.classList.contains('focus') === on) return;
     document.body.classList.toggle('focus', on);
@@ -2626,6 +2641,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!editing && !writingThis && ch.text.trim()) sec.append(suggestionsCard(p, ch));
 
     renderBar();
+    requestAnimationFrame(measureBars);
     if (writingThis) return;
     const ai = !!busy;
     const foot = el('div', { class: 'row end', style: 'margin-top:12px' });
@@ -4450,6 +4466,23 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return { text: full.trim(), truncated: finish === 'length' };
   }
 
+  // ---------- créditos disponíveis no topo ----------
+  var balanceTimer = null; // var: pode ser usado antes desta linha rodar
+  async function refreshBalance() {
+    const b = isConfigured() ? await fetchBalance() : null;
+    const c = $('creditBtn');
+    if (b == null) { c.hidden = true; return; }
+    c.hidden = false;
+    $('creditVal').textContent = fmtUSD(Math.max(0, b));
+    c.classList.toggle('low', b < 0.5);
+    c.title = b < 0.5 ? 'Créditos acabando. Toque para ver os gastos.' : 'Créditos disponíveis na IA. Toque para ver os gastos.';
+    c.setAttribute('aria-label', `Créditos disponíveis: ${fmtUSD(Math.max(0, b))}. Ver gastos`);
+  }
+  function scheduleBalance(ms = 2500) { clearTimeout(balanceTimer); balanceTimer = setTimeout(refreshBalance, ms); }
+  $('creditBtn').addEventListener('click', () => openSpend());
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleBalance(500); });
+  setInterval(() => { if (!document.hidden) refreshBalance(); }, 10 * 60 * 1000);
+
   // =====================================================================
   // Histórico de gastos com IA
   // =====================================================================
@@ -4499,6 +4532,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       markDirty('projects');
       showCostNote(e);
       renderSpendLine();
+      scheduleBalance(3000); // o OpenRouter leva alguns segundos para descontar
       if ($('spendDlg').open) renderSpend();
     } catch {}
   }

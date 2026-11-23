@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Box, ButtonBase, Dialog, DialogContent, DialogTitle, Divider, IconButton, Paper, Stack, Typography } from '@mui/material'
 import { Check, ChevronLeft, ChevronRight, Minus, X } from 'lucide-react'
 import { CARDIO, PLAN, duracao, planoDe } from './plan.js'
-import { ladoPadrao, treinoDe } from './exercicios.js'
+import { NOMES, ladoPadrao, treinoDe } from './exercicios.js'
 import { LIVRE, REFEICOES, opcao, valores } from './dieta.js'
 import { hojeISO, num } from './store.js'
 import { INTENSIDADES, consumo, diaSemana, intensidadeCardio, kcalCardio, kcalPatins, kcalTreino, pesoEm } from './gasto.js'
@@ -109,7 +109,9 @@ function Dia({ s, date, onClose }) {
   const dt = date || ultima
   if (!dt) return null
   const r = resumo(s, dt)
-  const feitos = r.plano.ex.map((e) => ({ e, sets: (r.log?.ex?.[e.id] || []).filter((x) => x && (x.ok || x.kg || x.reps)) })).filter((x) => x.sets.length)
+  // Na ordem do plano, e depois o que foi registrado e não está mais no plano (para nada sumir do histórico).
+  const ids = [...r.plano.ex.map((e) => e.id), ...Object.keys(r.log?.ex || {}).filter((id) => !r.plano.ex.some((e) => e.id === id))]
+  const feitos = ids.map((id) => ({ e: r.plano.ex.find((e) => e.id === id) || { id, nome: NOMES[id] || id }, sets: (r.log?.ex?.[id] || []).filter((x) => x && (x.ok || x.kg || x.reps)) })).filter((x) => x.sets.length)
   const vazio = !r.ativo && !r.temDieta && !feitos.length
   return (
     <Dialog open={!!date} onClose={onClose} fullWidth maxWidth="xs" scroll="paper">

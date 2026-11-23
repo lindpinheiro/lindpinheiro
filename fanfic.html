@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Fanfic Agent</title>
+<title>Writer Agent</title>
 <link rel="manifest" href="fanfic.webmanifest">
 <meta name="theme-color" content="#9b4d63">
 <link rel="icon" type="image/png" href="fanfic-icon-192.png">
 <link rel="apple-touch-icon" href="fanfic-icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fanfic Agent">
+<meta name="apple-mobile-web-app-title" content="Writer Agent">
 <style>
   :root {
     --bg: #faf6f4;
@@ -614,7 +614,7 @@
 <header>
   <button id="menuBtn" aria-label="Abrir a lista de projetos"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span id="menuTitle"></span></button>
   <button id="sideBtn" class="side-btn" aria-label="Ocultar a lista de projetos" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-panel-left"/></svg></button>
-  <h1><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Fanfic Agent</span></h1>
+  <h1><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Writer Agent</span></h1>
   <div id="currentTitle"></div>
   <div class="user">
     <button id="userBtn" class="avatar" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenu" aria-label="Seu menu: IA, sincronização, backup e app">
@@ -812,7 +812,7 @@
   <p class="hint">Mande o arquivo para o outro aparelho pelo WhatsApp, Google Drive ou e-mail.</p>
 
   <h3 style="margin-top:20px">2. No outro aparelho</h3>
-  <p class="hint" style="margin-top:4px">Abra o Fanfic Agent, toque no avatar → Backup em arquivo e escolha o arquivo. Histórias que já existirem ficam com a versão mais nova.</p>
+  <p class="hint" style="margin-top:4px">Abra o Writer Agent, toque no avatar → Backup em arquivo e escolha o arquivo. Histórias que já existirem ficam com a versão mais nova.</p>
   <input type="file" id="backupFile" accept=".json,application/json" hidden>
   <button class="wide" id="backupOpen" style="margin-top:10px"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Abrir arquivo de backup</button>
   <div class="status" id="backupStatus" role="status"></div>
@@ -978,7 +978,7 @@
 <!-- Instalar no iPhone -->
 <dialog id="installDlg" aria-labelledby="installTitle">
   <div class="dlg-head"><h2 id="installTitle"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Baixar o app</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
-  <p class="lead">O app <b>Fanfic Agent</b> fica na tela inicial com ícone próprio e abre em tela cheia. Não precisa da Play Store, e suas histórias continuam as mesmas.</p>
+  <p class="lead">O app <b>Writer Agent</b> fica na tela inicial com ícone próprio e abre em tela cheia. Não precisa da Play Store, e suas histórias continuam as mesmas.</p>
   <div id="installAndroid">
     <ol class="howto">
       <li>Abra esta página no <b>Chrome</b>.</li>
@@ -4260,7 +4260,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key };
     if (isOpenRouter(cfg.endpoint)) {
       headers['HTTP-Referer'] = location.origin;
-      headers['X-Title'] = 'Fanfic Agent';
+      headers['X-Title'] = 'Writer Agent';
     }
     let res;
     try {
@@ -4778,7 +4778,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // o botão aparece sempre, menos quando já está aberto como app
   $('installBtn').hidden = standalone;
   addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvent = e; });
-  addEventListener('appinstalled', () => { installEvent = null; $('installBtn').hidden = true; toast('App instalado! Procure “Fanfic Agent” na tela inicial.'); });
+  addEventListener('appinstalled', () => { installEvent = null; $('installBtn').hidden = true; toast('App instalado! Procure “Writer Agent” na tela inicial.'); });
   $('installBtn').addEventListener('click', async () => {
     if (installEvent) {
       // o navegador deixa instalar direto

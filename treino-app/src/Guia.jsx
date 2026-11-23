@@ -75,7 +75,7 @@ const SECOES = [
   ) },
   { id: 'peito', icone: Shirt, titulo: 'Peito que não cresce', corpo: (
     <Itens>
-      <li><b>Domingo é do peito superior</b>: supino inclinado, inclinado com halteres, crucifixo inclinado e crossover de baixo para cima, 13 séries antes de qualquer outra coisa. Na quarta o foco é o peito do meio.</li>
+      <li><b>Domingo é dia de peito superior e do meio</b>: 16 séries de peito antes de qualquer outra coisa, alternando as duas partes. Inclinado e crossover de baixo para cima para o superior; supino reto com halteres e crucifixo na máquina para o meio.</li>
       <li><b>Banco a 30°</b>, não 45°: mais inclinado que isso, quem trabalha é o ombro. A barra ou os halteres descem na parte de cima do peito, perto da clavícula, com os cotovelos a uns 45° do corpo.</li>
       <li>Grave uma série de lado de vez em quando: se a barra está descendo no meio do peito, o inclinado virou supino reto.</li>
       <li><b>Execução vale mais que o exercício</b>: escápulas juntas e peito alto o tempo todo. Se o ombro vai para a frente, quem trabalha é o ombro.</li>

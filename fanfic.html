@@ -358,6 +358,8 @@
   .cover-img { width: 132px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.35); cursor: zoom-in; }
   .cover-ph { width: 96px; aspect-ratio: 2 / 3; border-radius: 8px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); }
   .cover-ph .icon { width: 28px; height: 28px; }
+  button.cover-ph { min-height: 0; padding: 0; background: transparent; cursor: pointer; }
+  button.cover-ph:hover { border-color: var(--accent); color: var(--accent); }
   .cover-side { flex: 1 1 220px; }
   .cover-side h3 { margin: 0 0 4px; }
   .tag.gen-tag { color: var(--ai); border-color: var(--ai-border); margin: 0 0 0 6px; }
@@ -2388,11 +2390,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!editing) {
       const cover = p.coverRefId && (refsCache[p.id] || []).find(r => r.id === p.coverRefId);
       v.append(el('div', { class: 'card cover-card' },
-        cover ? el('img', { class: 'cover-img', src: cover.data, alt: `Capa de ${p.title || 'Sem título'}`, onclick: () => window.open(cover.data, '_blank') }) : el('div', { class: 'cover-ph', 'aria-hidden': 'true' }, svgIcon('image')),
+        cover ? el('img', { class: 'cover-img', src: cover.data, alt: `Capa de ${p.title || 'Sem título'}`, onclick: () => window.open(cover.data, '_blank') })
+          : el('button', { type: 'button', class: 'cover-ph', 'aria-label': 'Enviar uma imagem de capa', title: 'Enviar uma imagem de capa', onclick: () => pickCoverFile(p) }, svgIcon('upload')),
         el('div', { class: 'cover-side' },
           el('h3', { text: 'Capa' }),
-          el('p', { class: 'muted', style: 'margin:0 0 10px', text: cover ? 'A capa fica guardada nas Referências, junto com as outras imagens.' : 'Crie uma capa com base nas infos da obra, no mundo e nos personagens.' }),
+          el('p', { class: 'muted', style: 'margin:0 0 10px', text: cover ? 'A capa fica guardada nas Referências, junto com as outras imagens.' : 'Envie a sua capa ou crie uma com IA a partir das infos da obra, do mundo e dos personagens.' }),
           el('div', { class: 'row' },
+            el('button', { icon: 'upload', text: cover ? 'Trocar por uma imagem' : 'Enviar capa', onclick: () => pickCoverFile(p) }),
             el('button', { class: cover ? '' : 'primary', icon: 'image', ai: true, text: cover ? 'Gerar nova capa' : 'Gerar capa com IA', disabled: !!busy, onclick: () => openImageGen(p, { kind: 'capa' }) }),
             cover ? el('button', { icon: 'download', text: 'Baixar', onclick: () => downloadData(cover.data, `${(p.title || 'capa').replace(/[\\/:*?"<>|]+/g, '')}.jpg`) }) : null,
             el('button', { class: 'link plain', icon: 'sparkles', text: 'Outras imagens', disabled: !!busy, onclick: () => openImageGen(p, { kind: 'personagem' }) })))));
@@ -4148,6 +4152,27 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     });
   }
 
+  // ---------- capa enviada pela pessoa (sem IA) ----------
+  function pickCoverFile(p) {
+    const inp = el('input', { type: 'file', accept: 'image/*', hidden: true });
+    inp.addEventListener('change', async () => {
+      const f = inp.files[0]; inp.remove();
+      if (!f) return;
+      try {
+        const data = await shrinkImage(f, 1600); // capa com mais resolução
+        const r = { id: uid(), projectId: p.id, kind: 'image', name: f.name, type: 'img', text: '', data, chars: 0,
+          imgKind: 'capa', subject: (p.title || '').trim(), note: '', enabled: false, addedAt: Date.now(), updatedAt: Date.now() };
+        await db.put('refs', r);
+        (refsCache[p.id] = refsCache[p.id] || []).push(r);
+        markDirty('refs');
+        p.coverRefId = r.id; saveProject(p, true);
+        if (currentId === p.id) renderTab();
+        toast('Capa adicionada ✓');
+      } catch (e) { toast(`Não consegui usar essa imagem: ${e.message}.`); }
+    });
+    document.body.append(inp); inp.click();
+  }
+
   // ---------- gerar imagens (capa, cena, personagem, lugar) ----------
   const GEN_STYLES = ['Ilustração digital', 'Realista e cinematográfico', 'Anime', 'Aquarela', 'Pintura a óleo', 'Minimalista'];
   const GEN_KIND = {
@@ -4420,11 +4445,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   // reduz a imagem (até 1024 px, JPEG) para caber no aparelho e na sincronização
-  function shrinkImage(file) {
+  function shrinkImage(file, max = 1024) {
     return new Promise((res, rej) => {
       const img = new Image();
       img.onload = () => {
-        const k = Math.min(1, 1024 / Math.max(img.width, img.height));
+        const k = Math.min(1, max / Math.max(img.width, img.height));
         const c = document.createElement('canvas');
         c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);

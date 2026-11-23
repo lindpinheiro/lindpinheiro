@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Fanfic Agent</title>
 <link rel="manifest" href="fanfic.webmanifest">
-<meta name="theme-color" content="#b0234d">
+<meta name="theme-color" content="#9b4d63">
 <link rel="icon" type="image/png" href="fanfic-icon-192.png">
 <link rel="apple-touch-icon" href="fanfic-icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -20,18 +20,18 @@
     --text: #231a1c;
     --muted: #6d5d61;
     --border: #e2d6d3;
-    --accent: #b0234d;
+    --accent: #9b4d63;
     --accent-text: #ffffff;
-    --accent-soft: #fbe5ec;
+    --accent-soft: #f5e9ec;
     --danger: #a3261d;
     --danger-soft: #fdecea;
     --ok: #2f6b3a;
     --ok-soft: #e6f3e8;
-    --ai: #6a3fd0;
-    --ai-soft: #ece4fb;
-    --ai-border: #d9cbf3;
+    --ai: #6f5f9e;
+    --ai-soft: #eeeaf5;
+    --ai-border: #dcd5ea;
     --radius: 14px;
-    --side: 340px;
+    --side: 290px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -41,20 +41,20 @@
       --text: #f4ecee;
       --muted: #b7a6ab;
       --border: #3d3135;
-      --accent: #ff5d8a;
-      --accent-text: #1a0d12;
-      --accent-soft: #3a1d27;
+      --accent: #d4919f;
+      --accent-text: #1f1418;
+      --accent-soft: #33252a;
       --danger: #ff7b70;
       --danger-soft: #3a1d1b;
       --ok: #7fd18e;
       --ok-soft: #1d3322;
-      --ai: #b08cff;
-      --ai-soft: #2c2342;
-      --ai-border: #4a3a6b;
+      --ai: #a99bcf;
+      --ai-soft: #2a2533;
+      --ai-border: #433b52;
     }
   }
   * { box-sizing: border-box; }
-  html { font-size: 20px; }
+  html { font-size: 16px; }
   body {
     margin: 0; background: var(--bg); color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -99,7 +99,7 @@
   .dot.err { background: var(--danger); }
   .user { position: relative; margin-left: auto; flex: none; }
   .avatar {
-    width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; position: relative;
+    width: 38px; height: 38px; min-height: 38px; padding: 0; border-radius: 50%; position: relative;
     background: var(--accent-soft); border-color: var(--accent);
   }
   .avatar svg { width: 24px; height: 24px; fill: var(--accent); }
@@ -113,7 +113,7 @@
   }
   .menu-item {
     width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 12px; text-align: left;
-    background: transparent; border: 0; padding: 10px 12px; border-radius: 10px; min-height: 56px;
+    background: transparent; border: 0; padding: 10px 12px; border-radius: 10px; min-height: 48px;
   }
   .menu-item:hover, .menu-item:focus-visible { background: var(--surface-2); }
   .menu-item .mi-ico { font-size: 1.25rem; width: 28px; text-align: center; flex: none; }
@@ -158,7 +158,7 @@
   .proj-row { position: relative; }
   .proj-head { gap: 8px; }
   .proj-head h2 { margin-right: auto !important; }
-  .icon-btn { min-height: 44px; min-width: 44px; padding: 0; background: transparent; }
+  .icon-btn { min-height: 38px; min-width: 38px; padding: 0; background: transparent; }
   .icon-btn[aria-pressed=true] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
   .proj-row .check-dot { position: absolute; top: 14px; left: 12px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--muted);
     display: flex; align-items: center; justify-content: center; pointer-events: none; color: var(--accent-text); }
@@ -170,7 +170,7 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
     max-width: calc(100vw - 24px); }
   .sel-float .sel-count { font-weight: 700; padding: 0 8px; white-space: nowrap; }
-  .sel-float button { min-height: 44px; padding: 8px 12px; }
+  .sel-float button { min-height: 38px; padding: 8px 12px; }
   .sel-float .close { padding: 0; min-width: 44px; }
   @media (max-width: 480px) { .sel-float button span { display: none; } .sel-float { gap: 4px; } }
   .new-wrap { position: relative; }
@@ -233,21 +233,21 @@
   textarea { resize: vertical; min-height: 100px; }
   textarea.big {
     min-height: 60vh; font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.05rem; line-height: 1.75; background: var(--surface);
+    font-size: 1.15rem; line-height: 1.75; background: var(--surface);
   }
   input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible {
     outline: 3px solid var(--accent); outline-offset: 1px;
   }
   button, .btn {
     font: inherit; font-weight: 600; cursor: pointer; border-radius: 10px;
-    padding: 10px 16px; border: 1px solid var(--border);
-    background: var(--surface-2); color: var(--text); min-height: 48px;
+    padding: 7px 14px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); min-height: 40px;
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     text-decoration: none; text-align: center;
   }
   button.primary, .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
   button.danger { color: var(--danger); }
-  button.link { background: none; border: 0; color: var(--danger); font-weight: 600; padding: 8px 4px; min-height: 44px; }
+  button.link { background: none; border: 0; color: var(--danger); font-weight: 600; padding: 6px 4px; min-height: 36px; }
   button.wide, .btn.wide { width: 100%; }
   button:disabled { opacity: .5; cursor: not-allowed; }
   button.primary:disabled { background: var(--surface-2); color: var(--muted); border-color: var(--border); opacity: 1; }
@@ -279,7 +279,7 @@
 
   /* sugestões rápidas */
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .chip { min-height: 40px; padding: 6px 14px; border-radius: 99px; font-size: .85rem; }
+  .chip { min-height: 34px; padding: 4px 12px; border-radius: 99px; font-size: .85rem; }
   .chip[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); }
 
   /* avisos */
@@ -411,7 +411,7 @@
   .fmt-show { min-height: 36px; padding: 4px 10px; font-size: .85rem; font-weight: 600; background: transparent; border-color: transparent; color: var(--muted); }
   .fmt-show:hover { color: var(--text); background: var(--surface-2); }
   .more-menu { width: max-content; max-width: calc(100vw - 32px); }
-  .more-menu .menu-item { min-height: 48px; }
+  .more-menu .menu-item { min-height: 42px; }
   .menu-item.danger-item, .menu-item.danger-item .mi-ico .icon { color: var(--danger); }
   .edit-toolbar { display: flex; gap: 4px; flex-wrap: wrap; padding: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
   .edit-toolbar button { min-height: 38px; min-width: 40px; padding: 4px 10px; background: transparent; border-color: transparent; font-size: 1rem; }
@@ -433,7 +433,7 @@
   .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
   .seg button { border: 0; border-radius: 0; background: var(--surface); }
   .seg button[aria-pressed=true] { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
-  .reader { font-family: Georgia, "Times New Roman", serif; font-size: 1.1rem; line-height: 1.85; max-width: 680px; margin: 0 auto; }
+  .reader { font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; line-height: 1.85; max-width: 680px; margin: 0 auto; }
   .reader p { margin: 0 0 1em; white-space: pre-wrap; }
   .reader-title { font-family: Georgia, serif; text-align: center; font-size: 1.4rem; margin: 4px 0 22px; }
   .cursor::after { content: "▍"; color: var(--accent); animation: blink 1s steps(1) infinite; }
@@ -481,7 +481,7 @@
   dialog::backdrop { background: rgba(0,0,0,.55); }
   .dlg-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
   .dlg-head h2 { flex: 1; margin: 0; }
-  .dlg-head .close { min-height: 44px; min-width: 44px; padding: 0; font-size: 1.2rem; }
+  .dlg-head .close { min-height: 38px; min-width: 38px; padding: 0; font-size: 1.2rem; }
   .step { color: var(--accent); font-weight: 700; font-size: .8rem; letter-spacing: .04em; margin: 0 0 4px; }
   .steps { display: flex; gap: 6px; margin: 4px 0 16px; }
   .steps span { height: 6px; flex: 1; border-radius: 99px; background: var(--surface-2); }
@@ -506,9 +506,9 @@
 
   /* ---------- celular: mais espaço para o texto ---------- */
   @media (max-width: 640px) {
-    html { font-size: 17px; }
+    html { font-size: 15px; }
     header { position: static; padding: 8px 12px; gap: 8px; }
-    button, .btn { min-height: 42px; padding: 8px 12px; }
+    button, .btn { min-height: 38px; padding: 6px 12px; }
     main { padding: 10px 12px 150px; }
     .card { padding: 14px; margin-bottom: 12px; }
     .tabs { margin-bottom: 10px; padding-bottom: 6px; }

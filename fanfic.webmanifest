@@ -8,7 +8,7 @@
   "scope": "./fanfic",
   "display": "standalone",
   "background_color": "#faf6f4",
-  "theme_color": "#b0234d",
+  "theme_color": "#9b4d63",
   "icons": [
     { "src": "fanfic-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "fanfic-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

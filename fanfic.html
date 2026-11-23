@@ -1152,6 +1152,40 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     toast(`${what}! ${fmtNum(countWords(text))} palavras`);
   }
 
+  // copiar com formatação (negrito, itálico, parágrafos e quebra de cena) para colar no Wattpad, Docs, Word…
+  const escHtml = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const isSceneBreak = (t) => /^\s*(\*\s*\*\s*\*|-{3,}|⁂)\s*$/.test(t);
+  const mdParas = (text) => (text || '').split(/\n\s*\n/).map(t => t.replace(/^\n+|\n+$/g, '')).filter(t => t.trim());
+  function storyHtml(text) {
+    return mdParas(text).map(t => isSceneBreak(t) ? '<p style="text-align:center">* * *</p>'
+      : '<p>' + parseMd(t).map(x => { let h = escHtml(x.t).replace(/\n/g, '<br>'); if (x.b) h = `<b>${h}</b>`; if (x.i) h = `<i>${h}</i>`; return h; }).join('') + '</p>').join('\n');
+  }
+  // versão sem os asteriscos, para onde não aceita formatação
+  const storyPlain = (text) => mdParas(text).map(t => isSceneBreak(t) ? '* * *' : parseMd(t).map(x => x.t).join('')).join('\n\n');
+  async function copyRich(html, plain, what) {
+    try {
+      if (!window.ClipboardItem || !navigator.clipboard || !navigator.clipboard.write) throw new Error('sem ClipboardItem');
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([plain], { type: 'text/plain' })
+      })]);
+    } catch {
+      // navegadores antigos: copia selecionando um bloco formatado escondido
+      const d = el('div', { contenteditable: 'true', style: 'position:fixed;left:-9999px;top:0' });
+      d.innerHTML = html; document.body.append(d);
+      const r = document.createRange(); r.selectNodeContents(d);
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      try { document.execCommand('copy'); } finally { sel.removeAllRanges(); d.remove(); }
+    }
+    toast(`${what} com formatação! ${fmtNum(countWords(plain))} palavras`);
+  }
+  const copyChapter = (text) => copyRich(storyHtml(text), storyPlain(text), 'Capítulo copiado');
+  function copyWholeStory(p) {
+    const html = p.chapters.map(c => `<p style="text-align:center"><b>${escHtml(chTitle(p, c))}</b></p>\n${storyHtml(c.text)}`).join('\n<p><br></p>\n');
+    const plain = p.chapters.map(c => `${chTitle(p, c)}\n\n${storyPlain(c.text)}`).join('\n\n\n');
+    copyRich(html, plain, 'História copiada');
+  }
+
   // fecha diálogos pelos botões marcados com data-close
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-close]');
@@ -2466,7 +2500,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     sec.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:12px' },
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
-        el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyText(fullStoryText(p), 'História copiada') }),
+        el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyWholeStory(p) }),
         el('button', { icon: 'download', text: 'Baixar', onclick: () => exportStory(p) }),
         writeButton(p))));
 
@@ -2478,7 +2512,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('div', { class: 'preview', text: c.text.slice(0, 260) || (busy && busy.chapterId === c.id ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
           el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
-          el('button', { icon: 'copy', text: 'Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyText(c.text, 'Capítulo copiado'); } }))));
+          el('button', { icon: 'copy', text: 'Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyChapter(c.text); } }))));
     });
   }
 
@@ -2567,7 +2601,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }, svgIcon('book-open', 'hide-m'), 'Ler'),
         el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
     if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { saveEdit(); view.mode = 'ler'; renderChapters(); scrollTo(0, 0); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
-    else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyText(ch.text, 'Capítulo copiado') }, el('span', { text: 'Copiar' })));
+    else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyChapter(ch.text) }, el('span', { text: 'Copiar' })));
     if (!writingThis) {
       const more = el('div', { class: 'menu add-menu more-menu', role: 'menu', hidden: true },
         el('button', { role: 'menuitem', class: 'menu-item danger-item', disabled: !!busy, onclick: () => { closeAddMenus(); guardEdit(() => { discardEdit(); deleteChapter(p, ch); }, true); } },
@@ -3169,10 +3203,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const w = $('chWords'); if (w) w.textContent = fmtNum(countWords(text)) + ' palavras';
       if (follow) scrollTo(0, document.documentElement.scrollHeight);
     });
-  }
-
-  function fullStoryText(p) {
-    return p.chapters.map(c => `${chTitle(p, c)}\n\n${c.text}`).join('\n\n\n');
   }
 
   function exportStory(p) {

@@ -28,6 +28,8 @@
     --ok: #2f6b3a;
     --ok-soft: #e6f3e8;
     --ai: #6f5f9e;
+    --mark-edit: rgba(255, 226, 90, .55);
+    --mark-edit-imp: rgba(255, 170, 200, .55);
     --ai-soft: #eeeaf5;
     --ai-border: #dcd5ea;
     --radius: 14px;
@@ -49,6 +51,8 @@
       --ok: #7fd18e;
       --ok-soft: #1d3322;
       --ai: #a99bcf;
+      --mark-edit: rgba(255, 214, 70, .28);
+      --mark-edit-imp: rgba(255, 140, 180, .3);
       --ai-soft: #2a2533;
       --ai-border: #433b52;
     }
@@ -448,7 +452,7 @@
   .mnote-actions { display: flex; gap: 6px; align-items: center; width: 100%; }
   .mnote-actions button { min-height: 32px; padding: 4px 10px; font-size: .85rem; }
   .mnote-actions .link { margin-left: auto; color: var(--danger); }
-  .reader mark.active { outline: 2px solid var(--accent); }
+  .reader mark.active, .edit-backdrop mark.active { outline: 2px solid var(--accent); }
   .reader mark, .hl-item mark { background: #fff2a8; color: #231a1c; border-radius: 3px; padding: 0 2px; cursor: pointer; }
   .reader mark.important, .hl-item mark.important { background: #ffd6e3; box-shadow: inset 0 -2px 0 var(--accent); }
   .hl-list h3 { display: flex; align-items: center; gap: 8px; margin: 0; }
@@ -528,6 +532,12 @@
   textarea.doc-edit { display: block; width: 100%; max-width: 680px; margin: 0 auto; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--text);
     font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; line-height: 1.85; resize: none; overflow: hidden; min-height: 40vh; }
   textarea.doc-edit:focus { outline: none; }
+  .doc-edit-wrap { position: relative; max-width: 680px; margin: 0 auto; }
+  .doc-edit-wrap textarea.doc-edit { position: relative; z-index: 1; }
+  .edit-backdrop { position: absolute; inset: 0; z-index: 0; pointer-events: none; color: transparent; overflow: hidden;
+    font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; line-height: 1.85; white-space: pre-wrap; overflow-wrap: break-word; word-wrap: break-word; }
+  .edit-backdrop mark { color: transparent; background: var(--mark-edit); border-radius: 3px; box-shadow: inset 0 -2px 0 #e5c43a; }
+  .edit-backdrop mark.important { background: var(--mark-edit-imp); box-shadow: inset 0 -2px 0 var(--accent); }
   input.doc-title { display: block; width: 100%; max-width: 680px; margin: 4px auto 18px; padding: 4px 0; border: 0; border-bottom: 1px dashed transparent; border-radius: 0;
     background: transparent; color: var(--text); text-align: center; font-family: Georgia, serif; font-size: 1.4rem; font-weight: 700; }
   input.doc-title:hover, input.doc-title:focus { outline: none; border-bottom-color: var(--border); }
@@ -623,7 +633,7 @@
     .nav-row > button { min-width: 42px; padding: 6px 10px; }
     .nav-row .pos { margin: 0 auto 0 2px; }
     .seg button { padding: 6px 12px; }
-    .reader, textarea.doc-edit { font-size: 1.12rem; line-height: 1.75; }
+    .reader, textarea.doc-edit, .edit-backdrop { font-size: 1.12rem; line-height: 1.75; }
     .reader-title { font-size: 1.2rem; margin: 0 0 14px; }
     textarea.big { font-size: 1.05rem; }
     .bar { padding: 8px 12px; }
@@ -2838,7 +2848,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       };
       title.addEventListener('input', () => { d.title = title.value; keepDraft(); refresh(); });
       ta.addEventListener('input', () => { d.text = ta.value; keepDraft(); refresh(); });
-      card.append(title, editToolbar(ta, p, ch), ta, el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' }, words, state),
+      const backdrop = el('div', { class: 'edit-backdrop', 'aria-hidden': 'true' });
+      const paintMarks = () => { paintEditMarks(backdrop, ta.value, (ch.highlights || []).filter(h => !h.resolved)); };
+      let markRaf = null, markT = null;
+      ta.addEventListener('input', () => {
+        cancelAnimationFrame(markRaf); markRaf = requestAnimationFrame(paintMarks);
+        clearTimeout(markT); markT = setTimeout(layoutMarginNotes, 250);
+      });
+      paintMarks();
+      card.append(title, editToolbar(ta, p, ch), el('div', { class: 'doc-edit-wrap' }, backdrop, ta), el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' }, words, state),
         el('p', { class: 'hint', text: 'Selecione um trecho para formatar ou pedir ajuste à IA. Atalhos: Ctrl+B negrito, Ctrl+I itálico.' }));
       refresh();
     } else {
@@ -2850,12 +2868,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('div', { class: 'row', style: 'justify-content:space-between;margin-top:8px' }, words,
           writingThis ? null : el('span', { class: 'hint', style: 'margin:0', text: 'Selecione um trecho para marcar e, se quiser, anotar.' })));
     }
-    if (!editing && !writingThis) {
+    if (!writingThis) {
       const notes = marginNotes(p, ch);
       sec.append(el('div', { class: 'doc-wrap' + (notes.children.length ? ' has-notes' : '') }, card, notes));
       requestAnimationFrame(layoutMarginNotes);
     } else sec.append(card);
-    if (!editing && !writingThis && (ch.highlights || []).length) sec.append(highlightList(p, ch));
+    if (!writingThis && (ch.highlights || []).length) sec.append(highlightList(p, ch));
     if (!editing && !writingThis && ch.text.trim()) sec.append(suggestionsCard(p, ch));
 
     renderBar();
@@ -3082,7 +3100,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const h = { id: uid(), quote, note: '', important: false, at: Date.now() };
     (info.ch.highlights = info.ch.highlights || []).push(h);
     saveProject(info.p, true);
-    openNote(info.p, info.ch, h.id, true);
+    if (wideNotes()) { marginEdit = h.id; renderChapters(); }
+    else { renderChapters(); openNote(info.p, info.ch, h.id, true); }
   }
   function removeHighlight(p, ch, h) {
     ch.highlights = ch.highlights.filter(x => x.id !== h.id);
@@ -3094,6 +3113,31 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (wideNotes()) { marginEdit = id; renderChapters(); } else openNote(p, ch, id);
   }
   // anotações na margem, ao lado do trecho marcado
+  function rawQuoteRange(raw, quote) {
+    const f = findQuote(raw, quote);
+    if (f) return f;
+    const q = (quote || '').trim();
+    if (!q || q.length > 400) return null;
+    const pat = [...q].map(c => /\s/.test(c) ? '\\s+' : c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(?:\\*\\*|\\*|_)?');
+    try { const m = new RegExp(pat).exec(raw); if (m) return { start: m.index, end: m.index + m[0].length }; } catch {}
+    return null;
+  }
+  function paintEditMarks(box, raw, hls) {
+    const ranges = [];
+    hls.forEach(h => { const r = rawQuoteRange(raw, h.quote); if (r && !ranges.some(x => r.start < x.end && r.end > x.start)) ranges.push(Object.assign(r, { h })); });
+    ranges.sort((a, b) => a.start - b.start);
+    const frag = document.createDocumentFragment();
+    let pos = 0;
+    ranges.forEach(r => {
+      if (r.start > pos) frag.append(document.createTextNode(raw.slice(pos, r.start)));
+      const m = document.createElement('mark');
+      m.dataset.hl = r.h.id; if (r.h.important) m.className = 'important';
+      m.textContent = raw.slice(r.start, r.end);
+      frag.append(m); pos = r.end;
+    });
+    frag.append(document.createTextNode(raw.slice(pos) + '\n '));
+    box.replaceChildren(frag);
+  }
   function marginNotes(p, ch) {
     const aside = el('aside', { class: 'margin-notes', 'aria-label': 'Anotações' });
     (ch.highlights || []).filter(h => !h.resolved && ((h.note || '').trim() || h.askAI || h.id === marginEdit)).forEach(h => aside.append(marginCard(p, ch, h)));
@@ -3129,7 +3173,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         h.askAI ? el('span', { class: 'tag ask' }, svgIcon('lightbulb'), ' Feedback da IA') : null,
         h.important ? el('span', { class: 'tag mem' }, svgIcon('brain'), ' Memória da IA') : null);
     }
-    const marks = () => document.querySelectorAll(`#chBody mark[data-hl="${h.id}"]`);
+    const marks = () => document.querySelectorAll(`.doc-wrap mark[data-hl="${h.id}"]`);
     card.addEventListener('mouseenter', () => marks().forEach(m => m.classList.add('active')));
     card.addEventListener('mouseleave', () => marks().forEach(m => m.classList.remove('active')));
     return card;
@@ -3393,6 +3437,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let resolveCtx = null;
   function openResolve(p, ch) {
     if (busy) return;
+    if (edit && edit.chId === ch.id && editDirty()) { saveEdit(); toast('Texto salvo antes de resolver ✓'); }
     const open = ch.highlights.filter(h => !h.resolved);
     resolveCtx = { p, ch };
     const box = $('resolveList');

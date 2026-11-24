@@ -346,6 +346,21 @@
   .guide-head { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .guide-head strong { display: inline-flex; align-items: center; gap: 6px; }
   .guide-box textarea { margin-top: 8px; min-height: 220px; font-size: .9rem; }
+  .bible-md { font-size: 1rem; line-height: 1.65; }
+  .bible-md h1 { font-family: Georgia, serif; font-size: 1.6rem; margin: 0 0 6px; }
+  .bible-md h2 { font-size: 1.2rem; margin: 26px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .bible-md h3 { font-size: 1.02rem; margin: 18px 0 6px; color: var(--accent); }
+  .bible-md h4 { font-size: .95rem; margin: 12px 0 4px; }
+  .bible-md p { margin: 0 0 10px; white-space: pre-wrap; }
+  .bible-md ul { margin: 0 0 10px; padding-left: 22px; }
+  .bible-md blockquote { margin: 0 0 12px; padding: 6px 12px; border-left: 3px solid var(--accent); color: var(--muted); }
+  .bible-md .empty-recap { color: var(--muted); font-style: italic; }
+  textarea.bible-edit { width: 100%; min-height: 60vh; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; line-height: 1.6; resize: vertical; }
+  .bible-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .plan-list { display: grid; gap: 6px; max-height: 50vh; overflow-y: auto; }
+  .plan-group { font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 10px 0 2px; }
+  .plan-item { align-items: flex-start; margin: 0; padding: 8px 0; border-top: 1px solid var(--border); }
+  .plan-item small { display: block; color: var(--muted); font-weight: 400; }
   .gen-refs { display: flex; flex-wrap: wrap; gap: 8px; }
   .gen-ref { position: relative; width: 76px; height: 76px; min-height: 0; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid var(--border); background: var(--surface-2); }
   .gen-ref img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -746,6 +761,7 @@
         <button role="tab" data-tab="ideia"><svg class="icon ico" aria-hidden="true"><use href="#i-info"/></svg>Infos da Obra</button>
         <button role="tab" data-tab="capitulos"><svg class="icon ico" aria-hidden="true"><use href="#i-book-open"/></svg>Capítulos <span class="count" id="countCh"></span></button>
         <button role="tab" data-tab="mundo"><svg class="icon ico" aria-hidden="true"><use href="#i-globe"/></svg>Mundo</button>
+        <button role="tab" data-tab="biblia"><svg class="icon ico" aria-hidden="true"><use href="#i-scroll-text"/></svg>Bíblia</button>
         <button role="tab" data-tab="arquivos"><svg class="icon ico" aria-hidden="true"><use href="#i-library"/></svg>Referências <span class="count" id="countRefs"></span></button>
       </nav>
 
@@ -840,6 +856,7 @@
 
       <section id="tab-capitulos" role="tabpanel" hidden></section>
       <section id="tab-mundo" role="tabpanel" hidden></section>
+      <section id="tab-biblia" role="tabpanel" hidden></section>
       <section id="tab-arquivos" role="tabpanel" hidden></section>
     </div>
   </main>
@@ -924,6 +941,18 @@
   <div class="row" style="margin-top:16px">
     <button class="primary ai-btn" id="aiDlgGo">Usar a IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
     <button id="aiDlgCancel">Cancelar</button>
+  </div>
+</dialog>
+
+<!-- Plano da bíblia -->
+<dialog id="bibleDlg" aria-labelledby="bibleDlgTitle">
+  <div class="dlg-head"><h2 id="bibleDlgTitle"><svg class="icon" aria-hidden="true"><use href="#i-scroll-text"/></svg>Levar as mudanças para o livro</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="lead" id="biblePlanWhy"></p>
+  <div id="biblePlanList" class="plan-list"></div>
+  <p class="hint" id="biblePlanCost"></p>
+  <div class="row" style="margin-top:12px">
+    <button class="primary ai-btn" id="biblePlanGo"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Aplicar selecionados<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
+    <button data-close>Agora não</button>
   </div>
 </dialog>
 
@@ -1489,6 +1518,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const p = cur();
     view = { tab: p.chapters.length ? 'capitulos' : 'ideia', chapterId: null, mode: 'ler' };
     clearAlert(); closeDrawer();
+    bibleEdit = null; restoreBibleDraft(p);
     loadForm(); renderProjects(); renderTab();
     loadRefs(id);
     scrollTo(0, 0);
@@ -2350,12 +2380,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('countCh').textContent = p.chapters.length ? `(${p.chapters.length})` : '';
     const nRefs = (refsCache[p.id] || []).length;
     $('countRefs').textContent = nRefs ? `(${nRefs})` : '';
-    ['ideia', 'capitulos', 'mundo', 'arquivos'].forEach(t => { $('tab-' + t).hidden = t !== view.tab; });
+    ['ideia', 'capitulos', 'mundo', 'biblia', 'arquivos'].forEach(t => { $('tab-' + t).hidden = t !== view.tab; });
     if (view.tab !== 'capitulos') setFocus(false);
     if (view.tab === 'ideia') { renderInfo(); renderSummary(); }
     if (view.tab === 'capitulos') renderChapters();
     if (view.tab === 'mundo') renderWorld();
     if (view.tab === 'arquivos') renderRefs();
+    if (view.tab === 'biblia') renderBible();
     renderBar();
   }
 
@@ -2576,7 +2607,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     Object.assign(busy, patch);
     const s = $('barStatus'); if (s) s.textContent = busyText();
   }
-  function stopBusy() { busy = null; }
+  function stopBusy() { const was = busy; busy = null; if (was) scheduleRecaps(); }
 
   // =====================================================================
   // Aba Capítulos
@@ -2830,7 +2861,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function saveEdit() {
     const t = editTarget();
-    if (t && editDirty()) { t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); }
+    if (t && editDirty()) { t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); }
     discardEdit();
   }
   function discardEdit() { edit = null; local.del('fanfic.editdraft'); }
@@ -3193,7 +3224,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     ch.text = ch.text.slice(0, loc.start) + x.replacement + ch.text.slice(loc.end);
     ch.editedAt = Date.now();
     x.status = 'approved';
-    saveProject(p, true); renderChapters();
+    saveProject(p, true); renderChapters(); scheduleRecaps();
     toast('Sugestão aplicada ✓', { action: 'Desfazer', onAction: () => { x.status = 'pending'; undoChapter(p, ch); } });
   }
   function applySugWithNote(p, ch, x, note) {
@@ -4426,6 +4457,295 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
   });
 
+  // =====================================================================
+  // Bíblia da obra: um .md com tudo do livro, que a pessoa pode editar
+  // =====================================================================
+  const hashText = (t) => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + ':' + t.length; };
+  const staleRecaps = (p) => p.chapters.filter(c => c.text.trim() && (!c.recap || c.recap.of !== hashText(c.text)));
+  const FACTS_HEAD = '## Decisões e fatos fixos';
+  function composeBible(p) {
+    const L = [];
+    const t = (x) => (x || '').trim();
+    L.push(`# ${t(p.title) || 'Sem título'}`, '', `> Bíblia da obra. Edite à vontade e toque em "Aplicar mudanças" para a IA levar as mudanças para os capítulos, o Mundo e as Infos.`, '');
+    L.push('## Infos da obra', '');
+    const meta = [p.category ? `**Categoria:** ${t(p.category)}` : '', p.fandom ? `**Universo:** ${t(p.fandom)}` : '', `**Intensidade:** ${HEAT_LABEL[p.heat] || ''}`, `**Ponto de vista:** ${p.pov || ''}`].filter(Boolean);
+    L.push(meta.join(' · '), '');
+    L.push('### Ideia', t(p.premise) || '-', '', '### Personagens', t(p.characters) || '-', '', '### Tom e estilo', t(p.tone) || '-', '', '### O que quero e o que não quero', t(p.notes) || '-', '');
+    L.push(FACTS_HEAD, '', t(p.bibleFacts) || '- (escreva aqui o que nunca pode mudar: aparências, idades, regras, decisões de enredo)', '');
+    const w = p.world ? worldOf(p) : null;
+    if (w) {
+      const block = (label, items) => {
+        const its = items.filter(e => t(e.title) || t(e.text));
+        if (!its.length) return;
+        L.push(`### ${label}`, '');
+        its.forEach(e => L.push(`#### ${t(e.title) || 'Sem título'}`, t(e.text) || '-', ''));
+      };
+      const before = L.length;
+      L.push('## Mundo', '');
+      WORLD.forEach(([k, label]) => block(label, w.e[k] || []));
+      (w.folders || []).forEach(f => block(t(f.title) || 'Outras informações', f.entries || []));
+      if (L.length === before + 2) L.length = before;
+    }
+    L.push('## Linha da história', '');
+    p.chapters.forEach((c, i) => {
+      L.push(`### Capítulo ${i + 1} — ${chTitle(p, c)}`);
+      const stale = !c.recap || c.recap.of !== hashText(c.text);
+      L.push(c.recap && c.recap.text ? c.recap.text + (stale ? ' _(o capítulo mudou depois deste resumo)_' : '') : '_(sem resumo ainda)_', '');
+    });
+    const notes = importantNotes(p);
+    if (notes) L.push('## Anotações importantes (memória da IA)', '', notes, '');
+    return L.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+  }
+  // .md simples na tela: títulos, citações, listas, parágrafos, negrito e itálico
+  function renderMd(md) {
+    const box = el('div', { class: 'bible-md' });
+    const inline = (txt) => { const f = document.createDocumentFragment(); parseMd(txt).forEach(x => { const n = x.b ? el('strong', { text: x.t }) : x.i ? el('em', { text: x.t }) : document.createTextNode(x.t); f.append(n); }); return f; };
+    let list = null, para = [];
+    const flush = () => { if (para.length) { const pe = el('p'); pe.append(inline(para.join('\n'))); if (/^_\(.*\)_$/.test(para.join(' ').trim())) pe.className = 'empty-recap'; box.append(pe); para = []; } list = null; };
+    md.split('\n').forEach(line => {
+      const h = /^(#{1,4})\s+(.*)$/.exec(line);
+      if (h) { flush(); const e = el('h' + h[1].length); e.append(inline(h[2])); box.append(e); return; }
+      if (/^>\s?/.test(line)) { flush(); const q = el('blockquote'); q.append(inline(line.replace(/^>\s?/, ''))); box.append(q); return; }
+      const li = /^\s*[-*•]\s+(.*)$/.exec(line);
+      if (li) { if (para.length) { const keep = list; flush(); list = keep; } if (!list) { list = el('ul'); box.append(list); } const e = el('li'); e.append(inline(li[1])); list.append(e); return; }
+      if (!line.trim()) { flush(); return; }
+      list = null; para.push(line);
+    });
+    flush();
+    return box;
+  }
+  function mdSections(md) {
+    const out = [], stack = [];
+    let curS = { key: '(início)', lines: [] };
+    md.split('\n').forEach(l => {
+      const m = /^(#{1,4})\s+(.*)$/.exec(l);
+      if (m) {
+        out.push(curS);
+        const lv = m[1].length; stack.length = lv - 1; stack[lv - 1] = m[2].trim();
+        curS = { key: stack.filter(Boolean).join(' › '), lines: [] };
+      } else curS.lines.push(l);
+    });
+    out.push(curS);
+    return out.map(x => ({ key: x.key, text: x.lines.join('\n').trim() }));
+  }
+  const factsOf = (md) => { const m = new RegExp('^' + FACTS_HEAD + '\\s*$([\\s\\S]*?)(?=^## |(?![\\s\\S]))', 'm').exec(md); const t = m ? m[1].trim() : ''; return /^- \(escreva aqui/.test(t) ? '' : t; };
+
+  // resumos dos capítulos (a parte da bíblia que precisa de IA)
+  let recapTimer = null, recapRunning = false;
+  function scheduleRecaps(ms = 2500) { clearTimeout(recapTimer); recapTimer = setTimeout(autoRecaps, ms); }
+  async function autoRecaps() {
+    const p = cur();
+    if (!p || !p.bible || !p.bible.built || p.bible.auto === false || !isConfigured() || recapRunning) return;
+    if (busy) { scheduleRecaps(5000); return; }
+    const stale = staleRecaps(p);
+    if (!stale.length || stale.length > 4) { if (view.tab === 'biblia') renderBible(); return; }
+    try { await recapChapters(p, stale, null, null); } catch {}
+    if (currentId === p.id && view.tab === 'biblia' && !bibleEdit) renderBible();
+  }
+  async function recapChapters(p, list, signal, onProgress) {
+    recapRunning = true;
+    const op = uid();
+    try {
+      const batches = []; let cb = [], n = 0;
+      list.forEach(c => { const len = Math.min(c.text.length, 30000); if (cb.length && n + len > 60000) { batches.push(cb); cb = []; n = 0; } cb.push(c); n += len; });
+      if (cb.length) batches.push(cb);
+      for (let bi = 0; bi < batches.length; bi++) {
+        onProgress && onProgress(bi, batches.length);
+        const b = batches[bi];
+        const prompt = withLang(p, `${bible(p)}\n\nCAPÍTULOS PARA RESUMIR:\n` +
+          b.map(c => `### Capítulo ${p.chapters.indexOf(c) + 1}: ${chTitle(p, c)}\n${c.text.slice(0, 30000)}`).join('\n\n') +
+          `\n\nTAREFA: Para cada capítulo acima, escreva um resumo fiel de 80 a 150 palavras com o que acontece, as decisões, as revelações e as mudanças nos personagens e nas relações. Sem opinião, sem inventar. ` +
+          `Responda SOMENTE com um objeto JSON {"resumos": [{"numero": N, "resumo": "..."}]}.`, false);
+        const hashes = new Map(b.map(c => [c, hashText(c.text)]));
+        const r = await callAI(prompt, { signal, label: 'Bíblia da obra · resumos', opId: op });
+        let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
+        const items = (data && (data.resumos || data.summaries)) || [];
+        items.forEach(it => {
+          const c = p.chapters[Number(it.numero) - 1];
+          if (c && hashes.has(c) && String(it.resumo || '').trim()) c.recap = { text: String(it.resumo).trim(), of: hashes.get(c), at: Date.now() };
+        });
+        if (!items.length) throw Object.assign(new Error('A IA não devolveu os resumos no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
+        saveProject(p, true);
+      }
+      p.bible = Object.assign({ auto: true }, p.bible, { built: true, at: Date.now() });
+      saveProject(p, true);
+    } finally { recapRunning = false; }
+  }
+  async function buildBible(p) {
+    if (busy || recapRunning || !ensureReady(p, () => buildBible(p))) return;
+    const stale = staleRecaps(p);
+    if (!stale.length) { p.bible = Object.assign({ auto: true }, p.bible, { built: true, at: Date.now() }); saveProject(p, true); renderBible(); toast('A bíblia já está em dia ✓'); return; }
+    let est = '';
+    try {
+      const m = (await loadModels()).find(x => x.id === settings.model);
+      if (m && !isFree(m)) {
+        const chars = stale.reduce((n, c) => n + Math.min(c.text.length, 30000), 0);
+        est = ` Custo estimado: ${fmtCost((chars / 3.5 + 3000) * Number(m.pricing?.prompt || 0) + stale.length * 250 * Number(m.pricing?.completion || 0), true)}.`;
+      }
+    } catch {}
+    if (!(await confirmAI(`Resumir ${stale.length === 1 ? '1 capítulo' : stale.length + ' capítulos'} para montar a linha da história da bíblia.${est} Depois, ela se atualiza sozinha ao fim de cada pedido.`))) return;
+    const b = startBusy('recap', 'Montando a bíblia', null);
+    try {
+      await recapChapters(p, stale, b.ctrl.signal, (i, n) => updateBusy({ label: n > 1 ? `Montando a bíblia · parte ${i + 1} de ${n}` : 'Montando a bíblia', words: 0 }));
+      stopBusy(); toast('Bíblia da obra pronta ✓');
+    } catch (e) {
+      stopBusy();
+      if (e.name === 'AbortError') toast('Parado. Os resumos já feitos ficam guardados.'); else handleAIError(e, () => buildBible(p));
+    } finally { stopBusy(); if (currentId === p.id) renderTab(); }
+  }
+
+  let bibleEdit = null; // { pid, base, text }
+  function renderBible() {
+    const p = cur(), sec = $('tab-biblia');
+    sec.innerHTML = '';
+    const md = composeBible(p);
+    if (bibleEdit && bibleEdit.pid !== p.id) bibleEdit = null;
+    const stale = staleRecaps(p).length;
+    const done = p.chapters.filter(c => c.text.trim()).length - stale;
+    const auto = el('input', { type: 'checkbox', id: 'bibleAuto' });
+    auto.checked = !p.bible || p.bible.auto !== false;
+    auto.addEventListener('change', () => { p.bible = Object.assign({}, p.bible, { auto: auto.checked }); saveProject(p, true); });
+    sec.append(el('div', { class: 'card' },
+      el('h2', { icon: 'scroll-text', text: 'Bíblia da obra' }),
+      el('p', { class: 'lead', text: 'Um documento só com tudo do livro: infos, fatos fixos, mundo, o que acontece em cada capítulo e as anotações. A IA usa isto em todos os pedidos. Edite e toque em "Aplicar mudanças" para a IA levar as mudanças para os capítulos, o Mundo e as Infos.' }),
+      el('p', { class: 'muted', text: p.chapters.length ? `${done} de ${done + stale} capítulo(s) com resumo` + (p.bible && p.bible.at ? ` · atualizada em ${fmtDate(p.bible.at)}` : '') : 'Ainda não há capítulos; a linha da história aparece quando houver.' }),
+      el('div', { class: 'row' },
+        stale ? el('button', { class: (p.bible && p.bible.built) ? '' : 'primary', icon: 'refresh-cw', ai: true, disabled: !!busy, text: (p.bible && p.bible.built) ? `Resumir ${stale} capítulo(s) pendente(s)` : 'Montar a bíblia com IA', onclick: () => buildBible(p) }) : null,
+        el('button', { icon: 'download', text: 'Baixar .md', onclick: () => { const blob = new Blob([bibleEdit ? bibleEdit.text : md], { type: 'text/markdown' }); downloadData(URL.createObjectURL(blob), `${(p.title || 'biblia').replace(/[\\/:*?"<>|]+/g, '')} - bíblia.md`); } })),
+      el('label', { class: 'check', for: 'bibleAuto' }, auto, el('span', { text: 'Atualizar sozinha ao fim de cada pedido (resume os capítulos que mudaram; gasta um pouco de crédito)' }))));
+    const card = el('div', { class: 'card' });
+    if (bibleEdit) {
+      const ta = el('textarea', { class: 'bible-edit', 'aria-label': 'Bíblia da obra em markdown', spellcheck: 'true' });
+      ta.value = bibleEdit.text;
+      ta.addEventListener('input', () => { bibleEdit.text = ta.value; setDraft('bible:' + p.id, JSON.stringify(bibleEdit)); });
+      card.append(el('div', { class: 'bible-bar', style: 'margin-bottom:10px' },
+        el('strong', { text: 'Editando a bíblia' }),
+        el('div', { class: 'row' },
+          el('button', { text: 'Descartar', onclick: () => { if (bibleEdit.text !== bibleEdit.base && !confirm('Descartar as mudanças na bíblia?')) return; bibleEdit = null; setDraft('bible:' + p.id, ''); renderBible(); } }),
+          el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, disabled: !!busy, text: 'Aplicar mudanças', onclick: () => applyBible(p) }))),
+        el('p', { class: 'hint', style: 'margin-top:0', text: 'É um texto em markdown: # títulos, - listas, **negrito**. Mude o que quiser, inclusive os resumos dos capítulos. Em "Decisões e fatos fixos" escreva o que a IA nunca pode contradizer.' }),
+        ta);
+      setTimeout(() => ta.focus(), 30);
+    } else {
+      card.append(el('div', { class: 'bible-bar', style: 'margin-bottom:6px' }, el('span'),
+        el('button', { class: 'primary', icon: 'pencil', text: 'Editar a bíblia', onclick: () => { bibleEdit = { pid: p.id, base: md, text: md }; renderBible(); } })),
+        renderMd(md));
+    }
+    sec.append(card);
+  }
+  // rascunho da edição sobrevive se o app fechar
+  function restoreBibleDraft(p) {
+    try { const d = JSON.parse(drafts['bible:' + p.id] || 'null'); if (d && d.pid === p.id && d.text !== d.base) bibleEdit = d; } catch {}
+  }
+
+  // aplicar: salva os fatos fixos e pede à IA um plano para os capítulos, o Mundo e as Infos
+  let biblePlan = null;
+  async function applyBible(p) {
+    const ed = bibleEdit; if (!ed) return;
+    if (ed.text.trim() === ed.base.trim()) { toast('Nada mudou na bíblia.'); return; }
+    const facts = factsOf(ed.text);
+    const factsChanged = facts !== (p.bibleFacts || '').trim();
+    if (factsChanged) { p.bibleFacts = facts; saveProject(p, true); }
+    const before = new Map(mdSections(ed.base).map(x => [x.key, x.text])), after = mdSections(ed.text);
+    const afterKeys = new Set(after.map(x => x.key));
+    const changes = [];
+    after.forEach(x => { if (!before.has(x.key)) changes.push(`[NOVO] ${x.key}\n${x.text}`); else if (before.get(x.key) !== x.text) changes.push(`[MUDOU] ${x.key}\nANTES:\n${before.get(x.key)}\nDEPOIS:\n${x.text}`); });
+    before.forEach((t, k) => { if (!afterKeys.has(k)) changes.push(`[APAGADO] ${k}\n${t}`); });
+    const onlyFacts = changes.every(c => c.includes(FACTS_HEAD.replace('## ', '')));
+    if (!(await confirmAI(`Ler as mudanças da bíblia e montar um plano para levar para os capítulos, o Mundo e as Infos. Você revisa o plano antes de qualquer capítulo mudar.`))) {
+      if (factsChanged) toast('Os fatos fixos foram salvos. A IA vai seguir isso nos próximos pedidos.');
+      return;
+    }
+    const prompt = withLang(p, `${bible(p)}\n\nO autor editou a BÍBLIA DA OBRA. Estas são as mudanças (seção por seção):\n\n${changes.join('\n\n').slice(0, 30000)}\n\n` +
+      `BÍBLIA DEPOIS DA EDIÇÃO:\n${ed.text.slice(0, 40000)}\n\n` +
+      `TAREFA: Planeje como levar estas mudanças para a obra. Responda SOMENTE com um objeto JSON:\n` +
+      `{"explicacao": "em 1 ou 2 frases, o que vai mudar",\n "infos": {"title"?, "category"?, "premise"?, "characters"?, "tone"?, "notes"?} (só os campos que mudam, com o texto novo completo),\n` +
+      ` "mundo": [{"pasta": "personagens|relacoes|lugares|regras|grupos|historia|glossario|pendencias ou o nome de outra pasta", "titulo": "...", "texto": "texto novo completo", "acao": "criar|atualizar|apagar"}],\n` +
+      ` "capitulos": [{"numero": N, "instrucao": "o que mudar neste capítulo, bem específico"}]}\n` +
+      `Inclua em "capitulos" só os capítulos que precisam mudar para ficar coerentes: os que o autor mudou na linha da história e os que contradizem os fatos fixos ou as infos novas (use os resumos para decidir). ` +
+      `Se uma mudança vale só para os próximos capítulos, não inclua capítulos antigos. Não invente mudanças que o autor não pediu.`, false);
+    const b = startBusy('bibleplan', 'Planejando as mudanças', null);
+    try {
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
+      if (!data) throw Object.assign(new Error('A IA não devolveu o plano no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
+      stopBusy();
+      bibleEdit = null; setDraft('bible:' + p.id, '');
+      openBiblePlan(p, data, factsChanged);
+    } catch (e) {
+      stopBusy();
+      if (e.name === 'AbortError') toast('Parado. A edição continua aqui.'); else handleAIError(e, () => applyBible(p));
+    } finally { stopBusy(); if (currentId === p.id) renderTab(); }
+  }
+  function openBiblePlan(p, data, factsChanged) {
+    const INFO_LABEL = { title: 'Título', category: 'Categoria', premise: 'Ideia', characters: 'Personagens', tone: 'Tom e estilo', notes: 'O que quero e não quero' };
+    const items = [];
+    Object.entries(data.infos || {}).forEach(([k, v]) => { if (INFO_LABEL[k] && String(v ?? '').trim() && String(v).trim() !== String(p[k] || '').trim()) items.push({ type: 'info', k, v: String(v).trim(), label: `Infos: ${INFO_LABEL[k]}`, sub: String(v).trim().slice(0, 140) }); });
+    (data.mundo || []).forEach(m => { if (m && String(m.titulo || '').trim()) items.push({ type: 'world', m, label: `Mundo: ${m.acao === 'apagar' ? 'apagar' : m.acao === 'criar' ? 'novo' : 'atualizar'} "${m.titulo}"`, sub: String(m.texto || '').slice(0, 140) }); });
+    (data.capitulos || []).forEach(c => { const ch = p.chapters[Number(c.numero) - 1]; if (ch && String(c.instrucao || '').trim()) items.push({ type: 'chapter', ch, instr: String(c.instrucao).trim(), label: `Capítulo ${c.numero}: ${chTitle(p, ch)}`, sub: String(c.instrucao).trim() }); });
+    biblePlan = { p, items };
+    $('biblePlanWhy').textContent = (data.explicacao ? String(data.explicacao) + ' ' : '') + (factsChanged ? 'Os fatos fixos já foram salvos e valem para os próximos pedidos.' : '');
+    const box = $('biblePlanList');
+    box.innerHTML = '';
+    if (!items.length) box.append(el('p', { class: 'muted', text: 'Não há nada para mudar nos capítulos, no Mundo ou nas Infos. As mudanças valem a partir dos próximos pedidos.' }));
+    let lastType = null;
+    const GROUP = { info: 'Infos da obra', world: 'Mundo', chapter: 'Capítulos (reescritos pela IA)' };
+    items.forEach((it, i) => {
+      if (it.type !== lastType) { box.append(el('div', { class: 'plan-group', text: GROUP[it.type] })); lastType = it.type; }
+      const cb = el('input', { type: 'checkbox', value: String(i) }); cb.checked = true;
+      box.append(el('label', { class: 'check plan-item' }, cb, el('span', {}, it.label, it.sub ? el('small', { text: it.sub }) : null)));
+    });
+    const nCh = items.filter(x => x.type === 'chapter').length;
+    $('biblePlanCost').textContent = nCh ? `Cada capítulo é reescrito pela IA, um por vez (custa como um ajuste de capítulo). Dá para desfazer cada um na página do capítulo.` : '';
+    $('biblePlanGo').disabled = !items.length;
+    $('bibleDlg').showModal();
+  }
+  $('biblePlanGo').addEventListener('click', async () => {
+    const plan = biblePlan; if (!plan) return;
+    const p = plan.p;
+    const chosen = [...$('biblePlanList').querySelectorAll('input:checked')].map(x => plan.items[Number(x.value)]);
+    $('bibleDlg').close();
+    if (!chosen.length) return;
+    // infos e mundo: sem IA
+    chosen.filter(x => x.type === 'info').forEach(x => { p[x.k] = x.v; });
+    const w = worldOf(p);
+    chosen.filter(x => x.type === 'world').forEach(({ m }) => {
+      const key = normTitle(m.pasta || '');
+      const wk = WORLD.find(([k, label]) => k === key || normTitle(label) === key);
+      let list = wk ? w.e[wk[0]] : null;
+      if (!list) { let f = w.folders.find(f => normTitle(f.title) === key); if (!f && m.acao !== 'apagar') { f = { id: uid(), title: m.pasta || 'Outras informações', entries: [] }; w.folders.push(f); } list = f ? f.entries : null; }
+      if (!list) return;
+      const it = list.find(e => normTitle(e.title) === normTitle(m.titulo));
+      if (m.acao === 'apagar') { if (it) list.splice(list.indexOf(it), 1); }
+      else if (it) { it.text = String(m.texto || it.text); it.edited = true; }
+      else list.push({ id: uid(), title: String(m.titulo).trim(), text: String(m.texto || '').trim(), by: 'user', edited: true });
+    });
+    saveProject(p, true); loadForm();
+    const chs = chosen.filter(x => x.type === 'chapter');
+    if (!chs.length) { renderTab(); toast('Mudanças aplicadas ✓'); return; }
+    if (busy || !ensureReady(p, () => {})) return;
+    const b = startBusy('bibleapply', 'Aplicando a bíblia', null);
+    let done = 0;
+    try {
+      for (const x of chs) {
+        const ch = x.ch, idx = p.chapters.indexOf(ch);
+        if (idx < 0) continue;
+        updateBusy({ label: `Aplicando a bíblia · capítulo ${idx + 1} (${done + 1} de ${chs.length})`, words: 0, thinking: false });
+        const task = `CAPÍTULO ATUAL:\n${ch.text}\n\nTAREFA: Reescreva este capítulo para aplicar esta mudança decidida pelo autor na bíblia da obra: ${x.instr}\n` +
+          `Mude só o que for necessário para isso e para manter a coerência; mantenha todo o resto (cenas, falas, estilo, tamanho) igual. Devolva só o texto do capítulo, sem título.`;
+        const r = await aiWrite(p, (strong) => withLang(p, `${buildContext(p, idx, x.instr)}\n\n${task}`, strong), {
+          signal: b.ctrl.signal, onRetry: () => updateBusy({ words: 0 }), onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+        ch.prev = ch.text; ch.text = r.text; ch.editedAt = Date.now();
+        saveProject(p, true); done++;
+      }
+      stopBusy();
+      toast(`Bíblia aplicada ✓ ${done} capítulo(s) ajustado(s). Dá para desfazer em cada capítulo.`);
+    } catch (e) {
+      stopBusy();
+      if (e.name === 'AbortError') toast(`Parado. ${done} capítulo(s) já ajustado(s).`); else handleAIError(e, null);
+    } finally { stopBusy(); if (currentId === p.id) renderTab(); }
+  });
+
   // ---------- guia do livro: a IA lê o arquivo inteiro uma vez e resume o que importa ----------
   const DIGEST_PART = 120000; // ~48 páginas por parte
   function guideBox(p, r) {
@@ -4861,6 +5181,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   function buildContext(p, upto, extraQuery) {
     const parts = [bible(p)];
+    if ((p.bibleFacts || '').trim()) parts.push(`DECISÕES E FATOS FIXOS DO AUTOR (prioridade máxima; nunca contradiga, mesmo que capítulos antigos digam outra coisa):\n${p.bibleFacts.trim()}`);
+    const line = p.chapters.slice(0, upto).map((c, i) => c.recap && c.recap.text ? `- Capítulo ${i + 1} (${chTitle(p, c)}): ${c.recap.text}` : '').filter(Boolean).join('\n');
+    if (line) parts.push(`LINHA DA HISTÓRIA (o que acontece em cada capítulo, segundo a bíblia da obra):\n${line}`);
     const hasSummary = p.useSummary !== false && p.summary.trim();
     const notes = importantNotes(p);
     if (notes) parts.push(`ANOTAÇÕES IMPORTANTES DO AUTOR (lembre e respeite):\n${notes}`);
@@ -4895,11 +5218,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return e;
   }
 
-  async function callAI(userPrompt, { onText, onThinking, signal, override, guard, images, force } = {}) {
+  async function callAI(userPrompt, { onText, onThinking, signal, override, guard, images, force, label, opId } = {}) {
     const cfg = Object.assign({}, settings, override || {});
-    // para o histórico de gastos: qual ação e qual projeto
-    const op = busy ? (busy.op = busy.op || uid()) : uid();
-    const action = actionLabel(), projTitle = busy && busy.kind !== 'test' ? (cur()?.title || '').trim() : '';
+    // para o histórico de gastos: qual ação e qual projeto (tarefas de fundo trazem o próprio rótulo)
+    const op = opId || (busy ? (busy.op = busy.op || uid()) : uid());
+    const action = label || actionLabel(), projTitle = label || (busy && busy.kind !== 'test') ? (cur()?.title || '').trim() : '';
     // imagens só vão para modelos que enxergam (force: o pedido é sobre a imagem)
     let content = userPrompt;
     if (images && images.length && (force || await canSeeImages())) {
@@ -5020,6 +5343,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (busy.kind === 'entry') return 'Item do mundo';
     if (busy.kind === 'suggest') return busy.label;
     if (busy.kind === 'digest') return `Guia do livro · ${busy.refName || ''}`;
+    if (busy.kind === 'recap') return 'Bíblia da obra · resumos';
+    if (busy.kind === 'bibleplan') return 'Bíblia da obra · plano';
+    if (busy.kind === 'bibleapply') return 'Bíblia da obra · aplicar nos capítulos';
     return busy.label || 'IA';
   }
   function fmtCost(v, est) {

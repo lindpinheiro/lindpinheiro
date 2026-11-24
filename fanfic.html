@@ -342,6 +342,10 @@
   @media (max-width: 600px) { .cost-note { left: 12px; right: 12px; bottom: 12px; } .spend-stats .v { font-size: 1rem; } }
   .gen-kinds { display: flex; flex-wrap: wrap; margin-bottom: 6px; }
   .gen-kinds button { flex: 1 1 auto; }
+  .guide-box { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); }
+  .guide-head { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .guide-head strong { display: inline-flex; align-items: center; gap: 6px; }
+  .guide-box textarea { margin-top: 8px; min-height: 220px; font-size: .9rem; }
   .gen-refs { display: flex; flex-wrap: wrap; gap: 8px; }
   .gen-ref { position: relative; width: 76px; height: 76px; min-height: 0; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid var(--border); background: var(--surface-2); }
   .gen-ref img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -4101,9 +4105,24 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const budget = el('select', { id: 'refBudget' },
       el('option', { value: '8000', text: 'Pouco (~3 páginas)' }),
       el('option', { value: '20000', text: 'Médio (~8 páginas) — recomendado' }),
-      el('option', { value: '50000', text: 'Muito (~20 páginas)' }));
+      el('option', { value: '50000', text: 'Muito (~20 páginas)' }),
+      el('option', { value: '125000', text: 'Bastante (~50 páginas)' }),
+      el('option', { value: '250000', text: 'Máximo (~100 páginas)' }));
     budget.value = p.refBudget || '20000';
-    budget.addEventListener('change', () => { p.refBudget = budget.value; saveProject(p); });
+    const budgetCost = el('p', { class: 'hint', id: 'refBudgetCost' });
+    const paintBudgetCost = () => {
+      loadModels().then(list => {
+        const m = list.find(x => x.id === settings.model);
+        if (!m) { budgetCost.textContent = ''; return; }
+        const chars = Math.min(Number(budget.value), (refsCache[p.id] || []).filter(r => r.kind !== 'image' && r.enabled !== false).reduce((n, r) => n + r.text.length, 0) || Number(budget.value));
+        const cap = m.context_length ? Math.floor(m.context_length * 3 * 0.5) : Infinity;
+        const usd = Math.min(chars, cap) / 3.5 * Number(m.pricing?.prompt || 0);
+        budgetCost.textContent = (isFree(m) ? 'Com o modelo atual (grátis), não gasta créditos.' : `Com o modelo atual, isso soma cerca de ${fmtCost(usd)} em cada pedido.`) +
+          (chars > cap ? ` O modelo aceita no máximo ~${fmtNum(Math.round(cap / 2500))} páginas de referência por pedido; vai esse tanto.` : '');
+      }).catch(() => { budgetCost.textContent = ''; });
+    };
+    budget.addEventListener('change', () => { p.refBudget = budget.value; saveProject(p); paintBudgetCost(); });
+    paintBudgetCost();
 
     sec.append(el('div', { class: 'card' },
       el('h2', { icon: 'library', text: 'Referências' }),
@@ -4117,7 +4136,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('div', { class: 'progress', id: 'refProgress', hidden: true }, el('div')),
       refs.length ? el('details', { style: 'margin-top:14px' },
         el('summary', { text: 'Quanto material mandar em cada pedido' }), budget,
-        el('p', { class: 'hint', text: 'Mais material ajuda a acertar detalhes, mas o pedido fica mais lento e alguns modelos grátis não aceitam textos longos.' })) : null));
+        el('p', { class: 'hint', text: 'Em cada pedido vão os trechos do material mais ligados ao que está sendo escrito, até esse tanto. Para a IA conhecer um livro inteiro, use "Criar guia do livro" no arquivo. Mais material ajuda a acertar detalhes, mas o pedido fica mais caro e mais lento.' }),
+        budgetCost) : null));
 
     if (!refs.length) {
       sec.append(el('div', { class: 'card empty' }, el('p', { text: 'Nenhum arquivo neste projeto. É opcional.' })));
@@ -4146,6 +4166,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           el('div', {}, el('label', { for: 'kind-' + r.id, text: 'Tipo de referência' }), kind),
           el('div', {}, el('label', { class: 'check', for: 'use-' + r.id, style: 'margin-top:42px' }, use, el('span', { text: 'Usar ao escrever' })))),
         el('label', { for: 'note-' + r.id, text: 'Para que serve esta referência?' }), note,
+        guideBox(p, r),
         el('details', { style: 'margin-top:10px' },
           el('summary', { text: 'Ver o texto que foi lido' }),
           el('pre', { class: 'sample', text: r.text.slice(0, 2500) + (r.text.length > 2500 ? '\n…' : '') }))));
@@ -4404,6 +4425,90 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       if (currentId === p.id) renderTab();
     }
   });
+
+  // ---------- guia do livro: a IA lê o arquivo inteiro uma vez e resume o que importa ----------
+  const DIGEST_PART = 120000; // ~48 páginas por parte
+  function guideBox(p, r) {
+    const pages = Math.max(1, Math.round(r.text.length / 2500));
+    const parts = Math.ceil(r.text.length / DIGEST_PART);
+    const box = el('div', { class: 'guide-box' });
+    if ((r.digest || '').trim()) {
+      const ta = el('textarea', { rows: 10, 'aria-label': 'Guia do livro' });
+      ta.value = r.digest;
+      let t; ta.addEventListener('input', () => { r.digest = ta.value; r.updatedAt = Date.now(); clearTimeout(t); t = setTimeout(() => { db.put('refs', r); markDirty('refs'); }, 500); });
+      box.append(
+        el('div', { class: 'guide-head' }, el('strong', {}, svgIcon('book-open'), ' Guia do livro'), el('span', { class: 'muted', text: r.digestAt ? `feito em ${fmtDate(r.digestAt)}` : '' })),
+        el('p', { class: 'hint', style: 'margin:4px 0 8px', text: 'Vai em todos os pedidos, junto com os trechos mais ligados ao que está sendo escrito. Você pode editar.' }),
+        el('details', {}, el('summary', { text: 'Ver e editar o guia' }), ta),
+        el('div', { class: 'row', style: 'margin-top:8px' },
+          el('button', { icon: 'refresh-cw', ai: true, text: 'Refazer o guia', disabled: !!busy, onclick: () => digestRef(p, r) }),
+          el('button', { class: 'link plain', text: 'Apagar o guia', onclick: () => { if (!confirm('Apagar o guia deste livro?')) return; delete r.digest; delete r.digestAt; r.updatedAt = Date.now(); db.put('refs', r); markDirty('refs'); renderTab(); } })));
+    } else {
+      const partial = r.digestWork && r.digestWork.n === parts && r.digestWork.notes.length;
+      box.append(
+        el('div', { class: 'guide-head' }, el('strong', {}, svgIcon('book-open'), ' Guia do livro')),
+        el('p', { class: 'hint', style: 'margin:4px 0 8px', text: `Este arquivo tem ~${fmtNum(pages)} páginas. Em cada pedido só vão os trechos mais ligados ao que está sendo escrito. ` +
+          'Com o guia, a IA lê o livro inteiro uma vez e anota personagens, relações, lugares, enredo, termos e o estilo da autora; o guia vai em todos os pedidos.' }),
+        el('button', { class: 'primary', icon: 'book-open', ai: true, disabled: !!busy, text: partial ? `Continuar o guia (${r.digestWork.notes.length} de ${parts} partes lidas)` : 'Criar guia do livro com IA', onclick: () => digestRef(p, r) }));
+    }
+    return box;
+  }
+  async function digestRef(p, r) {
+    if (busy || !ensureReady(p, () => digestRef(p, r))) return;
+    const parts = [];
+    for (let i = 0; i < r.text.length; i += DIGEST_PART) parts.push(r.text.slice(i, i + DIGEST_PART));
+    let est = '';
+    try {
+      const m = (await loadModels()).find(x => x.id === settings.model);
+      if (m && isFree(m)) est = ' Modelo grátis: não gasta créditos, mas pode demorar.';
+      else if (m) {
+        const tin = r.text.length / 3.5 + parts.length * 1500 + (parts.length > 1 ? parts.length * 3500 : 0);
+        const tout = (parts.length > 1 ? parts.length * 3500 : 0) + 7000;
+        est = ` Custo estimado: ${fmtCost(tin * Number(m.pricing?.prompt || 0) + tout * Number(m.pricing?.completion || 0), true)}, uma vez só.`;
+        if (m.context_length && m.context_length < 48000) est += ' Atenção: o modelo atual aceita textos curtos; se der erro, escolha um modelo com mais contexto.';
+      }
+    } catch {}
+    const st = r.digestWork && r.digestWork.n === parts.length ? r.digestWork : { n: parts.length, notes: [] };
+    const left = parts.length > 1 ? parts.length - st.notes.length : 1;
+    if (!(await confirmAI(`Ler "${r.name}" inteiro (${parts.length > 1 ? `${left} de ${parts.length} partes` : '1 parte'}) e criar o guia do livro.${est}`))) return;
+    const why = (r.note || '').trim() ? ` O autor diz: ${r.note.trim()}.` : '';
+    const b = startBusy('digest', `Guia do livro · ${r.name}`, null);
+    b.refName = r.name;
+    try {
+      if (parts.length > 1) {
+        for (let i = st.notes.length; i < parts.length; i++) {
+          updateBusy({ label: `Lendo o livro · parte ${i + 1} de ${parts.length}`, words: 0, thinking: false });
+          const prompt = withLang(p, `Você está lendo o livro de referência "${r.name}" (parte ${i + 1} de ${parts.length}) para ajudar um autor a escrever uma história baseada nele.${why}\n\n` +
+            `TAREFA: Faça anotações fiéis desta parte, em tópicos e em português do Brasil:\n` +
+            `PERSONAGENS (nome, aparência, personalidade, jeito de falar, o que querem, relações);\nLUGARES;\nACONTECIMENTOS DESTA PARTE, em ordem;\n` +
+            `TERMOS, REGRAS E DETALHES DO MUNDO;\nESTILO DE ESCRITA (narrador, ponto de vista, tom, ritmo, recursos que se repetem).\n` +
+            `Não invente nada que não está no texto. Até ~2.000 palavras.\n\nTEXTO DA PARTE ${i + 1}:\n${parts[i]}`, false);
+          const res = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+          st.notes.push(res.text);
+          r.digestWork = st; await db.put('refs', r); // o que já foi lido fica guardado
+        }
+      }
+      updateBusy({ label: 'Montando o guia do livro', words: 0, thinking: false });
+      const src = parts.length > 1 ? st.notes.map((n, i) => `### Anotações da parte ${i + 1}\n${n}`).join('\n\n') : `TEXTO DO LIVRO:\n${parts[0]}`;
+      const prompt = withLang(p, `Livro de referência: "${r.name}".${why}\n\n${src}\n\n` +
+        `TAREFA: ${parts.length > 1 ? 'Junte as anotações acima' : 'Leia o livro acima e monte'} um GUIA DO LIVRO completo e organizado, em português do Brasil, para um autor escrever uma fanfic fiel a ele. Seções:\n` +
+        `1. Enredo resumido, em ordem;\n2. Personagens (aparência, personalidade, jeito de falar, motivações, arco);\n3. Relações entre eles;\n4. Lugares;\n` +
+        `5. Termos, regras e detalhes do mundo;\n6. Linha do tempo dos fatos importantes;\n7. Estilo de escrita da autora (narrador, ponto de vista, tom, ritmo, como escreve diálogos e cenas).\n` +
+        `Seja fiel ao livro; não invente. Até ~4.000 palavras.`, false);
+      const res = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      r.digest = res.text; r.digestAt = Date.now(); delete r.digestWork; r.updatedAt = Date.now();
+      await db.put('refs', r); markDirty('refs');
+      stopBusy();
+      toast('Guia do livro pronto ✓ A IA vai usar em todos os pedidos.');
+    } catch (e) {
+      stopBusy();
+      if (e.name === 'AbortError') toast('Parado. O que já foi lido fica guardado; toque de novo para continuar.');
+      else handleAIError(e, () => digestRef(p, r));
+    } finally {
+      stopBusy();
+      if (currentId === p.id) renderTab();
+    }
+  }
 
   // ---------- imagens de referência ----------
   const IMG_KINDS = [['personagem', 'Personagem'], ['lugar', 'Lugar'], ['mundo', 'Mundo e ambiente'], ['objeto', 'Objeto ou roupa'], ['estilo', 'Estilo visual'], ['capa', 'Capa'], ['cena', 'Cena'], ['outro', 'Outro']];
@@ -4683,11 +4788,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function pickReferences(p, query) {
     const refs = (refsCache[p.id] || []).filter(r => r.enabled !== false && r.kind !== 'image');
     if (!refs.length) return '';
-    const budget = Number(p.refBudget) || 20000;
+    let budget = Number(p.refBudget) || 20000;
+    // não passa do que o modelo aceita (deixa espaço para o resto do pedido)
+    const model = modelsCache && modelsCache.find(x => x.id === settings.model);
+    if (model && model.context_length) budget = Math.min(budget, Math.floor(model.context_length * 3 * 0.5));
     const KIND = { universo: 'universo e enredo', personagem: 'personagens', lugar: 'lugares', estilo: 'estilo de escrita (imite o jeito de escrever, não o conteúdo)', outro: 'outro' };
     const header = (r) => `[Arquivo: ${r.name} — tipo: ${KIND[r.refKind || 'universo']}${r.note ? ' — para que serve: ' + r.note : ''}]`;
     const total = refs.reduce((n, r) => n + r.text.length, 0);
     if (total <= budget) return refs.map(r => `${header(r)}\n${r.text}`).join('\n\n');
+    // guias dos livros (feitos a partir do arquivo inteiro) vão sempre
+    const guides = refs.filter(r => (r.digest || '').trim()).map(r => `[Guia do livro: ${r.name} — resumo feito a partir do livro inteiro]\n${r.digest.trim()}`).join('\n\n');
 
     const chunks = [];
     refs.forEach((r, ri) => chunk(r.text).forEach((t, ci) => chunks.push({ r, ri, ci, t, terms: new Set(terms(t)) })));
@@ -4714,7 +4824,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       else out += '\n[…]\n';
       out += c.t;
     }
-    return out;
+    return guides ? `${guides}\n\n[Trechos do livro mais ligados a este pedido]\n${out}` : out;
   }
 
   // =====================================================================
@@ -4909,6 +5019,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (busy.kind === 'image') return 'Descrever imagem';
     if (busy.kind === 'entry') return 'Item do mundo';
     if (busy.kind === 'suggest') return busy.label;
+    if (busy.kind === 'digest') return `Guia do livro · ${busy.refName || ''}`;
     return busy.label || 'IA';
   }
   function fmtCost(v, est) {

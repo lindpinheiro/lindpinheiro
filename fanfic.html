@@ -462,6 +462,11 @@
   .sug-after { background: var(--ok-soft); }
   .sug-diff .k { display: block; font-family: system-ui, sans-serif; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 2px; }
   .sug-actions { gap: 8px; }
+  textarea.sug-edit { width: 100%; min-height: 0; padding: 2px 0; border: 0; border-radius: 0; background: transparent; color: inherit;
+    font: inherit; line-height: 1.5; resize: none; overflow: hidden; border-bottom: 1px dashed transparent; }
+  textarea.sug-edit:hover, textarea.sug-edit:focus { outline: none; border-bottom-color: currentColor; }
+  .sug-hint { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .8; }
+  .sug-restore { min-height: 28px; padding: 2px 0; font-size: .8rem; margin-top: 4px; font-family: system-ui, sans-serif; }
   .sug-adjust { display: grid; gap: 8px; }
   @media (max-width: 700px) { .sug-diff { grid-template-columns: 1fr; } }
   .hl-done { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
@@ -3220,7 +3225,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       x.why ? el('p', { class: 'sug-why', text: x.why }) : null,
       el('div', { class: 'sug-diff' },
         el('div', { class: 'sug-before' }, el('span', { class: 'k', text: 'Antes' }), el('div', { text: x.quote })),
-        el('div', { class: 'sug-after' }, el('span', { class: 'k', text: 'Depois' }), el('div', { text: x.replacement }))),
+        sugAfter(p, x)),
       loc ? null : el('p', { class: 'status err', text: 'Esse trecho mudou desde a sugestão. Use "Aprovar com ajuste" para a IA aplicar a ideia no texto atual.' }),
       el('div', { class: 'row sug-actions' },
         el('button', { class: 'primary', icon: 'check', text: 'Aprovar', disabled: !loc || !!busy, onclick: () => approveSug(p, ch, x) }),
@@ -3231,11 +3236,27 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         } })),
       adjBox);
   }
+  // o "Depois" é editável: dá para acrescentar, tirar ou mudar antes de aprovar
+  function sugAfter(p, x) {
+    if (x.aiText == null) x.aiText = x.replacement;
+    const ta = el('textarea', { class: 'sug-edit', rows: 1, 'aria-label': `Texto sugerido: ${x.title}. Você pode editar.` });
+    ta.value = x.replacement;
+    const grow = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+    const restore = el('button', { type: 'button', class: 'link plain sug-restore', icon: 'undo-2', text: 'Voltar ao texto da IA', hidden: x.replacement === x.aiText,
+      onclick: () => { x.replacement = x.aiText; ta.value = x.aiText; restore.hidden = true; grow(); saveProject(p); } });
+    let t;
+    ta.addEventListener('input', () => { x.replacement = ta.value; restore.hidden = ta.value === x.aiText; grow(); clearTimeout(t); t = setTimeout(() => saveProject(p), 400); });
+    requestAnimationFrame(grow);
+    return el('div', { class: 'sug-after' },
+      el('span', { class: 'k' }, 'Depois ', el('span', { class: 'sug-hint', text: '· toque para editar' })), ta, restore);
+  }
   function approveSug(p, ch, x) {
     const loc = findQuote(ch.text, x.quote);
     if (!loc || busy) return;
+    if (!x.replacement.trim() && !confirm('O texto da sugestão está vazio: o trecho vai ser apagado do capítulo. Continuar?')) return;
     ch.prev = ch.text;
-    ch.text = ch.text.slice(0, loc.start) + x.replacement + ch.text.slice(loc.end);
+    ch.text = ch.text.slice(0, loc.start) + x.replacement.trim() + ch.text.slice(loc.end);
+    if (!x.replacement.trim()) ch.text = ch.text.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim(); // tirou o trecho: sem buracos
     ch.editedAt = Date.now();
     x.status = 'approved';
     saveProject(p, true); renderChapters(); scheduleRecaps();
@@ -3245,7 +3266,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const loc = findQuote(ch.text, x.quote);
     const r = loc ? paraRange(ch.text, loc) : null;
     const target = r ? { ch, start: r.start, end: r.end, partial: true } : { ch, start: 0, end: ch.text.length, partial: false };
-    const instr = `Aplique esta sugestão de melhoria: ${x.title}. ${x.why || ''}\nTrecho original: “${x.quote}”\nProposta da IA: “${x.replacement}”\n` +
+    const instr = `Aplique esta sugestão de melhoria: ${x.title}. ${x.why || ''}\nTrecho original: “${x.quote}”\nProposta${x.replacement !== x.aiText ? ' (já editada pelo autor)' : ' da IA'}: “${x.replacement}”\n` +
       `Ajuste do autor sobre a proposta (tem prioridade): ${note}\nMude só o necessário para aplicar a sugestão com o ajuste do autor.`;
     runAdjust(target, instr, { ask: `Aplicar a sugestão "${x.title}" com o seu ajuste.`, busyLabel: 'Aplicando sugestão', doneMsg: 'Sugestão aplicada ✓',
       onDone: () => { x.status = 'approved'; }, onUndo: () => { x.status = 'pending'; } });

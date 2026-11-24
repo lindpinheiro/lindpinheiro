@@ -392,6 +392,8 @@
   body.focus .layout { grid-template-columns: 1fr; min-height: 100vh; }
   body.focus .dock { left: 0; }
   body.focus main { padding-top: 0; }
+  body.zen header { display: none !important; }
+  body.zen .ch-toolbar { top: 0 !important; }
   body.focus .ch-toolbar { position: sticky; top: var(--hdr, 0px); z-index: 8; background: var(--bg); padding: 12px 0; margin: 0 0 12px; border-bottom: 1px solid var(--border); }
   body.focus .edit-tools { top: calc(var(--hdr, 0px) + var(--tbar, 64px) + 8px); }
   /* lateral recolhível */
@@ -438,7 +440,7 @@
     .doc-wrap.has-notes { display: grid; grid-template-columns: minmax(0, 860px) 284px; gap: 16px; align-items: start; }
     .doc-wrap.has-notes > .card { margin-bottom: 16px; }
     .doc-wrap.has-notes .margin-notes { display: block; position: relative; }
-    body.focus .wrap:has(.doc-wrap.has-notes) .hl-list > .hl-item.in-margin { display: none; }
+    body.focus .wrap:has(.doc-wrap.has-notes) .hl-list > .hl-row.in-margin { display: none; }
   }
   .mnote { position: absolute; left: 0; right: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left;
     background: var(--surface); border: 1px solid var(--border); border-left: 3px solid #e5c43a; border-radius: 10px; padding: 10px 12px;
@@ -493,6 +495,11 @@
   .hl-done summary { cursor: pointer; color: var(--muted); font-weight: 600; padding: 6px 0; }
   .hl-done-row { display: flex; align-items: flex-start; gap: 8px; opacity: .7; }
   .hl-done-row .hl-item { flex: 1; }
+  .hl-row { display: flex; align-items: flex-start; gap: 6px; border-top: 1px solid var(--border); }
+  .hl-row .hl-item { flex: 1; border-top: 0; }
+  .hl-del { min-height: 36px; min-width: 36px; padding: 0; margin-top: 6px; background: transparent; border-color: transparent; color: var(--muted); }
+  .hl-del:hover { color: var(--danger); border-color: var(--border); }
+  button.link.plain.hl-clear { color: var(--danger); }
   .resolve-list { max-height: 45vh; overflow-y: auto; display: grid; gap: 4px; }
   .resolve-item { align-items: flex-start; border-top: 1px solid var(--border); padding: 10px 0; margin: 0; }
   .resolve-item > span { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
@@ -691,7 +698,7 @@
 <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></symbol>
 <symbol id="i-pen-line" viewBox="0 0 24 24"><path d="M12 20h9" /> <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" /></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /><path d="M12 17.5v-11" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-maximize-2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" x2="14" y1="3" y2="10" /><line x1="3" x2="10" y1="21" y2="14" /></symbol><symbol id="i-minimize-2" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line x1="14" x2="21" y1="10" y2="3" /><line x1="3" x2="10" y1="21" y2="14" /></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /><path d="M12 17.5v-11" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
 <symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
 <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
 <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></symbol>
@@ -2679,16 +2686,30 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // página de leitura/edição: esconde topo, abas e lateral
   function measureBars() {
     const h = document.querySelector('header'), cs = h && getComputedStyle(h);
-    document.documentElement.style.setProperty('--hdr', (cs && cs.position === 'sticky' ? h.offsetHeight : 0) + 'px');
+    document.documentElement.style.setProperty('--hdr', (cs && cs.position === 'sticky' && cs.display !== 'none' ? h.offsetHeight : 0) + 'px');
     const tb = document.querySelector('body.focus .ch-toolbar');
     if (tb) document.documentElement.style.setProperty('--tbar', tb.offsetHeight + 'px');
   }
   addEventListener('resize', () => measureBars());
   function setFocus(on) {
+    if (!on && document.body.classList.contains('zen')) setZen(false);
     if (document.body.classList.contains('focus') === on) return;
     document.body.classList.toggle('focus', on);
     if (on) closeDrawer();
   }
+  // tela inteira na leitura/edição: esconde o topo do app e, se o aparelho deixar, a barra do navegador
+  const isZen = () => document.body.classList.contains('zen');
+  function setZen(on) {
+    document.body.classList.toggle('zen', on);
+    try {
+      if (on && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    } catch {}
+    requestAnimationFrame(measureBars);
+    if (view.chapterId) renderChapters();
+  }
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isZen()) setZen(false); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && isZen() && !document.querySelector('dialog[open]')) setZen(false); });
 
   // redesenha sem pular para o topo: guarda e devolve a posição da tela
   function renderChapters() {
@@ -2838,6 +2859,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const moreBtn = el('button', { icon: 'ellipsis', 'aria-label': 'Mais opções', title: 'Mais opções', 'aria-haspopup': 'menu', 'aria-expanded': 'false',
         onclick: (ev) => { ev.stopPropagation(); const open = more.hidden; closeAddMenus(more); more.hidden = !open; moreBtn.setAttribute('aria-expanded', String(open)); if (open) more.querySelector('button').focus(); } });
       more.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { closeAddMenus(); moreBtn.focus(); } });
+      tools.append(el('button', { icon: isZen() ? 'minimize-2' : 'maximize-2', 'aria-label': isZen() ? 'Sair da tela inteira' : 'Tela inteira', title: isZen() ? 'Sair da tela inteira (Esc)' : 'Tela inteira', 'aria-pressed': String(isZen()), onclick: () => setZen(!isZen()) }));
       tools.append(el('div', { class: 'add-wrap' }, moreBtn, more));
     }
 
@@ -3269,8 +3291,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('noteRemove').hidden = !!isNew;
     dlg.showModal(); $('noteText').focus();
   }
+  // apaga várias marcações de uma vez (com desfazer)
+  function removeHighlights(p, ch, list, what) {
+    if (!list.length) return;
+    if (!confirm(`Excluir ${what}? ${list.length === 1 ? '1 marcação' : list.length + ' marcações'} (com as anotações).`)) return;
+    const before = ch.highlights.slice();
+    ch.highlights = ch.highlights.filter(h => !list.includes(h));
+    if (list.some(h => h.id === marginEdit)) marginEdit = null;
+    saveProject(p, true); renderChapters();
+    toast(list.length === 1 ? 'Marcação excluída.' : `${list.length} marcações excluídas.`, { action: 'Desfazer', onAction: () => { ch.highlights = before; saveProject(p, true); renderChapters(); } });
+  }
   function highlightList(p, ch) {
     const open = ch.highlights.filter(h => !h.resolved), done = ch.highlights.filter(h => h.resolved);
+    const delBtn = (h) => el('button', { class: 'hl-del', icon: 'trash-2', 'aria-label': 'Excluir marcação', title: 'Excluir marcação', onclick: () => removeHighlight(p, ch, h) });
     const item = (h) => el('button', { class: 'hl-item' + (((h.note || '').trim() || h.askAI) && !h.resolved ? ' in-margin' : ''), type: 'button', onclick: () => h.resolved ? openNote(p, ch, h.id) : openHighlight(p, ch, h.id) },
       el('mark', { class: h.important ? 'important' : '', text: h.quote.length > 140 ? h.quote.slice(0, 140) + '…' : h.quote }),
       h.note ? el('span', { class: 'hl-note', text: h.note }) : null,
@@ -3279,13 +3312,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const list = el('div', { class: 'card hl-list' },
       el('div', { class: 'hl-head' },
         el('h3', { icon: 'highlighter', text: `Marcações (${open.length})` }),
-        open.length ? el('button', { class: 'primary', icon: 'lightbulb', ai: true, text: 'Gerar sugestões', onclick: () => openResolve(p, ch) }) : null));
+        el('div', { class: 'row' },
+          open.length ? el('button', { class: 'link plain hl-clear', icon: 'trash-2', text: 'Excluir todas', onclick: () => removeHighlights(p, ch, open, 'todas as marcações deste capítulo') }) : null,
+          open.length ? el('button', { class: 'primary', icon: 'lightbulb', ai: true, text: 'Gerar sugestões', onclick: () => openResolve(p, ch) }) : null)));
     if (!open.length) list.append(el('p', { class: 'muted', text: 'Nenhuma marcação pendente.' }));
-    open.forEach(h => list.append(item(h)));
+    open.forEach(h => list.append(el('div', { class: 'hl-row' + (((h.note || '').trim() || h.askAI) ? ' in-margin' : '') }, item(h), delBtn(h))));
     if (done.length) {
       const d = el('details', { class: 'hl-done' }, el('summary', { text: `Resolvidas (${done.length})` }));
+      d.append(el('div', { class: 'row end', style: 'margin:4px 0' }, el('button', { class: 'link plain hl-clear', icon: 'trash-2', text: 'Excluir as resolvidas', onclick: () => removeHighlights(p, ch, done, 'as marcações resolvidas') })));
       done.forEach(h => d.append(el('div', { class: 'hl-done-row' }, item(h),
-        el('button', { class: 'link plain', icon: 'undo-2', text: 'Reabrir', onclick: () => { delete h.resolved; saveProject(p, true); renderChapters(); } }))));
+        el('button', { class: 'link plain', icon: 'undo-2', text: 'Reabrir', onclick: () => { delete h.resolved; saveProject(p, true); renderChapters(); } }),
+        delBtn(h))));
       list.append(d);
     }
     return list;

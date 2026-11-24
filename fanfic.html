@@ -579,7 +579,9 @@
   .alert .msg .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
   .alert .close { min-height: 40px; min-width: 40px; padding: 0; background: transparent; border: 0; font-size: 1.2rem; }
   .bar { background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; }
-  .bar-inner { max-width: 860px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
+  .bar-inner { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+  .bar-job { display: flex; gap: 12px; align-items: center; }
+  .proj-ai { color: var(--accent); font-weight: 600; }
   .bar-status { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .spin { width: 22px; height: 22px; flex: none; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -1454,7 +1456,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let currentId = local.get('fanfic.current', null);
   const refsCache = {};
   let view = { tab: 'ideia', chapterId: null, mode: 'ler' };
-  let busy = null;
+  let busy = null; // não bloqueia mais nada: as tarefas de IA ficam em `jobs` e rodam ao mesmo tempo
+  const jobs = [];
+  const jobOnChapter = (ch) => ch && jobs.find(j => j.chapterId === ch.id || (j.chapterIds && j.chapterIds.includes(ch.id)));
+  const jobOfKind = (pid, kind) => jobs.find(j => j.projectId === pid && j.kind === kind);
+  // avisa e devolve true quando já tem IA mexendo no mesmo lugar
+  function locked(job, msg) { if (!job) return false; toast(msg || `A IA já está fazendo isso: ${job.label}.`); return true; }
 
   const cur = () => projects.find(p => p.id === currentId);
   const chTitle = (p, c) => c.title || `Capítulo ${p.chapters.indexOf(c) + 1}`;
@@ -1537,7 +1544,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
             el('span', { class: 'proj-name', text: p.title.trim() || 'Sem título' }),
             el('span', { class: 'meta' },
               (p.category || '').trim() ? el('span', { class: 'tag cat', text: p.category.trim() }) : null,
-              `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}`));
+              `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}`,
+              jobs.some(j => j.projectId === p.id) ? el('span', { class: 'proj-ai', text: ' · IA trabalhando…' }) : null));
         // segurar o dedo no projeto também começa a seleção
         item.addEventListener('pointerdown', () => { pressT = setTimeout(() => { pressT = null; if (!selecting) { longPressed = true; setSelecting(true, p.id); } }, 550); });
         ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => item.addEventListener(t, () => { clearTimeout(pressT); pressT = null; }));
@@ -1558,7 +1566,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   function openProject(id) {
     infoEditing = null;
-    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
     flushSaves();
     projects = projects.filter(x => !x.draft || x.id === id);
     currentId = id;
@@ -1584,7 +1591,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('newMenu').addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeNewMenu(); $('newProjectBtn').focus(); } });
   $('newImport').addEventListener('click', () => { closeNewMenu(); leaveDraft(() => guardEdit(openImport)); });
   $('newBlank').addEventListener('click', () => { closeNewMenu(); leaveDraft(() => guardEdit(() => {
-    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
     startDraft();
   })); });
 
@@ -1910,7 +1916,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (mergeSpend(remote.spend)) needPush = true;
     mergeDeleted('projects', remote.deleted);
     if (Object.keys(sync.deleted.projects).some(id => !(remote.deleted || {})[id])) needPush = true;
-    const editingNow = busy || (document.activeElement && document.activeElement.closest && document.activeElement.closest('main') &&
+    const editingNow = jobs.length > 0 || (document.activeElement && document.activeElement.closest && document.activeElement.closest('main') &&
       /^(TEXTAREA|INPUT|SELECT)$/.test(document.activeElement.tagName));
 
     // excluídos em outro aparelho
@@ -1948,7 +1954,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (added && cur()?.draft && !draftHasContent(cur())) { projects = projects.filter(x => !x.draft); currentId = null; }
     if (added || touchedCurrent || !cur()) {
       if (!cur()) { currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id; local.set('fanfic.current', currentId); view = { tab: 'ideia', chapterId: null, mode: 'ler' }; }
-      if (!busy) { loadForm(); renderTab(); loadRefs(currentId); }
+      if (!jobs.some(j => j.projectId === currentId)) { loadForm(); renderTab(); loadRefs(currentId); }
     }
     renderProjects();
     return needPush;
@@ -1980,7 +1986,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     for (const id of byId.keys()) if (!remoteIds.has(id)) needPush = true;
     delete refsCache[currentId];
     await loadRefs(currentId);
-    if (!busy) renderTab();
+    if (!jobs.some(j => j.projectId === currentId)) renderTab();
     return needPush;
   }
 
@@ -2219,7 +2225,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const impBar = (f) => { const pr = $('impProgress'); pr.hidden = f == null; pr.firstChild.style.width = Math.round((f || 0) * 100) + '%'; };
   document.querySelectorAll('[data-imp]').forEach(b => b.addEventListener('click', () => setImpMode(b.dataset.imp)));
   function openImport() {
-    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
     impFileParts = null; $('impFileName').textContent = ''; impBar(null);
     setImpMode('link');
     $('importDlg').showModal(); $('impUrl').focus();
@@ -2322,7 +2327,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Backup: levar as histórias para outro aparelho
   // =====================================================================
   $('backupBtn').addEventListener('click', () => {
-    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
     closeDrawer();
     flushSaves();
     $('backupStatus').textContent = '';
@@ -2483,9 +2487,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           el('p', { class: 'muted', style: 'margin:0 0 10px', text: cover ? 'A capa fica guardada nas Referências, junto com as outras imagens.' : 'Envie a sua capa ou crie uma com IA a partir das infos da obra, do mundo e dos personagens.' }),
           el('div', { class: 'row' },
             el('button', { icon: 'upload', text: cover ? 'Trocar por uma imagem' : 'Enviar capa', onclick: () => pickCoverFile(p) }),
-            el('button', { class: cover ? '' : 'primary', icon: 'image', ai: true, text: cover ? 'Gerar nova capa' : 'Gerar capa com IA', disabled: !!busy, onclick: () => openImageGen(p, { kind: 'capa' }) }),
+            el('button', { class: cover ? '' : 'primary', icon: 'image', ai: true, text: cover ? 'Gerar nova capa' : 'Gerar capa com IA', onclick: () => openImageGen(p, { kind: 'capa' }) }),
             cover ? el('button', { icon: 'download', text: 'Baixar', onclick: () => downloadData(cover.data, `${(p.title || 'capa').replace(/[\\/:*?"<>|]+/g, '')}.jpg`) }) : null,
-            el('button', { class: 'link plain', icon: 'sparkles', text: 'Outras imagens', disabled: !!busy, onclick: () => openImageGen(p, { kind: 'personagem' }) })))));
+            el('button', { class: 'link plain', icon: 'sparkles', text: 'Outras imagens', onclick: () => openImageGen(p, { kind: 'personagem' }) })))));
       const field = (label, value) => (value || '').trim() ? el('div', { class: 'info-field' }, el('div', { class: 'k', text: label }), el('div', { class: 'v', text: value.trim() })) : null;
       const hasStory = p.chapters.length || worldText(p) || (refsCache[p.id] || []).length;
       v.append(el('div', { class: 'card' },
@@ -2493,7 +2497,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           el('h2', { icon: 'info', text: 'Infos da Obra' }),
           el('div', { class: 'row' },
             el('button', { icon: 'pencil', text: 'Editar', onclick: () => { infoEditing = true; renderTab(); $('f-title').focus(); } }),
-            el('button', { icon: 'refresh-cw', ai: true, text: 'Atualizar com base na história', disabled: !!busy || !hasStory, title: hasStory ? '' : 'Escreva um capítulo ou adicione referências primeiro', onclick: updateInfoFromStory }))),
+            el('button', { icon: 'refresh-cw', ai: true, text: 'Atualizar com base na história', disabled: !hasStory, title: hasStory ? '' : 'Escreva um capítulo ou adicione referências primeiro', onclick: updateInfoFromStory }))),
         p.infoPrev ? el('div', { class: 'row', style: 'margin-bottom:8px' }, el('button', { class: 'link plain', icon: 'undo-2', text: 'Voltar às infos anteriores', onclick: () => {
           const now = { premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes };
           Object.assign(p, p.infoPrev); p.infoPrev = now; saveProject(p, true); loadForm(); renderTab();
@@ -2522,7 +2526,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('p', { class: 'muted', text: 'Escreva um pedido ou um bloco de texto com tudo o que já imaginou. A IA usa isso para preencher título, ideia, personagens, intensidade, tom e o resto. Você revisa e salva.' }),
         ta,
         el('div', { class: 'row', style: 'margin-top:10px' },
-          el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, disabled: !!busy, text: 'Preencher os campos com IA', onclick: () => fillInfoFromPrompt(p) }))));
+          el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, text: 'Preencher os campos com IA', onclick: () => fillInfoFromPrompt(p) }))));
     }
     if (editing && story && !p.draft) {
       const empty = !(p.premise || '').trim() && !(p.characters || '').trim();
@@ -2530,7 +2534,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('p', { text: empty
           ? `Esta obra já tem ${p.chapters.length ? p.chapters.length + ' capítulo(s)' : 'conteúdo'}. A IA pode ler e preencher as infos para você.`
           : 'A IA pode completar as infos com o que os capítulos, o mundo e as referências mostram. O que você escreveu é mantido.' }),
-        el('button', { class: empty ? 'primary' : '', icon: 'notebook-text', ai: true, disabled: !!busy, text: empty ? 'Gerar infos com base nos capítulos' : 'Completar com base na história', onclick: updateInfoFromStory })));
+        el('button', { class: empty ? 'primary' : '', icon: 'notebook-text', ai: true, text: empty ? 'Gerar infos com base nos capítulos' : 'Completar com base na história', onclick: updateInfoFromStory })));
     }
     // ação principal: escrever o primeiro capítulo (fora da edição)
     const box = $('ideaCta');
@@ -2538,12 +2542,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     // na edição de um projeto sem capítulos, a ação principal é salvar e já escrever
     $('infoSaveBtn').classList.toggle('primary', !(editing && !p.chapters.length));
     $('infoSaveBtn').lastChild.textContent = p.draft ? 'Salvar projeto' : 'Salvar';
-    if (editing && !p.chapters.length) box.append(el('button', { class: 'primary wide', icon: 'pen-line', text: 'Salvar e escrever o primeiro capítulo', disabled: !!busy,
+    if (editing && !p.chapters.length) box.append(el('button', { class: 'primary wide', icon: 'pen-line', text: 'Salvar e escrever o primeiro capítulo',
       onclick: () => { if (!commitDraft(p)) return; flushSaves(); infoEditing = false; renderTab(); openWriteDialog(); } }));
     if (p.draft && projects.some(x => !x.draft)) box.append(el('button', { class: 'wide', style: 'margin-top:10px', text: 'Cancelar', onclick: cancelDraft }));
     if (!editing) box.append(p.chapters.length
       ? el('button', { class: 'wide', iconEnd: 'arrow-right', text: `Ver os capítulos (${p.chapters.length})`, onclick: () => { view.tab = 'capitulos'; view.chapterId = null; renderTab(); scrollTo(0, 0); } })
-      : el('button', { class: 'primary wide', icon: 'pen-line', text: 'Escrever o primeiro capítulo', disabled: !!busy, onclick: openWriteDialog }));
+      : el('button', { class: 'primary wide', icon: 'pen-line', text: 'Escrever o primeiro capítulo', onclick: openWriteDialog }));
     renderAiDot();
   }
   $('infoSaveBtn').addEventListener('click', () => {
@@ -2554,7 +2558,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   // preenche a ficha da obra a partir do texto livre do autor
   async function fillInfoFromPrompt(p) {
-    if (busy) return;
+    if (locked(jobOfKind(p.id, 'fill'))) return;
     const text = (($('ideaPrompt') && $('ideaPrompt').value) || drafts['idea:' + p.id] || '').trim();
     if (!text) { toast('Escreva sua ideia na caixa primeiro.'); $('ideaPrompt')?.focus(); return; }
     if (!isConfigured()) { openSetup(1, () => fillInfoFromPrompt(p)); return; }
@@ -2571,7 +2575,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const prev = {}; ['title', 'category', 'fandom', 'premise', 'characters', 'heat', 'tone', 'notes', 'pov', 'povChars', 'length'].forEach(k => { prev[k] = p[k]; });
     const b = startBusy('fill', 'Preencher as infos', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       if (!data) throw Object.assign(new Error('A IA não devolveu as infos no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
       const str = (v) => Array.isArray(v) ? v.map(x => '- ' + String(x).replace(/^-\s*/, '')).join('\n') : String(v ?? '').trim();
@@ -2580,13 +2584,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       if (['Terceira pessoa', 'Terceira pessoa (POV)', 'Primeira pessoa', 'Segunda pessoa (você)'].includes(data.pov)) p.pov = data.pov;
       if (isPovMode(p) && String(data.povChars || '').trim()) p.povChars = String(data.povChars).trim();
       if (['800', '1500', '2500'].includes(String(data.length))) p.length = String(data.length);
-      stopBusy(); loadForm();
+      b.stop(); loadForm();
       toast('Campos preenchidos ✓ Revise e salve.', { action: 'Desfazer', onAction: () => { Object.assign(p, prev); saveProject(p, true); loadForm(); renderTab(); renderProjects(); } });
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Parado. Os campos não mudaram.'); else handleAIError(e, () => fillInfoFromPrompt(p));
     } finally {
-      stopBusy(); saveProject(p, true);
+      b.stop(); saveProject(p, true);
       if (currentId === p.id) { infoEditing = true; renderTab(); renderProjects(); }
     }
   }
@@ -2594,7 +2598,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // atualiza ideia, personagens, tom e regras com o que a história já tem
   async function updateInfoFromStory() {
     const p = cur();
-    if (busy || !ensureReady(p, updateInfoFromStory)) return;
+    if (locked(jobOfKind(p.id, 'info')) || !ensureReady(p, updateInfoFromStory)) return;
     if (!(await confirmAI('Preencher as Infos da Obra com os capítulos, o mundo e as referências.'))) return;
     // começo da história (apresenta personagens e mundo) + fim (onde ela está agora)
     const blocks = p.chapters.map((c, i) => `### Capítulo ${i + 1}: ${chTitle(p, c)}\n${c.text}\n\n`);
@@ -2616,50 +2620,58 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `Mantenha tudo o que o autor escreveu; só acrescente e esclareça com base nos capítulos, no mundo e nas referências. Não invente. Escreva em português do Brasil.`;
     const b = startBusy('info', 'Infos da Obra', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       if (!data) throw Object.assign(new Error('A IA não devolveu as infos no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
       p.infoPrev = { premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes };
       ['premise', 'characters', 'tone', 'notes'].forEach(k => { const v = data[k]; if (v != null && String(v).trim()) p[k] = Array.isArray(v) ? v.map(x => '- ' + String(x).replace(/^-\s*/, '')).join('\n') : String(v); });
-      stopBusy(); loadForm();
+      b.stop(); loadForm();
       toast('Infos atualizadas ✓', { action: 'Desfazer', onAction: () => { const t = p.infoPrev; p.infoPrev = null; Object.assign(p, t); saveProject(p, true); loadForm(); renderTab(); } });
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Parado. As infos não mudaram.'); else handleAIError(e, updateInfoFromStory);
-    } finally { stopBusy(); saveProject(p, true); if (currentId === p.id) renderTab(); }
+    } finally { b.stop(); saveProject(p, true); if (currentId === p.id) renderTab(); }
   }
 
   // =====================================================================
   // Barra de baixo (ação principal ou o que a IA está fazendo)
   // =====================================================================
-  function busyText() {
-    if (!busy) return '';
-    if (busy.thinking && !busy.words) return `${busy.label} · planejando…`;
-    return busy.words ? `${busy.label} · ${fmtNum(busy.words)} palavras` : `${busy.label} · começando…`;
+  function busyText(job) {
+    const pj = job.projectId !== currentId ? projects.find(x => x.id === job.projectId) : null;
+    const where = pj ? ` (${(pj.title || '').trim() || 'outro projeto'})` : '';
+    if (job.thinking && !job.words) return `${job.label}${where} · planejando…`;
+    return job.words ? `${job.label}${where} · ${fmtNum(job.words)} palavras` : `${job.label}${where} · começando…`;
   }
 
+  // barra de baixo: uma linha por pedido de IA em andamento, cada um com o seu Parar
   function renderBar() {
     const bar = $('bar'), inner = $('barInner');
     inner.innerHTML = '';
-    bar.hidden = !busy;
-    if (!busy) return;
-    inner.append(el('div', { class: 'spin', 'aria-hidden': 'true' }),
-      el('div', { class: 'bar-status', id: 'barStatus', text: busyText() }),
-      el('button', { class: 'danger', icon: 'square', text: 'Parar', onclick: () => busy && busy.ctrl.abort() }));
+    bar.hidden = !jobs.length;
+    jobs.forEach(job => inner.append(el('div', { class: 'bar-job', 'data-job': job.id },
+      el('div', { class: 'spin', 'aria-hidden': 'true' }),
+      el('div', { class: 'bar-status', text: busyText(job) }),
+      el('button', { class: 'danger', icon: 'square', text: 'Parar', 'aria-label': `Parar: ${job.label}`, onclick: () => job.ctrl.abort() }))));
   }
 
-  function startBusy(kind, label, chapterId) {
-    busy = { ctrl: new AbortController(), kind, label, chapterId, words: 0, thinking: false };
+  function startBusy(kind, label, chapterId, extra = {}) {
+    const job = Object.assign({ id: uid(), op: uid(), ctrl: new AbortController(), kind, label, chapterId, projectId: currentId, words: 0, thinking: false, done: false }, extra);
+    job.update = (patch) => {
+      Object.assign(job, patch);
+      const s = document.querySelector(`.bar-job[data-job="${job.id}"] .bar-status`);
+      if (s) s.textContent = busyText(job);
+    };
+    job.stop = () => {
+      if (job.done) return;
+      job.done = true;
+      const i = jobs.indexOf(job); if (i >= 0) jobs.splice(i, 1);
+      renderBar(); scheduleRecaps(); renderProjects();
+    };
+    jobs.push(job);
     clearAlert();
-    renderTab();
-    return busy;
+    renderTab(); renderProjects();
+    return job;
   }
-  function updateBusy(patch) {
-    if (!busy) return;
-    Object.assign(busy, patch);
-    const s = $('barStatus'); if (s) s.textContent = busyText();
-  }
-  function stopBusy() { const was = busy; busy = null; if (was) scheduleRecaps(); }
 
   // =====================================================================
   // Aba Capítulos
@@ -2703,8 +2715,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('h2', { text: 'Nenhum capítulo ainda' }),
         el('p', { text: 'A IA pode escrever o primeiro capítulo a partir da sua ideia, ou você escreve do zero.' }),
         el('div', { class: 'row', style: 'justify-content:center' },
-          el('button', { class: 'primary', icon: 'pen-line', ai: true, text: 'Escrever com IA', disabled: !!busy, onclick: openWriteDialog }),
-          el('button', { icon: 'pencil', text: 'Escrever sem IA', disabled: !!busy, onclick: () => blankChapter(p) }))));
+          el('button', { class: 'primary', icon: 'pen-line', ai: true, text: 'Escrever com IA', onclick: openWriteDialog }),
+          el('button', { icon: 'pencil', text: 'Escrever sem IA', onclick: () => blankChapter(p) }))));
       return;
     }
 
@@ -2721,7 +2733,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
         el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : '') }),
         el('h3', { text: chTitle(p, c) }),
-        el('div', { class: 'preview', text: c.text.slice(0, 260) || (busy && busy.chapterId === c.id ? 'Escrevendo…' : '(vazio)') }),
+        el('div', { class: 'preview', text: c.text.slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
           el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
           el('button', { icon: 'copy', text: 'Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyChapter(c.text); } }))));
@@ -2785,14 +2797,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('span', { class: 'mi-ico' }, svgIcon('pencil')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Em branco (sem IA)' }), el('span', { class: 'mi-sub', text: 'Você escreve o capítulo do zero' }))),
       el('button', { role: 'menuitem', class: 'menu-item', onclick: () => { closeAddMenus(); guardEdit(openWriteDialog); } },
         el('span', { class: 'mi-ico' }, svgIcon('sparkles')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Escrever com IA' }), el('span', { class: 'mi-sub', text: 'A IA escreve a partir do que você pedir' }))));
-    const btn = el('button', { class: primary ? 'primary' : '', icon: 'plus', iconEnd: 'chevron-down', 'aria-label': `Novo capítulo (capítulo ${n})`, 'aria-haspopup': 'menu', 'aria-expanded': 'false', disabled: !!busy,
+    const btn = el('button', { class: primary ? 'primary' : '', icon: 'plus', iconEnd: 'chevron-down', 'aria-label': `Novo capítulo (capítulo ${n})`, 'aria-haspopup': 'menu', 'aria-expanded': 'false',
       onclick: (ev) => { ev.stopPropagation(); const open = menu.hidden; closeAddMenus(menu); menu.hidden = !open; btn.setAttribute('aria-expanded', String(open)); if (open) menu.querySelector('button').focus(); } }, 'Novo capítulo');
     menu.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { closeAddMenus(); btn.focus(); } });
     return el('div', { class: 'add-wrap' }, btn, menu);
   }
   // capítulo em branco: abre direto no Editar; some sozinho se ficar vazio
   function blankChapter(p) {
-    if (busy) return;
     if ($('writeDlg').open) $('writeDlg').close();
     const ch = { id: uid(), title: '', text: '', isNew: true, createdAt: Date.now() };
     p.chapters.push(ch); saveProject(p, true);
@@ -2803,25 +2814,26 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   function renderChapterView(sec, p, ch) {
     const i = p.chapters.indexOf(ch);
-    const writingThis = busy && busy.chapterId === ch.id;
-    const editing = view.mode === 'editar' && !writingThis;
+    const writingThis = !!jobs.find(j => j.chapterId === ch.id); // a IA está escrevendo neste capítulo
+    const chBusy = !!jobOnChapter(ch);
+    const editing = view.mode === 'editar' && !chBusy;
     const go = (j) => guardEdit(() => { view.chapterId = p.chapters[j].id; renderChapters(); scrollTo(0, 0); });
     const setMode = (m) => m === view.mode ? null : (m === 'ler' ? guardEdit(() => { view.mode = 'ler'; renderChapters(); }) : (view.mode = m, renderChapters()));
 
     const tools = el('div', { class: 'tools' },
       el('div', { class: 'seg', role: 'group', 'aria-label': 'Modo' },
         el('button', { 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }, svgIcon('book-open', 'hide-m'), 'Ler'),
-        el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: writingThis, onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
+        el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: chBusy, title: chBusy ? 'A IA está mexendo neste capítulo' : '', onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
     if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { saveEdit(); view.mode = 'ler'; renderChapters(); scrollTo(0, 0); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
     else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyChapter(ch.text) }, el('span', { text: 'Copiar' })));
-    if (!writingThis && historyOf(ch).length) tools.append(el('button', { icon: 'undo-2', 'aria-label': 'Desfazer a última mudança da IA', title: `Desfazer: ${historyOf(ch).at(-1).label}`, disabled: !!busy, onclick: () => guardEdit(() => undoChapter(p, ch), true) }));
+    if (!writingThis && historyOf(ch).length) tools.append(el('button', { icon: 'undo-2', 'aria-label': 'Desfazer a última mudança da IA', title: `Desfazer: ${historyOf(ch).at(-1).label}`, disabled: chBusy, onclick: () => guardEdit(() => undoChapter(p, ch), true) }));
     if (!writingThis) {
       const more = el('div', { class: 'menu add-menu more-menu', role: 'menu', hidden: true },
-        el('button', { role: 'menuitem', class: 'menu-item', disabled: !!busy, onclick: () => { closeAddMenus(); guardEdit(() => openHistory(p, ch), true); } },
+        el('button', { role: 'menuitem', class: 'menu-item', disabled: chBusy, onclick: () => { closeAddMenus(); guardEdit(() => openHistory(p, ch), true); } },
           el('span', { class: 'mi-ico' }, svgIcon('history')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: `Versões anteriores${historyOf(ch).length ? ` (${historyOf(ch).length})` : ''}` }))),
-        el('button', { role: 'menuitem', class: 'menu-item', disabled: !!busy || !ch.text.trim(), onclick: () => { closeAddMenus(); guardEdit(() => openImageGen(p, { kind: 'cena', chId: ch.id }), true); } },
+        el('button', { role: 'menuitem', class: 'menu-item', disabled: !ch.text.trim(), onclick: () => { closeAddMenus(); guardEdit(() => openImageGen(p, { kind: 'cena', chId: ch.id }), true); } },
           el('span', { class: 'mi-ico' }, svgIcon('image')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Gerar imagem da cena' }))),
-        el('button', { role: 'menuitem', class: 'menu-item danger-item', disabled: !!busy, onclick: () => { closeAddMenus(); guardEdit(() => { discardEdit(); deleteChapter(p, ch); }, true); } },
+        el('button', { role: 'menuitem', class: 'menu-item danger-item', disabled: chBusy, onclick: () => { closeAddMenus(); guardEdit(() => { discardEdit(); deleteChapter(p, ch); }, true); } },
           el('span', { class: 'mi-ico' }, svgIcon('trash-2')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Excluir este capítulo' }))));
       const moreBtn = el('button', { icon: 'ellipsis', 'aria-label': 'Mais opções', title: 'Mais opções', 'aria-haspopup': 'menu', 'aria-expanded': 'false',
         onclick: (ev) => { ev.stopPropagation(); const open = more.hidden; closeAddMenus(more); more.hidden = !open; moreBtn.setAttribute('aria-expanded', String(open)); if (open) more.querySelector('button').focus(); } });
@@ -2837,7 +2849,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('span', { class: 'pos', text: `${i + 1}/${p.chapters.length}` })),
       tools));
 
-    if (!writingThis && !busy && wrongLang(p, ch.text)) sec.append(el('div', { class: 'notice' },
+    if (!writingThis && !chBusy && wrongLang(p, ch.text)) sec.append(el('div', { class: 'notice' },
       el('p', { text: `Este capítulo saiu em inglês.` }),
       el('button', { class: 'primary', icon: 'languages', ai: true, text: `Reescrever em ${langLower(p)}`, onclick: () => guardEdit(() => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
         `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`)) })));
@@ -2902,7 +2914,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     renderBar();
     requestAnimationFrame(measureBars);
     if (writingThis) return;
-    const ai = !!busy;
+    const ai = chBusy;
     const foot = el('div', { class: 'row end', style: 'margin-top:12px' });
     const hist = historyOf(ch);
     if (hist.length && !editing) foot.append(
@@ -2968,7 +2980,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let selInfo = null, selTimer = null;
 
   function selectionInChapter() {
-    if (view.tab !== 'capitulos' || !view.chapterId || busy) return null;
+    if (view.tab !== 'capitulos' || !view.chapterId || jobs.some(j => j.chapterId === view.chapterId || (j.chapterIds && j.chapterIds.includes(view.chapterId)))) return null;
     const p = cur(), ch = p.chapters.find(c => c.id === view.chapterId);
     const body = $('chBody');
     if (!ch || !body) return null;
@@ -3068,8 +3080,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('button', { type: 'button', text: '⁂', 'aria-label': 'Quebra de cena', title: 'Quebra de cena', onclick: () => fmtInsert(ta, '\n\n* * *\n\n') }),
       el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; } }),
       el('span', { class: 'tb-sep', 'aria-hidden': 'true' }),
-      el('button', { type: 'button', class: 'tb-ai', icon: 'wand-sparkles', ai: true, text: 'Ajustar', disabled: !!busy, title: 'Ajustar com IA o trecho selecionado ou o capítulo', onclick: () => adjustFromEditor(ch, ta) }),
-      el('button', { type: 'button', class: 'tb-ai', icon: 'spell-check', ai: true, text: 'Corrigir', disabled: !!busy, title: 'Corrigir o português e organizar no formato de livro (o trecho selecionado ou o capítulo)', onclick: () => fixText(p, ch, ta) }));
+      el('button', { type: 'button', class: 'tb-ai', icon: 'wand-sparkles', ai: true, text: 'Ajustar', title: 'Ajustar com IA o trecho selecionado ou o capítulo', onclick: () => adjustFromEditor(ch, ta) }),
+      el('button', { type: 'button', class: 'tb-ai', icon: 'spell-check', ai: true, text: 'Corrigir', title: 'Corrigir o português e organizar no formato de livro (o trecho selecionado ou o capítulo)', onclick: () => fixText(p, ch, ta) }));
     bar.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
     const wrap = el('div', { class: 'edit-tools' });
     const paint = () => {
@@ -3267,7 +3279,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const list = el('div', { class: 'card hl-list' },
       el('div', { class: 'hl-head' },
         el('h3', { icon: 'highlighter', text: `Marcações (${open.length})` }),
-        open.length ? el('button', { class: 'primary', icon: 'lightbulb', ai: true, text: 'Gerar sugestões', disabled: !!busy, onclick: () => openResolve(p, ch) }) : null));
+        open.length ? el('button', { class: 'primary', icon: 'lightbulb', ai: true, text: 'Gerar sugestões', onclick: () => openResolve(p, ch) }) : null));
     if (!open.length) list.append(el('p', { class: 'muted', text: 'Nenhuma marcação pendente.' }));
     open.forEach(h => list.append(item(h)));
     if (done.length) {
@@ -3300,7 +3312,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const card = el('div', { class: 'card sug-list' },
       el('div', { class: 'hl-head' },
         el('h3', { icon: 'lightbulb', text: pend.length ? `Sugestões da IA (${pend.length})` : 'Sugestões da IA' }),
-        el('button', { class: all.length ? '' : 'primary', icon: 'lightbulb', ai: true, disabled: !!busy, text: all.length ? 'Pedir novas sugestões' : 'Ver sugestões da IA', onclick: () => suggestChapter(p, ch) })));
+        el('button', { class: all.length ? '' : 'primary', icon: 'lightbulb', ai: true, text: all.length ? 'Pedir novas sugestões' : 'Ver sugestões da IA', onclick: () => suggestChapter(p, ch) })));
     const answered = new Set(pend.map(x => x.hlId).filter(Boolean));
     const asks = (ch.highlights || []).filter(h => h.askAI && !h.resolved && !answered.has(h.id)).length;
     if (!all.length) card.append(el('p', { class: 'muted', text: 'A IA lê o capítulo e sugere melhorias. Você aprova, recusa ou aprova com um ajuste seu. Nada muda sem você aprovar.' }));
@@ -3318,7 +3330,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const adjBox = el('div', { class: 'sug-adjust', hidden: !openSugAdjust.has(x.id) }, note,
       el('div', { class: 'row end' },
         el('button', { text: 'Cancelar', onclick: () => { openSugAdjust.delete(x.id); adjBox.hidden = true; } }),
-        el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, text: 'Aplicar com IA', disabled: !!busy, onclick: () => {
+        el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, text: 'Aplicar com IA', onclick: () => {
           const n = note.value.trim();
           if (!n && x.replacement) { note.focus(); toast('Escreva o ajuste que quer na proposta.'); return; }
           openSugAdjust.delete(x.id);
@@ -3331,7 +3343,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('span', { class: 'k' }, svgIcon('lightbulb'), ' Feedback da IA', x.agree === true ? el('span', { class: 'tag agree', text: 'A IA concorda' }) : x.agree === false ? el('span', { class: 'tag disagree', text: 'A IA sugere outro caminho' }) : null),
       el('p', { text: x.feedback })) : null;
     // comentário do autor: levar para tudo o que precisar (este e outros capítulos, bíblia, mundo, infos)
-    const spread = hl ? el('button', { class: x.agree === false ? '' : 'primary', icon: 'scroll-text', ai: true, disabled: !!busy,
+    const spread = hl ? el('button', { class: x.agree === false ? '' : 'primary', icon: 'scroll-text', ai: true,
       text: x.agree === false ? 'Aplicar a minha ideia mesmo assim' : 'Aplicar onde for preciso', title: 'A IA atualiza este capítulo, outros capítulos, a bíblia, o Mundo e as Infos, se precisar. Você revisa antes.',
       onclick: () => spreadComment(p, ch, x, hl) }) : null;
     // só feedback, sem trecho para trocar
@@ -3344,7 +3356,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           x.status = 'seen'; saveProject(p, true); renderChapters();
           toast('Feedback marcado como lido.', { action: 'Desfazer', onAction: () => { x.status = 'pending'; saveProject(p, true); renderChapters(); } });
         } }),
-        el('button', { icon: 'wand-sparkles', text: 'Aplicar no texto', disabled: !!busy, onclick: () => { openSugAdjust.add(x.id); adjBox.hidden = false; note.placeholder = 'Como aplicar? (opcional) Ex.: só na fala dele, sem mudar o resto.'; note.focus(); } })),
+        el('button', { icon: 'wand-sparkles', text: 'Aplicar no texto', onclick: () => { openSugAdjust.add(x.id); adjBox.hidden = false; note.placeholder = 'Como aplicar? (opcional) Ex.: só na fala dele, sem mudar o resto.'; note.focus(); } })),
       adjBox);
     return el('div', { class: 'sug-item' },
       el('div', { class: 'sug-title', text: x.title }),
@@ -3356,8 +3368,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       loc ? null : el('p', { class: 'status err', text: 'Esse trecho mudou desde a sugestão. Use "Aprovar com ajuste" para a IA aplicar a ideia no texto atual.' }),
       spread ? el('div', { class: 'row sug-actions' }, spread, el('span', { class: 'hint', style: 'margin:0', text: 'ou só troque o trecho:' })) : null,
       el('div', { class: 'row sug-actions' },
-        el('button', { class: 'primary', icon: 'check', text: 'Aprovar', disabled: !loc || !!busy, onclick: () => approveSug(p, ch, x) }),
-        el('button', { icon: 'pencil', text: 'Aprovar com ajuste', disabled: !!busy, onclick: () => { openSugAdjust.add(x.id); adjBox.hidden = false; note.focus(); } }),
+        el('button', { class: 'primary', icon: 'check', text: 'Aprovar', disabled: !loc, onclick: () => approveSug(p, ch, x) }),
+        el('button', { icon: 'pencil', text: 'Aprovar com ajuste', onclick: () => { openSugAdjust.add(x.id); adjBox.hidden = false; note.focus(); } }),
         el('button', { class: 'link plain', icon: 'x', text: 'Recusar', onclick: () => {
           x.status = 'declined'; saveProject(p, true); renderChapters();
           toast('Sugestão recusada.', { action: 'Desfazer', onAction: () => { x.status = 'pending'; saveProject(p, true); renderChapters(); } });
@@ -3380,7 +3392,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   // a IA lê o comentário, a bíblia e o capítulo e monta um plano com tudo o que precisa mudar
   async function spreadComment(p, ch, x, hl) {
-    if (busy || !ensureReady(p, () => spreadComment(p, ch, x, hl))) return;
+    if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.') || !ensureReady(p, () => spreadComment(p, ch, x, hl))) return;
     if (!(await confirmAI('Ler o seu comentário e montar um plano com o que precisa mudar: este capítulo, outros capítulos, a bíblia, o Mundo e as Infos. Você revisa antes de qualquer mudança.'))) return;
     const n = p.chapters.indexOf(ch) + 1;
     const prompt = withLang(p, `${bible(p)}\n\nBÍBLIA DA OBRA (inclui a linha da história de todos os capítulos):\n${composeBible(p).slice(0, 40000)}\n\n` +
@@ -3396,19 +3408,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `Inclua o capítulo ${n} se ele precisa mudar. Inclua outros capítulos só se eles ficam incoerentes sem a mudança. Se a ideia vale só daqui para frente, use "fatos" e não mexa em capítulos antigos. Não invente mudanças além do comentário.`, false);
     const b = startBusy('spread', 'Planejando onde aplicar', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       if (!data) throw Object.assign(new Error('A IA não devolveu o plano no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
-      stopBusy();
+      b.stop();
       openBiblePlan(p, data, false, { title: 'Aplicar o seu comentário', onDone: () => { x.status = 'approved'; hl.resolved = Date.now(); hl.askAI = false; saveProject(p, true); } });
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Parado.'); else handleAIError(e, () => spreadComment(p, ch, x, hl));
-    } finally { stopBusy(); if (currentId === p.id) renderTab(); }
+    } finally { b.stop(); if (currentId === p.id) renderTab(); }
   }
   function approveSug(p, ch, x) {
     const loc = findQuote(ch.text, x.quote);
-    if (!loc || busy) return;
+    if (!loc || locked(jobOnChapter(ch), 'A IA está mexendo neste capítulo. Espere terminar para aprovar.')) return;
     if (!x.replacement.trim() && !confirm('O texto da sugestão está vazio: o trecho vai ser apagado do capítulo. Continuar?')) return;
     pushHistory(ch, `Sugestão: ${x.title}`);
     ch.text = ch.text.slice(0, loc.start) + x.replacement.trim() + ch.text.slice(loc.end);
@@ -3433,7 +3445,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       onUndo: () => { x.status = 'pending'; const hl = x.hlId && (ch.highlights || []).find(h => h.id === x.hlId); if (hl) delete hl.resolved; } });
   }
   async function suggestChapter(p, ch, opts = {}) {
-    if (busy || !ensureReady(p, () => suggestChapter(p, ch, opts))) return;
+    if (locked(jobOnChapter(ch), 'A IA já está trabalhando neste capítulo. Espere terminar.') || !ensureReady(p, () => suggestChapter(p, ch, opts))) return;
     const only = !!(opts.marks && opts.marks.length);
     if (!(await confirmAI(only ? `Gerar sugestões para ${opts.marks.length === 1 ? '1 marcação' : opts.marks.length + ' marcações'} de "${chTitle(p, ch)}". Nada muda no texto sem você aprovar.` : `Pedir sugestões de melhoria para "${chTitle(p, ch)}". Nada muda no texto sem você aprovar.`))) return;
     const idx = p.chapters.indexOf(ch);
@@ -3454,7 +3466,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       (asks.length ? ` Numa resposta a uma marcação, "trecho" e "novo" são opcionais: se o melhor for só um comentário, deixe "novo" vazio.` : ''), false);
     const b = startBusy('suggest', `${only ? 'Sugestões das marcações' : 'Sugestões da IA'} · ${chTitle(p, ch)}`, null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       const items = (data && (data.sugestoes || data.suggestions)) || [];
       const list = items.map(it => {
@@ -3473,13 +3485,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         const keep = (ch.suggestions || []).filter(x => x.status === 'pending' && !(x.hlId && list.some(n => n.hlId === x.hlId)));
         ch.suggestions = [...list, ...keep];
       } else ch.suggestions = list;
-      stopBusy();
+      b.stop();
       toast(`${list.length} sugestões ✓ Veja abaixo do capítulo.`);
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Parado.'); else handleAIError(e, () => suggestChapter(p, ch, opts));
     } finally {
-      stopBusy(); saveProject(p, true);
+      b.stop(); saveProject(p, true);
       if (currentId === p.id) { renderTab(); setTimeout(() => document.querySelector('.sug-list')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 50); }
     }
   }
@@ -3487,7 +3499,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // resolver marcações: a IA muda o capítulo para atender às anotações escolhidas
   let resolveCtx = null;
   function openResolve(p, ch) {
-    if (busy) return;
+    if (locked(jobOnChapter(ch), 'A IA já está trabalhando neste capítulo. Espere terminar.')) return;
     if (edit && edit.chId === ch.id && editDirty()) { saveEdit(); toast('Texto salvo antes das sugestões ✓'); }
     const open = ch.highlights.filter(h => !h.resolved);
     resolveCtx = { p, ch };
@@ -3589,7 +3601,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     requestAnimationFrame(() => {
       paintQueued = false;
       const { ch, text } = paintLatest;
-      if (!busy || busy.chapterId !== ch.id) return;
+      if (!jobs.some(j => j.chapterId === ch.id)) return;
       if (view.tab !== 'capitulos' || view.chapterId !== ch.id) return;
       const body = $('chBody');
       if (!body) return;
@@ -3697,7 +3709,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   function openWriteDialog() {
     const p = cur();
-    if (busy) return;
+    if (locked(jobOfKind(p.id, 'chapter'), 'Já tem um capítulo novo sendo escrito neste projeto. Espere terminar.')) return;
     if (!ensureReady(p, openWriteDialog)) return;
     const n = p.chapters.length + 1;
     $('writeTitle').replaceChildren(svgIcon('pen-line'), `Capítulo ${n}`);
@@ -3816,28 +3828,28 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     try {
       const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal, images: pickImages(p, [dir, p.characters, p.premise].join(' ')),
-        onRetry: () => { ch.text = ''; paintChapter(ch, ''); updateBusy({ words: 0, label: `Capítulo ${n} (de novo, em ${langLower(p)})` }); },
-        onThinking: () => updateBusy({ thinking: true }),
-        onText: (t) => { ch.text = t; paintChapter(ch, t); updateBusy({ words: countWords(t) }); }
+        onRetry: () => { ch.text = ''; paintChapter(ch, ''); b.update({ words: 0, label: `Capítulo ${n} (de novo, em ${langLower(p)})` }); },
+        onThinking: () => b.update({ thinking: true }),
+        onText: (t) => { ch.text = t; paintChapter(ch, t); b.update({ words: countWords(t) }); }
       });
       ch.text = r.text;
       // quando a IA escolhe o POV, ela avisa na primeira linha ("POV: Nome"); guarda e tira do texto
       if (isPovMode(p) && !ch.pov) { const m = /^\s*POV:\s*([^\n]{1,40})\n+/i.exec(ch.text); if (m) { ch.pov = m[1].trim().replace(/[.*_]+$/g, ''); ch.text = ch.text.slice(m[0].length); } }
-      stopBusy();
+      b.stop();
       if (r.truncated) showAlert({
         kind: 'info', msg: 'O capítulo parou antes do fim, porque a resposta atingiu o tamanho máximo.',
         actions: [{ icon: 'plus', ai: true, label: 'Continuar escrevendo', primary: true, onClick: () => continueChapter(ch) }]
       });
       else toast(`Capítulo ${n} pronto ✓`);
       setDraft('write:' + p.id, '');
-      if (p.chapters.length === 1 && !(p.world && p.world.at)) setTimeout(() => { if (!busy && currentId === p.id) generateWorld(true); }, 600);
+      if (p.chapters.length === 1 && !(p.world && p.world.at)) setTimeout(() => { if (!jobOfKind(p.id, 'world')) generateWorld(true, null, p); }, 600);
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (!ch.text.trim() || e.code === 'lang-final') { p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null; }
       else if (e.name === 'AbortError') { toast('Parado. O que já foi escrito ficou salvo.'); e = null; }
       if (e) handleAIError(e, () => writeChapter(dir, length), openWriteDialog);
     } finally {
-      stopBusy(); saveProject(p, true);
+      b.stop(); saveProject(p, true);
       if (currentId === p.id) { renderTab(); renderProjects(); }
     }
   }
@@ -3847,7 +3859,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   async function continueChapter(ch) {
     const p = cur();
-    if (busy || !ensureReady(p, () => continueChapter(ch))) return;
+    if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.') || !ensureReady(p, () => continueChapter(ch))) return;
     if (!(await confirmAI('Continuar escrevendo este capítulo.'))) return;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
@@ -3862,20 +3874,20 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     try {
       const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal, images: pickImages(p, original.slice(-2000)),
-        onRetry: () => { paintChapter(ch, original); updateBusy({ words: 0 }); },
-        onThinking: () => updateBusy({ thinking: true }),
-        onText: (t) => { paintChapter(ch, original + sep + t); updateBusy({ words: countWords(original + sep + t) }); }
+        onRetry: () => { paintChapter(ch, original); b.update({ words: 0 }); },
+        onThinking: () => b.update({ thinking: true }),
+        onText: (t) => { paintChapter(ch, original + sep + t); b.update({ words: countWords(original + sep + t) }); }
       });
       pushHistory(ch, 'Continuar escrevendo', original);
       ch.text = original + sep + r.text;
-      stopBusy();
+      b.stop();
       toast('Capítulo continuado ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
       ch.text = original;
-      stopBusy();
+      b.stop();
       handleAIError(e, () => continueChapter(ch));
     } finally {
-      stopBusy(); saveProject(p, true);
+      b.stop(); saveProject(p, true);
       if (currentId === p.id) renderTab();
     }
   }
@@ -3901,7 +3913,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   function openAdjust(ch, preset) {
-    if (busy) return;
+    if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.')) return;
     const sel = preset ? (preset.partial ? { start: preset.start, end: preset.end } : null) : currentSelection(ch);
     adjustTarget = { ch, start: sel ? sel.start : 0, end: sel ? sel.end : ch.text.length, partial: !!sel };
     $('adjustTitle').replaceChildren(svgIcon('wand-sparkles'), sel ? 'Ajustar o trecho selecionado' : 'Ajustar o capítulo');
@@ -3924,14 +3936,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Corrigir: português e formato de livro, sem mudar a história
   const FIX_INSTR = 'Revise o texto como um revisor de livro. Corrija ortografia, acentuação, concordância, pontuação e erros de digitação em português do Brasil. Organize no formato padrão de livro: parágrafos separados por uma linha em branco (quebre blocos longos em parágrafos onde a cena muda de foco), cada fala de personagem em seu próprio parágrafo começando com travessão (—), e quebras de cena como * * *. NÃO mude a história, os acontecimentos, as falas, o estilo, a voz nem o vocabulário do autor; não acrescente nem corte conteúdo. Mantenha **negrito** e *itálico*.';
   function fixText(p, ch, ta) {
-    if (busy) return;
+    if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.')) return;
     const s = ta ? ta.selectionStart : 0, e = ta ? ta.selectionEnd : 0;
     const partial = !!ta && e > s && ta.value.slice(s, e).trim().length > 0;
     saveEdit(); // a IA trabalha sobre o texto salvo
     runAdjust({ ch, start: partial ? s : 0, end: partial ? e : ch.text.length, partial }, FIX_INSTR, { fix: true });
   }
   function adjustFromEditor(ch, ta) {
-    if (busy) return;
+    if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.')) return;
     const s = ta.selectionStart, e = ta.selectionEnd;
     const partial = e > s && ta.value.slice(s, e).trim().length > 0;
     saveEdit();
@@ -3940,7 +3952,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   async function runAdjust(target, instr, opts = {}) {
     const p = cur();
-    if (busy || !ensureReady(p, () => runAdjust(target, instr, opts))) return;
+    if (locked(jobOnChapter(target.ch), 'A IA já está mexendo neste capítulo. Espere terminar.') || !ensureReady(p, () => runAdjust(target, instr, opts))) return;
     const ask = opts.ask ? opts.ask : opts.resolveCount
       ? `Resolver ${opts.resolveCount === 1 ? '1 marcação' : opts.resolveCount + ' marcações'} com IA: ${target.partial ? 'só o parágrafo marcado muda' : 'o capítulo é reescrito só onde as anotações pedem'}.`
       : opts.fix
@@ -3968,13 +3980,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     try {
       const r = await aiWrite(p, makePrompt, {
         signal: b.ctrl.signal, images: opts.fix ? [] : pickImages(p, original.slice(start, end) + ' ' + instr),
-        onRetry: () => { paintChapter(ch, original); updateBusy({ words: 0 }); },
-        onThinking: () => updateBusy({ thinking: true }),
-        onText: (t) => { paintChapter(ch, before + t + after); updateBusy({ words: countWords(before + t + after) }); }
+        onRetry: () => { paintChapter(ch, original); b.update({ words: 0 }); },
+        onThinking: () => b.update({ thinking: true }),
+        onText: (t) => { paintChapter(ch, before + t + after); b.update({ words: countWords(before + t + after) }); }
       });
       pushHistory(ch, opts.resolveCount ? 'Resolver marcações' : opts.fix ? 'Correção do português' : opts.busyLabel ? opts.busyLabel.replace('Aplicando', 'Aplicar') : `Ajuste: ${instr.slice(0, 50)}${instr.length > 50 ? '…' : ''}`, original);
       ch.text = before + r.text + after;
-      stopBusy();
+      b.stop();
       if (plain) setDraft('adj:' + ch.id, '');
       if (opts.onDone) opts.onDone();
       const resolved = opts.resolve || [];
@@ -3987,7 +3999,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       } });
     } catch (e) {
       ch.text = original;
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Cancelado. O texto original foi mantido.');
       else if (!plain) handleAIError(e, () => runAdjust(target, instr, opts));
       else {
@@ -3998,7 +4010,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         });
       }
     } finally {
-      stopBusy(); saveProject(p, true);
+      b.stop(); saveProject(p, true);
       if (currentId === p.id) renderTab();
     }
   }
@@ -4138,7 +4150,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (c.ctrl) { c.ctrl.abort(); return; }
     const p = c.p;
     if (!settings.key || !settings.model) { closeEntry(true); ensureReady(p, () => {}); return; }
-    if (busy) { entryStatus('Espere a IA terminar o que está fazendo.', 'err'); return; }
     const title = $('entryTitle').value.trim();
     if (!title) { entryStatus('Escreva o título do item primeiro (ex.: o nome do personagem).', 'err'); $('entryTitle').focus(); return; }
     if (!(await confirmAI(`Escrever o item "${title}" (${c.folder.label}).`))) return;
@@ -4155,7 +4166,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       (ask ? `Pedido do autor: ${ask}\n\n` : '') +
       `Use o que os capítulos e as infos mostram; não contradiga a história. Responda SOMENTE com o texto do item, sem título e sem comentários.`;
     c.before = $('entryText').value; c.ctrl = new AbortController();
-    busy = { ctrl: c.ctrl, kind: 'entry', label: 'Item do mundo', words: 0 };
+    const job = startBusy('entry', 'Item do mundo', null); job.ctrl = c.ctrl;
     entryAiBtn(true); entryStatus('A IA está escrevendo…');
     try {
       const r = await callAI(prompt, { signal: c.ctrl.signal, onText: (t) => { if (entryCtx === c) $('entryText').value = t; } });
@@ -4165,7 +4176,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       if (err.name === 'AbortError') entryStatus('Parado. O texto anterior foi mantido.');
       else { entryStatus(err.message || 'Não deu certo. Tente de novo.', 'err'); if (err.action) handleAIError(err, null); }
     } finally {
-      busy = null; c.ctrl = null; if (entryCtx === c) entryAiBtn(false);
+      job.stop(); c.ctrl = null; if (entryCtx === c) entryAiBtn(false);
     }
   });
 
@@ -4181,7 +4192,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       w.at ? el('p', { class: 'muted', text: `Atualizado em ${fmtDate(w.at)}, com ${w.chapters} capítulo(s).` + (outdated ? ' Há capítulos novos ou editados desde então.' : '') })
         : el('p', { class: 'muted', text: p.chapters.length ? 'Ainda não foi gerado.' : 'É criado sozinho depois do primeiro capítulo. Você também pode preencher à mão agora.' }),
       el('div', { class: 'row' },
-        el('button', { class: 'primary', icon: 'refresh-cw', ai: true, disabled: !!busy || !p.chapters.length, text: w.at ? 'Atualizar com os capítulos' : 'Gerar a partir dos capítulos', onclick: () => generateWorld(false) }),
+        el('button', { class: 'primary', icon: 'refresh-cw', ai: true, disabled: !p.chapters.length, text: w.at ? 'Atualizar com os capítulos' : 'Gerar a partir dos capítulos', onclick: () => generateWorld(false) }),
         w.prev ? el('button', { icon: 'undo-2', text: 'Desfazer a última atualização', onclick: () => {
         const pr = w.prev.e ? w.prev : { e: w.prev, folders: w.folders };
         w.prev = { e: w.e, folders: w.folders }; w.e = pr.e; w.folders = pr.folders; saveProject(p, true); renderWorld();
@@ -4212,9 +4223,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     } }));
   }
 
-  async function generateWorld(auto, target) {
-    const p = cur();
-    if (busy || !ensureReady(p, () => generateWorld(auto, target))) return;
+  async function generateWorld(auto, target, pp) {
+    const p = pp || cur();
+    if ((!auto && locked(jobOfKind(p.id, 'world'), 'O Mundo já está sendo atualizado.')) || !ensureReady(p, () => generateWorld(auto, target, p))) return;
     const w = worldOf(p);
     if (!auto && !(await confirmAI(target ? `Criar com IA o que falta em "${target.label}". Nada do que já existe é mudado.` : 'Atualizar o mundo da história com os capítulos.'))) return;
     let chaptersTxt = '';
@@ -4244,7 +4255,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           `Em "pendencias", liste o que ainda não está definido e seria útil o autor decidir (nomes, regras, motivações, lugares).`);
     const b = startBusy('world', 'Mundo da história', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       const a = r.text.indexOf('{'), z = r.text.lastIndexOf('}');
       let data;
       try { data = JSON.parse(r.text.slice(a, z + 1)); } catch { data = null; }
@@ -4267,15 +4278,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       if (target) addTo(targetList, data.itens || data[target.key] || Object.values(data).find(Array.isArray), target.key === 'personagens');
       else WORLD.forEach(([k]) => addTo(w.e[k], data[k], k === 'personagens'));
       if (!target) { w.at = Date.now(); w.chapters = p.chapters.length; }
-      stopBusy();
+      b.stop();
       toast(auto ? 'Mundo da história criado ✓ Veja na aba Mundo.' : added ? `${added} item(ns) novo(s) ✓` : 'Nada novo para acrescentar.');
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Parado. O mundo anterior foi mantido.');
       else if (auto) toast('Não deu para criar o mundo agora. Tente depois na aba Mundo.'); // automático: sem aviso de erro grande
-      else handleAIError(e, () => generateWorld(auto, target));
+      else handleAIError(e, () => generateWorld(auto, target, p));
     } finally {
-      stopBusy(); saveProject(p, true);
+      b.stop(); saveProject(p, true);
       if (currentId === p.id) renderTab();
     }
   }
@@ -4299,7 +4310,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (p.summaryAt) card.append(el('p', { class: 'muted', text: `Feito em ${fmtDate(p.summaryAt)}, com ${p.summaryChapters} capítulo(s).` +
       (p.chapters.length !== p.summaryChapters ? ' Há capítulos novos desde então.' : edited ? ' Você editou capítulos desde então.' : '') }));
     card.append(el('button', {
-      class: 'primary wide', disabled: !!busy, onclick: generateSummary,
+      class: 'primary wide', onclick: generateSummary,
       icon: 'notebook-text', ai: true, text: p.summary.trim() ? (outdated ? 'Atualizar o resumo' : 'Gerar de novo') : 'Gerar o resumo'
     }));
 
@@ -4325,7 +4336,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   async function generateSummary() {
     const p = cur();
-    if (busy || !ensureReady(p, generateSummary)) return;
+    if (locked(jobOfKind(p.id, 'summary')) || !ensureReady(p, generateSummary)) return;
     if (!(await confirmAI('Gerar o resumo da história a partir dos capítulos.'))) return;
     const MAX = 60000;
     let chaptersTxt = '', truncated = false;
@@ -4350,20 +4361,20 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     try {
       const r = await callAI(prompt, {
         signal: b.ctrl.signal,
-        onThinking: () => updateBusy({ thinking: true }),
-        onText: (t) => { const ta = $('summaryText'); if (ta && view.tab === 'ideia') ta.value = t; updateBusy({ words: countWords(t) }); }
+        onThinking: () => b.update({ thinking: true }),
+        onText: (t) => { const ta = $('summaryText'); if (ta && view.tab === 'ideia') ta.value = t; b.update({ words: countWords(t) }); }
       });
       p.summaryPrev = old.trim() ? old : null;
       p.summary = r.text; p.summaryAt = Date.now(); p.summaryChapters = p.chapters.length;
-      stopBusy();
+      b.stop();
       toast('Resumo pronto ✓');
     } catch (e) {
       p.summary = old;
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Cancelado. O resumo anterior foi mantido.');
       else handleAIError(e, generateSummary);
     } finally {
-      stopBusy(); saveProject(p, true);
+      b.stop(); saveProject(p, true);
       if (currentId === p.id) renderTab();
     }
   }
@@ -4419,7 +4430,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('div', { class: 'row' },
         el('button', { class: 'primary', style: 'flex:1', icon: 'paperclip', text: 'Adicionar texto (PDF, EPUB, TXT)', onclick: () => input.click() }),
         el('button', { style: 'flex:1', icon: 'image', text: 'Adicionar imagem', onclick: () => imgInput.click() }),
-        el('button', { style: 'flex:1', icon: 'sparkles', ai: true, text: 'Gerar imagem com IA', disabled: !!busy, onclick: () => openImageGen(p, { kind: 'personagem' }) })),
+        el('button', { style: 'flex:1', icon: 'sparkles', ai: true, text: 'Gerar imagem com IA', onclick: () => openImageGen(p, { kind: 'personagem' }) })),
       el('div', { class: 'status', id: 'refStatus', role: 'status' }),
       el('div', { class: 'progress', id: 'refProgress', hidden: true }, el('div')),
       refs.length ? el('details', { style: 'margin-top:14px' },
@@ -4536,7 +4547,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       onclick: () => { genCtx.style = st; settings.imageStyle = st; local.set('fanfic.settings', settings); renderGenStyles(); } })));
   }
   async function openImageGen(p, opts = {}) {
-    if (busy) { toast('Espere a IA terminar ou toque em Parar.'); return; }
     if (!isConfigured()) { openSetup(1, () => openImageGen(p, opts)); return; }
     genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null, sel: new Set(), canSee: true };
     const chs = p.chapters.filter(c => c.text.trim());
@@ -4664,7 +4674,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('genGo').addEventListener('click', async () => {
     const c = genCtx; if (!c) return;
     if (c.ctrl) { c.ctrl.abort(); return; }
-    if (busy) { genStatus('Espere a IA terminar o que está fazendo.', 'err'); return; }
     const p = c.p, kind = c.kind;
     const sub = $('genSub').value.trim();
     const ch = kind === 'cena' ? p.chapters.find(x => x.id === $('genCh').value) : null;
@@ -4684,7 +4693,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         { type: 'text', text: `Referência — ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}${(r.note || '').trim() ? ` (${r.note.trim().slice(0, 300)})` : ''}:` },
         { type: 'image_url', image_url: { url: r.data } }])] : prompt;
     c.ctrl = new AbortController();
-    busy = { ctrl: c.ctrl, kind: 'genimage', label: 'Gerar imagem' };
+    const job = startBusy('genimage', 'Gerar imagem', null); job.ctrl = c.ctrl;
     genGoLabel(true); $('genResult').hidden = true;
     genStatus('Gerando a imagem… pode levar até um minuto.');
     try {
@@ -4709,7 +4718,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       if (e.name === 'AbortError') genStatus('Parado.');
       else { genStatus(e.message || 'Não deu certo. Tente de novo.', 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
     } finally {
-      busy = null; c.ctrl = null; genGoLabel(false);
+      job.stop(); c.ctrl = null; genGoLabel(false);
       if (currentId === p.id) renderTab();
     }
   });
@@ -4793,7 +4802,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function autoRecaps() {
     const p = cur();
     if (!p || !p.bible || !p.bible.built || p.bible.auto === false || !isConfigured() || recapRunning) return;
-    if (busy) { scheduleRecaps(5000); return; }
+    if (jobs.some(j => j.projectId === p.id && j.kind !== 'genimage' && j.kind !== 'entry')) { scheduleRecaps(5000); return; } // espera os textos pararem de mudar
     const stale = staleRecaps(p);
     if (!stale.length || stale.length > 4) { if (view.tab === 'biblia') renderBible(); return; }
     try { await recapChapters(p, stale, null, null); } catch {}
@@ -4829,7 +4838,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     } finally { recapRunning = false; }
   }
   async function buildBible(p) {
-    if (busy || recapRunning || !ensureReady(p, () => buildBible(p))) return;
+    if (recapRunning || locked(jobOfKind(p.id, 'recap')) || !ensureReady(p, () => buildBible(p))) return;
     const stale = staleRecaps(p);
     if (!stale.length) { p.bible = Object.assign({ auto: true }, p.bible, { built: true, at: Date.now() }); saveProject(p, true); renderBible(); toast('A bíblia já está em dia ✓'); return; }
     let est = '';
@@ -4843,12 +4852,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!(await confirmAI(`Resumir ${stale.length === 1 ? '1 capítulo' : stale.length + ' capítulos'} para montar a linha da história da bíblia.${est} Depois, ela se atualiza sozinha ao fim de cada pedido.`))) return;
     const b = startBusy('recap', 'Montando a bíblia', null);
     try {
-      await recapChapters(p, stale, b.ctrl.signal, (i, n) => updateBusy({ label: n > 1 ? `Montando a bíblia · parte ${i + 1} de ${n}` : 'Montando a bíblia', words: 0 }));
-      stopBusy(); toast('Bíblia da obra pronta ✓');
+      await recapChapters(p, stale, b.ctrl.signal, (i, n) => b.update({ label: n > 1 ? `Montando a bíblia · parte ${i + 1} de ${n}` : 'Montando a bíblia', words: 0 }));
+      b.stop(); toast('Bíblia da obra pronta ✓');
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Parado. Os resumos já feitos ficam guardados.'); else handleAIError(e, () => buildBible(p));
-    } finally { stopBusy(); if (currentId === p.id) renderTab(); }
+    } finally { b.stop(); if (currentId === p.id) renderTab(); }
   }
 
   let bibleEdit = null; // { pid, base, text }
@@ -4867,7 +4876,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('p', { class: 'lead', text: 'Um documento só com tudo do livro: infos, fatos fixos, mundo, o que acontece em cada capítulo e as anotações. A IA usa isto em todos os pedidos. Edite e toque em "Aplicar mudanças" para a IA levar as mudanças para os capítulos, o Mundo e as Infos.' }),
       el('p', { class: 'muted', text: p.chapters.length ? `${done} de ${done + stale} capítulo(s) com resumo` + (p.bible && p.bible.at ? ` · atualizada em ${fmtDate(p.bible.at)}` : '') : 'Ainda não há capítulos; a linha da história aparece quando houver.' }),
       el('div', { class: 'row' },
-        stale ? el('button', { class: (p.bible && p.bible.built) ? '' : 'primary', icon: 'refresh-cw', ai: true, disabled: !!busy, text: (p.bible && p.bible.built) ? `Resumir ${stale} capítulo(s) pendente(s)` : 'Montar a bíblia com IA', onclick: () => buildBible(p) }) : null,
+        stale ? el('button', { class: (p.bible && p.bible.built) ? '' : 'primary', icon: 'refresh-cw', ai: true, text: (p.bible && p.bible.built) ? `Resumir ${stale} capítulo(s) pendente(s)` : 'Montar a bíblia com IA', onclick: () => buildBible(p) }) : null,
         el('button', { icon: 'download', text: 'Baixar .md', onclick: () => { const blob = new Blob([bibleEdit ? bibleEdit.text : md], { type: 'text/markdown' }); downloadData(URL.createObjectURL(blob), `${(p.title || 'biblia').replace(/[\\/:*?"<>|]+/g, '')} - bíblia.md`); } })),
       el('label', { class: 'check', for: 'bibleAuto' }, auto, el('span', { text: 'Atualizar sozinha ao fim de cada pedido (resume os capítulos que mudaram; gasta um pouco de crédito)' }))));
     const card = el('div', { class: 'card' });
@@ -4879,7 +4888,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('strong', { text: 'Editando a bíblia' }),
         el('div', { class: 'row' },
           el('button', { text: 'Descartar', onclick: () => { if (bibleEdit.text !== bibleEdit.base && !confirm('Descartar as mudanças na bíblia?')) return; bibleEdit = null; setDraft('bible:' + p.id, ''); renderBible(); } }),
-          el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, disabled: !!busy, text: 'Aplicar mudanças', onclick: () => applyBible(p) }))),
+          el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, text: 'Aplicar mudanças', onclick: () => applyBible(p) }))),
         el('p', { class: 'hint', style: 'margin-top:0', text: 'É um texto em markdown: # títulos, - listas, **negrito**. Mude o que quiser, inclusive os resumos dos capítulos. Em "Decisões e fatos fixos" escreva o que a IA nunca pode contradizer.' }),
         ta);
       setTimeout(() => ta.focus(), 30);
@@ -4923,16 +4932,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `Se uma mudança vale só para os próximos capítulos, não inclua capítulos antigos. Não invente mudanças que o autor não pediu.`, false);
     const b = startBusy('bibleplan', 'Planejando as mudanças', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       if (!data) throw Object.assign(new Error('A IA não devolveu o plano no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
-      stopBusy();
+      b.stop();
       bibleEdit = null; setDraft('bible:' + p.id, '');
       openBiblePlan(p, data, factsChanged);
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Parado. A edição continua aqui.'); else handleAIError(e, () => applyBible(p));
-    } finally { stopBusy(); if (currentId === p.id) renderTab(); }
+    } finally { b.stop(); if (currentId === p.id) renderTab(); }
   }
   function openBiblePlan(p, data, factsChanged, opts = {}) {
     const INFO_LABEL = { title: 'Título', category: 'Categoria', premise: 'Ideia', characters: 'Personagens', tone: 'Tom e estilo', notes: 'O que quero e não quero' };
@@ -4987,28 +4996,29 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     saveProject(p, true); loadForm();
     const chs = chosen.filter(x => x.type === 'chapter');
     if (!chs.length) { if (plan.onDone) plan.onDone(); renderTab(); toast('Mudanças aplicadas ✓'); return; }
-    if (busy || !ensureReady(p, () => {})) return;
-    const b = startBusy('bibleapply', 'Aplicando a bíblia', null);
+    if (chs.some(x => jobOnChapter(x.ch))) { toast('A IA está mexendo em um desses capítulos. Espere terminar e aplique de novo.'); return; }
+    if (!ensureReady(p, () => {})) return;
+    const b = startBusy('bibleapply', 'Aplicando a bíblia', null, { chapterIds: chs.map(x => x.ch.id) });
     let done = 0;
     try {
       for (const x of chs) {
         const ch = x.ch, idx = p.chapters.indexOf(ch);
         if (idx < 0) continue;
-        updateBusy({ label: `Aplicando a bíblia · capítulo ${idx + 1} (${done + 1} de ${chs.length})`, words: 0, thinking: false });
+        b.update({ label: `Aplicando a bíblia · capítulo ${idx + 1} (${done + 1} de ${chs.length})`, words: 0, thinking: false });
         const task = `CAPÍTULO ATUAL:\n${ch.text}\n\nTAREFA: Reescreva este capítulo para aplicar esta mudança decidida pelo autor na bíblia da obra: ${x.instr}\n` +
           `Mude só o que for necessário para isso e para manter a coerência; mantenha todo o resto (cenas, falas, estilo, tamanho) igual. Devolva só o texto do capítulo, sem título.`;
         const r = await aiWrite(p, (strong) => withLang(p, `${buildContext(p, idx, x.instr)}\n\n${task}`, strong), {
-          signal: b.ctrl.signal, onRetry: () => updateBusy({ words: 0 }), onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+          signal: b.ctrl.signal, onRetry: () => b.update({ words: 0 }), onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
         pushHistory(ch, 'Mudança da bíblia ou de um comentário'); ch.text = r.text; ch.editedAt = Date.now();
         saveProject(p, true); done++;
       }
-      stopBusy();
+      b.stop();
       if (plan.onDone) plan.onDone();
       toast(`Aplicado ✓ ${done} capítulo(s) ajustado(s). Dá para desfazer em cada capítulo.`);
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast(`Parado. ${done} capítulo(s) já ajustado(s).`); else handleAIError(e, null);
-    } finally { stopBusy(); if (currentId === p.id) renderTab(); }
+    } finally { b.stop(); if (currentId === p.id) renderTab(); }
   });
 
   // ---------- guia do livro: a IA lê o arquivo inteiro uma vez e resume o que importa ----------
@@ -5026,7 +5036,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('p', { class: 'hint', style: 'margin:4px 0 8px', text: 'Vai em todos os pedidos, junto com os trechos mais ligados ao que está sendo escrito. Você pode editar.' }),
         el('details', {}, el('summary', { text: 'Ver e editar o guia' }), ta),
         el('div', { class: 'row', style: 'margin-top:8px' },
-          el('button', { icon: 'refresh-cw', ai: true, text: 'Refazer o guia', disabled: !!busy, onclick: () => digestRef(p, r) }),
+          el('button', { icon: 'refresh-cw', ai: true, text: 'Refazer o guia', onclick: () => digestRef(p, r) }),
           el('button', { class: 'link plain', text: 'Apagar o guia', onclick: () => { if (!confirm('Apagar o guia deste livro?')) return; delete r.digest; delete r.digestAt; r.updatedAt = Date.now(); db.put('refs', r); markDirty('refs'); renderTab(); } })));
     } else {
       const partial = r.digestWork && r.digestWork.n === parts && r.digestWork.notes.length;
@@ -5034,12 +5044,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('div', { class: 'guide-head' }, el('strong', {}, svgIcon('book-open'), ' Guia do livro')),
         el('p', { class: 'hint', style: 'margin:4px 0 8px', text: `Este arquivo tem ~${fmtNum(pages)} páginas. Em cada pedido só vão os trechos mais ligados ao que está sendo escrito. ` +
           'Com o guia, a IA lê o livro inteiro uma vez e anota personagens, relações, lugares, enredo, termos e o estilo da autora; o guia vai em todos os pedidos.' }),
-        el('button', { class: 'primary', icon: 'book-open', ai: true, disabled: !!busy, text: partial ? `Continuar o guia (${r.digestWork.notes.length} de ${parts} partes lidas)` : 'Criar guia do livro com IA', onclick: () => digestRef(p, r) }));
+        el('button', { class: 'primary', icon: 'book-open', ai: true, text: partial ? `Continuar o guia (${r.digestWork.notes.length} de ${parts} partes lidas)` : 'Criar guia do livro com IA', onclick: () => digestRef(p, r) }));
     }
     return box;
   }
   async function digestRef(p, r) {
-    if (busy || !ensureReady(p, () => digestRef(p, r))) return;
+    if (locked(jobs.find(j => j.kind === 'digest' && j.refId === r.id)) || !ensureReady(p, () => digestRef(p, r))) return;
     const parts = [];
     for (let i = 0; i < r.text.length; i += DIGEST_PART) parts.push(r.text.slice(i, i + DIGEST_PART));
     let est = '';
@@ -5057,40 +5067,40 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const left = parts.length > 1 ? parts.length - st.notes.length : 1;
     if (!(await confirmAI(`Ler "${r.name}" inteiro (${parts.length > 1 ? `${left} de ${parts.length} partes` : '1 parte'}) e criar o guia do livro.${est}`))) return;
     const why = (r.note || '').trim() ? ` O autor diz: ${r.note.trim()}.` : '';
-    const b = startBusy('digest', `Guia do livro · ${r.name}`, null);
+    const b = startBusy('digest', `Guia do livro · ${r.name}`, null, { refId: r.id });
     b.refName = r.name;
     try {
       if (parts.length > 1) {
         for (let i = st.notes.length; i < parts.length; i++) {
-          updateBusy({ label: `Lendo o livro · parte ${i + 1} de ${parts.length}`, words: 0, thinking: false });
+          b.update({ label: `Lendo o livro · parte ${i + 1} de ${parts.length}`, words: 0, thinking: false });
           const prompt = withLang(p, `Você está lendo o livro de referência "${r.name}" (parte ${i + 1} de ${parts.length}) para ajudar um autor a escrever uma história baseada nele.${why}\n\n` +
             `TAREFA: Faça anotações fiéis desta parte, em tópicos e em português do Brasil:\n` +
             `PERSONAGENS (nome, aparência, personalidade, jeito de falar, o que querem, relações);\nLUGARES;\nACONTECIMENTOS DESTA PARTE, em ordem;\n` +
             `TERMOS, REGRAS E DETALHES DO MUNDO;\nESTILO DE ESCRITA (narrador, ponto de vista, tom, ritmo, recursos que se repetem).\n` +
             `Não invente nada que não está no texto. Até ~2.000 palavras.\n\nTEXTO DA PARTE ${i + 1}:\n${parts[i]}`, false);
-          const res = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+          const res = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
           st.notes.push(res.text);
           r.digestWork = st; await db.put('refs', r); // o que já foi lido fica guardado
         }
       }
-      updateBusy({ label: 'Montando o guia do livro', words: 0, thinking: false });
+      b.update({ label: 'Montando o guia do livro', words: 0, thinking: false });
       const src = parts.length > 1 ? st.notes.map((n, i) => `### Anotações da parte ${i + 1}\n${n}`).join('\n\n') : `TEXTO DO LIVRO:\n${parts[0]}`;
       const prompt = withLang(p, `Livro de referência: "${r.name}".${why}\n\n${src}\n\n` +
         `TAREFA: ${parts.length > 1 ? 'Junte as anotações acima' : 'Leia o livro acima e monte'} um GUIA DO LIVRO completo e organizado, em português do Brasil, para um autor escrever uma fanfic fiel a ele. Seções:\n` +
         `1. Enredo resumido, em ordem;\n2. Personagens (aparência, personalidade, jeito de falar, motivações, arco);\n3. Relações entre eles;\n4. Lugares;\n` +
         `5. Termos, regras e detalhes do mundo;\n6. Linha do tempo dos fatos importantes;\n7. Estilo de escrita da autora (narrador, ponto de vista, tom, ritmo, como escreve diálogos e cenas).\n` +
         `Seja fiel ao livro; não invente. Até ~4.000 palavras.`, false);
-      const res = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
+      const res = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       r.digest = res.text; r.digestAt = Date.now(); delete r.digestWork; r.updatedAt = Date.now();
       await db.put('refs', r); markDirty('refs');
-      stopBusy();
+      b.stop();
       toast('Guia do livro pronto ✓ A IA vai usar em todos os pedidos.');
     } catch (e) {
-      stopBusy();
+      b.stop();
       if (e.name === 'AbortError') toast('Parado. O que já foi lido fica guardado; toque de novo para continuar.');
       else handleAIError(e, () => digestRef(p, r));
     } finally {
-      stopBusy();
+      b.stop();
       if (currentId === p.id) renderTab();
     }
   }
@@ -5195,7 +5205,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   async function describeImage(p, r, noteEl, btn) {
-    if (busy || !ensureReady(p, () => describeImage(p, r, noteEl, btn))) return;
+    if (!ensureReady(p, () => describeImage(p, r, noteEl, btn))) return;
     if (!(await confirmAI('Descrever esta imagem de referência.'))) return;
     btn.disabled = true;
     const b = startBusy('image', 'Descrevendo a imagem', null);
@@ -5204,9 +5214,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         'Em português do Brasil, em até 6 linhas, só o que importa para escrever: aparência, roupas, cores, clima, detalhes marcantes. Sem introdução.',
         { signal: b.ctrl.signal, images: [{ url: r.data }], force: true });
       r.note = res.text; r.updatedAt = Date.now(); await db.put('refs', r); markDirty('refs');
-      stopBusy(); toast('Descrição pronta ✓');
-    } catch (e) { stopBusy(); handleAIError(e, () => describeImage(p, r, noteEl, btn)); }
-    finally { stopBusy(); if (currentId === p.id) renderTab(); }
+      b.stop(); toast('Descrição pronta ✓');
+    } catch (e) { b.stop(); handleAIError(e, () => describeImage(p, r, noteEl, btn)); }
+    finally { b.stop(); if (currentId === p.id) renderTab(); }
   }
 
   async function removeRef(p, r) {
@@ -5494,8 +5504,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function callAI(userPrompt, { onText, onThinking, signal, override, guard, images, force, label, opId } = {}) {
     const cfg = Object.assign({}, settings, override || {});
     // para o histórico de gastos: qual ação e qual projeto (tarefas de fundo trazem o próprio rótulo)
-    const op = opId || (busy ? (busy.op = busy.op || uid()) : uid());
-    const action = label || actionLabel(), projTitle = label || (busy && busy.kind !== 'test') ? (cur()?.title || '').trim() : '';
+    const job = signal ? jobs.find(j => j.ctrl.signal === signal) : null;
+    const op = opId || (job ? job.op : uid());
+    const jobProj = job ? projects.find(x => x.id === job.projectId) : null;
+    const action = label || actionLabel(job), projTitle = ((jobProj || (label ? cur() : null)) || {}).title || '';
     // imagens só vão para modelos que enxergam (force: o pedido é sobre a imagem)
     let content = userPrompt;
     if (images && images.length && (force || await canSeeImages())) {
@@ -5602,10 +5614,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const SPEND_MAX = 1000;
   let spend = local.get('fanfic.spend', { log: [], clearedAt: 0 });
   if (Array.isArray(spend)) spend = { log: spend, clearedAt: 0 };
-  function actionLabel() {
+  function actionLabel(busy) {
     if (!busy) return 'Teste da conexão';
-    const ch = busy.chapterId && cur()?.chapters.find(c => c.id === busy.chapterId);
-    const chName = ch ? ` · ${chTitle(cur(), ch)}` : '';
+    const pj = projects.find(x => x.id === busy.projectId) || cur();
+    const ch = busy.chapterId && pj?.chapters.find(c => c.id === busy.chapterId);
+    const chName = ch ? ` · ${chTitle(pj, ch)}` : '';
     if (busy.kind === 'chapter') return 'Escrever capítulo' + chName;
     if (busy.kind === 'continue') return 'Continuar capítulo' + chName;
     if (busy.kind === 'adjust') return busy.label.replace('Reescrevendo o trecho', 'Ajustar trecho').replace('Reescrevendo', 'Ajustar capítulo').replace('Corrigindo', 'Corrigir texto').replace('Resolvendo marcações', 'Resolver marcações').replace('Aplicando sugestão', 'Aplicar sugestão') + chName;

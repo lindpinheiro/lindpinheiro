@@ -821,6 +821,7 @@
                 <label for="f-pov">Narração</label>
                 <select id="f-pov" data-f="pov">
                   <option>Terceira pessoa</option>
+                  <option>Terceira pessoa (POV)</option>
                   <option>Primeira pessoa</option>
                   <option>Segunda pessoa (você)</option>
                 </select>
@@ -833,6 +834,11 @@
                   <option value="2500">Longo (~2.500 palavras)</option>
                 </select>
               </div>
+            </div>
+            <div id="povWrap" hidden>
+              <label for="f-povChars">De quem é o ponto de vista? <span class="muted">(POV)</span></label>
+              <input type="text" id="f-povChars" data-f="povChars" placeholder="Ex.: Jason e Miguel, alternando entre os capítulos">
+              <p class="hint">O narrador acompanha um personagem por vez e mostra só o que ele vê, sente e pensa. Ao escrever um capítulo, você escolhe de quem é o POV.</p>
             </div>
             <label for="f-tone">Tom e estilo</label>
             <input type="text" id="f-tone" data-f="tone" placeholder="Ex.: slow burn, enemies to lovers, diálogos afiados…">
@@ -1067,6 +1073,10 @@
   <label for="writeDir" style="margin-top:8px">O que deve acontecer? <span class="muted">(opcional)</span></label>
   <textarea id="writeDir" placeholder="Deixe em branco para a IA seguir a história."></textarea>
   <div class="chips" id="writeChips"></div>
+  <div id="writePovWrap" hidden>
+    <label for="writePov">POV deste capítulo</label>
+    <select id="writePov"></select>
+  </div>
   <label for="writeLength">Tamanho</label>
   <select id="writeLength">
     <option value="800">Curto (~800 palavras)</option>
@@ -2397,13 +2407,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const p = cur();
     document.querySelectorAll('[data-f]').forEach(inp => { inp.value = p[inp.dataset.f] ?? ''; });
     $('f-lang').value = p.lang || DEFAULT_LANG;
+    $('povWrap').hidden = !isPovMode(p);
     document.querySelectorAll('input[name=heat]').forEach(r => { r.checked = r.value === p.heat; });
     $('f-adults').checked = !!p.adults;
   }
   document.querySelectorAll('[data-f]').forEach(inp => inp.addEventListener('input', () => {
     const p = cur(); p[inp.dataset.f] = inp.value; saveProject(p);
+    if (inp.dataset.f === 'pov') $('povWrap').hidden = !isPovMode(p);
     if (inp.dataset.f === 'title' || inp.dataset.f === 'category') renderProjects();
   }));
+  $('f-pov').addEventListener('change', () => { const p = cur(); p.pov = $('f-pov').value; saveProject(p); $('povWrap').hidden = !isPovMode(p); });
   document.querySelectorAll('input[name=heat]').forEach(r => r.addEventListener('change', () => {
     const p = cur(); p.heat = r.value; saveProject(p);
   }));
@@ -2515,9 +2528,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `"fandom": o universo ou fandom se for fanfic de algo que existe, senão "",\n"premise": a ideia e o enredo em 1 a 3 parágrafos,\n` +
       `"characters": um personagem por linha começando com "- " (nome, idade 18+, aparência, jeito, relação com os outros),\n` +
       `"heat": "leve", "picante" ou "intenso",\n"tone": tom e estilo em uma linha,\n"notes": o que o autor quer e o que não quer na história,\n` +
-      `"pov": "Terceira pessoa", "Primeira pessoa" ou "Segunda pessoa (você)",\n"length": "800", "1500" ou "2500" (tamanho de capítulo que combina).\n` +
+      `"pov": "Terceira pessoa", "Terceira pessoa (POV)" (um personagem por vez), "Primeira pessoa" ou "Segunda pessoa (você)",\n"povChars": se for POV, de quem (ex.: "Jason e Miguel, alternando"), senão "",\n"length": "800", "1500" ou "2500" (tamanho de capítulo que combina).\n` +
       `Use tudo o que o autor escreveu e organize; complete o que faltar de forma coerente, sem contradizer o autor. Todos os personagens são adultos (18+).`, false);
-    const prev = {}; ['title', 'category', 'fandom', 'premise', 'characters', 'heat', 'tone', 'notes', 'pov', 'length'].forEach(k => { prev[k] = p[k]; });
+    const prev = {}; ['title', 'category', 'fandom', 'premise', 'characters', 'heat', 'tone', 'notes', 'pov', 'povChars', 'length'].forEach(k => { prev[k] = p[k]; });
     const b = startBusy('fill', 'Preencher as infos', null);
     try {
       const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => updateBusy({ thinking: true }), onText: (t) => updateBusy({ words: countWords(t) }) });
@@ -2526,7 +2539,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const str = (v) => Array.isArray(v) ? v.map(x => '- ' + String(x).replace(/^-\s*/, '')).join('\n') : String(v ?? '').trim();
       ['title', 'category', 'fandom', 'premise', 'characters', 'tone', 'notes'].forEach(k => { const v = str(data[k]); if (v) p[k] = v; });
       if (['leve', 'picante', 'intenso'].includes(String(data.heat).toLowerCase())) p.heat = String(data.heat).toLowerCase();
-      if (['Terceira pessoa', 'Primeira pessoa', 'Segunda pessoa (você)'].includes(data.pov)) p.pov = data.pov;
+      if (['Terceira pessoa', 'Terceira pessoa (POV)', 'Primeira pessoa', 'Segunda pessoa (você)'].includes(data.pov)) p.pov = data.pov;
+      if (isPovMode(p) && String(data.povChars || '').trim()) p.povChars = String(data.povChars).trim();
       if (['800', '1500', '2500'].includes(String(data.length))) p.length = String(data.length);
       stopBusy(); loadForm();
       toast('Campos preenchidos ✓ Revise e salve.', { action: 'Desfazer', onAction: () => { Object.assign(p, prev); saveProject(p, true); loadForm(); renderTab(); renderProjects(); } });
@@ -2659,7 +2673,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     p.chapters.forEach((c, i) => {
       const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
       sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
-        el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` }),
+        el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : '') }),
         el('h3', { text: chTitle(p, c) }),
         el('div', { class: 'preview', text: c.text.slice(0, 260) || (busy && busy.chapterId === c.id ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
@@ -3467,6 +3481,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       : ['Mais romance e tensão', 'Uma reviravolta', 'Um conflito entre eles', 'Um momento engraçado', 'Um segredo é revelado'];
     if (n > 1 && p.heat !== 'leve') ideas.splice(1, 0, 'Uma cena quente');
     renderChips($('writeChips'), ideas, $('writeDir'));
+    // POV: sugere alternar com o do capítulo anterior
+    $('writePovWrap').hidden = !isPovMode(p);
+    if (isPovMode(p)) {
+      const names = povNames(p), last = (p.chapters.at(-1) || {}).pov;
+      $('writePov').replaceChildren(el('option', { value: '', text: names.length > 1 ? 'A IA escolhe (alternando)' : 'A IA escolhe' }), ...names.map(n => el('option', { value: n, text: n })));
+      const next = names.length > 1 && last ? names[(names.findIndex(n => normTitle(n) === normTitle(last)) + 1) % names.length] : '';
+      $('writePov').value = next && names.some(n => normTitle(n) === normTitle(last)) ? next : '';
+    }
     $('writeDlg').showModal();
   }
 
@@ -3495,8 +3517,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('writeGo').addEventListener('click', () => {
     const dir = $('writeDir').value.trim();
     const length = $('writeLength').value;
+    const pov = isPovMode(cur()) ? $('writePov').value : '';
     $('writeDlg').close();
-    writeChapter(dir, length);
+    writeChapter(dir, length, pov);
   });
 
   const langOf = (p) => p.lang || DEFAULT_LANG;
@@ -3544,17 +3567,21 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
   }
 
-  async function writeChapter(dir, length) {
+  async function writeChapter(dir, length, pov) {
     const p = cur();
     const n = p.chapters.length + 1;
+    const lastPov = (p.chapters.at(-1) || {}).pov;
+    const povLine = !isPovMode(p) ? '' : pov ? `\nPONTO DE VISTA (POV) DESTE CAPÍTULO: ${pov}. Narre todo o capítulo em terceira pessoa pelo olhar de ${pov}.`
+      : `\nPONTO DE VISTA (POV) DESTE CAPÍTULO: escolha um dos personagens de POV (${(p.povChars || 'os protagonistas').trim()})${lastPov ? `; o capítulo anterior foi pelo olhar de ${lastPov}, então de preferência alterne` : ''}. Mantenha o mesmo POV no capítulo inteiro. Na primeira linha do texto, escreva só "POV: Nome" e depois comece o capítulo.`;
     if (!(await confirmAI(n === 1 ? 'Escrever o capítulo 1. Depois dele, o mundo da história também é criado (mais um pedido).' : `Escrever o capítulo ${n}.`))) { setDraft('write:' + p.id, dir); return; }
     const makePrompt = (strong) => withLang(p, `${buildContext(p, p.chapters.length, dir)}\n\n` +
       `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde o anterior parou') +
       `, com cerca de ${length} palavras.` +
-      (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') +
+      (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') + povLine +
       `\nNão escreva o título; comece direto no texto.`, strong);
 
     const ch = { id: uid(), title: '', text: '' };
+    if (pov) ch.pov = pov;
     p.chapters.push(ch);
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
     const b = startBusy('chapter', `Capítulo ${n}`, ch.id);
@@ -3567,6 +3594,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         onText: (t) => { ch.text = t; paintChapter(ch, t); updateBusy({ words: countWords(t) }); }
       });
       ch.text = r.text;
+      // quando a IA escolhe o POV, ela avisa na primeira linha ("POV: Nome"); guarda e tira do texto
+      if (isPovMode(p) && !ch.pov) { const m = /^\s*POV:\s*([^\n]{1,40})\n+/i.exec(ch.text); if (m) { ch.pov = m[1].trim().replace(/[.*_]+$/g, ''); ch.text = ch.text.slice(m[0].length); } }
       stopBusy();
       if (r.truncated) showAlert({
         kind: 'info', msg: 'O capítulo parou antes do fim, porque a resposta atingiu o tamanho máximo.',
@@ -3597,6 +3626,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const original = ch.text;
     const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, '')}\n\n` +
       `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` +
+      (isPovMode(p) && ch.pov ? `PONTO DE VISTA (POV) DESTE CAPÍTULO: ${ch.pov}; continue pelo olhar dele.\n` : '') +
       `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
       `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.`, strong);
     const sep = !original ? '' : /[.!?…"”»*)\]]\s*$/.test(original) ? '\n\n' : ' ';
@@ -4488,7 +4518,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
     L.push('## Linha da história', '');
     p.chapters.forEach((c, i) => {
-      L.push(`### Capítulo ${i + 1} — ${chTitle(p, c)}`);
+      L.push(`### Capítulo ${i + 1} — ${chTitle(p, c)}${c.pov ? ` (POV: ${c.pov})` : ''}`);
       const stale = !c.recap || c.recap.of !== hashText(c.text);
       L.push(c.recap && c.recap.text ? c.recap.text + (stale ? ' _(o capítulo mudou depois deste resumo)_' : '') : '_(sem resumo ainda)_', '');
     });
@@ -5150,12 +5180,20 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   // Montagem dos pedidos
   // =====================================================================
+  const isPovMode = (p) => /\(POV\)/.test(p.pov || '');
+  const povNames = (p) => (p.povChars || '').split(/\s*(?:,|;|\/|\be\b|\band\b)\s*/i).map(x => x.replace(/\(.*?\)|alternando.*$|entre os capítulos/gi, '').trim()).filter(x => x && x.length < 40);
+  function narration(p) {
+    if (!isPovMode(p)) return p.pov;
+    return `Terceira pessoa limitada (POV): o narrador acompanha UM personagem por vez e mostra só o que ele vê, ouve, sente e pensa; ` +
+      `não entra na cabeça dos outros personagens (o que eles sentem aparece só pelo que o personagem do POV percebe). ` +
+      `Personagens de POV: ${(p.povChars || '').trim() || 'os protagonistas'}.`;
+  }
   function bible(p) {
     return [
       `TÍTULO: ${p.title || '(sem título)'}`,
       `IDIOMA DA HISTÓRIA: ${p.lang || DEFAULT_LANG}`,
       `FANDOM/UNIVERSO: ${p.fandom || 'original'}`,
-      `NARRAÇÃO: ${p.pov}`,
+      `NARRAÇÃO: ${narration(p)}`,
       `INTENSIDADE: ${HEAT[p.heat] || HEAT.picante}`,
       `TOM E ESTILO: ${p.tone || 'livre'}`,
       `PERSONAGENS (todos adultos, 18+):\n${p.characters || '(a definir)'}`,

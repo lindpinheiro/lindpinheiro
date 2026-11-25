@@ -3539,6 +3539,21 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       onDone: () => { x.status = 'approved'; const hl = x.hlId && (ch.highlights || []).find(h => h.id === x.hlId); if (hl) hl.resolved = Date.now(); },
       onUndo: () => { x.status = 'pending'; const hl = x.hlId && (ch.highlights || []).find(h => h.id === x.hlId); if (hl) delete hl.resolved; } });
   }
+  // tira os objetos JSON completos de uma lista que pode ter sido cortada no meio
+  function completeJsonObjects(t) {
+    const out = [], start = (t || '').indexOf('[');
+    if (start < 0) return out;
+    let depth = 0, inStr = false, esc = false, from = -1;
+    for (let i = start + 1; i < t.length; i++) {
+      const c = t[i];
+      if (inStr) { if (esc) esc = false; else if (c === '\\') esc = true; else if (c === '"') inStr = false; continue; }
+      if (c === '"') { inStr = true; continue; }
+      if (c === '{') { if (depth === 0) from = i; depth++; }
+      else if (c === '}') { depth--; if (depth === 0 && from >= 0) { try { out.push(JSON.parse(t.slice(from, i + 1))); } catch {} from = -1; } }
+      else if (c === ']' && depth === 0) break;
+    }
+    return out;
+  }
   async function suggestChapter(p, ch, opts = {}) {
     if (locked(jobOnChapter(ch), 'A IA já está trabalhando neste capítulo. Espere terminar.') || !ensureReady(p, () => suggestChapter(p, ch, opts))) return;
     const only = !!(opts.marks && opts.marks.length);
@@ -3564,6 +3579,23 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       const items = (data && (data.sugestoes || data.suggestions)) || [];
+      const list = toSugList(items);
+      if (!list.length) throw Object.assign(new Error('A IA não devolveu as sugestões no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
+      saveSugList(list);
+      b.stop();
+      toast(`${list.length} sugestões ✓ Veja abaixo do capítulo.`);
+    } catch (e) {
+      b.stop();
+      // a conexão caiu: as sugestões que chegaram inteiras ficam salvas
+      const got = e.net ? toSugList(completeJsonObjects(e.partial)) : [];
+      if (got.length) { saveSugList(got); e.kept = `Mas ${got.length === 1 ? '1 sugestão chegou inteira e ficou salva' : got.length + ' sugestões chegaram inteiras e ficaram salvas'} abaixo do capítulo.`; }
+      else if (e.name !== 'AbortError') e.kept = 'Nenhuma sugestão chegou, e o capítulo não mudou.';
+      if (e.name === 'AbortError') toast('Parado.'); else handleAIError(e, () => suggestChapter(p, ch, opts));
+    } finally {
+      b.stop(); saveProject(p, true);
+      if (currentId === p.id) { renderTab(); setTimeout(() => document.querySelector('.sug-list')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 50); }
+    }
+    function toSugList(items) {
       const list = items.map(it => {
         const m = /M(\d+)/i.exec(String(it.marcacao || ''));
         const h = m ? asks[Number(m[1]) - 1] : null;
@@ -3572,22 +3604,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           quote, replacement: String(it.novo || it.replacement || '').trim(), feedback: String(it.feedback || '').trim(), hlId: h ? h.id : null,
           agree: h ? (it.concorda === true || /^(true|sim)$/i.test(String(it.concorda))) : null, status: 'pending', at: Date.now() };
       }).filter(it => (it.quote && it.replacement && it.quote !== it.replacement) || (it.hlId && (it.feedback || it.why)));
-      if (!list.length) throw Object.assign(new Error('A IA não devolveu as sugestões no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
       // respostas às marcações primeiro; depois as que acham o trecho no texto
       list.sort((a, b2) => (!!b2.hlId - !!a.hlId) || (!!findQuote(ch.text, b2.quote) - !!findQuote(ch.text, a.quote)));
+      return list;
+    }
+    function saveSugList(list) {
       if (only) {
         // junta com as sugestões que ainda estavam esperando (sem repetir as das mesmas marcações)
         const keep = (ch.suggestions || []).filter(x => x.status === 'pending' && !(x.hlId && list.some(n => n.hlId === x.hlId)));
         ch.suggestions = [...list, ...keep];
       } else ch.suggestions = list;
-      b.stop();
-      toast(`${list.length} sugestões ✓ Veja abaixo do capítulo.`);
-    } catch (e) {
-      b.stop();
-      if (e.name === 'AbortError') toast('Parado.'); else handleAIError(e, () => suggestChapter(p, ch, opts));
-    } finally {
-      b.stop(); saveProject(p, true);
-      if (currentId === p.id) { renderTab(); setTimeout(() => document.querySelector('.sug-list')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 50); }
     }
   }
 
@@ -3794,9 +3820,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       actions.push({ icon: 'credit-card', label: 'Adicionar créditos', primary: true, onClick: () => openCredits(retry) });
       actions.push({ label: 'Escolher um modelo grátis', onClick: () => openSetup(3, retry) });
     }
-    if (retry && e.action !== 'key' && e.action !== 'setup') actions.push({ label: 'Tentar de novo', primary: !e.action, onClick: retry });
+    if (retry && e.action !== 'key' && e.action !== 'setup') actions.push({ icon: 'refresh-cw', label: 'Tentar de novo', primary: !e.action, onClick: retry });
     if (edit) actions.push({ icon: 'pencil', label: 'Mudar o pedido', onClick: edit });
-    showAlert({ kind: 'err', msg: e.message + (edit ? ' Seu pedido ficou guardado.' : ''), actions });
+    const money = e.charged === false ? ' Nada foi cobrado: o pedido não chegou a ser processado.'
+      : e.charged === true ? ' Foi cobrado só o que a IA chegou a escrever (veja em Gastos com IA).' : '';
+    if (e.charged === true) actions.push({ icon: 'receipt', label: 'Ver gastos', onClick: openSpend });
+    showAlert({ kind: 'err', msg: e.message + (e.kept ? ' ' + e.kept : '') + money + (edit ? ' Seu pedido ficou guardado.' : ''), actions });
   }
 
   // =====================================================================
@@ -3942,7 +3971,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       b.stop();
       if (!ch.text.trim() || e.code === 'lang-final') { p.chapters = p.chapters.filter(c => c.id !== ch.id); view.chapterId = null; }
       else if (e.name === 'AbortError') { toast('Parado. O que já foi escrito ficou salvo.'); e = null; }
-      if (e) handleAIError(e, () => writeChapter(dir, length), openWriteDialog);
+      if (e && e.net && ch.text.trim() && p.chapters.includes(ch)) {
+        e.kept = 'O que a IA já tinha escrito ficou salvo no capítulo; "Tentar de novo" continua de onde parou.';
+        handleAIError(e, () => continueChapter(ch));
+      } else if (e) handleAIError(e, () => writeChapter(dir, length, pov), openWriteDialog);
     } finally {
       b.stop(); saveProject(p, true);
       if (currentId === p.id) { renderTab(); renderProjects(); }
@@ -3979,6 +4011,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       toast('Capítulo continuado ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
       ch.text = original;
+      if (e.net && (e.partial || '').trim()) {
+        pushHistory(ch, 'Continuar escrevendo (interrompido)', original);
+        ch.text = original + sep + e.partial.trim();
+        e.kept = 'O que a IA já tinha escrito ficou salvo; "Tentar de novo" continua de onde parou.';
+      } else if (e.name !== 'AbortError') e.kept = 'O capítulo ficou como estava.';
       b.stop();
       handleAIError(e, () => continueChapter(ch));
     } finally {
@@ -4096,7 +4133,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ch.text = original;
       b.stop();
       if (e.name === 'AbortError') toast('Cancelado. O texto original foi mantido.');
-      else if (!plain) handleAIError(e, () => runAdjust(target, instr, opts));
+      else if (!plain) { e.kept = 'O texto ficou como estava.'; handleAIError(e, () => runAdjust(target, instr, opts)); }
       else {
         setDraft('adj:' + ch.id, instr);
         handleAIError(e, () => runAdjust(target, instr), () => {
@@ -4269,7 +4306,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     } catch (err) {
       if (entryCtx === c) { $('entryText').value = c.before; c.before = null; }
       if (err.name === 'AbortError') entryStatus('Parado. O texto anterior foi mantido.');
-      else { entryStatus(err.message || 'Não deu certo. Tente de novo.', 'err'); if (err.action) handleAIError(err, null); }
+      else { entryStatus((err.message || 'Não deu certo.') + (err.charged === false ? ' Nada foi cobrado.' : '') + ' Toque em "Escrever com IA" para tentar de novo.', 'err'); if (err.action) handleAIError(err, null); }
     } finally {
       job.stop(); c.ctrl = null; if (entryCtx === c) entryAiBtn(false);
     }
@@ -4748,7 +4785,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         usage: { include: true }, image_config: { aspect_ratio: aspect } }) });
     } catch (e) {
       if (e.name === 'AbortError') throw e;
-      throw new Error('Não consegui falar com a IA. Confira a internet e tente de novo.');
+      throw Object.assign(new Error('Não consegui falar com a IA: a internet caiu ou está instável.'), { net: true, charged: false });
     }
     if (!res.ok) {
       let msg = await res.text();
@@ -4811,7 +4848,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       genStatus('Pronto! A imagem ficou guardada nas Referências. Toque em Gerar imagem para fazer outra.', 'ok');
     } catch (e) {
       if (e.name === 'AbortError') genStatus('Parado.');
-      else { genStatus(e.message || 'Não deu certo. Tente de novo.', 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
+      else { genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ' Toque em "Gerar imagem" para tentar de novo.', 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
     } finally {
       job.stop(); c.ctrl = null; genGoLabel(false);
       if (currentId === p.id) renderTab();
@@ -5093,6 +5130,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!chs.length) { if (plan.onDone) plan.onDone(); renderTab(); toast('Mudanças aplicadas ✓'); return; }
     if (chs.some(x => jobOnChapter(x.ch))) { toast('A IA está mexendo em um desses capítulos. Espere terminar e aplique de novo.'); return; }
     if (!ensureReady(p, () => {})) return;
+    applyChapterChanges(p, chs, plan.onDone);
+  });
+  async function applyChapterChanges(p, chs, onDone) {
+    if (chs.some(x => jobOnChapter(x.ch))) { toast('A IA está mexendo em um desses capítulos. Espere terminar e tente de novo.'); return; }
     const b = startBusy('bibleapply', 'Aplicando a bíblia', null, { chapterIds: chs.map(x => x.ch.id) });
     let done = 0;
     try {
@@ -5108,13 +5149,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         saveProject(p, true); done++;
       }
       b.stop();
-      if (plan.onDone) plan.onDone();
+      if (onDone) onDone();
       toast(`Aplicado ✓ ${done} capítulo(s) ajustado(s). Dá para desfazer em cada capítulo.`);
     } catch (e) {
       b.stop();
-      if (e.name === 'AbortError') toast(`Parado. ${done} capítulo(s) já ajustado(s).`); else handleAIError(e, null);
+      const rest = chs.slice(done);
+      e.kept = done ? `${done} capítulo(s) já foram ajustados e ficaram salvos; "Tentar de novo" faz só os ${rest.length} que faltam.` : 'Nenhum capítulo mudou.';
+      if (e.name === 'AbortError') toast(`Parado. ${done} capítulo(s) já ajustado(s).`); else handleAIError(e, () => applyChapterChanges(p, rest, onDone));
     } finally { b.stop(); if (currentId === p.id) renderTab(); }
-  });
+  }
 
   // ---------- guia do livro: a IA lê o arquivo inteiro uma vez e resume o que importa ----------
   const DIGEST_PART = 120000; // ~48 páginas por parte
@@ -5635,16 +5678,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       });
     } catch (e) {
       if (e.name === 'AbortError') throw e;
-      throw new Error('Não consegui falar com a IA. Confira a internet e tente de novo.');
+      // não chegou à IA: nada foi cobrado
+      throw Object.assign(new Error('Não consegui falar com a IA: a internet caiu ou está instável.'), { net: true, charged: false });
     }
     if (!res.ok) {
       let msg = await res.text();
       try { const j = JSON.parse(msg); msg = j.error?.metadata?.raw || j.error?.message || msg; } catch {}
-      throw apiError(res.status, msg);
+      throw Object.assign(apiError(res.status, msg), { charged: false });
     }
     const reader = res.body.getReader();
     const dec = new TextDecoder();
     let buf = '', full = '', finish = null, usage = null;
+    try {
     try {
     for (;;) {
       const { done, value } = await reader.read();
@@ -5673,6 +5718,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           onText && onText(full);
         }
       }
+    }
+    } catch (e) {
+      // a conexão caiu no meio: o que já veio fica em e.partial; foi cobrado só o que a IA chegou a escrever
+      if (e.name === 'AbortError' || e.code === 'lang' || e.status != null) { e.partial = full; e.charged = true; throw e; }
+      throw Object.assign(new Error('A conexão caiu no meio da resposta da IA.'), { net: true, charged: true, partial: full });
     }
     } finally {
       // o pedido chegou à IA: registra o gasto (mesmo se parou no meio)

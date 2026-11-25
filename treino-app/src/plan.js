@@ -181,18 +181,18 @@ export const PLAN = {
     ],
   },
   0: {
-    titulo: 'Peito, ombro e acessórios',
+    titulo: 'Peito inferior, ombro e acessórios',
     grupo: 'peito',
     longo: true,
     cardio: { tipo: 'esteira', min: 10 },
-    // Domingo focado no peito superior e do meio: 16 séries de peito antes de qualquer outra coisa,
-    // alternando um exercício para cada parte (inclinado para o superior, reto e crucifixo para o meio).
+    // Domingo focado no peito inferior e nas bordas interna e lateral: 16 séries de peito antes de qualquer outra coisa.
+    // Sem banco declinado com a cabeça para baixo, por causa da pressão: o declinado é na máquina, sentado.
     ex: [
-      E('supino-inc', 'Supino inclinado', 4, '6–10', 120, 'Banco a 30°, não mais: acima disso o ombro assume. A barra desce na parte de cima do peito, perto da clavícula, cotovelos a uns 45° do corpo.'),
-      E('supino-reto-halter', 'Supino reto com halteres', 3, '8–12', 90, 'Peito do meio. Escápulas juntas, desça até os halteres ficarem na altura do peito e suba aproximando sem bater.'),
-      E('crucifixo-inc', 'Crucifixo inclinado com halteres', 3, '10–12', 75, 'Banco a 30°, cotovelos levemente dobrados. Desça até alongar e suba pensando em juntar os braços na frente do rosto.'),
-      E('peck-deck', 'Crucifixo na máquina', 3, '12–15', 60, 'Peito do meio. Pegadas na altura do peito, aperte 1 s no meio.'),
-      E('crossover-baixo', 'Crossover de baixo para cima', 3, '12–15', 60, 'Polias embaixo. Suba as mãos até a altura do queixo e aperte 1 s. Acaba de esgotar o peito superior.'),
+      E('supino-decl-maq', 'Supino declinado na máquina', 4, '6–10', 120, 'Peito inferior. Sentado, a cabeça fica para cima. Empurre para baixo e à frente, na direção do umbigo, sem tirar as escápulas do banco.'),
+      E('squeeze-press', 'Supino com halteres encostados', 3, '10–12', 75, 'Borda interna. Halteres encostados um no outro, palmas viradas para dentro, apertando um contra o outro durante toda a série.'),
+      E('crossover-alto', 'Crossover de cima para baixo', 3, '12–15', 60, 'Peito inferior e borda interna. Polias no alto, puxe as mãos para baixo e à frente do quadril e cruze uma sobre a outra no fim, apertando 1 s.'),
+      E('crucifixo-halter', 'Crucifixo reto com halteres', 3, '10–12', 75, 'Borda lateral. Banco reto, cotovelos levemente dobrados. Desça devagar até alongar bem e suba só até os halteres ficarem acima do peito.'),
+      E('peck-deck', 'Crucifixo na máquina', 3, '12–15', 60, 'Borda interna. Aperte 2 s no meio, como se quisesse juntar os cotovelos.'),
       E('elev-lateral-cabo', 'Elevação lateral na polia', 4, '12–20', 45, 'Um braço de cada vez.'),
       E('triceps-corda-alto', 'Tríceps na polia acima da cabeça', 3, '10–12', 60, 'De costas para a polia, corda atrás da cabeça. Deixa o braço grosso.'),
       E('encolh-halter', 'Encolhimento com halteres', 4, '10–15', 60, 'Suba o ombro até a orelha e segure 1 s.'),
@@ -248,7 +248,7 @@ export function duracao(p) {
 
 // Fotos de início e fim do movimento: free-exercise-db (domínio público), em src/img/<id>.jpg.
 const FOTOS = import.meta.glob('./img/*.jpg', { eager: true, import: 'default' })
-const MESMA_FOTO = { 'hip-thrust-b': 'hip-thrust', 'abdutora-reta': 'abdutora' }
+const MESMA_FOTO = { 'hip-thrust-b': 'hip-thrust', 'abdutora-reta': 'abdutora', 'crossover-alto': 'crossover' }
 export const foto = (id) => FOTOS[`./img/${MESMA_FOTO[id] || id}.jpg`]
 // Busca no YouTube pelo nome do exercício, em vez de um vídeo fixo que pode sair do ar.
 export const video = (nome) => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${nome} execução correta`)}`

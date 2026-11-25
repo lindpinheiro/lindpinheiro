@@ -5,7 +5,7 @@ const A = (id, nome, nota = '') => ({ id, nome, nota })
 
 // Exercícios em que a carga anotada costuma ser de cada lado (cada halter, ou um braço/perna por vez).
 const POR_LADO = new Set([
-  'supino-inc-halter', 'supino-reto-halter', 'elev-lateral', 'encolh-halter', 'stiff', 'step-up', 'rosca-martelo',
+  'supino-inc-halter', 'supino-reto-halter', 'squeeze-press', 'elev-lateral', 'encolh-halter', 'stiff', 'step-up', 'rosca-martelo',
   'rosca-halter', 'crucifixo-halter', 'crucifixo-inc', 'desenv-halter', 'afundo', 'remada-unilateral', 'elev-lateral-cabo',
   'aducao-cabo', 'abducao-cabo', 'leg-unilateral', 'rosca-punho-halter',
 ])
@@ -60,6 +60,10 @@ export const ALTERNATIVAS = {
   'abd-polia': [A('abd-maq', 'Abdominal na máquina', 'Solte o ar ao contrair.'), A('abd-bola', 'Abdominal no chão com pés apoiados', 'Mãos no peito, suba só até tirar as escápulas do chão.')],
   'elev-pernas': [A('elev-pernas-barra', 'Elevação de pernas na barra', 'Pendurado, suba os joelhos até a altura do quadril.'), A('dead-bug', 'Dead bug', 'Deitado, braço e perna opostos descem juntos, lombar colada no chão.')],
   'pallof': [A('dead-bug', 'Dead bug', 'Deitado, braço e perna opostos descem juntos, lombar colada no chão.')],
+  'supino-decl-maq': [A('supino-maq', 'Supino na máquina', 'Use as pegadas mais baixas, na linha do peito inferior.'), A('supino-reto', 'Supino reto', 'Barra descendo na parte de baixo do peito.')],
+  'squeeze-press': [A('supino-reto-halter', 'Supino reto com halteres'), A('supino-maq', 'Supino na máquina', 'Feche bem as mãos no fim, como se quisesse juntá-las.')],
+  'crossover-alto': [A('crossover', 'Crossover na polia'), A('peck-deck', 'Crucifixo na máquina')],
+  'crucifixo-halter': [A('crossover', 'Crossover na polia', 'Polias na altura do ombro, alongando bem na abertura.'), A('peck-deck', 'Crucifixo na máquina')],
   'crucifixo-inc': [A('crossover', 'Crossover na polia', 'Polias na altura do ombro, mãos se encontram na frente do queixo.'), A('peck-deck', 'Crucifixo na máquina', 'Banco na posição mais baixa, para as mãos passarem na altura do peito superior.')],
   'adutora': [A('aducao-cabo', 'Adução na polia', 'Tornozeleira na polia baixa, puxe a perna para dentro.'), A('sumo', 'Agachamento sumô com halter', 'Pés bem abertos, halter entre as pernas.')],
 }

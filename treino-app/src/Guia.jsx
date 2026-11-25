@@ -75,7 +75,8 @@ const SECOES = [
   ) },
   { id: 'peito', icone: Shirt, titulo: 'Peito que não cresce', corpo: (
     <Itens>
-      <li><b>Domingo é dia de peito superior e do meio</b>: 16 séries de peito antes de qualquer outra coisa, alternando as duas partes. Inclinado e crossover de baixo para cima para o superior; supino reto com halteres e crucifixo na máquina para o meio.</li>
+      <li><b>Domingo é dia de peito inferior e das bordas</b>, a parte que desenha o contorno: supino declinado na máquina, crossover de cima para baixo e crucifixos (com alongamento para a borda lateral e com aperto no meio para a interna). O peito superior fica na quarta, com o inclinado e o crossover de baixo para cima.</li>
+      <li><b>O contorno aparece com menos gordura</b>: o músculo cresce com o treino, mas a linha embaixo do peito e a separação no meio só ficam visíveis conforme o percentual de gordura cai. Dieta e treino andam juntos aqui.</li>
       <li><b>Banco a 30°</b>, não 45°: mais inclinado que isso, quem trabalha é o ombro. A barra ou os halteres descem na parte de cima do peito, perto da clavícula, com os cotovelos a uns 45° do corpo.</li>
       <li>Grave uma série de lado de vez em quando: se a barra está descendo no meio do peito, o inclinado virou supino reto.</li>
       <li><b>Execução vale mais que o exercício</b>: escápulas juntas e peito alto o tempo todo. Se o ombro vai para a frente, quem trabalha é o ombro.</li>

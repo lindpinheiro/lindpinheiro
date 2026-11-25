@@ -365,6 +365,9 @@
   .plan-group { font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 10px 0 2px; }
   .plan-item { align-items: flex-start; margin: 0; padding: 8px 0; border-top: 1px solid var(--border); }
   .plan-item small { display: block; color: var(--muted); font-weight: 400; }
+  .eco-box { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); }
+  .eco-box h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+  .eco-box h3 .icon { color: var(--accent); }
   .gen-refs { display: flex; flex-wrap: wrap; gap: 8px; }
   .gen-ref { position: relative; width: 76px; height: 76px; min-height: 0; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid var(--border); background: var(--surface-2); }
   .gen-ref img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -698,7 +701,7 @@
 <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></symbol>
 <symbol id="i-pen-line" viewBox="0 0 24 24"><path d="M12 20h9" /> <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" /></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-maximize-2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" x2="14" y1="3" y2="10" /><line x1="3" x2="10" y1="21" y2="14" /></symbol><symbol id="i-minimize-2" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line x1="14" x2="21" y1="10" y2="3" /><line x1="3" x2="10" y1="21" y2="14" /></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /><path d="M12 17.5v-11" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-piggy-bank" viewBox="0 0 24 24"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z" /><path d="M2 9v1c0 1.1.9 2 2 2h1" /><path d="M16 11h.01" /></symbol><symbol id="i-maximize-2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" x2="14" y1="3" y2="10" /><line x1="3" x2="10" y1="21" y2="14" /></symbol><symbol id="i-minimize-2" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line x1="14" x2="21" y1="10" y2="3" /><line x1="3" x2="10" y1="21" y2="14" /></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /><path d="M12 17.5v-11" /></symbol><symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></symbol><symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M9 15h6" /><path d="M12 18v-6" /></symbol>
 <symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
 <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
 <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /> <path d="M20 3v4" /> <path d="M22 5h-4" /> <path d="M4 17v2" /> <path d="M5 18H3" /></symbol>
@@ -1732,7 +1735,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let cryptoKey = null, syncing = false, syncAgain = false, syncTimer = null;
 
   // configuração da IA que viaja junto com as histórias (no mesmo arquivo cifrado)
-  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system'];
+  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy'];
   function aiForSync() {
     if (!settings.key) return null;
     const o = { updatedAt: settings.updatedAt || 0 };
@@ -2582,7 +2585,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const prev = {}; ['title', 'category', 'fandom', 'premise', 'characters', 'heat', 'tone', 'notes', 'pov', 'povChars', 'length'].forEach(k => { prev[k] = p[k]; });
     const b = startBusy('fill', 'Preencher as infos', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+      const r = await callAI(prompt, { support: true, signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       if (!data) throw Object.assign(new Error('A IA não devolveu as infos no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
       const str = (v) => Array.isArray(v) ? v.map(x => '- ' + String(x).replace(/^-\s*/, '')).join('\n') : String(v ?? '').trim();
@@ -2613,8 +2616,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     while (hi <= ti && hn + blocks[hi].length <= 18000) { hn += blocks[hi].length; head.push(blocks[hi++]); }
     while (ti >= hi && tn + blocks[ti].length <= 24000) { tn += blocks[ti].length; tail.unshift(blocks[ti--]); }
     if (!head.length && blocks.length) head.push(blocks[0].slice(0, 18000) + '\n[...]\n\n');
-    const chaptersTxt = head.join('') + (hi <= ti ? `[... ${ti - hi + 1} capítulo(s) do meio omitidos ...]\n\n` : '') + tail.join('');
-    const refs = pickReferences(Object.assign({}, p, { refBudget: '12000' }), [p.premise, p.characters].join('\n'));
+    const useLine = ecoOn() && hasRecaps(p);
+    const unc = useLine ? uncoveredText(p, p.chapters.length, 20000) : '';
+    const chaptersTxt = useLine
+      ? `LINHA DA HISTÓRIA (resumo de cada capítulo):\n${recapLine(p, p.chapters.length)}\n\n` + (unc ? `CAPÍTULOS AINDA SEM RESUMO:\n${unc}\n` : `FIM DO ÚLTIMO CAPÍTULO:\n${(p.chapters.at(-1) || { text: '' }).text.slice(-6000)}\n`)
+      : head.join('') + (hi <= ti ? `[... ${ti - hi + 1} capítulo(s) do meio omitidos ...]\n\n` : '') + tail.join('');
+    const refs = ecoOn() && refGuides(p) ? refGuides(p) : pickReferences(Object.assign({}, p, { refBudget: '12000' }), [p.premise, p.characters].join('\n'));
     const prompt = `INFOS ATUAIS DA OBRA (o autor escreveu; têm prioridade):\n${JSON.stringify({ premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes }, null, 1)}\n\n` +
       (worldText(p) ? `MUNDO DA HISTÓRIA:\n${worldText(p)}\n\n` : '') +
       ((p.summary || '').trim() ? `RESUMO:\n${p.summary}\n\n` : '') +
@@ -2627,7 +2634,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `Mantenha tudo o que o autor escreveu; só acrescente e esclareça com base nos capítulos, no mundo e nas referências. Não invente. Escreva em português do Brasil.`;
     const b = startBusy('info', 'Infos da Obra', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+      const r = await callAI(prompt, { support: true, signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       if (!data) throw Object.assign(new Error('A IA não devolveu as infos no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
       p.infoPrev = { premise: p.premise, characters: p.characters, tone: p.tone, notes: p.notes };
@@ -3503,7 +3510,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `Inclua o capítulo ${n} se ele precisa mudar. Inclua outros capítulos só se eles ficam incoerentes sem a mudança. Se a ideia vale só daqui para frente, use "fatos" e não mexa em capítulos antigos. Não invente mudanças além do comentário.`, false);
     const b = startBusy('spread', 'Planejando onde aplicar', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+      const r = await callAI(prompt, { support: true, signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       if (!data) throw Object.assign(new Error('A IA não devolveu o plano no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
       b.stop();
@@ -3562,7 +3569,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const asks = only ? opts.marks : (ch.highlights || []).filter(h => h.askAI && !h.resolved);
     const askBlock = asks.length ? `MARCAÇÕES DO AUTOR ${only ? '' : 'PEDINDO FEEDBACK '}(responda a TODAS, uma sugestão para cada, com "marcacao" igual ao código):\n` +
       asks.map((h, i) => `[M${i + 1}] Trecho marcado: “${h.quote}”\n     Anotação do autor: ${(h.note || '').trim() || (only ? '(sem anotação: melhore este trecho)' : '(sem anotação: dê sua opinião sincera sobre este trecho)')}`).join('\n') + '\n\n' : '';
-    const prompt = withLang(p, `${buildContext(p, idx, ch.text.slice(0, 2000))}\n\nCAPÍTULO PARA REVISAR (${chTitle(p, ch)}):\n${ch.text}\n\n` + askBlock +
+    const prompt = withLang(p, `${buildContext(p, idx, ch.text.slice(0, 2000), ecoOn() ? 'lite' : 'full')}\n\nCAPÍTULO PARA REVISAR (${chTitle(p, ch)}):\n${ch.text}\n\n` + askBlock +
       (opts.extra ? `PEDIDO GERAL DO AUTOR: ${opts.extra}\n\n` : '') +
       (only ? `TAREFA: Você é um editor literário experiente. Para CADA marcação acima, proponha uma mudança pontual que atenda à anotação: em "trecho" copie exatamente o trecho a trocar (o marcado ou um pouco mais, se precisar) e em "novo" escreva como ficaria melhor; ` +
           `explique em "feedback" o que mudou e por quê. Não reescreva o capítulo e não sugira nada além das marcações. Respeite a voz e o estilo do autor. `
@@ -3576,7 +3583,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       (asks.length ? ` Numa resposta a uma marcação, "trecho" e "novo" são opcionais: se o melhor for só um comentário, deixe "novo" vazio.` : ''), false);
     const b = startBusy('suggest', `${only ? 'Sugestões das marcações' : 'Sugestões da IA'} · ${chTitle(p, ch)}`, null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+      const r = await callAI(prompt, { support: true, signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       const items = (data && (data.sugestoes || data.suggestions)) || [];
       const list = toSugList(items);
@@ -4104,7 +4111,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         `TAREFA: Reescreva este capítulo seguindo este pedido: ${instr}\n` +
         `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
     // na correção não precisa do contexto da obra (mais barato)
-    const makePrompt = (strong) => withLang(p, opts.fix ? task : `${buildContext(p, idx, instr)}\n\n${task}`, strong);
+    const makePrompt = (strong) => withLang(p, opts.fix ? task : `${buildContext(p, idx, instr, ecoOn() ? 'lite' : 'full')}\n\n${task}`, strong);
     const before = original.slice(0, start), after = original.slice(end);
     if (edit && edit.chId === ch.id) discardEdit();
     view = { tab: 'capitulos', chapterId: ch.id, mode: view.mode };
@@ -4286,13 +4293,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!title) { entryStatus('Escreva o título do item primeiro (ex.: o nome do personagem).', 'err'); $('entryTitle').focus(); return; }
     if (!(await confirmAI(`Escrever o item "${title}" (${c.folder.label}).`))) return;
     let chaptersTxt = '';
-    for (let i = p.chapters.length - 1; i >= 0; i--) {
-      const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
-      if (chaptersTxt.length + block.length > 40000) break;
-      chaptersTxt = block + chaptersTxt;
+    if (ecoOn()) {
+      // só os parágrafos que falam do item (pelo nome), até ~10 mil letras
+      const key = normTitle(title).replace(/\(.*?\)/g, '').trim().split(' ')[0];
+      const hits = [];
+      p.chapters.forEach((c, i) => c.text.split(/\n\s*\n/).forEach(par => { if (key.length > 2 && normTitle(par).includes(key)) hits.push(`[Cap. ${i + 1}] ${par.trim()}`); }));
+      for (const h of hits) { if (chaptersTxt.length + h.length > 10000) break; chaptersTxt += h + '\n\n'; }
+    } else {
+      for (let i = p.chapters.length - 1; i >= 0; i--) {
+        const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
+        if (chaptersTxt.length + block.length > 40000) break;
+        chaptersTxt = block + chaptersTxt;
+      }
     }
     const currentText = $('entryText').value.trim(), ask = $('entryAsk').value.trim();
-    const prompt = `${bible(p)}\n\n` + (worldText(p) ? `MUNDO DA HISTÓRIA:\n${worldText(p)}\n\n` : '') + (chaptersTxt ? `CAPÍTULOS:\n${chaptersTxt}\n` : '') +
+    const line = ecoOn() ? recapLine(p, p.chapters.length) : '';
+    const prompt = `${bible(p)}\n\n` + (worldText(p) ? `MUNDO DA HISTÓRIA:\n${worldText(p)}\n\n` : '') + (line ? `LINHA DA HISTÓRIA:\n${line}\n\n` : '') + (chaptersTxt ? `${ecoOn() ? 'TRECHOS DOS CAPÍTULOS QUE CITAM O ITEM' : 'CAPÍTULOS'}:\n${chaptersTxt}\n` : '') +
       `TAREFA: Escreva o texto do item "${title}" da pasta "${c.folder.label}" do worldbuilding (${c.folder.hint || ''}). ` +
       (currentText ? `Texto atual do item (mantenha o que o autor escreveu e complete):\n${currentText}\n\n` : '') +
       (ask ? `Pedido do autor: ${ask}\n\n` : '') +
@@ -4301,7 +4317,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const job = startBusy('entry', 'Item do mundo', null); job.ctrl = c.ctrl;
     entryAiBtn(true); entryStatus('A IA está escrevendo…');
     try {
-      const r = await callAI(prompt, { signal: c.ctrl.signal, onText: (t) => { if (entryCtx === c) $('entryText').value = t; } });
+      const r = await callAI(prompt, { signal: c.ctrl.signal, support: true, onText: (t) => { if (entryCtx === c) $('entryText').value = t; } });
       if (entryCtx === c) { $('entryText').value = r.text.trim(); $('entryUndo').hidden = !c.before; entryStatus('Pronto. Confira e toque em Salvar.', 'ok'); }
     } catch (err) {
       if (entryCtx === c) { $('entryText').value = c.before; c.before = null; }
@@ -4361,10 +4377,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const w = worldOf(p);
     if (!auto && !(await confirmAI(target ? `Criar com IA o que falta em "${target.label}". Nada do que já existe é mudado.` : 'Atualizar o mundo da história com os capítulos.'))) return;
     let chaptersTxt = '';
-    for (let i = p.chapters.length - 1; i >= 0; i--) {
-      const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
-      if (chaptersTxt.length + block.length > 60000) break;
-      chaptersTxt = block + chaptersTxt;
+    if (ecoOn() && hasRecaps(p)) {
+      // resumos de todos + texto só dos capítulos novos, editados desde a última vez ou ainda sem resumo
+      const line = recapLine(p, p.chapters.length);
+      const txt = uncoveredText(p, p.chapters.length, 30000, (c, i) => i >= (w.chapters || 0) || (c.editedAt || 0) > (w.at || 0));
+      chaptersTxt = `LINHA DA HISTÓRIA (resumo de cada capítulo):\n${line}\n\n` + (txt ? `TEXTO DOS CAPÍTULOS NOVOS OU EDITADOS:\n${txt}` : '');
+    } else {
+      for (let i = p.chapters.length - 1; i >= 0; i--) {
+        const block = `### Capítulo ${i + 1}: ${chTitle(p, p.chapters[i])}\n${p.chapters[i].text}\n\n`;
+        if (chaptersTxt.length + block.length > 60000) break;
+        chaptersTxt = block + chaptersTxt;
+      }
     }
     const current = {};
     WORLD.forEach(([k]) => { current[k] = w.e[k].map(e => ({ title: e.title, text: e.text })); });
@@ -4387,7 +4410,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           `Em "pendencias", liste o que ainda não está definido e seria útil o autor decidir (nomes, regras, motivações, lugares).`);
     const b = startBusy('world', 'Mundo da história', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+      const r = await callAI(prompt, { support: true, signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       const a = r.text.indexOf('{'), z = r.text.lastIndexOf('}');
       let data;
       try { data = JSON.parse(r.text.slice(a, z + 1)); } catch { data = null; }
@@ -4491,7 +4514,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const old = p.summary;
     const b = startBusy('summary', 'Resumo', null);
     try {
-      const r = await callAI(prompt, {
+      const r = await callAI(prompt, { support: true,
         signal: b.ctrl.signal,
         onThinking: () => b.update({ thinking: true }),
         onText: (t) => { const ta = $('summaryText'); if (ta && view.tab === 'ideia') ta.value = t; b.update({ words: countWords(t) }); }
@@ -4955,7 +4978,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           `\n\nTAREFA: Para cada capítulo acima, escreva um resumo fiel de 80 a 150 palavras com o que acontece, as decisões, as revelações e as mudanças nos personagens e nas relações. Sem opinião, sem inventar. ` +
           `Responda SOMENTE com um objeto JSON {"resumos": [{"numero": N, "resumo": "..."}]}.`, false);
         const hashes = new Map(b.map(c => [c, hashText(c.text)]));
-        const r = await callAI(prompt, { signal, label: 'Bíblia da obra · resumos', opId: op });
+        const r = await callAI(prompt, { signal, label: 'Bíblia da obra · resumos', opId: op, support: true });
         let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
         const items = (data && (data.resumos || data.summaries)) || [];
         items.forEach(it => {
@@ -5064,7 +5087,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `Se uma mudança vale só para os próximos capítulos, não inclua capítulos antigos. Não invente mudanças que o autor não pediu.`, false);
     const b = startBusy('bibleplan', 'Planejando as mudanças', null);
     try {
-      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+      const r = await callAI(prompt, { support: true, signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
       if (!data) throw Object.assign(new Error('A IA não devolveu o plano no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
       b.stop();
@@ -5141,11 +5164,28 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         const ch = x.ch, idx = p.chapters.indexOf(ch);
         if (idx < 0) continue;
         b.update({ label: `Aplicando a bíblia · capítulo ${idx + 1} (${done + 1} de ${chs.length})`, words: 0, thinking: false });
-        const task = `CAPÍTULO ATUAL:\n${ch.text}\n\nTAREFA: Reescreva este capítulo para aplicar esta mudança decidida pelo autor na bíblia da obra: ${x.instr}\n` +
-          `Mude só o que for necessário para isso e para manter a coerência; mantenha todo o resto (cenas, falas, estilo, tamanho) igual. Devolva só o texto do capítulo, sem título.`;
-        const r = await aiWrite(p, (strong) => withLang(p, `${buildContext(p, idx, x.instr)}\n\n${task}`, strong), {
-          signal: b.ctrl.signal, onRetry: () => b.update({ words: 0 }), onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
-        pushHistory(ch, 'Mudança da bíblia ou de um comentário'); ch.text = r.text; ch.editedAt = Date.now();
+        let newText = null;
+        if (ecoOn()) {
+          // mais barato: a IA devolve só os trechos a trocar (em vez de reescrever o capítulo inteiro)
+          const ask = withLang(p, `${buildContext(p, idx, x.instr, 'lite')}\n\nCAPÍTULO ATUAL:\n${ch.text}\n\n` +
+            `TAREFA: Aplique esta mudança decidida pelo autor: ${x.instr}\nMude só o necessário. Responda SOMENTE com um objeto JSON {"trocas": [{"trecho": "cópia EXATA de um trecho do capítulo", "novo": "o trecho reescrito"}]}. ` +
+            `Cada "trecho" deve ser copiado letra por letra do capítulo. Se a mudança exigir reescrever a maior parte do capítulo, responda {"reescrever": true}.`, false);
+          const r0 = await callAI(ask, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+          let data; try { data = JSON.parse(r0.text.slice(r0.text.indexOf('{'), r0.text.lastIndexOf('}') + 1)); } catch { data = null; }
+          if (data && !data.reescrever && Array.isArray(data.trocas)) {
+            let t = ch.text, n = 0;
+            data.trocas.forEach(tr => { const loc = findQuote(t, String(tr.trecho || '')); if (loc && tr.novo != null) { t = t.slice(0, loc.start) + String(tr.novo).trim() + t.slice(loc.end); n++; } });
+            if (n) newText = t;
+          }
+        }
+        if (newText == null) {
+          const task = `CAPÍTULO ATUAL:\n${ch.text}\n\nTAREFA: Reescreva este capítulo para aplicar esta mudança decidida pelo autor na bíblia da obra: ${x.instr}\n` +
+            `Mude só o que for necessário para isso e para manter a coerência; mantenha todo o resto (cenas, falas, estilo, tamanho) igual. Devolva só o texto do capítulo, sem título.`;
+          const r = await aiWrite(p, (strong) => withLang(p, `${buildContext(p, idx, x.instr, ecoOn() ? 'lite' : 'full')}\n\n${task}`, strong), {
+            signal: b.ctrl.signal, onRetry: () => b.update({ words: 0 }), onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+          newText = r.text;
+        }
+        pushHistory(ch, 'Mudança da bíblia ou de um comentário'); ch.text = newText; ch.editedAt = Date.now();
         saveProject(p, true); done++;
       }
       b.stop();
@@ -5216,7 +5256,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
             `PERSONAGENS (nome, aparência, personalidade, jeito de falar, o que querem, relações);\nLUGARES;\nACONTECIMENTOS DESTA PARTE, em ordem;\n` +
             `TERMOS, REGRAS E DETALHES DO MUNDO;\nESTILO DE ESCRITA (narrador, ponto de vista, tom, ritmo, recursos que se repetem).\n` +
             `Não invente nada que não está no texto. Até ~2.000 palavras.\n\nTEXTO DA PARTE ${i + 1}:\n${parts[i]}`, false);
-          const res = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+          const res = await callAI(prompt, { support: true, signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
           st.notes.push(res.text);
           r.digestWork = st; await db.put('refs', r); // o que já foi lido fica guardado
         }
@@ -5228,7 +5268,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         `1. Enredo resumido, em ordem;\n2. Personagens (aparência, personalidade, jeito de falar, motivações, arco);\n3. Relações entre eles;\n4. Lugares;\n` +
         `5. Termos, regras e detalhes do mundo;\n6. Linha do tempo dos fatos importantes;\n7. Estilo de escrita da autora (narrador, ponto de vista, tom, ritmo, como escreve diálogos e cenas).\n` +
         `Seja fiel ao livro; não invente. Até ~4.000 palavras.`, false);
-      const res = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+      const res = await callAI(prompt, { support: true, signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
       r.digest = res.text; r.digestAt = Date.now(); delete r.digestWork; r.updatedAt = Date.now();
       await db.put('refs', r); markDirty('refs');
       b.stop();
@@ -5518,10 +5558,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return out;
   }
 
-  function pickReferences(p, query) {
+  function pickReferences(p, query, opts = {}) {
     const refs = (refsCache[p.id] || []).filter(r => r.enabled !== false && r.kind !== 'image');
     if (!refs.length) return '';
-    let budget = Number(p.refBudget) || 20000;
+    let budget = Math.min(Number(p.refBudget) || 20000, opts.cap || Infinity);
     // não passa do que o modelo aceita (deixa espaço para o resto do pedido)
     const model = modelsCache && modelsCache.find(x => x.id === settings.model);
     if (model && model.context_length) budget = Math.min(budget, Math.floor(model.context_length * 3 * 0.5));
@@ -5530,7 +5570,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const total = refs.reduce((n, r) => n + r.text.length, 0);
     if (total <= budget) return refs.map(r => `${header(r)}\n${r.text}`).join('\n\n');
     // guias dos livros (feitos a partir do arquivo inteiro) vão sempre
-    const guides = refs.filter(r => (r.digest || '').trim()).map(r => `[Guia do livro: ${r.name} — resumo feito a partir do livro inteiro]\n${r.digest.trim()}`).join('\n\n');
+    const guides = opts.guides === false ? '' : refs.filter(r => (r.digest || '').trim()).map(r => `[Guia do livro: ${r.name} — resumo feito a partir do livro inteiro]\n${r.digest.trim()}`).join('\n\n');
 
     const chunks = [];
     refs.forEach((r, ri) => chunk(r.text).forEach((t, ci) => chunks.push({ r, ri, ci, t, terms: new Set(terms(t)) })));
@@ -5600,23 +5640,59 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return txt;
   }
 
-  function buildContext(p, upto, extraQuery) {
+  const ecoOn = () => settings.economy !== false;
+  // capítulos antes de `upto` têm resumo atualizado na bíblia?
+  const recapOk = (c) => !c.text.trim() || (c.recap && c.recap.text && c.recap.of === hashText(c.text));
+  const recapsCover = (p, upto) => upto > 0 && p.chapters.slice(0, upto).every(recapOk);
+  // a bíblia já tem resumos? (então dá para mandar resumos no lugar dos capítulos que não mudaram)
+  const hasRecaps = (p) => p.chapters.some(c => c.recap && c.recap.text);
+  // texto só dos capítulos sem resumo em dia (os mais recentes primeiro), até `max` letras
+  function uncoveredText(p, upto, max, extra = () => false) {
+    let txt = '';
+    for (let i = upto - 1; i >= 0; i--) {
+      const c = p.chapters[i];
+      if (recapOk(c) && !extra(c, i)) continue;
+      const block = `### Capítulo ${i + 1}: ${chTitle(p, c)}\n${c.text}\n\n`;
+      if (txt.length + block.length > max) break;
+      txt = block + txt;
+    }
+    return txt;
+  }
+  const recapLine = (p, upto) => p.chapters.slice(0, upto).map((c, i) => c.recap && c.recap.text ? `- Capítulo ${i + 1} (${chTitle(p, c)}): ${c.recap.text}` : '').filter(Boolean).join('\n');
+  function refGuides(p) {
+    return (refsCache[p.id] || []).filter(r => r.enabled !== false && r.kind !== 'image' && (r.digest || '').trim())
+      .map(r => `[Guia do livro: ${r.name} — resumo feito a partir do livro inteiro]\n${r.digest.trim()}`).join('\n\n');
+  }
+  // mode 'lite': só o essencial (obra, fatos, mundo, guias, anotações e linha da história), sem trechos de livro nem capítulos anteriores
+  function buildContext(p, upto, extraQuery, mode = 'full') {
+    const eco = ecoOn();
+    // o que muda pouco vem primeiro: assim os provedores reaproveitam (e cobram menos) a parte repetida
     const parts = [bible(p)];
     if ((p.bibleFacts || '').trim()) parts.push(`DECISÕES E FATOS FIXOS DO AUTOR (prioridade máxima; nunca contradiga, mesmo que capítulos antigos digam outra coisa):\n${p.bibleFacts.trim()}`);
-    const line = p.chapters.slice(0, upto).map((c, i) => c.recap && c.recap.text ? `- Capítulo ${i + 1} (${chTitle(p, c)}): ${c.recap.text}` : '').filter(Boolean).join('\n');
-    if (line) parts.push(`LINHA DA HISTÓRIA (o que acontece em cada capítulo, segundo a bíblia da obra):\n${line}`);
-    const hasSummary = p.useSummary !== false && p.summary.trim();
-    const notes = importantNotes(p);
-    if (notes) parts.push(`ANOTAÇÕES IMPORTANTES DO AUTOR (lembre e respeite):\n${notes}`);
     const world = worldText(p);
     if (world) parts.push(`MUNDO DA HISTÓRIA (guia do autor; siga estas informações e não as contradiga):\n${world}`);
+    const guides = refGuides(p);
+    if (guides) parts.push(`GUIA DO LIVRO DE REFERÊNCIA (apoio; não copie trechos literalmente):\n${guides}`);
+    const notes = importantNotes(p);
+    if (notes) parts.push(`ANOTAÇÕES IMPORTANTES DO AUTOR (lembre e respeite):\n${notes}`);
     const visual = imageNotes(p);
     if (visual) parts.push(`REFERÊNCIAS VISUAIS do autor (descrições):\n${visual}`);
+    const line = recapLine(p, upto);
+    if (line) parts.push(`LINHA DA HISTÓRIA (o que acontece em cada capítulo, segundo a bíblia da obra):\n${line}`);
+    if (mode === 'lite') return parts.join('\n\n');
+    const covered = eco && hasRecaps(p);
+    // com a linha da história em dia, o resumo antigo é repetido: fica de fora na economia
+    const hasSummary = p.useSummary !== false && p.summary.trim() && !covered;
     if (hasSummary) parts.push(`RESUMO DA HISTÓRIA ATÉ AGORA (memória; se algo aqui discordar do texto dos capítulos, vale o texto dos capítulos, que o autor pode ter editado):\n${p.summary}`);
     const lastTail = upto > 0 ? p.chapters[upto - 1].text.slice(-2500) : '';
-    const refs = pickReferences(p, [p.characters, p.premise, p.fandom, p.tone, lastTail, extraQuery].join('\n'));
+    const refs = pickReferences(p, [p.characters, p.premise, p.fandom, p.tone, lastTail, extraQuery].join('\n'), { guides: false, cap: eco && guides ? 20000 : Infinity });
     if (refs) parts.push(`MATERIAL DE REFERÊNCIA enviado pelo autor (apoio; não copie trechos literalmente; pode estar em outro idioma, mas a história é escrita em ${langOf(p)}):\n${refs}`);
-    const prev = previousText(p, upto, hasSummary ? 16000 : 24000);
+    // com a linha da história, bastam o fim do capítulo anterior (para emendar) e os capítulos que ainda não têm resumo
+    let prev;
+    if (covered) {
+      const unc = p.chapters.slice(0, upto).reduce((n, c) => n + (recapOk(c) ? 0 : c.text.length + 40), 0);
+      prev = previousText(p, upto, Math.min(20000, 7000 + unc));
+    } else prev = previousText(p, upto, hasSummary ? 16000 : 24000);
     if (prev) parts.push(`CAPÍTULOS ANTERIORES (os mais recentes):\n${prev}`);
     return parts.join('\n\n');
   }
@@ -5639,8 +5715,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return e;
   }
 
-  async function callAI(userPrompt, { onText, onThinking, signal, override, guard, images, force, label, opId } = {}) {
-    const cfg = Object.assign({}, settings, override || {});
+  async function callAI(userPrompt, { onText, onThinking, signal, override, guard, images, force, label, opId, support } = {}) {
+    // tarefas de apoio (resumos, planos, sugestões, mundo, infos…) podem usar um modelo mais barato
+    const cfg = Object.assign({}, settings, support && settings.cheapModel ? { model: settings.cheapModel } : {}, override || {});
     // para o histórico de gastos: qual ação e qual projeto (tarefas de fundo trazem o próprio rótulo)
     const job = signal ? jobs.find(j => j.ctrl.signal === signal) : null;
     const op = opId || (job ? job.op : uid());
@@ -5668,6 +5745,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         body: JSON.stringify({
           model: cfg.model, stream: true,
           ...(isOpenRouter(cfg.endpoint) ? { usage: { include: true } } : {}),
+          // nas tarefas de apoio, a IA "pensa" pouco (pensamento também é cobrado)
+          ...(support && ecoOn() && isOpenRouter(cfg.endpoint) ? { reasoning: { effort: 'low' } } : {}),
           temperature: Number(cfg.temperature) || 0.9,
           max_tokens: Number(cfg.maxTokens) || 8192,
           messages: [
@@ -6118,6 +6197,41 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('settingsDlg').showModal();
   }
 
+  // economia: modo econômico e um modelo mais barato para as tarefas de apoio
+  const perM = (v) => { const n = Number(v || 0) * 1e6; return n === 0 ? 'grátis' : 'US$ ' + (n < 1 ? n.toFixed(2) : n.toFixed(n < 10 ? 2 : 0)).replace('.', ','); };
+  function economyBox() {
+    const eco = el('input', { type: 'checkbox', id: 'set-eco' });
+    eco.checked = ecoOn();
+    eco.addEventListener('change', () => { settings.economy = eco.checked; saveSettings(); });
+    const cheap = el('select', { id: 'set-cheap' }, el('option', { value: '', text: 'Usar o mesmo modelo principal' }));
+    const mainPrice = el('p', { class: 'hint', style: 'margin:4px 0 0' });
+    loadModels().then(list => {
+      const main = list.find(m => m.id === settings.model);
+      if (main) mainPrice.textContent = `Modelo principal (${main.name || main.id}): ${perM(main.pricing?.prompt)} por milhão de tokens enviados e ${perM(main.pricing?.completion)} por milhão escritos.` +
+        (/multi.?agent/i.test(main.id + ' ' + (main.name || '')) ? ' Modelos "Multi-Agent" usam vários agentes por pedido e costumam gastar bem mais.' : '');
+      const good = /gemini-2\.5-flash(?!-image)|gemini-3.*flash(?!.*image)|deepseek-(chat|v3)|gpt-4\.1-mini|gpt-5-mini|grok-4(\.\d+)?-fast|haiku|qwen3|mistral-(small|medium)/i;
+      const cands = list.filter(m => (m.context_length || 0) >= 64000 && !((m.architecture && m.architecture.output_modalities) || []).includes('image') && m.id !== settings.model)
+        .map(m => ({ m, price: Number(m.pricing?.prompt || 0) * 3 + Number(m.pricing?.completion || 0) }))
+        .sort((a, b) => (good.test(b.m.id) - good.test(a.m.id)) || (a.price - b.price)).slice(0, 80);
+      cands.forEach(({ m }) => cheap.append(el('option', { value: m.id, text: `${good.test(m.id) ? '★ ' : ''}${m.name || m.id} · ${isFree(m) ? 'grátis' : perM(m.pricing?.prompt) + ' / ' + perM(m.pricing?.completion) + ' por milhão'}` })));
+      if (settings.cheapModel && !cands.some(x => x.m.id === settings.cheapModel)) cheap.append(el('option', { value: settings.cheapModel, text: settings.cheapModelName || settings.cheapModel }));
+      cheap.value = settings.cheapModel || '';
+    }).catch(() => { if (settings.cheapModel) { cheap.append(el('option', { value: settings.cheapModel, text: settings.cheapModelName || settings.cheapModel })); cheap.value = settings.cheapModel; } });
+    cheap.addEventListener('change', () => {
+      settings.cheapModel = cheap.value;
+      settings.cheapModelName = cheap.value ? cheap.selectedOptions[0].textContent.replace(/^★ /, '').split(' · ')[0] : '';
+      saveSettings();
+      toast(cheap.value ? 'Tarefas de apoio vão usar o modelo econômico ✓' : 'Tudo vai usar o modelo principal.');
+    });
+    return el('div', { class: 'eco-box' },
+      el('h3', { icon: 'piggy-bank', text: 'Economia' }),
+      el('label', { class: 'check', for: 'set-eco', style: 'margin-top:4px' }, eco, el('span', {},
+        el('b', { text: 'Modo econômico' }), ' (recomendado)',
+        el('small', { class: 'hint', style: 'display:block', text: 'Manda à IA só o necessário: usa a linha da história da Bíblia em vez de capítulos inteiros, não repete informação, pede só as trocas pontuais ao aplicar mudanças e faz a IA "pensar" menos nas tarefas de apoio.' }))),
+      el('label', { for: 'set-cheap', text: 'Modelo para tarefas de apoio' }), cheap,
+      el('p', { class: 'hint', style: 'margin:4px 0 0', text: 'Usado em: resumos da Bíblia, sugestões, Mundo, Infos, planos, guia do livro e itens do Mundo. Escrever, continuar, ajustar e corrigir capítulos continuam no modelo principal. ★ = bons e baratos.' }),
+      mainPrice);
+  }
   function renderSettings() {
     const b = $('settingsBody');
     b.innerHTML = '';
@@ -6157,6 +6271,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('div', { class: 'kv' },
         el('div', {}, el('div', { class: 'k', text: 'Chave' }), el('div', { class: 'v', text: '••••' + settings.key.slice(-4) })),
         el('button', { text: 'Trocar chave', onclick: () => openSetup(2) })),
+      economyBox(),
       el('div', { class: 'row', style: 'margin-top:14px' },
         el('button', {
           text: 'Testar a conexão', onclick: async (e) => {

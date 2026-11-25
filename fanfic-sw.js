@@ -1,6 +1,6 @@
 // Guarda a última versão do fanfic.html para o app abrir sem internet (ler e editar capítulos).
 // Registrado com escopo "./fanfic", então não substitui o service worker do treino.
-const CACHE = 'fanfic-v33'
+const CACHE = 'fanfic-v34'
 const PAGINA = /\/fanfic\.html(\?.*)?$/
 
 self.addEventListener('install', () => self.skipWaiting())

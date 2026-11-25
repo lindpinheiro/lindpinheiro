@@ -88,6 +88,8 @@
     padding: 10px 16px; display: flex; gap: 10px; align-items: center;
   }
   header h1 { font-size: 1.05rem; margin: 0; white-space: nowrap; display: flex; align-items: center; gap: 10px; }
+  .home-link { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; border-radius: 10px; }
+  .home-link:hover .app-name { color: var(--accent); }
   header .logo { width: 32px; height: 32px; border-radius: 8px; flex: none; }
   #currentTitle {
     flex: 1; min-width: 0; font-weight: 700; color: var(--muted);
@@ -739,7 +741,7 @@
 <header>
   <button id="menuBtn" aria-label="Abrir a lista de projetos"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span id="menuTitle"></span></button>
   <button id="sideBtn" class="side-btn" aria-label="Ocultar a lista de projetos" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-panel-left"/></svg></button>
-  <h1><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Writer Agent</span></h1>
+  <h1><a href="./fanfic.html" id="homeLink" class="home-link" aria-label="Writer Agent: ir para o início"><img src="fanfic-icon-192.png" alt="" class="logo"><span class="app-name">Writer Agent</span></a></h1>
   <div id="currentTitle"></div>
   <button id="creditBtn" class="credit-chip" hidden><svg class="icon" aria-hidden="true"><use href="#i-wallet"/></svg><span id="creditVal"></span></button>
   <div class="user">
@@ -1701,6 +1703,21 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!saved.length) return;
     leaveDraft(() => openProject(saved.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id));
   }
+
+  // logo: volta para o início do projeto (sai do capítulo e da tela inteira, vai para o topo)
+  $('homeLink').addEventListener('click', (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return; // abrir em outra aba continua funcionando
+    e.preventDefault();
+    closeAddMenus(); closeUserMenu();
+    guardEdit(() => {
+      const p = cur();
+      if (isZen()) setZen(false);
+      if (p) view = { tab: p.draft || !p.chapters.length ? 'ideia' : 'capitulos', chapterId: null, mode: 'ler' };
+      closeDrawer(); setFocus(false);
+      if (p) renderTab();
+      scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
 
   // lateral recolhível no computador
   function setSide(collapsed) {

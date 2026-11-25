@@ -398,6 +398,7 @@
   body.focus .dock { left: 0; }
   body.focus main { padding-top: 0; }
   body.zen header { display: none !important; }
+  html:has(body.zen), body.zen { overscroll-behavior-y: none; } /* sem "puxar para atualizar" ao rolar para cima */
   body.zen .ch-toolbar { top: 0 !important; }
   body.focus .ch-toolbar { position: sticky; top: var(--hdr, 0px); z-index: 8; background: var(--bg); padding: 12px 0; margin: 0 0 12px; border-bottom: 1px solid var(--border); }
   body.focus .edit-tools { top: calc(var(--hdr, 0px) + var(--tbar, 64px) + 8px); }
@@ -2728,12 +2729,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     try {
       if (on && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
       if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      if (!on && zenRearm) { document.removeEventListener('click', zenRearm, true); zenRearm = null; }
     } catch {}
     requestAnimationFrame(measureBars);
     if (view.chapterId) renderChapters();
   }
-  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isZen()) setZen(false); });
-  addEventListener('keydown', (e) => { if (e.key === 'Escape' && isZen() && !document.querySelector('dialog[open]')) setZen(false); });
+  // só o X sai da tela inteira. Se o navegador sair da tela cheia sozinho (gesto do celular ao rolar),
+  // o modo continua e, no celular, a tela cheia volta no próximo toque
+  let zenRearm = null;
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement || !isZen() || !matchMedia('(pointer: coarse)').matches || zenRearm) return;
+    zenRearm = () => {
+      document.removeEventListener('click', zenRearm, true); zenRearm = null;
+      if (isZen() && !document.fullscreenElement && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    };
+    document.addEventListener('click', zenRearm, true);
+  });
 
   // redesenha sem pular para o topo: guarda e devolve a posição da tela
   let pendingAnchor = null;
@@ -2941,7 +2952,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const moreBtn = el('button', { icon: 'ellipsis', 'aria-label': 'Mais opções', title: 'Mais opções', 'aria-haspopup': 'menu', 'aria-expanded': 'false',
         onclick: (ev) => { ev.stopPropagation(); const open = more.hidden; closeAddMenus(more); more.hidden = !open; moreBtn.setAttribute('aria-expanded', String(open)); if (open) more.querySelector('button').focus(); } });
       more.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { closeAddMenus(); moreBtn.focus(); } });
-      tools.append(el('button', { icon: isZen() ? 'minimize-2' : 'maximize-2', 'aria-label': isZen() ? 'Sair da tela inteira' : 'Tela inteira', title: isZen() ? 'Sair da tela inteira (Esc)' : 'Tela inteira', 'aria-pressed': String(isZen()), onclick: () => setZen(!isZen()) }));
+      tools.append(el('button', { icon: isZen() ? 'x' : 'maximize-2', class: isZen() ? 'zen-exit' : '', 'aria-label': isZen() ? 'Sair da tela inteira' : 'Tela inteira', title: isZen() ? 'Sair da tela inteira' : 'Tela inteira', 'aria-pressed': String(isZen()), onclick: () => setZen(!isZen()) }));
       tools.append(el('div', { class: 'add-wrap' }, moreBtn, more));
     }
 

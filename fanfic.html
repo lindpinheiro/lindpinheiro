@@ -2712,12 +2712,67 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && isZen() && !document.querySelector('dialog[open]')) setZen(false); });
 
   // redesenha sem pular para o topo: guarda e devolve a posição da tela
+  let pendingAnchor = null;
   function renderChapters() {
     const y = scrollY;
     renderChaptersInner();
     const ta = document.querySelector('textarea.doc-edit');
     if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+    if (pendingAnchor) { const a = pendingAnchor; pendingAnchor = null; if (restoreAnchor(a)) return; }
     if (Math.abs(scrollY - y) > 2) scrollTo(scrollX, y);
+  }
+  // ---------- âncora de leitura: qual parágrafo está no alto da tela ----------
+  // posição (em relação ao topo do campo) do começo de cada parágrafo no Editar, numa cópia invisível do campo
+  function editParaTops(ta) {
+    const cs = getComputedStyle(ta), m = document.createElement('div');
+    ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'wordSpacing', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+      'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth', 'boxSizing', 'textIndent'].forEach(k => { m.style[k] = cs[k]; });
+    Object.assign(m.style, { position: 'absolute', visibility: 'hidden', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', top: '0', left: '-9999px', width: ta.getBoundingClientRect().width + 'px' });
+    const text = ta.value, starts = [0], re = /\n\s*\n/g;
+    let mm; while ((mm = re.exec(text))) starts.push(mm.index + mm[0].length);
+    const marks = []; let pos = 0;
+    starts.forEach(st => {
+      if (st > pos) m.append(document.createTextNode(text.slice(pos, st)));
+      const sp = document.createElement('span'); sp.textContent = '\u200b'; m.append(sp); marks.push(sp); pos = st;
+    });
+    m.append(document.createTextNode(text.slice(pos)));
+    document.body.append(m);
+    const tops = marks.map(sp => sp.offsetTop);
+    m.remove();
+    return tops;
+  }
+  // caixas (na tela) de cada parágrafo, no Ler ou no Editar
+  function paraBoxes() {
+    const body = $('chBody');
+    if (!body) return null;
+    if (body.tagName === 'TEXTAREA') {
+      const r = body.getBoundingClientRect(), tops = editParaTops(body);
+      return tops.map((t, i) => ({ top: r.top + t, bottom: r.top + (i + 1 < tops.length ? tops[i + 1] : r.height) }));
+    }
+    return [...body.children].map(el => { const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom }; });
+  }
+  // linha de referência: logo abaixo das barras grudadas no topo
+  function anchorLine() {
+    let y = 0;
+    ['header', '.ch-toolbar', '.edit-tools'].forEach(sel => { const e = document.querySelector(sel); if (e) { const r = e.getBoundingClientRect(); if (r.top <= 4 + y && r.bottom > y) y = r.bottom; } });
+    return y + 12;
+  }
+  function captureAnchor() {
+    const boxes = paraBoxes(); if (!boxes || !boxes.length) return null;
+    const line = anchorLine();
+    const i = boxes.findIndex(b => b.bottom > line);
+    if (i < 0) return null;
+    const b = boxes[i], h = Math.max(1, b.bottom - b.top);
+    return { chId: view.chapterId, para: i, frac: Math.min(1, Math.max(0, (line - b.top) / h)), atTop: scrollY < 40 };
+  }
+  function restoreAnchor(a) {
+    if (!a || a.chId !== view.chapterId) return false;
+    if (a.atTop) { scrollTo(scrollX, 0); return true; }
+    const boxes = paraBoxes(); if (!boxes || !boxes.length) return false;
+    const b = boxes[Math.min(a.para, boxes.length - 1)];
+    const target = scrollY + b.top + a.frac * (b.bottom - b.top) - anchorLine();
+    scrollTo(scrollX, Math.max(0, target));
+    return true;
   }
   function renderChaptersInner() {
     const p = cur();
@@ -2839,13 +2894,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const chBusy = !!jobOnChapter(ch);
     const editing = view.mode === 'editar' && !chBusy;
     const go = (j) => guardEdit(() => { view.chapterId = p.chapters[j].id; renderChapters(); scrollTo(0, 0); });
-    const setMode = (m) => m === view.mode ? null : (m === 'ler' ? guardEdit(() => { view.mode = 'ler'; renderChapters(); }) : (view.mode = m, renderChapters()));
+    // ao trocar Ler/Editar, a tela continua no mesmo parágrafo
+    const setMode = (m) => m === view.mode ? null : (m === 'ler'
+      ? guardEdit(() => { pendingAnchor = captureAnchor(); view.mode = 'ler'; renderChapters(); })
+      : (pendingAnchor = captureAnchor(), view.mode = m, renderChapters()));
 
     const tools = el('div', { class: 'tools' },
       el('div', { class: 'seg', role: 'group', 'aria-label': 'Modo' },
         el('button', { 'aria-pressed': String(view.mode === 'ler'), onclick: () => setMode('ler') }, svgIcon('book-open', 'hide-m'), 'Ler'),
         el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: chBusy, title: chBusy ? 'A IA está mexendo neste capítulo' : '', onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
-    if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { saveEdit(); view.mode = 'ler'; renderChapters(); scrollTo(0, 0); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
+    if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { pendingAnchor = captureAnchor(); saveEdit(); view.mode = 'ler'; renderChapters(); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
     else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyChapter(ch.text) }, el('span', { text: 'Copiar' })));
     if (!writingThis && historyOf(ch).length) tools.append(el('button', { icon: 'undo-2', 'aria-label': 'Desfazer a última mudança da IA', title: `Desfazer: ${historyOf(ch).at(-1).label}`, disabled: chBusy, onclick: () => guardEdit(() => undoChapter(p, ch), true) }));
     if (!writingThis) {

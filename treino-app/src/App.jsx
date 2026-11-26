@@ -17,6 +17,7 @@ import { META, PESO_INICIAL, br, hojeISO, iso, num, semana, ultima, useStore } f
 import Guia from './Guia.jsx'
 import Dieta from './Dieta.jsx'
 import Progresso from './Progresso.jsx'
+import SessaoCardio from './SessaoCardio.jsx'
 import Aquecimento, { AlongamentoFim, RotinaPatins } from './Aquecimento.jsx'
 import { aquecDoDia } from './aquecimento.js'
 import { INTENSIDADES, gastoTreino, intensidadeCardio, kcalCardio, kcalPatins, pesoEm } from './gasto.js'
@@ -529,6 +530,7 @@ function Cardio({ c, log, patins, kg, onSalvar, principal }) {
   const info = CARDIO[c.tipo]
   const [min, setMin] = useState(c.min), [int, setInt] = useState(intensidadeCardio(c.tipo))
   const m = parseInt(min) > 0 ? parseInt(min) : 0
+  const [rodando, setRodando] = useState(false)
   return (
     <Card sx={{ mt: 2 }}>
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
@@ -546,6 +548,7 @@ function Cardio({ c, log, patins, kg, onSalvar, principal }) {
       </Stack>
       {!log && (
         <>
+          {!rodando && <>
           <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>
             {info.como}{patins && !principal && c.tipo !== 'caminhada' ? ' Vai andar de patins hoje? Pode pular.' : ''}
           </Typography>
@@ -558,6 +561,8 @@ function Cardio({ c, log, patins, kg, onSalvar, principal }) {
             <Typography variant="body2" color="textSecondary" sx={{ flex: 1 }}>{m ? `Cerca de ${kcalCardio(c.tipo, { min: m, int }, kg)} kcal` : ''}</Typography>
             <Button variant="contained" disabled={!m} onClick={() => onSalvar({ min: m, int })}>{principal ? 'Concluir' : 'Marcar'}</Button>
           </Stack>
+          </>}
+          {principal && <SessaoCardio minutos={m || 60} onRodando={setRodando} onConcluir={(min) => onSalvar({ min, int: 'moderada', guiada: true })} />}
         </>
       )}
     </Card>

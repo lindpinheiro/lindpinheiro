@@ -44,6 +44,8 @@ const SECOES = [
       <li><b>Escada</b> (quarta): nível 4–6. Trabalha glúteo e panturrilha. Diminua o ritmo nos 2 últimos minutos; parar de uma vez pode derrubar a pressão.</li>
       <li><b>Caminhada leve</b> (terça e sábado): só para a circulação voltar ao normal depois da perna. Nada de escada nesses dias.</li>
       <li><b>Dia só de cardio</b>: em qualquer dia, “Trocar por cardio hoje” troca a musculação por cerca de 1 hora de bicicleta, esteira ou escada. Use no máximo 2 vezes por semana, de preferência no lugar de um treino de costas: musculação é o que mantém o músculo enquanto você emagrece. Na sexta, dá para fazer cardio em vez de descansar.</li>
+      <li><b>Sessão guiada</b>: no dia de cardio, “Iniciar” conduz a hora com sinais no fone. <b>Intervalado</b>: 5 min leve, blocos de 1 min forte e 2 min moderado, 5 min leve. Sinal subindo, acelere; descendo, alivie; um toque curto avisa 5 s antes. Forte é “só frases curtas”, não tiro máximo. Faça intervalado 1 ou 2 vezes por semana e contínuo nas outras.</li>
+      <li>Nunca pule a volta à calma do fim: parar de uma vez depois de esforço é o que mais derruba a pressão.</li>
       <li><b>Bicicleta</b> é a mais leve para os joelhos; <b>escada</b> é a que mais gasta, mas evite na véspera do sábado de perna.</li>
       <li>Intensidade certa: você consegue falar frases inteiras, mas não cantar.</li>
       <li>Quando ficar fácil, aumente a inclinação ou o nível, não o tempo.</li>

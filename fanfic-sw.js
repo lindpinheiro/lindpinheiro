@@ -1,7 +1,10 @@
 // Guarda a última versão do fanfic.html para o app abrir sem internet (ler e editar capítulos).
 // Registrado com escopo "./fanfic", então não substitui o service worker do treino.
-const CACHE = 'fanfic-v43'
+const CACHE = 'fanfic-v44'
 const PAGINA = /\/fanfic\.html(\?.*)?$/
+// dicionário e sinônimos: grandes e quase nunca mudam; guardados à parte na primeira vez que são usados
+const DICT = /\/fanfic-dict-[\w-]+\.(aff|dic|txt)$/
+const DICT_CACHE = 'dictpt-v1'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (e) => e.waitUntil(
@@ -11,6 +14,10 @@ self.addEventListener('activate', (e) => e.waitUntil(
 ))
 
 self.addEventListener('fetch', (e) => {
+  if (e.request.method === 'GET' && DICT.test(e.request.url)) {
+    e.respondWith(caches.open(DICT_CACHE).then((c) => c.match(e.request.url).then((hit) => hit || fetch(e.request).then((r) => { if (r.ok) c.put(e.request.url, r.clone()); return r }))))
+    return
+  }
   if (e.request.method !== 'GET' || !PAGINA.test(e.request.url)) return
   // Rede primeiro, para pegar atualizações; sem rede, usa a cópia guardada.
   // "no-cache": sempre confere com o servidor se há versão nova (barato, usa ETag)

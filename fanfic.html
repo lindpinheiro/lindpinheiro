@@ -839,6 +839,15 @@
   .rv-item .rv-b { display: flex; gap: 6px; margin-top: 6px; }
   .rv-item .rv-b button { min-height: 30px; padding: 2px 10px; font-size: .8rem; }
   .rv-empty { padding: 18px 12px; text-align: center; color: var(--muted); }
+  .rv-scope { padding: 8px 12px 0; font-size: .84rem; color: var(--muted); }
+  .rv-item .rv-b { flex-wrap: wrap; }
+  .syn-box { margin-top: 8px; display: grid; gap: 6px; }
+  .syn-note { font-size: .78rem; color: var(--muted); }
+  .syn-g { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .syn-lab { font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+  button.syn { min-height: 0; padding: 3px 10px; border-radius: 99px; font-weight: 400; font-size: .86rem; font-family: Georgia, serif; }
+  .sel-bar .syn-box { flex-basis: 100%; max-width: min(520px, 90vw); max-height: 40vh; overflow: auto; }
+  html, body { overflow-x: clip; }
   /* ---------- nomes novos ---------- */
   .nm-list { display: grid; gap: 8px; max-height: 44vh; overflow: auto; margin: 8px 0; }
   .nm-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; }
@@ -3855,7 +3864,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   // conteúdo da barra flutuante conforme o modo
   function fillSelBar(info) {
-    const bar = $('selBar'), mode = info.inmark ? 'inmark:' + info.inmark.id : info.editing ? 'edit' : (info.multi ? 'multi' : 'read');
+    const taE = info.editing ? $('chBody') : null, selW = taE ? taE.value.slice(taE.selectionStart, taE.selectionEnd).trim() : '';
+    const bar = $('selBar'), mode = info.inmark ? 'inmark:' + info.inmark.id : info.editing ? 'edit' + (/^\p{L}+(?:-\p{L}+)?$/u.test(selW) && selW.length < 30 ? ':' + selW : '') : (info.multi ? 'multi' : 'read');
     if (bar.dataset.mode === mode) return;
     bar.dataset.mode = mode;
     bar.innerHTML = '';
@@ -3865,8 +3875,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         note ? el('span', { class: 'sel-title sel-note', text: note.length > 70 ? note.slice(0, 70) + '…' : note }) : null,
         el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: note ? 'Abrir marcação' : 'Anotar', onclick: () => { hideSelBar(); openHighlight(info.p, info.ch, h.id); } }),
         el('button', { type: 'button', class: 'chip', icon: 'trash-2', 'aria-label': 'Remover marcação', title: 'Remover marcação', onclick: () => { hideSelBar(); removeHighlight(info.p, info.ch, h); } }));
-    } else if (mode === 'edit') {
-      const ta = $('chBody');
+    } else if (mode.startsWith('edit')) {
+      const ta = $('chBody'), selText = ta.value.slice(ta.selectionStart, ta.selectionEnd).trim(), oneWord = /^\p{L}+(?:-\p{L}+)?$/u.test(selText) && selText.length < 30 ? selText : '';
       const grid = emojiGrid(ta, () => hideSelBar()); grid.hidden = true;
       const colors = colorPop(ta, () => hideSelBar()); colors.hidden = true;
       bar.append(
@@ -3876,6 +3886,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { type: 'button', class: 'chip', icon: 'palette', 'aria-label': 'Cor do texto', title: 'Cor do texto', onclick: () => { colors.hidden = !colors.hidden; grid.hidden = true; updateSelBar(); } }),
         el('button', { type: 'button', class: 'chip', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; colors.hidden = true; updateSelBar(); } }),
         el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: 'Marcar', title: 'Marcar o trecho (a anotação é opcional)', onclick: markFromEditor }),
+        el('button', { type: 'button', class: 'chip', icon: 'list-checks', 'aria-label': 'Revisar o trecho (sem IA)', title: 'Revisar o trecho: ortografia, pontuação, repetições (sem IA)', onclick: () => { const t = $('chBody'), c = cur(), chh = c && c.chapters.find(x => x.id === view.chapterId); hideSelBar(); if (t && chh) openReview(c, chh, t); } }),
+        oneWord ? el('button', { type: 'button', class: 'chip', icon: 'book-open', text: 'Sinônimos', onclick: () => {
+          if (bar.querySelector('.syn-box')) { bar.querySelector('.syn-box').remove(); updateSelBar(); return; }
+          const a0 = ta.selectionStart, b0 = ta.selectionEnd;
+          const box = synChips(oneWord, (w) => { ta.focus(); ta.setRangeText(w, a0, b0, 'select'); ta.dispatchEvent(new Event('input')); hideSelBar(); toast(`Trocado por "${w}" ✓`); });
+          bar.append(box); updateSelBar(); } }) : null,
         colors, grid);
     } else if (mode === 'multi') {
       bar.append(el('span', { class: 'sel-title', text: 'Para marcar, selecione dentro de um parágrafo.' }));
@@ -6451,7 +6467,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Revisor automático (sem IA): aponta e sugere, você decide
   // =====================================================================
   var review = null, reviewWanted = null;
-  const RV_KINDS = { pont: 'Pontuação', trad: 'Cara de tradução', rep: 'Repetição', estilo: 'Estilo' };
+  const RV_KINDS = { orto: 'Ortografia', pont: 'Pontuação', trad: 'Cara de tradução', rep: 'Repetição', estilo: 'Estilo' };
   const BODY = 'cabelo|cabelos|olho|olhos|mão|mãos|boca|lábio|lábios|rosto|cabeça|braço|braços|perna|pernas|ombro|ombros|peito|nariz|testa|queixo|pescoço|dedo|dedos|coração|costas|cintura|pele|bochecha|bochechas|nuca|língua|joelho|joelhos|pé|pés|barriga|orelha|orelhas|sobrancelha|sobrancelhas';
   const RV_STOP = new Set('a o as os um uma uns umas de do da dos das em no na nos nas por pelo pela pelos pelas para pra com sem sob sobre entre até que se não mais mas como quando onde porque pois já ainda também muito muita muitos muitas pouco tudo nada todo toda todos todas isso isto aquilo esse essa esses essas este esta estes estas aquele aquela ele ela eles elas eu tu você vocês nós me te se lhe nos vos seu sua seus suas meu minha meus minhas teu tua dele dela deles delas era foi ser estar estava está estão tinha tem ter havia há fazer fez faz disse ou e é sim só bem então depois antes agora sempre nunca outra outro outras outros mesmo mesma cada qual quem'.split(' '));
   const CLICHES = [
@@ -6514,12 +6530,186 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     });
     return out.sort((a, b) => a.s - b.s);
   }
+  // ---------- dicionário (VERO, do LibreOffice) e sinônimos: baixados só quando usados ----------
+  // corretor ortográfico próprio, lendo um dicionário no formato do Hunspell (só sufixos/prefixos de um nível, como o pt_BR do LibreOffice)
+  function makeSpeller(affText, dicText) {
+    const sfx = new Map(), pfx = new Map(), rep = [], maps = [];
+    let tryChars = 'aeiou', forbidden = '', nosuggest = '';
+    const lines = affText.replace(/^﻿/, '').split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i].replace(/#.*$/, '').trim(); if (!l) continue;
+      const t = l.split(/\s+/);
+      if (t[0] === 'TRY') tryChars = t[1] || tryChars;
+      else if (t[0] === 'FORBIDDENWORD') forbidden = t[1] || '';
+      else if (t[0] === 'NOSUGGEST') nosuggest = t[1] || '';
+      else if (t[0] === 'REP' && t.length >= 3) rep.push([t[1].replace(/_/g, ' '), t[2].replace(/_/g, ' ')]);
+      else if (t[0] === 'MAP' && t.length >= 2 && !/^\d+$/.test(t[1])) maps.push([...t[1]]);
+      else if ((t[0] === 'SFX' || t[0] === 'PFX') && t.length >= 5 && !/^[YN]$/.test(t[2])) {
+        const isS = t[0] === 'SFX', flag = t[1], strip = t[2] === '0' ? '' : t[2], add = (t[3] === '0' ? '' : t[3]).split('/')[0], cond = t[4] || '.';
+        const cross = true;
+        let re; try { re = new RegExp(isS ? `(${cond})$` : `^(${cond})`, 'u'); } catch { re = /./; }
+        const m = isS ? sfx : pfx;
+        if (!m.has(add)) m.set(add, []);
+        m.get(add).push({ flag, strip, re, cross });
+      }
+    }
+    const dic = new Map();
+    dicText.replace(/^﻿/, '').split('\n').forEach((l, i) => {
+      if (!i && /^\d+\s*$/.test(l)) return;
+      l = l.trim(); if (!l) return;
+      const k = l.indexOf('/'), w = k < 0 ? l : l.slice(0, k), f = k < 0 ? '' : l.slice(k + 1).split(/\s/)[0];
+      dic.set(w, (dic.get(w) || '') + f);
+    });
+    const maxS = Math.max(0, ...[...sfx.keys()].map(k => k.length)), maxP = Math.max(0, ...[...pfx.keys()].map(k => k.length));
+    const has = (w, flag) => { const f = dic.get(w); return f != null && (!flag || f.includes(flag)) && !(forbidden && f.includes(forbidden)); };
+    // procura a forma base; devolve as bases encontradas
+    function stems(w, out = [], want) {
+      if (has(w, want)) out.push(w);
+      for (let k = 0; k <= Math.min(maxS, w.length - 1); k++) {
+        const rules = sfx.get(k ? w.slice(-k) : ''); if (!rules) continue;
+        for (const r of rules) {
+          const st = w.slice(0, w.length - k) + r.strip;
+          if (!r.re.test(st)) continue;
+          if (has(st, r.flag) && (!want || has(st, want))) out.push(st);
+        }
+      }
+      return out;
+    }
+    function known(w) {
+      if (stems(w).length) return true;
+      for (let k = 1; k <= Math.min(maxP, w.length - 1); k++) {
+        const rules = pfx.get(w.slice(0, k)); if (!rules) continue;
+        for (const r of rules) {
+          const st = r.strip + w.slice(k);
+          if (!r.re.test(st)) continue;
+          if (has(st, r.flag) || stems(st, [], r.flag).length) return true;
+        }
+      }
+      return false;
+    }
+    const lower = (w) => w.toLocaleLowerCase('pt-BR'), cap = (w) => w[0].toLocaleUpperCase('pt-BR') + w.slice(1);
+    const CLITIC = /^(o|a|os|as|lo|la|los|las|no|na|nos|nas|me|te|se|lhe|lhes|vos|mo|ma|to|ta|lho|lha)$/i;
+    function check(w) {
+      if (!w || /\d/.test(w)) return true;
+      if (known(w) || known(lower(w))) return true;
+      if (w === w.toLocaleUpperCase('pt-BR') && (known(lower(w)) || known(cap(lower(w))))) return true;
+      if (w.includes('-')) {
+        const parts = w.split('-');
+        if (parts.every(x => !x || check(x))) return true;
+        const last = parts[parts.length - 1], base = parts.slice(0, -1).join('-');
+        if (CLITIC.test(last)) {
+          const b = lower(base), cands = [b, b + 'r', b.replace(/[áa]$/, 'ar'), b.replace(/[êe]$/, 'er'), b.replace(/[íi]$/, 'ir'), b.replace(/ô$/, 'or'), b.replace(/ô$/, 'ôr')];
+          if (cands.some(c => known(c))) return true;
+        }
+      }
+      return false;
+    }
+    const COMMON = { concerteza: 'com certeza', derrepente: 'de repente', apartir: 'a partir', porisso: 'por isso', ancioso: 'ansioso', excessão: 'exceção', previlégio: 'privilégio',
+      mendingo: 'mendigo', menas: 'menos', seje: 'seja', esteje: 'esteja', impecilho: 'empecilho', poblema: 'problema', cabeleleiro: 'cabeleireiro', advinhar: 'adivinhar',
+      gratuíto: 'gratuito', rúbrica: 'rubrica', beneficiente: 'beneficente', iorgute: 'iogurte', mortandela: 'mortadela', asterístico: 'asterisco', deslise: 'deslize',
+      paralizar: 'paralisar', analizar: 'analisar', pesquizar: 'pesquisar', atravez: 'através', tambem: 'também', voce: 'você', nao: 'não', entao: 'então', ate: 'até', so: 'só', ja: 'já', tb: 'também', vc: 'você', pq: 'porque', q: 'que', oque: 'o que', derepente: 'de repente' };
+    const ALPHA = [...new Set([...tryChars, ...'abcdefghijklmnopqrstuvwxyzáàâãéêíóôõúüç'])].join('');
+    function suggest(w, max = 6) {
+      const out = [], seen = new Set([w]), isCap = w[0] !== lower(w[0]);
+      const tryW = (c) => { if (seen.has(c)) return; seen.add(c); if (c && (known(c) || known(lower(c))) && !(nosuggest && (dic.get(c) || '').includes(nosuggest))) out.push(c); };
+      const lw = lower(w);
+      rep.forEach(([a, b]) => { let i = lw.indexOf(a); while (i >= 0 && out.length < max * 2) { tryW(lw.slice(0, i) + b + lw.slice(i + a.length)); i = lw.indexOf(a, i + 1); } });
+      // acentos trocados (MAP), uma e duas posições
+      const alt = (ch) => (maps.find(g => g.includes(ch)) || []).filter(x => x !== ch && x === lower(x));
+      for (let i = 0; i < lw.length; i++) for (const a of alt(lw[i])) {
+        const c1 = lw.slice(0, i) + a + lw.slice(i + 1); tryW(c1);
+        for (let j = i + 1; j < lw.length; j++) for (const b of alt(lw[j])) tryW(c1.slice(0, j) + b + c1.slice(j + 1));
+      }
+      // uma letra a mais, a menos, trocada ou invertida
+      for (let i = 0; i <= lw.length; i++) {
+        if (i < lw.length) tryW(lw.slice(0, i) + lw.slice(i + 1));
+        if (i < lw.length - 1) tryW(lw.slice(0, i) + lw[i + 1] + lw[i] + lw.slice(i + 2));
+        for (const ch of ALPHA) { tryW(lw.slice(0, i) + ch + lw.slice(i)); if (i < lw.length) tryW(lw.slice(0, i) + ch + lw.slice(i + 1)); }
+      }
+      // duas mudanças: uma letra + um acento (pasaro -> pássaro)
+      if (out.length < 3) {
+        const ed = [];
+        for (let i = 0; i <= lw.length; i++) for (const ch of 'sraeiouclmnt') { ed.push(lw.slice(0, i) + ch + lw.slice(i)); }
+        for (let i = 0; i < lw.length; i++) ed.push(lw.slice(0, i) + lw.slice(i + 1));
+        ed.forEach(e => { for (let i = 0; i < e.length; i++) for (const a of alt(e[i])) tryW(e.slice(0, i) + a + e.slice(i + 1)); });
+      }
+      // ordena: mais parecida primeiro (acento conta pouco); no empate, a mais longa (é mais comum esquecer letra)
+      const plain = (x) => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const lev = (a, b) => { const d = [...Array(b.length + 1).keys()]; for (let i = 1; i <= a.length; i++) { let pr = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const tmp = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, pr + (a[i - 1] === b[j - 1] ? 0 : 1)); pr = tmp; } } return d[b.length]; };
+      const cost = (c) => lev(plain(lw), plain(c)) + (plain(c) === c ? 0 : .3) * 0 + (c.length < lw.length ? .4 : 0) + (c[0] === lw[0] ? 0 : .5);
+      out.sort((a, b) => cost(a) - cost(b));
+      if (COMMON[lw]) out.unshift(COMMON[lw]);
+      if (!out.length) for (let i = 2; i < lw.length - 1; i++) { const a = lw.slice(0, i), b = lw.slice(i); if (known(a) && known(b)) { out.push(a + ' ' + b); break; } }
+      return [...new Set(out)].slice(0, max).map(x => isCap ? cap(x) : x);
+    }
+    return { check, suggest, stems: (w) => { const lw = lower(w); const r = new Set(stems(lw)); for (let k = 1; k <= Math.min(maxP, lw.length - 1); k++) { const rules = pfx.get(lw.slice(0, k)) || []; rules.forEach(rr => { const st = rr.strip + lw.slice(k); if (rr.re.test(st)) stems(st, [], rr.flag).forEach(x => r.add(x)); }); } return [...r]; }, size: dic.size };
+  }
+
+  let spellP = null, thesP = null, speller = null, thes = null;
+  function loadSpeller() {
+    if (!spellP) spellP = Promise.all(['fanfic-dict-pt.aff', 'fanfic-dict-pt.dic'].map(f => fetch(f).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })))
+      .then(([a, d]) => { if (!/\bSFX\b/.test(a) || !/^\uFEFF?\d+\s*\n/.test(d)) throw new Error('dicionário inválido'); return (speller = makeSpeller(a, d)); }).catch(e => { spellP = null; throw e; });
+    return spellP;
+  }
+  function loadThes() {
+    if (!thesP) thesP = fetch('fanfic-dict-sinonimos.txt').then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(t => { if (!/^[^\t\n<]+\t/.test(t)) throw new Error('sinônimos inválidos'); const m = new Map(); t.split('\n').forEach(l => { const k = l.indexOf('\t'); if (k > 0) m.set(l.slice(0, k), l.slice(k + 1)); }); return (thes = m); })
+      .catch(e => { thesP = null; throw e; });
+    return thesP;
+  }
+  // sinônimos de uma palavra (ou da forma base: "aconteceu" -> "acontecer")
+  function synonymsOf(word) {
+    if (!thes) return null;
+    const w = word.toLocaleLowerCase('pt-BR');
+    let base = thes.has(w) ? w : null;
+    if (!base && speller) base = speller.stems(w).find(x => thes.has(x)) || null;
+    if (!base) return { base: null, groups: [] };
+    const groups = thes.get(base).split(';').map(g => { const k = g.indexOf(':'); return k >= 0 ? [g.slice(0, k), g.slice(k + 1).split(',')] : ['', g.split(',')]; });
+    return { base, groups };
+  }
+  const keepCap = (orig, w) => orig[0] && orig[0] !== orig[0].toLocaleLowerCase('pt-BR') ? w[0].toLocaleUpperCase('pt-BR') + w.slice(1) : w;
+  function synChips(word, onPick) {
+    const box = el('div', { class: 'syn-box' }, el('span', { class: 'muted', text: 'Carregando sinônimos…' }));
+    const paint = () => {
+      const r = synonymsOf(word);
+      if (!r || !r.groups.length) { box.replaceChildren(el('span', { class: 'muted', text: `Não achei sinônimos para "${word}".` })); return; }
+      box.replaceChildren(...[
+        r.base !== word.toLocaleLowerCase('pt-BR') ? el('div', { class: 'syn-note', text: `Sinônimos de "${r.base}" (forma base). Ajuste a conjugação se precisar.` }) : null,
+        ...r.groups.map(([lab, list]) => el('div', { class: 'syn-g' }, lab ? el('span', { class: 'syn-lab', text: lab }) : null,
+          ...list.map(x => el('button', { type: 'button', class: 'syn', text: x, onclick: () => onPick(keepCap(word, x)) }))))].filter(Boolean));
+    };
+    if (thes) paint(); else loadThes().then(paint).catch(() => box.replaceChildren(el('span', { class: 'muted', text: 'Não consegui baixar os sinônimos. Confira a internet e tente de novo.' })));
+    return box;
+  }
+  // palavras com erro de grafia (ignora nomes próprios e o dicionário do autor)
+  const sugCache = new Map();
+  function spellIssues(text, p) {
+    if (!speller) return [];
+    const mine = new Set((p.dict || []).map(x => x.toLocaleLowerCase('pt-BR'))), known = knownNames(p), out = [];
+    // não confere o que está dentro das marcas de cor
+    const masked = text.replace(/\[cor=[^\]]*\]|\[\/cor\]/g, m => ' '.repeat(m.length));
+    const re = /\p{L}+(?:[-'’]\p{L}+)*/gu; let m;
+    while ((m = re.exec(masked))) {
+      const w = m[0];
+      if (w.length < 2 || mine.has(w.toLocaleLowerCase('pt-BR')) || known.has(nNorm(w))) continue;
+      const capital = w[0] !== w[0].toLocaleLowerCase('pt-BR');
+      if (capital) { const before = masked.slice(Math.max(0, m.index - 3), m.index); if (!/(^|[.!?…—"“]\s*|\n\s*)$/.test(m.index ? before : '')) continue; } // nome próprio no meio da frase
+      if (speller.check(w)) continue;
+      if (!sugCache.has(w)) sugCache.set(w, speller.suggest(w, 4));
+      const sugs = sugCache.get(w);
+      out.push({ s: m.index, e: m.index + w.length, kind: 'orto', msg: sugs.length ? 'Palavra fora do dicionário. Quis dizer:' : 'Palavra fora do dicionário (pode ser nome ou gíria).', fix: sugs[0] ?? null, sugs, word: w });
+    }
+    return out;
+  }
   function openReview(p, ch, ta) {
     if (review) clearInterval(review.watch);
-    review = { p, ch, chId: ch.id, filter: '', ignore: new Set((ch.rvIgnore || [])), sel: -1, miss: 0 };
+    const a = ta.selectionStart, b = ta.selectionEnd;
+    review = { p, ch, chId: ch.id, filter: '', ignore: new Set((ch.rvIgnore || [])), sel: -1, miss: 0, open: null,
+      range: b - a > 1 ? { s: a, e: b } : null, len: ta.value.length };
     // some sozinho quando o Editar deste capítulo fecha
     review.watch = setInterval(() => { if (!review) return; if (review.ta && review.ta.isConnected) { review.miss = 0; return; } if (++review.miss > 2) closeReview(); }, 400);
     attachReview(p, ch, ta);
+    if (!speller) loadSpeller().then(() => { if (review) runReview(); }).catch(() => { if (review) { review.dictErr = true; renderReview(); } });
   }
   function closeReview() {
     const ta = review && review.ta;
@@ -6537,8 +6727,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function runReview() {
     const r = review; if (!r) return;
     if (!r.ta || !r.ta.isConnected) return;
-    const key = (x) => `${x.kind}:${r.ta.value.slice(x.s, x.e)}:${x.msg}`;
-    r.issues = reviewText(r.ta.value, isPtBr(r.p)).filter(x => !r.ignore.has(key(x)));
+    const v = r.ta.value;
+    if (r.range) { r.range.e = Math.max(r.range.s, Math.min(v.length, r.range.e + (v.length - r.len))); }
+    r.len = v.length;
+    const key = (x) => `${x.kind}:${v.slice(x.s, x.e)}:${x.msg}`;
+    r.issues = [...reviewText(v, isPtBr(r.p)), ...(isPtBr(r.p) ? spellIssues(v, r.p) : [])]
+      .filter(x => !r.ignore.has(key(x)) && (!r.range || (x.s >= r.range.s && x.e <= r.range.e)))
+      .sort((a, b) => a.s - b.s);
     r.key = key;
     const bd = r.ta.parentElement.querySelector('.edit-backdrop');
     if (bd) { bd._issues = r.issues.map(x => [x.s, x.e]); bd._repaint && bd._repaint(); }
@@ -6550,31 +6745,46 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!panel) { panel = el('div', { id: 'reviewPanel', class: 'review-panel', role: 'region', 'aria-label': 'Revisor automático' }); document.body.append(panel); document.body.classList.add('rv-open'); }
     const shown = r.issues.filter(x => !r.filter || x.kind === r.filter), fixable = r.issues.filter(x => x.kind === 'pont' && x.fix != null);
     const counts = Object.keys(RV_KINDS).map(k => [k, r.issues.filter(x => x.kind === k).length]).filter(x => x[1]);
-    const list = el('div', { class: 'rv-list' });
+    const list = el('div', { class: 'rv-list' }), v = r.ta.value;
     shown.slice(0, 200).forEach(x => {
-      const v = r.ta.value, a = Math.max(0, x.s - 40), z = Math.min(v.length, x.e + 40);
-      const q = el('div', { class: 'rv-q' }, (a ? '…' : '') + v.slice(a, x.s).replace(/\s+/g, ' '), el('b', { text: v.slice(x.s, x.e) || ' ' }),
-        x.fix != null ? el('ins', { text: x.fix || '∅' }) : null, v.slice(x.e, z).replace(/\s+/g, ' ') + (z < v.length ? '…' : ''));
+      const a = Math.max(0, x.s - 40), z = Math.min(v.length, x.e + 40), word = v.slice(x.s, x.e);
+      const q = el('div', { class: 'rv-q' }, (a ? '…' : '') + v.slice(a, x.s).replace(/\s+/g, ' '), el('b', { text: word || ' ' }),
+        x.fix != null && x.kind !== 'orto' ? el('ins', { text: x.fix || '∅' }) : null, v.slice(x.e, z).replace(/\s+/g, ' ') + (z < v.length ? '…' : ''));
+      const id = `${x.kind}:${x.s}`, isOpen = r.open === id;
+      const buttons = [];
+      if (x.kind === 'orto') {
+        x.sugs.forEach((sg, i) => buttons.push(el('button', { class: i ? '' : 'primary', text: sg, onclick: () => rvApply([Object.assign({}, x, { fix: sg })]) })));
+        buttons.push(el('button', { class: 'link plain', text: 'Adicionar ao dicionário', title: 'Esta palavra está certa (nome, gíria, termo do mundo)', onclick: () => {
+          r.p.dict = [...new Set([...(r.p.dict || []), x.word])]; saveProject(r.p); runReview(); toast(`"${x.word}" adicionada ao dicionário deste projeto ✓`); } }));
+      } else {
+        buttons.push(x.fix != null ? el('button', { class: 'primary', text: x.fix === '' ? 'Apagar' : 'Aplicar', onclick: () => rvApply([x]) }) : el('button', { text: 'Ver no texto', onclick: () => rvGoto(x) }));
+        if (x.kind === 'rep' || (x.kind === 'estilo' && /^\p{L}+$/u.test(word))) buttons.push(el('button', { icon: 'book-open', text: 'Sinônimos', 'aria-expanded': String(isOpen), onclick: () => { r.open = isOpen ? null : id; renderReview(); } }));
+        buttons.push(el('button', { class: 'link plain', text: 'Ignorar', onclick: () => { r.ignore.add(r.key(x)); r.ch.rvIgnore = [...r.ignore].slice(-300); saveProject(r.p); runReview(); } }));
+      }
       const item = el('div', { class: 'rv-item', onclick: (e) => { if (!e.target.closest('button')) rvGoto(x); } },
         el('div', { class: 'rv-k', text: RV_KINDS[x.kind] }), q, el('div', { class: 'rv-m', text: x.msg }),
-        el('div', { class: 'rv-b' },
-          x.fix != null ? el('button', { class: 'primary', text: x.fix === '' ? 'Apagar' : 'Aplicar', onclick: () => rvApply([x]) }) : el('button', { text: 'Ver no texto', onclick: () => rvGoto(x) }),
-          el('button', { class: 'link plain', text: 'Ignorar', onclick: () => { r.ignore.add(r.key(x)); r.ch.rvIgnore = [...r.ignore].slice(-300); saveProject(r.p); runReview(); } })));
+        el('div', { class: 'rv-b' }, buttons),
+        isOpen ? synChips(word, (w) => { r.open = null; rvApply([Object.assign({}, x, { fix: w })]); }) : null);
       list.append(item);
     });
-    if (!shown.length) list.append(el('div', { class: 'rv-empty', text: r.issues.length ? 'Nada nesta categoria.' : 'Nada para apontar. O texto está limpo ✓' }));
-    panel.replaceChildren(
-      el('div', { class: 'rv-head' }, el('h3', { icon: 'list-checks', text: `Revisor · ${r.issues.length}` }), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar o revisor', onclick: closeReview })),
+    if (!shown.length) list.append(el('div', { class: 'rv-empty', text: r.issues.length ? 'Nada nesta categoria.' : (r.range ? 'Nada para apontar neste trecho ✓' : 'Nada para apontar. O texto está limpo ✓') }));
+    const parts = [
+      el('div', { class: 'rv-head' }, el('h3', { icon: 'list-checks', text: `Revisor · ${r.issues.length}${r.range ? ' no trecho' : ''}` }), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar o revisor', onclick: closeReview })),
+      r.range ? el('div', { class: 'rv-scope' }, 'Revisando só o trecho selecionado. ', el('button', { class: 'link plain', text: 'Revisar o capítulo todo', onclick: () => { r.range = null; runReview(); } })) : null,
+      !speller && isPtBr(r.p) ? el('div', { class: 'rv-scope', text: r.dictErr ? 'Não consegui baixar o dicionário (sem internet?). A ortografia fica de fora por enquanto.' : 'Carregando o dicionário de português (só na primeira vez)…' }) : null,
       counts.length > 1 ? el('div', { class: 'rv-tabs' }, el('button', { class: 'chip', 'aria-pressed': String(!r.filter), text: 'Tudo', onclick: () => { r.filter = ''; renderReview(); } }),
         counts.map(([k, n]) => el('button', { class: 'chip', 'aria-pressed': String(r.filter === k), text: `${RV_KINDS[k]} ${n}`, onclick: () => { r.filter = k; renderReview(); } }))) : null,
       fixable.length ? el('div', { class: 'rv-actions' }, el('button', { class: 'primary', icon: 'check', text: `Corrigir a pontuação (${fixable.length})`, onclick: () => rvApply(fixable) })) : null,
-      list);
+      list];
+    panel.replaceChildren(...parts.filter(Boolean));
   }
   function rvApply(xs) {
     const r = review, ta = r.ta; if (!xs.length) return;
-    ta.focus();
+    const sx = scrollX, sy = scrollY;
+    ta.focus({ preventScroll: true });
     [...xs].sort((a, b) => b.s - a.s).forEach(x => ta.setRangeText(x.fix, x.s, x.e, 'end'));
     ta.dispatchEvent(new Event('input'));
+    if (scrollX !== sx || scrollY !== sy) scrollTo(0, sy);
     clearTimeout(r.t); runReview();
     toast(xs.length > 1 ? `${xs.length} correções aplicadas ✓ (Ctrl+Z desfaz)` : 'Corrigido ✓');
   }
@@ -6583,7 +6793,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     ta.focus({ preventScroll: true }); ta.setSelectionRange(x.s, x.e);
     const para = (v.slice(0, x.s).match(/\n\s*\n/g) || []).length, tops = editParaTops(ta), r = ta.getBoundingClientRect();
     const y = scrollY + r.top + (tops[para] || 0) - innerHeight * .3;
-    scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    scrollTo({ left: 0, top: Math.max(0, y), behavior: 'smooth' });
   }
 
 

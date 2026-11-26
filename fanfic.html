@@ -218,6 +218,7 @@
   .cmap-stage.panning { cursor: grabbing; }
   .cmap-stage svg { width: 100%; height: 100%; display: block; }
   .cmap-node { cursor: pointer; }
+  .cmap-node image { pointer-events: none; }
   .cmap-node circle.ring { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
   .cmap-node.sel circle.ring { stroke: var(--accent); stroke-width: 4; }
   .cmap-node text { fill: var(--text); font: 600 13px system-ui, sans-serif; text-anchor: middle; paint-order: stroke; stroke: var(--surface-2); stroke-width: 4px; }
@@ -684,7 +685,7 @@
   .b3-face { position: absolute; backface-visibility: hidden; overflow: hidden; }
   .b3-front, .b3-back { inset: 0; border-radius: 2px 5px 5px 2px; }
   .b3-front { transform: translateZ(calc(var(--d) / 2)); background: #3a2530; }
-  .b3-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .b3-front img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; user-select: none; }
   .b3-front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.35) 0, rgba(255,255,255,.12) 3%, transparent 7%, transparent 80%, rgba(255,255,255,.08)); pointer-events: none; }
   .b3-front .b3-ph { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 24px; text-align: center; color: #fff;
     background: linear-gradient(160deg, #9b4d63, #3a2530); font-family: Georgia, serif; }
@@ -885,6 +886,50 @@
   .tpl[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); }
   .tpl-steps { margin: 6px 0 0; padding-left: 20px; font-size: .86rem; color: var(--muted); max-height: 30vh; overflow: auto; }
   .bcard.plan { border-style: dashed; }
+  /* ---------- oficina ---------- */
+  dialog.of-dlg { width: min(860px, calc(100vw - 16px)); }
+  .of-tabs { display: flex; margin: 2px 0 12px; }
+  .of-tabs { overflow-x: auto; }
+  .of-tabs button { flex: 1 0 auto; padding: 8px 12px; }
+  @media (max-width: 520px) { .of-tabs button { font-size: .86rem; padding: 8px 9px; } }
+  .of-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 680px) { .of-grid { grid-template-columns: 1fr; } }
+  .of-card { border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .of-card.full { grid-column: 1 / -1; }
+  .of-card h3 { margin: 0; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+  .of-card .of-big { font-family: Georgia, serif; font-size: 1.08rem; line-height: 1.55; margin: 0; }
+  .of-card .row button { min-height: 36px; padding: 4px 12px; font-size: .88rem; }
+  .of-q { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .of-starts { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .of-start { text-align: left; display: grid; justify-items: start; justify-content: stretch; align-content: start; gap: 3px; padding: 10px 12px; border-radius: 12px; min-height: 0; font-weight: 400; }
+  .of-start b { font-size: .95rem; } .of-start span { color: var(--muted); font-size: .82rem; } .of-start i { font-family: Georgia, serif; font-size: .9rem; }
+  .of-scene { border: 1px solid var(--border); border-radius: 12px; }
+  .of-scene > button { width: 100%; text-align: left; display: grid; justify-items: start; justify-content: stretch; gap: 2px; padding: 10px 14px; border: 0; background: transparent; min-height: 0; font-weight: 400; }
+  .of-scene > button b { font-size: .98rem; } .of-scene > button span { color: var(--muted); font-size: .85rem; }
+  .of-scene .of-body { padding: 0 14px 12px; }
+  .of-scene ol { margin: 4px 0 8px; padding-left: 20px; display: grid; gap: 4px; }
+  .of-tip { font-size: .86rem; color: var(--muted); margin: 0 0 8px; }
+  .of-list { display: grid; gap: 8px; }
+  .d30 { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; }
+  @media (max-width: 520px) { .d30 { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+  .d30 button { min-height: 38px; padding: 0; font-weight: 700; border-radius: 10px; }
+  .d30 button.done { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .d30 button[aria-pressed=true] { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+  .badge { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px; font-size: .84rem; }
+  .badge .icon { width: 22px; height: 22px; flex: none; color: #d4a017; }
+  .badge.locked { opacity: .45; } .badge.locked .icon { color: var(--muted); }
+  .badge b { display: block; font-size: .88rem; }
+  .ex-cats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .ex-cats .chip { font-size: .82rem; }
+  .ex-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ex-list button { min-height: 0; padding: 6px 12px; border-radius: 99px; font-weight: 400; font-family: Georgia, serif; font-size: .95rem; }
+  .sprint-pill { position: fixed; left: 16px; bottom: 16px; z-index: 75; display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 14px; border-radius: 99px;
+    background: var(--surface); border: 1px solid var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,.35); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sprint-pill .icon { color: var(--accent); }
+  .sprint-pill .sp-w { color: var(--muted); font-weight: 600; }
+  .sprint-pill button { min-height: 32px; padding: 2px 10px; font-size: .82rem; }
+  .sprint-pill.done { border-color: #2f9e55; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -1021,6 +1066,10 @@
 <symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /> <path d="M13 6h8" /> <path d="M13 12h8" /> <path d="M13 18h8" /></symbol>
 <symbol id="i-paintbrush" viewBox="0 0 24 24"><path d="m14.622 17.897-10.68-2.913" /> <path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z" /> <path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15" /></symbol>
 <symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16" /> <path d="M18 17V9" /> <path d="M13 17V5" /> <path d="M8 17v-3" /></symbol>
+<symbol id="i-timer" viewBox="0 0 24 24"><line x1="10" x2="14" y1="2" y2="2" /> <line x1="12" x2="15" y1="14" y2="11" /> <circle cx="12" cy="14" r="8" /></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /> <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /> <path d="M4 22h16" /> <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /> <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /> <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></symbol>
+<symbol id="i-shuffle" viewBox="0 0 24 24"><path d="m18 14 4 4-4 4" /> <path d="m18 2 4 4-4 4" /> <path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-7.6a4 4 0 0 1 3.3-1.7H22" /> <path d="M2 6h1.972a4 4 0 0 1 3.6 2.2" /> <path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45" /></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><path d="M8 2v4" /> <path d="M16 2v4" /> <rect width="18" height="18" x="3" y="4" rx="2" /> <path d="M3 10h18" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1490,6 +1539,17 @@
   <p class="muted" style="margin-top:0">Cria cartões de planejamento no Mural, um para cada etapa. Você troca os títulos e escreve o que acontece em cada um (sem IA).</p>
   <div class="tpl-list" id="tplList"></div>
   <div class="row end"><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="tplGo" disabled>Criar os cartões</button></div>
+</dialog>
+
+<dialog id="oficinaDlg" class="of-dlg" aria-labelledby="oficinaTitle">
+  <div class="dlg-head"><h2 id="oficinaTitle"><svg class="icon" aria-hidden="true"><use href="#i-lightbulb"/></svg>Oficina de escrita</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="seg of-tabs" role="tablist" aria-label="Oficina">
+    <button type="button" role="tab" data-of="destravar">Destravar</button>
+    <button type="button" role="tab" data-of="cenas">Cenas</button>
+    <button type="button" role="tab" data-of="desafios">Desafios</button>
+    <button type="button" role="tab" data-of="expressoes">Expressões</button>
+  </div>
+  <div id="oficinaBody"></div>
 </dialog>
 
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
@@ -2262,7 +2322,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let cryptoKey = null, syncing = false, syncAgain = false, syncTimer = null;
 
   // configuração da IA que viaja junto com as histórias (no mesmo arquivo cifrado)
-  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy', 'freeFirst', 'freeModel', 'goals'];
+  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy', 'freeFirst', 'freeModel', 'goals', 'challenges'];
   function aiForSync() {
     if (!settings.key) return null;
     const o = { updatedAt: settings.updatedAt || 0 };
@@ -3339,7 +3399,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('p', { text: 'A IA pode escrever o primeiro capítulo a partir da sua ideia, ou você escreve do zero.' }),
         el('div', { class: 'row', style: 'justify-content:center' },
           el('button', { class: 'primary', icon: 'pen-line', ai: true, text: 'Escrever com IA', onclick: openWriteDialog }),
-          el('button', { icon: 'pencil', text: 'Escrever sem IA', onclick: () => blankChapter(p) }))));
+          el('button', { icon: 'pencil', text: 'Escrever sem IA', onclick: () => blankChapter(p) })),
+        el('button', { class: 'link plain', icon: 'lightbulb', text: 'Sem ideia? Abra a Oficina: primeiras frases, modelos de cena e desafios', onclick: () => openOficina(p) })));
       return;
     }
 
@@ -3351,6 +3412,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('div', { class: 'row' },
         el('button', { icon: 'search', text: 'Buscar', title: 'Buscar e substituir em todos os capítulos (Ctrl+Shift+F)', onclick: () => openFind(p) }),
         el('button', { icon: 'bar-chart', text: 'Estatísticas', onclick: () => openStats(p) }),
+        el('button', { icon: 'lightbulb', text: 'Oficina', title: 'Ideias, modelos de cena e desafios (sem IA)', onclick: () => openOficina(p) }),
         el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyWholeStory(p) }),
         el('button', { icon: 'book-open', text: 'Baixar / diagramar', onclick: () => openLayout(p) }),
         writeButton(p))));
@@ -3767,6 +3829,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('button', { type: 'button', text: '⁂', 'aria-label': 'Quebra de cena', title: 'Quebra de cena', onclick: () => fmtInsert(ta, '\n\n* * *\n\n') }),
       el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; colors.hidden = true; } }),
       el('span', { class: 'tb-sep', 'aria-hidden': 'true' }),
+      el('button', { type: 'button', class: 'tb-ai', icon: 'lightbulb', text: 'Ideias', title: 'Oficina: primeiras frases, perguntas, expressões e desafios (sem IA)', onclick: () => openOficina(p, { ta, ch }) }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'list-checks', text: 'Revisar', title: 'Revisor automático, sem IA: repetições, cara de tradução, pontuação', onclick: () => openReview(p, ch, ta) }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'paintbrush', text: 'Formatar', title: 'Arrumar travessões, aspas, reticências e parágrafos, sem IA (o trecho selecionado ou o capítulo)', onclick: () => formatInEditor(ta) }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'wand-sparkles', ai: true, text: 'Ajustar', title: 'Ajustar com IA o trecho selecionado ou o capítulo', onclick: () => adjustFromEditor(ch, ta) }),
@@ -6783,6 +6846,151 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     toast(`${t.steps.length} cartões criados no Mural ✓ Toque em um para escrever o plano.`);
   });
 
+
+  // =====================================================================
+  // Oficina de escrita (sem IA): destravar, modelos de cena MM, desafios e expressões
+  // =====================================================================
+  var OFICINA = {"openings": ["A última pessoa que Daniel esperava encontrar no velório do avô era o garoto que tinha partido o coração dele aos dezoito.", "— Só tem uma cama — avisou o recepcionista, e Léo soube na hora que aquela viagem ia dar errado.", "Fazia três anos que Davi não dizia o nome dele em voz alta.", "O novo capitão do time rival tinha o sorriso mais irritante que Gabriel já tinha visto.", "A mensagem chegou às 3h12 da manhã: “Ainda acordado?”", "O plano era simples: fingir namoro por um fim de semana, enganar a família inteira e não se apaixonar.", "O vizinho do 302 tocava violino às duas da manhã, e Rafael já tinha decidido odiá-lo.", "No primeiro dia de trabalho, Theo derramou café na camisa do chefe. No segundo, descobriu que o chefe era o cara da festa.", "— Você ainda guarda isso? — Caio perguntou, segurando a pulseira que tinha dado a ele dez anos antes.", "Ninguém na cidade sabia que o filho do prefeito e o mecânico da oficina se encontravam no farol toda sexta.", "O carro morreu no meio da estrada, debaixo de um temporal, com a única pessoa que ele não suportava no banco do carona.", "Era para ser só uma aposta.", "Ele aprendeu a ler os silêncios do outro antes de aprender o nome dele.", "O casamento da irmã tinha tudo para ser perfeito, até o padrinho aparecer: o ex que ninguém da família conhecia.", "Quando o príncipe pediu um guarda-costas, ninguém avisou que seria justamente ele.", "Lucas tinha uma regra: nunca se envolver com o colega de apartamento. A regra durou onze dias.", "O tatuador tinha as mãos firmes e um jeito de olhar que fez Mateus esquecer qual desenho tinha escolhido.", "— Finge que está comigo — sussurrou o desconhecido, e segurou a mão dele antes que ele pudesse responder.", "Ele voltou para a cidade natal com uma mala, um cachorro e a firme decisão de não procurar o primeiro amor.", "Na internet, eles eram rivais famosos. Ninguém sabia que conversavam todas as noites por mensagem.", "Treze anos de amizade, e Bento nunca tinha reparado na cor exata dos olhos de Samuel. Até aquela noite.", "A biblioteca fechava às dez. Às dez e cinco, ainda havia dois homens presos lá dentro.", "O médico do plantão era o mesmo homem que ele tinha deixado no altar sete anos antes.", "Na primeira vez que se viram, um deles estava com um olho roxo e o outro segurava o gelo.", "Henrique tinha perdido a aposta, e agora precisava levar o cara mais insuportável do campus ao baile.", "A casa de praia estava vazia havia anos. Até alguém deixar a luz da varanda acesa.", "— Eu não danço — disse ele. Dez minutos depois, estava dançando.", "O bilhete dobrado dentro do livro emprestado dizia apenas: “Página 214. Leia devagar.”"], "questions": ["O que ele quer nesta cena e não tem coragem de pedir?", "O que o outro percebe que ele está tentando esconder?", "Qual é a pior coisa que pode acontecer agora? Faça acontecer.", "Que objeto pequeno pode carregar a emoção da cena (uma jaqueta, uma xícara, uma pulseira)?", "Onde eles estão? Que cheiro, som e temperatura tem o lugar?", "Quem tem o poder nesta conversa? Em que momento isso se inverte?", "Que mentira um deles conta? O leitor percebe antes do outro?", "O que ficou sem ser dito na cena anterior e volta agora?", "Como o medo de ser visto (pela família, pelo time, pela cidade) pesa nesta cena?", "Que lembrança do passado aparece no meio da conversa?", "Como seria esta cena contada pelo olhar do outro?", "Qual é o primeiro toque, mesmo que sem querer?", "O que um amigo diria se visse os dois agora?", "Que detalhe do outro ele nota e finge não notar?", "Que frase ele ensaia e não tem coragem de dizer?", "O que interrompe o momento justo na hora errada?", "A cena termina com uma pergunta, uma decisão ou uma porta fechando?", "O que cada um perde se o outro descobrir a verdade?", "Como a cena seria se acontecesse debaixo de chuva? E num lugar lotado?", "Qual é o apelido que só ele usa? Quando ele usa pela primeira vez?"], "starters": [["Pela ação", "Comece no meio de um movimento, sem explicação.", "Gabriel já estava com a mão na maçaneta quando ouviu o próprio nome."], ["Por uma fala", "Uma frase que cria uma pergunta na cabeça do leitor.", "— Você não deveria estar aqui — disse Rafael, sem tirar os olhos da porta."], ["Por uma sensação", "O corpo antes do pensamento: frio, cheiro, gosto, dor.", "O cheiro de café e chuva entrou junto com ele."], ["Pelo lugar", "Um detalhe do cenário que diga algo do clima da cena.", "O vestiário estava vazio, a não ser pela toalha esquecida no banco dele."], ["Por um pensamento", "A voz de dentro do personagem, sincera e curta.", "Se ele sorrisse mais uma vez daquele jeito, Léo ia fazer alguma besteira."], ["Por um objeto", "Algo pequeno que carrega a história entre os dois.", "A jaqueta ainda estava no encosto da cadeira, três semanas depois."]], "scenes": [{"n": "Primeiro encontro com faísca", "d": "Os dois se conhecem e algo fica no ar: atrito, graça ou atração.", "b": ["Mostre cada um no seu mundo, ocupado com outra coisa.", "O encontro acontece por acaso ou por erro (esbarrão, engano, disputa).", "Uma troca de frases rápida, com graça ou atrito.", "Um detalhe do outro fica na cabeça (voz, mãos, cheiro).", "Termine com um gancho: um nome, um número, um 'a gente se vê'."], "t": "Não resolva nada. A cena é boa quando o leitor quer o próximo encontro."}, {"n": "Inimigos obrigados a cooperar", "d": "Rivais precisam trabalhar juntos e não conseguem se suportar.", "b": ["Deixe claro por que se odeiam (ou acham que se odeiam).", "Algo de fora força os dois a cooperar.", "Briga sobre como fazer as coisas.", "Um vê o outro sendo competente ou gentil sem querer.", "Um momento de trégua que nenhum dos dois admite."], "t": "As provocações devem revelar que eles prestam atenção demais um no outro."}, {"n": "Só tem uma cama", "d": "O clássico: dividir o espaço deixa tudo à flor da pele.", "b": ["Mostre por que não há outra opção (chuva, hotel lotado, viagem).", "A negociação: quem fica com qual lado, a barreira de travesseiros.", "O silêncio no escuro e uma conversa sincera.", "Um movimento durante o sono e o susto de acordar perto demais.", "A manhã seguinte: fingir que nada aconteceu, e falhar."], "t": "A tensão vale mais que a ação. Explore o que eles não fazem."}, {"n": "Primeiro beijo", "d": "O momento que a história inteira estava prometendo.", "b": ["Comece com os dois sozinhos, em um momento que parece comum.", "Uma conversa que vai ficando mais sincera e mais baixa.", "Hesitação: o olhar desce para a boca e volta.", "O beijo, contado com poucos e bons detalhes.", "O depois: o que cada um sente e o que diz (ou não diz)."], "t": "Use o ritmo: frases curtas antes do beijo, uma frase longa durante."}, {"n": "Confissão", "d": "Um deles finalmente diz o que sente.", "b": ["O que leva à confissão: uma crise, um ciúme, uma despedida.", "As tentativas de começar a frase.", "A confissão, simples e na voz do personagem.", "O silêncio do outro (o leitor sofre junto).", "A resposta: aceitar, recuar ou adiar."], "t": "Confissão boa é específica: cite algo que só ele sabe do outro."}, {"n": "Ciúme", "d": "Alguém de fora mexe com o casal (antes ou depois de juntos).", "b": ["Apresente o terceiro de um jeito que ameace sem ser vilão.", "Mostre o ciúme pelo corpo, não pelo nome da emoção.", "Uma reação exagerada ou um comentário atravessado.", "A conversa em que o ciúme aparece de verdade.", "Algo muda entre os dois depois disso."], "t": "O ciúme revela o que ele ainda não teve coragem de admitir."}, {"n": "Namoro de mentira em público", "d": "Fingir para os outros e esquecer que é mentira.", "b": ["Combine as regras do fingimento (o leitor vai ver elas quebrarem).", "Um gesto ensaiado em público que sai natural demais.", "Alguém desconfia e eles exageram para provar.", "Um momento sozinhos em que ninguém está olhando, mas eles continuam.", "A pergunta que ninguém faz: isso ainda é mentira?"], "t": "Contraste o carinho em público com o constrangimento quando estão sozinhos."}, {"n": "Cuidar do ferido", "d": "Hurt/comfort: um se machuca ou adoece, o outro cuida.", "b": ["O acidente, a doença ou o dia ruim.", "O outro aparece e assume o cuidado, mesmo sem jeito.", "Proximidade física por necessidade (curativo, febre, banho de chuva).", "Uma vulnerabilidade revelada (medo, solidão, passado).", "Gratidão que vira outra coisa."], "t": "O cuidado em detalhes pequenos (um chá, um cobertor) diz mais que declarações."}, {"n": "Briga e reconciliação", "d": "Uma discussão de verdade e o caminho de volta.", "b": ["O motivo aparente da briga e o motivo de verdade.", "Frases que machucam porque acertam.", "Um vai embora ou se fecha.", "O tempo separado: o que cada um percebe.", "Pedido de desculpas que não é perfeito, mas é verdadeiro."], "t": "Na briga, os dois precisam ter um pouco de razão."}, {"n": "Saindo do armário", "d": "Contar para alguém importante (família, amigos, time).", "b": ["O que está em jogo: o que ele pode perder.", "A preparação: ensaios, desistências, mensagens apagadas.", "O momento, com as palavras que ele consegue dizer.", "A reação, que pode ser boa, ruim ou confusa.", "Quem está ao lado dele depois."], "t": "Trate com cuidado e verdade. A cena é sobre coragem, não sobre o choque dos outros."}, {"n": "Reencontro depois de anos", "d": "Segunda chance: eles se veem de novo e tudo volta.", "b": ["O choque do reencontro e o que mudou na aparência.", "Conversa educada demais, cheia do que não é dito.", "A lembrança do motivo da separação.", "Um detalhe que mostra que nada foi esquecido.", "A decisão de se ver de novo (ou o medo disso)."], "t": "Mostre a passagem do tempo: o que ele aprendeu sem o outro."}, {"n": "Dança lenta", "d": "Uma festa, uma música, dois corpos perto demais.", "b": ["O motivo de estarem na mesma festa.", "O convite (ou a falta de escolha) para dançar.", "Os primeiros passos desajeitados.", "A música, as mãos e a conversa ao pé do ouvido.", "Quando a música acaba e eles não se soltam."], "t": "Escolha uma música real ou inventada e deixe a letra conversar com a cena."}, {"n": "A manhã seguinte", "d": "Depois da primeira noite juntos (sem mostrar a noite).", "b": ["O despertar e a luz do quarto.", "Observar o outro dormindo e os detalhes que só agora aparecem.", "O café da manhã improvisado.", "A conversa sobre o que aquilo significa.", "Um gesto pequeno de carinho que responde tudo."], "t": "Fade to black: o carinho do dia seguinte diz o que a noite foi."}, {"n": "O grande gesto", "d": "Um deles arrisca tudo para provar o amor.", "b": ["O ponto mais baixo: separados e sem esperança.", "Ele percebe o que precisa fazer e o quanto vai custar.", "A corrida contra o tempo (aeroporto, jogo, estação).", "O gesto, em público ou num lugar que só os dois entendem.", "A resposta do outro e o final."], "t": "O gesto precisa custar algo ao personagem: orgulho, segredo, medo."}], "tropes": [{"id": "inimigos", "name": "Inimigos para amantes (MM)", "desc": "Rivais que se provocam até não aguentarem mais a própria atração.", "steps": [["Rivais", "Mostre a rivalidade: time, trabalho, escola, família."], ["Forçados a conviver", "Um projeto, viagem ou castigo junta os dois."], ["Provocações", "Brigas cheias de atenção demais ao outro."], ["Primeira trégua", "Um vê o lado humano do outro."], ["Ciúme", "Alguém de fora faz um deles perceber o que sente."], ["Quase beijo", "A tensão estoura, mas algo interrompe."], ["Juntos", "O primeiro beijo e o começo escondido."], ["O segredo vem à tona", "A rivalidade antiga cobra o preço."], ["Separados", "Orgulho e medo vencem."], ["Escolha pública", "Um deles escolhe o outro na frente de todos."]]}, {"id": "amigos", "name": "Amigos para amantes / slow burn (MM)", "desc": "Anos de amizade, um sentimento que cresce devagar e o medo de perder tudo.", "steps": [["A amizade", "Mostre a intimidade de anos: piadas internas, rotina."], ["A faísca", "Um momento muda o olhar de um deles."], ["Negação", "Ele tenta se convencer de que não é nada."], ["Ciúme disfarçado", "Um novo namorado ou namorada aparece."], ["Quase", "Uma noite em que quase acontece."], ["Afastamento", "O medo de estragar a amizade."], ["Confissão", "Um deles fala, do jeito errado."], ["Silêncio", "O outro precisa entender o que sente."], ["Do jeito certo", "A resposta, e o primeiro beijo."], ["Melhores amigos e mais", "O final mostra que a amizade continua, agora maior."]]}, {"id": "fake", "name": "Namoro de mentira (MM)", "desc": "Um acordo de fachada que vira verdade sem ninguém perceber.", "steps": [["O problema", "Por que um deles precisa de um namorado falso."], ["O acordo", "As regras combinadas (e escritas)."], ["Primeiro teste", "Em público, o fingimento quase dá errado."], ["Treino", "Ensaiar carinho em particular fica estranho."], ["Natural demais", "Os gestos começam a sair sem pensar."], ["Regra quebrada", "Um beijo que não estava no acordo."], ["Fim do acordo", "O motivo do fingimento acaba."], ["Saudade", "Separados, eles percebem a verdade."], ["Sem acordo", "Um pedido de namoro de verdade."]]}, {"id": "segunda", "name": "Segunda chance (MM)", "desc": "Ex-namorados (ou quase) que se reencontram anos depois.", "steps": [["Antes", "Um vislumbre do que eles foram (lembrança ou prólogo)."], ["Reencontro", "O acaso coloca os dois no mesmo lugar."], ["Feridas", "Conversas educadas cheias de mágoa."], ["O que mudou", "Cada um mostra quem se tornou."], ["A verdade", "O motivo real da separação aparece."], ["Reaproximação", "Pequenos gestos de antes voltam."], ["O medo", "Vale a pena arriscar de novo?"], ["Escolha", "Desta vez, um deles fica."]]}, {"id": "hurt", "name": "Cuidado e conforto (MM)", "desc": "Um personagem ferido (por fora ou por dentro) e o outro que fica.", "steps": [["A ferida", "Mostre a dor: acidente, perda, trauma."], ["Quem aparece", "O outro chega quando ninguém mais chega."], ["Deixar cuidar", "A resistência a aceitar ajuda."], ["Confiança", "Um segredo dividido de madrugada."], ["Recaída", "A dor volta e testa os dois."], ["Ficar", "O outro escolhe ficar, mesmo assim."], ["Cura", "Não total, mas real, e com ele ao lado."], ["Juntos", "O amor como lugar seguro."]]}], "daily": ["Os dois dividem um guarda-chuva pequeno demais.", "Um deles encontra uma foto antiga dos dois que não lembrava ter tirado.", "Uma mensagem enviada para o contato errado.", "Ficam presos no elevador por quarenta minutos.", "Um ensina o outro a cozinhar o prato da avó.", "A jaqueta emprestada que nunca foi devolvida.", "Um apelido que nasce de uma briga boba.", "Os dois cuidam do cachorro de um amigo por um fim de semana.", "Um deles tem pesadelo e o outro acorda com o barulho.", "A festa de família em que alguém pergunta: “E a namorada?”", "O carro quebra na estrada e o sinal do celular some.", "Um deles canta mal no karaokê, e o outro acha lindo.", "Uma carta escrita e nunca entregue é encontrada.", "O primeiro dia morando juntos e a briga pela arrumação.", "Um bilhete deixado na geladeira toda manhã.", "Um treino que termina com os dois no chão, rindo.", "A viagem de ônibus noturna em que um dorme no ombro do outro.", "Um deles aparece na porta, molhado de chuva, às duas da manhã.", "Os dois disputam a última mesa livre do café.", "Uma tatuagem com significado que só um deles sabe.", "Um machucado bobo e um curativo feito com cuidado demais.", "Os dois tentam montar um móvel sem ler o manual.", "O dia em que um deles conhece a família do outro.", "Uma playlist feita de presente, com uma música escondida no fim.", "Os dois são confundidos com um casal antes de serem um.", "Um deles perde uma aposta e precisa cumprir o castigo.", "Uma noite de apagão na cidade inteira.", "Um pedido de desculpas escrito na neblina do vidro do carro.", "Os dois procuram o gato que fugiu pelo bairro.", "Um deles lê em voz alta para o outro dormir.", "Um casamento de amigos, um buquê e um olhar.", "O primeiro “eu te amo”, dito na hora mais errada possível.", "Um deles volta de viagem e o outro está esperando no aeroporto.", "Uma briga no supermercado por causa de uma marca de cereal.", "Uma noite de febre e uma sopa queimada.", "Os dois são parceiros num trabalho que ninguém quer fazer.", "Uma cicatriz e a história dela.", "O aniversário que um deles esqueceu (ou fingiu esquecer).", "Uma ligação no meio da noite que começa com silêncio.", "Os dois em lados opostos de um jogo decisivo."], "rules": ["Só diálogo, sem narração.", "Em exatamente 100 palavras (um drabble).", "Sem usar a palavra “olhar”.", "Do ponto de vista do outro personagem.", "Tudo num único lugar fechado.", "Comece pelo fim da cena.", "Use os cinco sentidos.", "Em menos de 500 palavras.", "Sem usar a palavra “amor”.", "O clímax é um toque de mãos.", "Com uma música tocando ao fundo.", "Em tempo presente.", "Com um objeto perdido no centro da cena.", "Nenhum dos dois pode dizer o que sente.", "Termine com uma pergunta."], "d30": [["Primeiro olhar", "O momento exato em que um repara no outro."], ["Café", "Uma cena em uma cafeteria, uma cozinha ou um copo derramado."], ["Chuva", "Os dois e um temporal."], ["Jaqueta", "Uma peça de roupa emprestada."], ["Mensagem às 3h", "Uma conversa de madrugada."], ["Apelido", "Como nasceu o apelido que só ele usa."], ["Viagem", "Estrada, ônibus, avião ou trem."], ["Ferido", "Um machucado e um cuidado."], ["Festa", "Música alta, gente demais e só um rosto importa."], ["Segredo", "O que um deles esconde."], ["Dança", "Uma música lenta."], ["Ciúme", "Alguém de fora mexe com eles."], ["Carta", "Palavras escritas à mão."], ["Primeiro beijo", "O beijo que a história promete."], ["Briga", "Uma discussão que diz a verdade."], ["Família", "Um almoço de domingo complicado."], ["Praia", "Sol, sal e coragem."], ["Inverno", "Frio, cobertor e proximidade."], ["Promessa", "Algo que um deles jura."], ["Cozinhando juntos", "Farinha, fogo e risada."], ["Hospital", "Uma sala de espera."], ["Mudança", "Caixas, uma casa nova ou uma despedida."], ["Aposta", "Quem perde paga."], ["Foto antiga", "Uma lembrança que volta."], ["Fim de tarde", "A luz dourada e uma conversa sem pressa."], ["Tatuagem", "Tinta, agulha e significado."], ["Desculpas", "Um pedido de perdão sincero."], ["Anel", "Um objeto pequeno, uma pergunta enorme."], ["Casa", "O que é casa para os dois."], ["Para sempre", "Um vislumbre do futuro deles."]], "expr": [["Nervosismo", ["mexeu na barra da camiseta", "a perna não parava de balançar debaixo da mesa", "engoliu em seco", "riu alto demais de uma piada sem graça", "as mãos não sabiam onde ficar", "conferiu o celular sem ver nada na tela", "a voz saiu meio tom acima", "esfregou a nuca"]], ["Atração", ["desviou o olhar rápido demais", "reparou na veia do antebraço quando ele arregaçou a manga", "esqueceu o que ia dizer no meio da frase", "o calor subiu pelo pescoço", "inventou uma desculpa para ficar mais cinco minutos", "deixou o ombro encostar no dele e não se afastou", "a boca secou", "decorou o jeito como ele ria"]], ["Desejo contido", ["olhou para a boca dele e se obrigou a voltar para os olhos", "a distância entre eles ficou pequena demais", "a mão parou no meio do caminho", "contou até dez, depois até vinte", "percebeu a respiração dele mudar", "apertou o tecido da camisa dele entre os dedos", "encostou a testa na dele e ficou assim"]], ["Ciúme", ["apertou o copo até os dedos ficarem brancos", "o sorriso não chegou aos olhos", "contou quantas vezes ele riu da piada do outro", "a resposta saiu curta e seca", "de repente achou a música da festa irritante", "fingiu não se importar, e fingiu mal", "ficou de braços cruzados no canto da sala"]], ["Carinho", ["ajeitou a gola do casaco dele sem pedir", "guardou a última fatia para ele", "afastou o cabelo da testa dele com a ponta dos dedos", "esperou ele dormir para apagar a luz", "lembrou como ele gostava do café", "puxou o cobertor até o ombro dele", "segurou a mão dele por baixo da mesa"]], ["Raiva", ["a mandíbula travou", "falou baixo, o que era pior do que gritar", "bateu a porta do armário com mais força que o necessário", "respirou fundo pelo nariz", "as palavras saíram cortadas", "riu sem achar graça nenhuma"]], ["Tristeza", ["o peito pesou", "ficou olhando para o mesmo ponto da parede", "a garganta fechou", "deixou o café esfriar", "a risada morreu antes de sair", "abraçou os joelhos", "não conseguiu terminar a frase"]], ["Vergonha", ["as orelhas esquentaram", "escondeu o rosto nas mãos", "riu de nervoso", "não conseguiu sustentar o olhar", "quis que o chão se abrisse", "pigarreou e mudou de assunto"]], ["Medo", ["o estômago gelou", "prendeu a respiração", "ouviu o próprio coração", "as pernas falharam", "os dedos tremeram na maçaneta", "olhou para a porta duas vezes"]], ["Alívio e alegria", ["os ombros finalmente baixaram", "riu, quase chorando", "as pernas amoleceram", "abraçou forte e não soltou", "o sorriso veio antes que ele pudesse impedir", "deixou a cabeça cair no ombro dele"]], ["No lugar de “disse”", ["murmurou", "resmungou", "retrucou", "provocou", "admitiu", "insistiu", "sussurrou", "rebateu", "confessou", "brincou", "cortou", "emendou", "desconversou", "gaguejou", "completou"]]]};
+  OFICINA.tropes.forEach(t => STORY_TEMPLATES.push(t));
+  var ofCtx = null, ofTab = 'destravar', ofOpen = 0, ofQ = 0, ofExpr = 0, ofDayOff = 0, ofD30 = null, ofScene = -1;
+  const pick = (arr, i) => arr[((i % arr.length) + arr.length) % arr.length];
+  function chal() { return Object.assign({ daily: {}, d30: [], sprints: [] }, settings.challenges || {}); }
+  function saveChal(c) { settings.challenges = c; saveSettings(); }
+  function openOficina(p, opts = {}) {
+    ofCtx = { p, ta: opts.ta || null, ch: opts.ch || (view.chapterId ? p.chapters.find(c => c.id === view.chapterId) : null) };
+    if (!ofOpen) { ofOpen = Math.floor(Math.random() * OFICINA.openings.length); ofQ = Math.floor(Math.random() * OFICINA.questions.length); }
+    if (opts.tab) ofTab = opts.tab;
+    renderOficina(); $('oficinaDlg').showModal();
+  }
+  const ofHasEditor = () => ofCtx && ofCtx.ta && ofCtx.ta.isConnected;
+  function ofInsert(text, sep = ' ') {
+    if (ofHasEditor()) {
+      const ta = ofCtx.ta, before = ta.value.slice(0, ta.selectionStart);
+      const pre = !before || /\s$/.test(before) ? '' : sep;
+      fmtInsert(ta, pre + text); toast('Inserido no texto ✓');
+    } else { navigator.clipboard && navigator.clipboard.writeText(text).catch(() => {}); toast('Copiado ✓ Cole no texto quando quiser.'); }
+  }
+  // cria um capítulo novo (com texto e/ou plano) e abre no Editar
+  function ofNewChapter(title, text, plan) {
+    const p = ofCtx.p, ch = { id: uid(), title: title || '', text: text || '', plan: plan || '', status: 'ideia' };
+    p.chapters.push(ch); saveProject(p, true);
+    $('oficinaDlg').close();
+    view = { tab: 'capitulos', chapterId: ch.id, mode: 'editar' }; renderTab(); renderProjects(); scrollTo(0, 0);
+    toast('Capítulo criado ✓');
+  }
+  function renderOficina() {
+    document.querySelectorAll('[data-of]').forEach(b => { b.setAttribute('aria-selected', String(b.dataset.of === ofTab)); b.setAttribute('aria-pressed', String(b.dataset.of === ofTab)); });
+    const body = $('oficinaBody'), O = OFICINA, ed = ofHasEditor(), ch = ofCtx.ch;
+    let out = [];
+    if (ofTab === 'destravar') {
+      const first = pick(O.openings, ofOpen);
+      out.push(el('div', { class: 'of-grid' },
+        el('div', { class: 'of-card full' }, el('h3', { icon: 'pen-line', text: 'Primeira frase' }), el('p', { class: 'of-big', text: first }),
+          el('div', { class: 'row' },
+            el('button', { icon: 'shuffle', text: 'Outra', onclick: () => { ofOpen++; renderOficina(); } }),
+            ed ? el('button', { class: 'primary', text: 'Usar no texto', onclick: () => ofInsert(first, '\n\n') })
+              : el('button', { class: 'primary', text: 'Começar um capítulo com ela', onclick: () => ofNewChapter('', first) }),
+            el('span', { class: 'hint', style: 'margin:0', text: 'Troque os nomes pelos seus personagens.' }))),
+        el('div', { class: 'of-card' }, el('h3', { icon: 'lightbulb', text: 'Perguntas para destravar' }),
+          el('ol', { class: 'of-q' }, [0, 1, 2].map(k => el('li', { text: pick(O.questions, ofQ + k * 7) }))),
+          el('div', { class: 'row' }, el('button', { icon: 'shuffle', text: 'Outras perguntas', onclick: () => { ofQ += 3; renderOficina(); } }))),
+        el('div', { class: 'of-card' }, el('h3', { icon: 'timer', text: 'Escrita livre' }),
+          el('p', { style: 'margin:0', text: 'Dez minutos escrevendo sem parar e sem apagar. Ruim também vale: o importante é sair do zero.' }),
+          el('div', { class: 'row' }, el('button', { class: 'primary', icon: 'timer', text: 'Começar 10 minutos', onclick: () => startSprint(10, 200) }))),
+        el('div', { class: 'of-card full' }, el('h3', { text: 'Comece por…' }),
+          el('div', { class: 'of-starts' }, O.starters.map(([n, d, ex]) => el('button', { type: 'button', class: 'of-start', title: ed ? 'Inserir o exemplo no texto' : 'Copiar o exemplo', onclick: () => ofInsert(ex, '\n\n') },
+            el('b', { text: n }), el('span', { text: d }), el('i', { text: ex })))))));
+    } else if (ofTab === 'cenas') {
+      out.push(el('p', { class: 'muted', style: 'margin-top:0', text: 'Roteiros de cenas clássicas de romance MM, passo a passo. Use como plano de um capítulo; você escreve (ou a IA escreve seguindo o plano).' }));
+      out.push(el('div', { class: 'of-list' }, O.scenes.map((sc, i) => {
+        const open = ofScene === i, plan = sc.b.map((x, k) => `${k + 1}. ${x}`).join('\n') + `\nDica: ${sc.t}`;
+        return el('div', { class: 'of-scene' },
+          el('button', { type: 'button', 'aria-expanded': String(open), onclick: () => { ofScene = open ? -1 : i; renderOficina(); } }, el('b', { text: sc.n }), el('span', { text: sc.d })),
+          open ? el('div', { class: 'of-body' }, el('ol', {}, sc.b.map(x => el('li', { text: x }))), el('p', { class: 'of-tip', text: 'Dica: ' + sc.t }),
+            el('div', { class: 'row' },
+              ch && !(ch.text || '').trim() ? el('button', { class: 'primary', text: 'Usar como plano deste capítulo', onclick: () => { ch.plan = `${sc.n}\n${plan}`; saveProject(ofCtx.p, true); $('oficinaDlg').close(); renderChapters(); toast('Plano adicionado ✓'); } }) : null,
+              el('button', { class: ch && !(ch.text || '').trim() ? '' : 'primary', text: 'Novo capítulo com esta cena', onclick: () => ofNewChapter(sc.n, '', plan) }),
+              ch && (ch.text || '').trim() ? el('button', { text: 'Pôr no plano deste capítulo', onclick: () => { ch.plan = `${sc.n}\n${plan}`; saveProject(ofCtx.p, true); $('oficinaDlg').close(); renderChapters(); toast('Plano adicionado ✓'); } }) : null)) : null);
+      })));
+      out.push(el('div', { class: 'of-card', style: 'margin-top:12px' }, el('h3', { icon: 'milestone', text: 'Estruturas de história MM' }),
+        el('p', { style: 'margin:0', text: `Inimigos para amantes, amigos para amantes (slow burn), namoro de mentira, segunda chance e cuidado e conforto: viram cartões no Mural, um por etapa.` }),
+        el('div', { class: 'row' }, el('button', { class: 'primary', text: 'Ver estruturas', onclick: () => { $('oficinaDlg').close(); openTemplates(ofCtx.p); } }))));
+    } else if (ofTab === 'desafios') {
+      const c = chal(), now = new Date(), day = Math.floor((now - new Date(2024, 0, 1)) / 864e5) + ofDayOff, key = dayKey(now);
+      const prompt = pick(O.daily, day), rule = pick(O.rules, day * 7 + 3), done = !!c.daily[key];
+      const total = projects.reduce((n, p) => n + p.chapters.reduce((k, x) => k + countWords(x.text), 0), 0);
+      const badges = [
+        ['Primeiro sprint', 'Termine um sprint', c.sprints.length >= 1], ['Maratonista', '10 sprints', c.sprints.length >= 10],
+        ['Na meta', 'Bata a meta de um sprint', c.sprints.some(x => x.done)], ['Desafio aceito', 'Faça um desafio do dia', Object.keys(c.daily).length >= 1],
+        ['Semana criativa', '7 desafios do dia', Object.keys(c.daily).length >= 7], ['Metade do caminho', '15 dias do desafio de 30', c.d30.length >= 15],
+        ['30 dias de MM', 'Complete os 30 dias', c.d30.length >= 30], ['Constância', '7 dias seguidos na meta diária', streakDays() >= 7],
+        ['10 mil palavras', 'Somando todos os projetos', total >= 1e4], ['50 mil palavras', 'Um livro inteiro', total >= 5e4]];
+      const sel = ofD30 != null ? O.d30[ofD30] : null;
+      out.push(el('div', { class: 'of-grid' },
+        el('div', { class: 'of-card full' }, el('h3', { icon: 'sparkles', text: `Desafio do dia${ofDayOff ? ' (outro)' : ''}` }),
+          el('p', { class: 'of-big', text: prompt }), el('p', { style: 'margin:0' }, el('b', { text: 'Regra: ' }), rule),
+          el('div', { class: 'row' },
+            el('button', { class: 'primary', text: 'Aceitar e escrever', onclick: () => { ofNewChapter(`Desafio de ${now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`, '', `${prompt}\nRegra: ${rule}`); } }),
+            el('button', { icon: done ? 'check' : null, class: done ? 'on' : '', text: done ? 'Feito hoje' : 'Marcar como feito', onclick: () => { const cc = chal(); if (cc.daily[key]) delete cc.daily[key]; else cc.daily[key] = true; saveChal(cc); renderOficina(); if (!done) toast('Desafio do dia feito ✓'); } }),
+            el('button', { class: 'link plain', icon: 'shuffle', text: 'Outro desafio', onclick: () => { ofDayOff += 1; renderOficina(); } }))),
+        el('div', { class: 'of-card' }, el('h3', { icon: 'timer', text: 'Sprint de escrita' }),
+          el('p', { style: 'margin:0', text: 'Escolha o tempo e a meta. Um cronômetro fica no canto da tela contando as palavras que você escreve.' }),
+          el('div', { class: 'row' }, [[10, 200], [15, 300], [25, 500]].map(([m, w]) => el('button', { text: `${m} min · ${w} palavras`, onclick: () => startSprint(m, w) }))),
+          c.sprints.length ? el('p', { class: 'hint', style: 'margin:0', text: `${c.sprints.length} sprint(s) feitos · melhor: ${fmtNum(Math.max(...c.sprints.map(x => x.words)))} palavras` }) : null),
+        el('div', { class: 'of-card' }, el('h3', { icon: 'calendar', text: `30 dias de MM · ${c.d30.length}/30` }),
+          el('div', { class: 'd30' }, O.d30.map(([t], i) => el('button', { class: c.d30.includes(i + 1) ? 'done' : '', 'aria-pressed': String(ofD30 === i), title: `Dia ${i + 1}: ${t}`, text: String(i + 1), onclick: () => { ofD30 = ofD30 === i ? null : i; renderOficina(); } }))),
+          sel ? el('div', {}, el('p', { style: 'margin:4px 0' }, el('b', { text: `Dia ${ofD30 + 1}: ${sel[0]}` }), ' · ' + sel[1]),
+            el('div', { class: 'row' },
+              el('button', { class: 'primary', text: 'Escrever', onclick: () => ofNewChapter(`Dia ${ofD30 + 1}: ${sel[0]}`, '', `30 dias de MM, dia ${ofD30 + 1}: ${sel[0]}. ${sel[1]}`) }),
+              el('button', { text: c.d30.includes(ofD30 + 1) ? 'Desmarcar' : 'Marcar como feito', onclick: () => { const cc = chal(), d = ofD30 + 1; cc.d30 = cc.d30.includes(d) ? cc.d30.filter(x => x !== d) : [...cc.d30, d].sort((a, b) => a - b); saveChal(cc); renderOficina(); } })))
+            : el('p', { class: 'hint', style: 'margin:0', text: 'Um tema por dia. Toque em um número.' })),
+        el('div', { class: 'of-card full' }, el('h3', { icon: 'trophy', text: `Conquistas · ${badges.filter(b => b[2]).length}/${badges.length}` }),
+          el('div', { class: 'badges' }, badges.map(([n, d, ok]) => el('div', { class: 'badge' + (ok ? '' : ' locked') }, svgIcon('trophy'), el('span', {}, el('b', { text: n }), d)))))));
+    } else {
+      const cats = O.expr, [name, list] = cats[ofExpr % cats.length];
+      out.push(el('p', { class: 'muted', style: 'margin-top:0', text: 'Mostrar, não contar: em vez de escrever "ele ficou nervoso", mostre o corpo. ' + (ed ? 'Toque para inserir no texto.' : 'Toque para copiar.') }),
+        el('div', { class: 'ex-cats' }, cats.map(([n], i) => el('button', { class: 'chip', 'aria-pressed': String(i === ofExpr % cats.length), text: n, onclick: () => { ofExpr = i; renderOficina(); } }))),
+        el('div', { class: 'ex-list' }, list.map(x => el('button', { type: 'button', text: x, onclick: () => ofInsert(x) }))));
+    }
+    body.replaceChildren(...out);
+  }
+  document.querySelectorAll('[data-of]').forEach(b => b.addEventListener('click', () => { ofTab = b.dataset.of; renderOficina(); }));
+
+  // sprint: cronômetro no canto contando as palavras novas do projeto (inclusive o que está no Editar)
+  var sprint = null;
+  function projectWordsNow(p) { return p.chapters.reduce((n, c) => n + countWords(edit && edit.chId === c.id ? edit.text : c.text), 0); }
+  function startSprint(min, goal) {
+    if (sprint) stopSprint(false);
+    const p = ofCtx ? ofCtx.p : cur();
+    sprint = { p, min, goal, end: Date.now() + min * 60000, start: projectWordsNow(p) };
+    if ($('oficinaDlg').open) $('oficinaDlg').close();
+    const pill = el('div', { class: 'sprint-pill', id: 'sprintPill', role: 'status' }, svgIcon('timer'), el('span', { class: 'sp-t' }), el('span', { class: 'sp-w' }),
+      el('button', { text: 'Parar', onclick: () => stopSprint(true) }));
+    document.body.append(pill);
+    sprint.timer = setInterval(tickSprint, 1000); tickSprint();
+    toast(`Sprint de ${min} minutos começou. Bora escrever! Meta: ${goal} palavras.`);
+  }
+  function tickSprint() {
+    const s = sprint; if (!s) return;
+    const left = Math.max(0, s.end - Date.now()), words = Math.max(0, projectWordsNow(s.p) - s.start), pill = $('sprintPill');
+    if (pill) { pill.querySelector('.sp-t').textContent = `${String(Math.floor(left / 60000)).padStart(2, '0')}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')}`; pill.querySelector('.sp-w').textContent = `+${fmtNum(words)} / ${fmtNum(s.goal)}`; }
+    s.words = words;
+    if (!left) stopSprint(true, true);
+  }
+  function stopSprint(record, finished) {
+    const s = sprint; if (!s) return;
+    clearInterval(s.timer); sprint = null;
+    const pill = $('sprintPill');
+    if (record && (s.words || finished)) {
+      const c = chal(); c.sprints = [...c.sprints, { at: Date.now(), min: s.min, words: s.words || 0, goal: s.goal, done: (s.words || 0) >= s.goal }].slice(-200); saveChal(c);
+    }
+    if (pill) {
+      if (finished) { pill.classList.add('done'); pill.querySelector('.sp-t').textContent = (s.words || 0) >= s.goal ? 'Meta batida!' : 'Tempo!'; pill.querySelector('button').textContent = 'Fechar'; pill.querySelector('button').onclick = () => pill.remove(); setTimeout(() => pill.remove(), 15000); }
+      else pill.remove();
+    }
+    if (finished) toast(`Sprint terminado: ${fmtNum(s.words || 0)} palavras${(s.words || 0) >= s.goal ? ', meta batida ✓' : ''}.`);
+  }
+
   // =====================================================================
   // Linha do tempo (sem IA): acontecimentos em ordem, ligados a capítulos e personagens
   // =====================================================================
@@ -7190,7 +7398,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     bk.style.setProperty('--w', '230px'); bk.style.setProperty('--h', '345px'); bk.style.setProperty('--d', d + 'px');
     const [r, g, b] = b3.tone || [74, 38, 52], light = (r * .3 + g * .59 + b * .11) > 150;
     bk.style.setProperty('--spine', `rgb(${r},${g},${b})`); bk.style.setProperty('--spine-ink', light ? '#1b1214' : '#f6eef0');
-    const front = b3.cover ? el('img', { src: b3.cover, alt: '' }) : el('div', { class: 'b3-ph' }, el('b', { text: title }), author ? el('span', { text: author }) : null);
+    const front = b3.cover ? el('img', { src: b3.cover, alt: '', draggable: 'false' }) : el('div', { class: 'b3-ph' }, el('b', { text: title }), author ? el('span', { text: author }) : null);
     bk.replaceChildren(
       el('div', { class: 'b3-face b3-front' }, front),
       el('div', { class: 'b3-face b3-back' }, el('div', { class: 'b3-btitle', text: title }), el('div', { class: 'b3-blurb', text: (p.blurb ?? '').trim() || (p.premise || '').trim() }), author ? el('div', { text: author }) : null, el('div', { class: 'b3-bar', 'aria-hidden': 'true' })),
@@ -7223,7 +7431,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   });
   (() => {
     const st = $('b3Stage'); let drag = null;
-    st.addEventListener('pointerdown', (e) => { b3StopSpin(); drag = { x: e.clientX, y: e.clientY, ry: b3.ry, rx: b3.rx }; st.setPointerCapture(e.pointerId); st.classList.add('dragging'); });
+    st.addEventListener('dragstart', (e) => e.preventDefault());
+    st.addEventListener('pointerdown', (e) => { if (e.button > 0) return; e.preventDefault(); b3StopSpin(); drag = { x: e.clientX, y: e.clientY, ry: b3.ry, rx: b3.rx }; st.setPointerCapture(e.pointerId); st.classList.add('dragging'); });
     st.addEventListener('pointermove', (e) => {
       if (!drag) return;
       b3.ry = drag.ry + (e.clientX - drag.x) * .5; b3.rx = Math.max(-35, Math.min(35, drag.rx - (e.clientY - drag.y) * .3)); b3Apply(false);

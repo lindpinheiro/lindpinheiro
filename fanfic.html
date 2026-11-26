@@ -630,6 +630,38 @@
     max-height: calc(100vh - 24px); padding: 20px;
   }
   dialog::backdrop { background: rgba(0,0,0,.55); }
+  /* ---------- livro em 3D ---------- */
+  dialog.book3d-dlg { width: min(860px, calc(100vw - 16px)); }
+  .b3-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 18px; align-items: start; }
+  @media (max-width: 680px) { .b3-wrap { grid-template-columns: 1fr; } }
+  .b3-stage { height: 430px; display: flex; align-items: center; justify-content: center; perspective: 1400px; touch-action: none; cursor: grab; user-select: none;
+    border-radius: 14px; background: radial-gradient(ellipse at 50% 85%, rgba(155,77,99,.28), transparent 60%), var(--surface-2); overflow: hidden; }
+  .b3-stage.dragging { cursor: grabbing; }
+  .book3d { position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  .book3d.live { transition: none; }
+  .b3-face { position: absolute; backface-visibility: hidden; overflow: hidden; }
+  .b3-front, .b3-back { inset: 0; border-radius: 2px 5px 5px 2px; }
+  .b3-front { transform: translateZ(calc(var(--d) / 2)); background: #3a2530; }
+  .b3-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .b3-front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.35) 0, rgba(255,255,255,.12) 3%, transparent 7%, transparent 80%, rgba(255,255,255,.08)); pointer-events: none; }
+  .b3-front .b3-ph { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 24px; text-align: center; color: #fff;
+    background: linear-gradient(160deg, #9b4d63, #3a2530); font-family: Georgia, serif; }
+  .b3-front .b3-ph b { font-size: 1.6rem; line-height: 1.2; }
+  .b3-back { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); background: var(--spine); color: var(--spine-ink); padding: 26px 22px; display: flex; flex-direction: column; gap: 10px; font-family: Georgia, serif; }
+  .b3-back .b3-blurb { font-size: .78rem; line-height: 1.5; overflow: hidden; flex: 1; white-space: pre-wrap; }
+  .b3-back .b3-btitle { font-weight: 700; font-size: 1rem; }
+  .b3-back .b3-bar { align-self: flex-end; width: 74px; height: 40px; background: repeating-linear-gradient(90deg, #111 0 2px, #fff 2px 3px, #111 3px 4px, #fff 4px 6px); border: 4px solid #fff; }
+  .b3-spine { width: var(--d); height: var(--h); left: calc((var(--w) - var(--d)) / 2); transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); background: var(--spine); color: var(--spine-ink);
+    display: flex; align-items: center; justify-content: center; }
+  .b3-spine span { writing-mode: vertical-rl; font-family: Georgia, serif; font-weight: 700; font-size: clamp(9px, calc(var(--d) * .42), 15px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-height: 92%; }
+  .b3-spine::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.25), rgba(255,255,255,.12) 45%, rgba(0,0,0,.25)); }
+  .b3-pages { width: var(--d); height: calc(var(--h) - 6px); top: 3px; left: calc((var(--w) - var(--d)) / 2); transform: rotateY(90deg) translateZ(calc(var(--w) / 2 - 3px));
+    background: repeating-linear-gradient(90deg, #f3eee4 0 1px, #d9d2c4 1px 2px); }
+  .b3-top, .b3-bottom { width: calc(var(--w) - 3px); height: var(--d); top: calc((var(--h) - var(--d)) / 2); background: repeating-linear-gradient(0deg, #f3eee4 0 1px, #d9d2c4 1px 2px); }
+  .b3-top { transform: rotateX(90deg) translateZ(calc(var(--h) / 2 - 3px)); }
+  .b3-bottom { transform: rotateX(-90deg) translateZ(calc(var(--h) / 2 - 3px)); }
+  .b3-views { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+  .b3-side label:first-child { margin-top: 0; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -744,6 +776,7 @@
 <symbol id="i-wand-sparkles" viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /> <path d="m14 7 3 3" /> <path d="M5 6v4" /> <path d="M19 14v4" /> <path d="M10 2v2" /> <path d="M7 8H3" /> <path d="M21 16h-4" /> <path d="M11 3H9" /></symbol>
 <symbol id="i-strikethrough" viewBox="0 0 24 24"><path d="M16 4H9a3 3 0 0 0-2.83 4" /> <path d="M14 12a4 4 0 0 1 0 8H6" /> <line x1="4" x2="20" y1="12" y2="12" /></symbol>
 <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" /> <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /> <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /> <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /> <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
+<symbol id="i-rotate-3d" viewBox="0 0 24 24"><path d="M16.466 7.5C15.643 4.237 13.952 2 12 2 9.239 2 7 6.477 7 12s2.239 10 5 10c.342 0 .677-.069 1-.2" /> <path d="m15.194 13.707 3.814 1.86-1.86 3.814" /> <path d="M19 15.57c-1.804.885-4.274 1.43-7 1.43-5.523 0-10-2.239-10-5s4.477-5 10-5c4.838 0 8.873 1.718 9.8 4" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1085,6 +1118,27 @@
 </dialog>
 
 <!-- Versões anteriores -->
+<dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
+  <div class="dlg-head"><h2 id="book3dTitle"><svg class="icon" aria-hidden="true"><use href="#i-rotate-3d"/></svg>Seu livro em 3D</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="b3-wrap">
+    <div>
+      <div class="b3-stage" id="b3Stage" aria-label="Livro em 3D. Arraste para girar."><div class="book3d" id="book3d"></div></div>
+      <div class="b3-views" role="group" aria-label="Ver o livro">
+        <button type="button" data-b3="-28,8">Frente</button><button type="button" data-b3="-70,6">Lombada</button><button type="button" data-b3="160,6">Contracapa</button>
+        <button type="button" id="b3Spin"><svg class="icon" aria-hidden="true"><use href="#i-rotate-3d"/></svg>Girar</button>
+      </div>
+    </div>
+    <div class="b3-side">
+      <label for="b3Author">Nome do autor (aparece na lombada e na contracapa)</label>
+      <input type="text" id="b3Author" placeholder="Ex.: Lin Pinheiro">
+      <label for="b3Blurb">Texto da contracapa</label>
+      <textarea id="b3Blurb" rows="7" placeholder="A sinopse que fica atrás do livro"></textarea>
+      <p class="hint">A grossura do livro segue o número de palavras (<span id="b3Pages"></span>).</p>
+      <button type="button" class="primary wide" id="b3Mock"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Baixar imagem do livro</button>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="imgDlg" class="img-dlg" aria-label="Imagem ampliada">
   <img id="imgDlgImg" alt="">
   <div class="img-dlg-bar">
@@ -2597,6 +2651,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
             cover ? el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, text: 'Melhorar capa', title: 'Gerar uma versão nova a partir desta capa', onclick: () => openImageGen(p, { kind: 'capa', baseId: cover.id }) }) : null,
             el('button', { class: cover ? '' : 'primary', icon: 'image', ai: true, text: cover ? 'Gerar nova capa' : 'Gerar capa com IA', onclick: () => openImageGen(p, { kind: 'capa' }) }),
             cover ? el('button', { icon: 'download', text: 'Baixar', onclick: () => downloadData(cover.data, `${(p.title || 'capa').replace(/[\\/:*?"<>|]+/g, '')}.jpg`) }) : null,
+            el('button', { icon: 'rotate-3d', text: 'Ver em 3D', onclick: () => openBook3d(p) }),
             el('button', { class: 'link plain', icon: 'sparkles', text: 'Outras imagens', onclick: () => openImageGen(p, { kind: 'personagem' }) })))));
       const field = (label, value) => (value || '').trim() ? el('div', { class: 'info-field' }, el('div', { class: 'k', text: label }), el('div', { class: 'v', text: value.trim() })) : null;
       const hasStory = p.chapters.length || worldText(p) || (refsCache[p.id] || []).length;
@@ -5153,6 +5208,125 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       job.stop(); c.ctrl = null; genGoLabel(false);
       if (currentId === p.id) renderTab();
     }
+  });
+
+
+  // =====================================================================
+  // Livro em 3D (sem IA): frente com a capa, lombada, contracapa e páginas
+  // =====================================================================
+  let b3 = null;
+  const bookWords = (p) => p.chapters.reduce((n, c) => n + countWords(c.text), 0);
+  const bookPages = (p) => Math.max(24, Math.ceil(bookWords(p) / 250));
+  // cor média de uma faixa da capa, para a lombada e a contracapa combinarem
+  function coverTone(data) {
+    return new Promise(res => {
+      if (!data) return res(null);
+      const im = new Image();
+      im.onload = () => {
+        try {
+          const c = document.createElement('canvas'); c.width = 8; c.height = 32;
+          const g = c.getContext('2d'); g.drawImage(im, 0, 0, im.naturalWidth * .12, im.naturalHeight, 0, 0, 8, 32);
+          const d = g.getImageData(0, 0, 8, 32).data; let r = 0, gg = 0, b = 0;
+          for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; }
+          const n = d.length / 4; res([r / n, gg / n, b / n].map(x => Math.round(x * .7)));
+        } catch { res(null); }
+      };
+      im.onerror = () => res(null); im.src = data;
+    });
+  }
+  function b3Apply(anim = true) {
+    const bk = $('book3d'); bk.classList.toggle('live', !anim);
+    bk.style.transform = `rotateX(${b3.rx}deg) rotateY(${b3.ry}deg)`;
+  }
+  function b3Render() {
+    const p = b3.p, title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim();
+    const pages = bookPages(p), d = Math.round(Math.min(70, Math.max(12, pages * .11)));
+    const bk = $('book3d');
+    bk.style.setProperty('--w', '230px'); bk.style.setProperty('--h', '345px'); bk.style.setProperty('--d', d + 'px');
+    const [r, g, b] = b3.tone || [74, 38, 52], light = (r * .3 + g * .59 + b * .11) > 150;
+    bk.style.setProperty('--spine', `rgb(${r},${g},${b})`); bk.style.setProperty('--spine-ink', light ? '#1b1214' : '#f6eef0');
+    const front = b3.cover ? el('img', { src: b3.cover, alt: '' }) : el('div', { class: 'b3-ph' }, el('b', { text: title }), author ? el('span', { text: author }) : null);
+    bk.replaceChildren(
+      el('div', { class: 'b3-face b3-front' }, front),
+      el('div', { class: 'b3-face b3-back' }, el('div', { class: 'b3-btitle', text: title }), el('div', { class: 'b3-blurb', text: (p.blurb ?? '').trim() || (p.premise || '').trim() }), author ? el('div', { text: author }) : null, el('div', { class: 'b3-bar', 'aria-hidden': 'true' })),
+      el('div', { class: 'b3-face b3-spine' }, el('span', { text: author ? `${title}  ·  ${author}` : title })),
+      el('div', { class: 'b3-face b3-pages' }), el('div', { class: 'b3-face b3-top' }), el('div', { class: 'b3-face b3-bottom' }));
+    $('b3Pages').textContent = `${fmtNum(bookWords(p))} palavras, cerca de ${fmtNum(pages)} páginas`;
+    b3Apply();
+  }
+  async function openBook3d(p) {
+    const cover = p.coverRefId && (refsCache[p.id] || []).find(r => r.id === p.coverRefId);
+    b3 = { p, cover: cover ? cover.data : '', tone: null, rx: 8, ry: -28, spin: null };
+    $('b3Author').value = p.author || '';
+    $('b3Blurb').value = p.blurb ?? '';
+    $('b3Blurb').placeholder = (p.premise || '').trim() ? 'Se ficar vazio, usa a ideia da história' : 'A sinopse que fica atrás do livro';
+    b3Render();
+    $('book3dDlg').showModal();
+    b3.tone = await coverTone(b3.cover);
+    if (b3.tone) b3Render();
+  }
+  function b3StopSpin() { if (b3 && b3.spin) { cancelAnimationFrame(b3.spin); b3.spin = null; } }
+  $('book3dDlg').addEventListener('close', b3StopSpin);
+  document.querySelectorAll('[data-b3]').forEach(btn => btn.addEventListener('click', () => {
+    b3StopSpin(); const [y, x] = btn.dataset.b3.split(',').map(Number); b3.ry = y; b3.rx = x; b3Apply();
+  }));
+  $('b3Spin').addEventListener('click', () => {
+    if (b3.spin) return b3StopSpin();
+    let last = performance.now();
+    const step = (t) => { b3.ry += (t - last) * .045; last = t; b3Apply(false); b3.spin = requestAnimationFrame(step); };
+    b3.spin = requestAnimationFrame(step);
+  });
+  (() => {
+    const st = $('b3Stage'); let drag = null;
+    st.addEventListener('pointerdown', (e) => { b3StopSpin(); drag = { x: e.clientX, y: e.clientY, ry: b3.ry, rx: b3.rx }; st.setPointerCapture(e.pointerId); st.classList.add('dragging'); });
+    st.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      b3.ry = drag.ry + (e.clientX - drag.x) * .5; b3.rx = Math.max(-35, Math.min(35, drag.rx - (e.clientY - drag.y) * .3)); b3Apply(false);
+    });
+    const end = () => { drag = null; st.classList.remove('dragging'); };
+    st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
+  })();
+  $('b3Author').addEventListener('input', () => { b3.p.author = $('b3Author').value; saveProject(b3.p); b3Render(); });
+  $('b3Blurb').addEventListener('input', () => { b3.p.blurb = $('b3Blurb').value; saveProject(b3.p); b3Render(); });
+  // imagem para divulgar: frente + lombada em perspectiva, sombra e fundo
+  $('b3Mock').addEventListener('click', async () => {
+    const p = b3.p, title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim();
+    const W = 1200, H = 1500, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2a1d22'); bg.addColorStop(1, '#120c0f'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    const glow = g.createRadialGradient(W / 2, H * .82, 10, W / 2, H * .82, W * .6); glow.addColorStop(0, 'rgba(155,77,99,.35)'); glow.addColorStop(1, 'rgba(155,77,99,0)'); g.fillStyle = glow; g.fillRect(0, 0, W, H);
+    const bw = 640, bh = 960, depth = Math.round(Math.min(120, Math.max(30, bookPages(p) * .2))), skew = depth * .35;
+    const x0 = (W - bw) / 2 + depth / 2, y0 = (H - bh) / 2 + 20;
+    // sombra no chão
+    g.save(); g.filter = 'blur(28px)'; g.fillStyle = 'rgba(0,0,0,.65)'; g.beginPath(); g.ellipse(W / 2 + 20, y0 + bh + 18, bw * .58, 34, 0, 0, Math.PI * 2); g.fill(); g.restore();
+    const [r, gg, b] = b3.tone || [74, 38, 52];
+    // lombada (paralelogramo à esquerda)
+    g.save(); g.setTransform(1, skew / depth, 0, 1, x0 - depth, y0 - skew);
+    const sp = g.createLinearGradient(0, 0, depth, 0); sp.addColorStop(0, `rgb(${r * .6},${gg * .6},${b * .6})`); sp.addColorStop(.5, `rgb(${r},${gg},${b})`); sp.addColorStop(1, `rgb(${r * .7},${gg * .7},${b * .7})`);
+    g.fillStyle = sp; g.fillRect(0, 0, depth, bh);
+    const light = (r * .3 + gg * .59 + b * .11) > 150; g.fillStyle = light ? '#1b1214' : '#f6eef0';
+    g.translate(depth / 2, bh / 2); g.rotate(Math.PI / 2); g.font = `bold ${Math.round(Math.min(depth * .45, 30))}px Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(author ? `${title}  ·  ${author}` : title, 0, 0, bh * .9); g.restore();
+    // páginas no topo
+    g.save(); g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + bw - 4, y0 + 3); g.lineTo(x0 + bw - 4 - depth, y0 + 3 - skew); g.lineTo(x0 - depth, y0 - skew); g.closePath();
+    const pg = g.createLinearGradient(0, y0 - skew, 0, y0); pg.addColorStop(0, '#cfc6b6'); pg.addColorStop(1, '#f3eee4'); g.fillStyle = pg; g.fill(); g.restore();
+    // frente
+    g.save();
+    if (b3.cover) {
+      const im = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = b3.cover; });
+      if (im) {
+        const s = Math.max(bw / im.naturalWidth, bh / im.naturalHeight), sw = bw / s, sh = bh / s;
+        g.drawImage(im, (im.naturalWidth - sw) / 2, (im.naturalHeight - sh) / 2, sw, sh, x0, y0, bw, bh);
+      }
+    } else {
+      const fg = g.createLinearGradient(x0, y0, x0 + bw, y0 + bh); fg.addColorStop(0, '#9b4d63'); fg.addColorStop(1, '#3a2530'); g.fillStyle = fg; g.fillRect(x0, y0, bw, bh);
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = 'bold 64px Georgia, serif'; g.fillText(title, x0 + bw / 2, y0 + bh / 2, bw * .85);
+      if (author) { g.font = '34px Georgia, serif'; g.fillText(author, x0 + bw / 2, y0 + bh / 2 + 70, bw * .85); }
+    }
+    const sh = g.createLinearGradient(x0, 0, x0 + bw, 0); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(.03, 'rgba(255,255,255,.14)'); sh.addColorStop(.08, 'rgba(255,255,255,0)'); sh.addColorStop(.85, 'rgba(255,255,255,0)'); sh.addColorStop(1, 'rgba(255,255,255,.08)');
+    g.fillStyle = sh; g.fillRect(x0, y0, bw, bh); g.restore();
+    downloadData(c.toDataURL('image/png'), `${title.replace(/[\\/:*?"<>|]+/g, '')} - livro 3D.png`);
+    toast('Imagem do livro baixada ✓');
   });
 
   // =====================================================================

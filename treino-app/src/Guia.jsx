@@ -43,6 +43,8 @@ const SECOES = [
       <li><b>Esteira inclinada</b> (segunda, quinta e domingo): 5–6 km/h com 8–12% de inclinação. Gasta bastante e poupa o joelho.</li>
       <li><b>Escada</b> (quarta): nível 4–6. Trabalha glúteo e panturrilha. Diminua o ritmo nos 2 últimos minutos; parar de uma vez pode derrubar a pressão.</li>
       <li><b>Caminhada leve</b> (terça e sábado): só para a circulação voltar ao normal depois da perna. Nada de escada nesses dias.</li>
+      <li><b>Dia só de cardio</b>: em qualquer dia, “Trocar por cardio hoje” troca a musculação por cerca de 1 hora de bicicleta, esteira ou escada. Use no máximo 2 vezes por semana, de preferência no lugar de um treino de costas: musculação é o que mantém o músculo enquanto você emagrece. Na sexta, dá para fazer cardio em vez de descansar.</li>
+      <li><b>Bicicleta</b> é a mais leve para os joelhos; <b>escada</b> é a que mais gasta, mas evite na véspera do sábado de perna.</li>
       <li>Intensidade certa: você consegue falar frases inteiras, mas não cantar.</li>
       <li>Quando ficar fácil, aumente a inclinação ou o nível, não o tempo.</li>
     </Itens>

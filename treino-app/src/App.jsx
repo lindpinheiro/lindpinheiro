@@ -174,6 +174,7 @@ function Treino({ s, update, onDescanso }) {
   const wd = dias.find((d) => d.date === date).wd
   const p = treinoDe(s, date)
   const [trocando, setTrocando] = useState(null) // exercício aberto na janela de troca
+  const [escolhendoCardio, setEscolhendoCardio] = useState(false)
   const log = s.logs[date] || {}
   const feitas = p.ex.reduce((t, e) => t + (log.ex?.[e.id] || []).filter((x) => x?.ok).length, 0)
   const total = p.ex.reduce((t, e) => t + e.series, 0)
@@ -226,6 +227,19 @@ function Treino({ s, update, onDescanso }) {
 
       <Typography variant="h4" sx={{ mt: 3 }}>{p.titulo}</Typography>
 
+      {p.soCardio ? (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
+          <Typography color="textSecondary" sx={{ flex: 1 }}>{CARDIO[p.cardio.tipo].nome} · {p.no?.descanso ? 'no dia de descanso' : `no lugar de ${p.no?.titulo.toLowerCase()}`}</Typography>
+          <Button size="small" onClick={() => editar((l) => { delete l.soCardio; delete l.cardio; l.feito = false })}>{p.no?.descanso ? 'Voltar ao descanso' : 'Voltar à musculação'}</Button>
+        </Stack>
+      ) : !p.repoe && !p.extra && (
+        <Button size="small" startIcon={<HeartPulse size={16} />} onClick={() => setEscolhendoCardio(true)} sx={{ mt: 0.5, ml: -1 }}>
+          {p.descanso ? 'Fazer só cardio hoje' : 'Trocar por cardio hoje'}
+        </Button>
+      )}
+      <EscolherCardio aberto={escolhendoCardio} descanso={!!p.descanso} feitas={feitas} kg={pesoEm(s, date)} onClose={() => setEscolhendoCardio(false)}
+        onEscolher={(tipo) => { editar((l) => { l.soCardio = tipo; delete l.cardio; delete l.repoe; delete l.extra; l.feito = false }); setEscolhendoCardio(false); onDescanso(0) }} />
+
       {(p.repoe || p.extra) && (
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
           <Typography color="textSecondary" sx={{ flex: 1 }}>{p.extra ? 'Treino opcional · dia de descanso' : `Reposição do treino de ${NOME_DIA[p.repoe]}`}</Typography>
@@ -236,7 +250,12 @@ function Treino({ s, update, onDescanso }) {
         </Stack>
       )}
 
-      {p.descanso ? (
+      {p.soCardio ? (
+        <>
+          <Cardio key={`so-${date}-${p.cardio.tipo}`} principal c={p.cardio} log={log.cardio} kg={pesoEm(s, date)} onSalvar={(v) => editar((l) => { l.cardio = v; l.feito = !!v })} />
+          <AlongamentoFim key={`along-${date}`} sx={{ mt: 2 }} date={date} />
+        </>
+      ) : p.descanso ? (
         <>
         <Reposicao key={date} s={s} dias={dias} data={date} temOpcional={!!p.opcional} onEscolher={(d) => editar((l) => { l.repoe = d; delete l.extra })} />
         {p.opcional && (
@@ -434,6 +453,37 @@ function Exercicio({ e, n, sets, ant, lado, onLado, onTrocar, aberto, onToggle, 
   )
 }
 
+// Janela para trocar o treino do dia por uma sessão de cardio.
+function EscolherCardio({ aberto, descanso, feitas, kg, onClose, onEscolher }) {
+  const opcoes = ['bike', 'esteira', 'escada']
+  return (
+    <Dialog open={aberto} onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitle sx={{ pb: 1 }}>
+        {descanso ? 'Cardio no dia de descanso' : 'Trocar por cardio hoje'}
+        <Typography variant="body2" color="textSecondary">Cerca de 1 hora. Tempo e intensidade você ajusta na tela do dia.</Typography>
+      </DialogTitle>
+      <DialogContent sx={{ pt: 0 }}>
+        {opcoes.map((t) => (
+          <ButtonBase key={t} onClick={() => {
+            if (feitas && !confirm('Já há séries marcadas hoje. Elas ficam salvas, mas o dia passa a contar como cardio. Continuar?')) return
+            onEscolher(t)
+          }} sx={{ display: 'flex', width: '100%', textAlign: 'left', gap: 1.5, py: 1.25, borderTop: 1, borderColor: 'divider', alignItems: 'center', justifyContent: 'flex-start' }}>
+            <Box sx={{ width: 36, height: 36, flexShrink: 0, borderRadius: '50%', display: 'grid', placeItems: 'center', bgcolor: 'action.hover', color: 'primary.main' }}><HeartPulse size={18} /></Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{CARDIO[t].nome}</Typography>
+              <Typography variant="body2" color="textSecondary">1 h moderada · cerca de {kcalCardio(t, { min: 60, int: 'moderada' }, kg)} kcal</Typography>
+            </Box>
+          </ButtonBase>
+        ))}
+        <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1.5 }}>
+          {descanso ? 'Dica: prefira bicicleta ou esteira na sexta, para chegar com as pernas inteiras no sábado.'
+            : 'Dica: troque no máximo 2 treinos por semana e prefira os dias de costas. Perna e peito são os que mais mudam o seu formato.'}
+        </Typography>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // Janela para trocar um exercício por outro parecido, só hoje ou daqui em diante.
 function Trocar({ e, onClose, onEscolher }) {
   const [sempre, setSempre] = useState(false)
@@ -475,7 +525,7 @@ function Trocar({ e, onClose, onEscolher }) {
   )
 }
 
-function Cardio({ c, log, patins, kg, onSalvar }) {
+function Cardio({ c, log, patins, kg, onSalvar, principal }) {
   const info = CARDIO[c.tipo]
   const [min, setMin] = useState(c.min), [int, setInt] = useState(intensidadeCardio(c.tipo))
   const m = parseInt(min) > 0 ? parseInt(min) : 0
@@ -489,7 +539,7 @@ function Cardio({ c, log, patins, kg, onSalvar }) {
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>{info.nome}</Typography>
           <Typography variant="body2" color="textSecondary">
-            {log ? `${log.min} min · ${INTENSIDADES[intensidadeCardio(c.tipo, log)].nome.toLowerCase()} · ${kcalCardio(c.tipo, log, kg)} kcal` : `${c.min} min · para fechar o treino`}
+            {log ? `${log.min} min · ${INTENSIDADES[intensidadeCardio(c.tipo, log)].nome.toLowerCase()} · ${kcalCardio(c.tipo, log, kg)} kcal` : principal ? 'Sessão de cardio de hoje' : `${c.min} min · para fechar o treino`}
           </Typography>
         </Box>
         {log && <Button color="inherit" onClick={() => onSalvar(null)}>Desfazer</Button>}
@@ -497,7 +547,7 @@ function Cardio({ c, log, patins, kg, onSalvar }) {
       {!log && (
         <>
           <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>
-            {info.como}{patins && c.tipo !== 'caminhada' ? ' Vai andar de patins hoje? Pode pular.' : ''}
+            {info.como}{patins && !principal && c.tipo !== 'caminhada' ? ' Vai andar de patins hoje? Pode pular.' : ''}
           </Typography>
           <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={int} onChange={(_, v) => v && setInt(v)} aria-label="Intensidade do cardio" sx={{ mt: 1.5 }}>
             {Object.entries(INTENSIDADES).map(([id, i]) => <ToggleButton key={id} value={id}>{i.nome}</ToggleButton>)}
@@ -506,7 +556,7 @@ function Cardio({ c, log, patins, kg, onSalvar }) {
             <TextField size="small" type="number" value={min} onChange={(e) => setMin(e.target.value)} sx={{ width: 120 }}
               slotProps={{ htmlInput: { inputMode: 'numeric', 'aria-label': 'Minutos de cardio' }, input: { endAdornment: <InputAdornment position="end">min</InputAdornment> } }} />
             <Typography variant="body2" color="textSecondary" sx={{ flex: 1 }}>{m ? `Cerca de ${kcalCardio(c.tipo, { min: m, int }, kg)} kcal` : ''}</Typography>
-            <Button variant="contained" disabled={!m} onClick={() => onSalvar({ min: m, int })}>Marcar</Button>
+            <Button variant="contained" disabled={!m} onClick={() => onSalvar({ min: m, int })}>{principal ? 'Concluir' : 'Marcar'}</Button>
           </Stack>
         </>
       )}

@@ -9,6 +9,10 @@ export const CARDIO = {
     nome: 'Escada',
     como: 'Nível 4–6, ritmo constante. Nos 2 últimos minutos, diminua aos poucos — não pare de uma vez.',
   },
+  bike: {
+    nome: 'Bicicleta',
+    como: 'Bicicleta ergométrica com carga em que dá para pedalar falando frases curtas. Ajuste o banco: joelho quase esticado embaixo. É a mais leve para os joelhos.',
+  },
   caminhada: {
     nome: 'Caminhada leve',
     como: 'Esteira plana a 4–5 km/h. Serve para a pressão voltar ao normal depois do treino de perna.',
@@ -231,6 +235,9 @@ export const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 export function planoDe(logs, date) {
   const repoe = logs?.[date]?.repoe
   // Reposição nova guarda a data do treino perdido; a antiga guardava só o dia da semana.
+  // Dia trocado por uma sessão de cardio: logs[data].soCardio guarda o tipo (bike, esteira ou escada).
+  const so = logs?.[date]?.soCardio
+  if (so) return { titulo: 'Cardio', soCardio: true, grupo: 'cardio', cardio: { tipo: so, min: 60 }, ex: [], no: planoBase(date)[diaDe(date)] }
   if (logs?.[date]?.extra) return { ...OPCIONAL, extra: true }
   if (typeof repoe === 'string') { const wd = diaDe(repoe); return { ...planoBase(repoe)[wd], repoe: wd } }
   if (repoe) return { ...planoBase(date)[repoe], repoe }

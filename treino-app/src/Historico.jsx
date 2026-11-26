@@ -19,7 +19,7 @@ function resumo(s, date) {
   const { refeicoes, extras, kcal, prot } = consumo(s, date)
   const kg = pesoEm(s, date)
   const gasto = kcalTreino(s, date, kg) + (pat ? kcalPatins(pat, kg) : 0)
-  const minutos = (treino ? duracao(plano) : log?.cardio?.min || 0) + (pat?.min || 0)
+  const minutos = (treino && !plano.soCardio ? duracao(plano) : log?.cardio?.min || 0) + (pat?.min || 0)
   return { log, d, pat, plano, treino, refeicoes, extras, kcal, prot, minutos, kg, gasto, ativo: minutos > 0,
     temDieta: refeicoes.length > 0 || extras.length > 0 || !!d?.agua, dietaCompleta: refeicoes.length === REFEICOES.length }
 }
@@ -127,7 +127,7 @@ function Dia({ s, date, onClose }) {
             <Secao sx={{ display: 'block', mt: 0, lineHeight: 2 }}>Treino</Secao>
             {r.plano.descanso
               ? <Linha ok={false} titulo="Dia de descanso" />
-              : <Linha ok={r.treino} titulo={r.plano.titulo} detalhe={r.treino ? `Concluído · cerca de ${duracao(r.plano)} min` : feitos.length ? 'Começou, mas não marcou como concluído' : 'Não registrado'} />}
+              : <Linha ok={r.treino} titulo={r.plano.titulo} detalhe={r.plano.soCardio ? (r.treino ? `Concluído · ${r.log.cardio?.min || 0} min de ${CARDIO[r.plano.cardio.tipo].nome.toLowerCase()}` : 'Não concluído') : r.treino ? `Concluído · cerca de ${duracao(r.plano)} min` : feitos.length ? 'Começou, mas não marcou como concluído' : 'Não registrado'} />}
             {feitos.map(({ e, sets }) => (
               <Stack key={e.id} direction="row" spacing={1.5} sx={{ py: 0.5, pl: 4.25 }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>

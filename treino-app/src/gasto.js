@@ -11,6 +11,8 @@ const MET_CARDIO = {
   esteira: { leve: 3.5, moderada: 5, forte: 7, padrao: 'moderada' },
   escada: { leve: 4.5, moderada: 6, forte: 8, padrao: 'moderada' },
   caminhada: { leve: 2.3, moderada: 3.3, forte: 4.5, padrao: 'leve' },
+  // Bicicleta ergométrica: ~30–50 W leve, ~50–90 W moderada, ~90–100 W forte (valores conservadores).
+  bike: { leve: 2.5, moderada: 3.8, forte: 5.8, padrao: 'moderada' },
 }
 export const intensidadeCardio = (tipo, c) => c?.int || MET_CARDIO[tipo].padrao
 export const kcalCardio = (tipo, c, kg) => kcal(MET_CARDIO[tipo][intensidadeCardio(tipo, c)], kg, c.min)
@@ -50,7 +52,7 @@ export function gastoTreino(s, date, kg) {
     r.volume += feitas.reduce((t, x) => t + kgTotal(x, id) * (x.reps || 0), 0)
   }
   if (r.series) r.minutos = Math.round(seg / 60) + (log.feito ? 5 : 0)
-  else if (log.feito) r.minutos = duracao(p) - (p.cardio?.min || 0)
+  else if (log.feito && !p.soCardio) r.minutos = Math.max(0, duracao(p) - (p.cardio?.min || 0))
   r.musculacao = kcal(MET_MUSCULACAO, kg, r.minutos) + Math.round(r.volume * KCAL_POR_KG_REP)
   r.cardio = log.cardio && p.cardio ? kcalCardio(p.cardio.tipo, log.cardio, kg) : 0
   r.total = r.musculacao + r.cardio

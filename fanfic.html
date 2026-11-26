@@ -841,6 +841,33 @@
   .nm-var { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 10px; border: 1px dashed var(--border); border-radius: 10px; }
   .nm-var .grow { flex: 1; min-width: 160px; }
   @media (max-width: 520px) { .nm-row { grid-template-columns: auto 1fr; } .nm-row select { grid-column: 1 / -1; width: 100%; } }
+  /* ---------- estatísticas ---------- */
+  dialog.stats-dlg { width: min(900px, calc(100vw - 16px)); }
+  .st-hero { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 14px; }
+  @media (max-width: 620px) { .st-hero { grid-template-columns: 1fr 1fr; } }
+  .st-hero > div { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .st-hero .k { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .st-hero .v { font-size: 1.45rem; font-weight: 700; line-height: 1.2; }
+  .st-hero .s { font-size: .78rem; color: var(--muted); }
+  .st-sec { margin: 16px 0 6px; font-size: 1rem; }
+  .st-bars { display: grid; gap: 4px; }
+  .st-bar { display: grid; grid-template-columns: minmax(70px, min(200px, 32%)) 1fr 52px; gap: 8px; align-items: center; font-size: .84rem; }
+  .st-bar .lb { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .st-bar .tr { position: relative; height: 14px; }
+  .st-bar .tr i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 0 4px 4px 0; }
+  .st-bar .tr .avg { position: absolute; top: -3px; bottom: -3px; border-left: 1.5px dashed var(--muted); }
+  .st-bar .n { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .st-heat-wrap { overflow: auto; max-height: 46vh; border: 1px solid var(--border); border-radius: 10px; }
+  .st-heat { border-collapse: separate; border-spacing: 2px; font-size: .78rem; }
+  .st-heat th { position: sticky; background: var(--surface); font-weight: 600; color: var(--muted); padding: 4px 6px; white-space: nowrap; }
+  .st-heat thead th { top: 0; z-index: 1; }
+  .st-heat tbody th { left: 0; text-align: left; color: var(--text); z-index: 1; }
+  .st-heat td { width: 30px; min-width: 30px; height: 26px; text-align: center; border-radius: 4px; background: var(--surface-2); color: var(--text); font-variant-numeric: tabular-nums; }
+  .st-heat td.z { color: transparent; }
+  .st-warn { margin: 6px 0 0; font-size: .84rem; color: var(--muted); }
+  .st-words { display: flex; flex-wrap: wrap; gap: 6px; }
+  .st-words span { border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; font-size: .84rem; }
+  .st-words span b { color: var(--muted); font-weight: 600; margin-left: 4px; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -976,6 +1003,7 @@
 <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14" /> <path d="m19 12-7 7-7-7" /></symbol>
 <symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /> <path d="M13 6h8" /> <path d="M13 12h8" /> <path d="M13 18h8" /></symbol>
 <symbol id="i-paintbrush" viewBox="0 0 24 24"><path d="m14.622 17.897-10.68-2.913" /> <path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z" /> <path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15" /></symbol>
+<symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16" /> <path d="M18 17V9" /> <path d="M13 17V5" /> <path d="M8 17v-3" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1425,6 +1453,11 @@
   <div class="nm-list" id="namesList"></div>
   <div id="namesVarWrap"><b>Grafias parecidas</b><p class="hint" style="margin:2px 0 6px">Podem ser o mesmo nome escrito de jeitos diferentes. Unificar troca em todos os capítulos (dá para desfazer em Versões anteriores).</p><div class="nm-list" id="namesVar"></div></div>
   <div class="row end" style="margin-top:8px"><button type="button" data-close>Agora não</button><button type="button" class="primary" id="namesGo">Guardar no Mundo</button></div>
+</dialog>
+
+<dialog id="statsDlg" class="stats-dlg" aria-labelledby="statsTitle">
+  <div class="dlg-head"><h2 id="statsTitle"><svg class="icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Estatísticas da história</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div id="statsBody"></div>
 </dialog>
 
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
@@ -3284,6 +3317,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
         el('button', { icon: 'search', text: 'Buscar', title: 'Buscar e substituir em todos os capítulos (Ctrl+Shift+F)', onclick: () => openFind(p) }),
+        el('button', { icon: 'bar-chart', text: 'Estatísticas', onclick: () => openStats(p) }),
         el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyWholeStory(p) }),
         el('button', { icon: 'book-open', text: 'Baixar / diagramar', onclick: () => openLayout(p) }),
         writeButton(p))));
@@ -6449,6 +6483,69 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (currentId === c.p.id && view.tab === 'mundo') renderWorld();
     toast(n ? `${n} item(ns) guardado(s) no Mundo ✓` : 'Pronto ✓');
   });
+
+
+  // =====================================================================
+  // Estatísticas (sem IA): tamanho dos capítulos, quem aparece onde, diálogo, palavras mais usadas
+  // =====================================================================
+  const fmtTime = (min) => min < 60 ? `${Math.max(1, Math.round(min))} min` : `${Math.floor(min / 60)} h ${String(Math.round(min % 60)).padStart(2, '0')} min`;
+  function chapterStats(c) {
+    const paras = mdParas(c.text || '').filter(t => !isSceneBreak(t));
+    let dlg = 0, all = 0;
+    paras.forEach(t => {
+      const plain = parseMd(t).map(x => x.t).join(''), n = countWords(plain); all += n;
+      if (/^\s*[—–-]/.test(plain)) { // fala com travessão: só a parte falada (sem "— disse ela")
+        const parts = plain.split(/\s[—–]\s/); dlg += parts.filter((_, i) => i % 2 === 0).reduce((k, x) => k + countWords(x), 0);
+      } else (plain.match(/[“"][^”"]+[”"]/g) || []).forEach(q => { dlg += countWords(q); });
+    });
+    return { words: all, dlg };
+  }
+  function openStats(p) {
+    const chs = p.chapters, st = chs.map(chapterStats), total = st.reduce((n, x) => n + x.words, 0), dlg = st.reduce((n, x) => n + x.dlg, 0);
+    const avg = chs.length ? total / chs.length : 0, max = Math.max(1, ...st.map(x => x.words));
+    const body = $('statsBody');
+    const tile = (k, v, sub) => el('div', {}, el('div', { class: 'k', text: k }), el('div', { class: 'v', text: v }), sub ? el('div', { class: 's', text: sub }) : null);
+    const out = [el('div', { class: 'st-hero' },
+      tile('Palavras', fmtNum(total), `${fmtNum(Math.round(total / 250))} páginas de livro`),
+      tile('Capítulos', fmtNum(chs.length), `média de ${fmtNum(Math.round(avg))} palavras`),
+      tile('Tempo de leitura', fmtTime(total / 220), 'lendo 220 palavras por minuto'),
+      tile('Diálogo', `${total ? Math.round(dlg / total * 100) : 0}%`, 'do texto é fala'))];
+    // tamanho de cada capítulo
+    out.push(el('h3', { class: 'st-sec', text: 'Tamanho dos capítulos' }),
+      el('p', { class: 'hint', style: 'margin:0 0 6px', text: 'A linha tracejada é a média. Capítulos muito maiores ou menores que a média mudam o ritmo da leitura.' }),
+      el('div', { class: 'st-bars', role: 'list' }, chs.map((c, i) => el('div', { class: 'st-bar', role: 'listitem', title: `${fmtNum(st[i].words)} palavras · ${st[i].words ? Math.round(st[i].dlg / st[i].words * 100) : 0}% de diálogo · ${fmtTime(st[i].words / 220)} de leitura` },
+        el('span', { class: 'lb', text: `${i + 1}. ${chTitle(p, c)}` }),
+        el('span', { class: 'tr', 'aria-hidden': 'true' }, el('i', { style: `width:${st[i].words / max * 100}%` }), el('span', { class: 'avg', style: `left:${avg / max * 100}%` })),
+        el('span', { class: 'n', text: fmtNum(st[i].words) })))));
+    // quem aparece em cada capítulo
+    const w = p.world ? worldOf(p) : null, people = w ? w.e.personagens.filter(e => charKey(e.title).length > 1) : [];
+    if (people.length && chs.length) {
+      const rows = people.map(e => {
+        const re = new RegExp(`(?<![\\p{L}])${charKey(e.title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'giu');
+        return { e, counts: chs.map(c => (storyPlain(c.text || '').match(re) || []).length) };
+      }).sort((a, b) => b.counts.reduce((n, x) => n + x, 0) - a.counts.reduce((n, x) => n + x, 0));
+      const peak = Math.max(1, ...rows.flatMap(r => r.counts));
+      const shade = (n) => n ? `background: color-mix(in srgb, var(--accent) ${Math.round(18 + 70 * Math.sqrt(n / peak))}%, var(--surface-2))` : '';
+      out.push(el('h3', { class: 'st-sec', text: 'Quem aparece em cada capítulo' }),
+        el('p', { class: 'hint', style: 'margin:0 0 6px', text: 'Quantas vezes o nome aparece. Quanto mais forte a cor, mais presente o personagem.' }),
+        el('div', { class: 'st-heat-wrap' }, el('table', { class: 'st-heat' },
+          el('thead', {}, el('tr', {}, el('th', { text: 'Personagem' }), chs.map((c, i) => el('th', { scope: 'col', title: chTitle(p, c), text: String(i + 1) })))),
+          el('tbody', {}, rows.map(r => el('tr', {}, el('th', { scope: 'row', text: charKey(r.e.title) }),
+            r.counts.map((n, i) => el('td', { class: n ? '' : 'z', style: shade(n), title: `${charKey(r.e.title)} no capítulo ${i + 1}: ${n}×`, text: String(n) }))))))));
+      const gone = chs.length >= 5 ? rows.filter(r => { const lastIdx = r.counts.reduce((k, n, i) => n ? i : k, -1); return lastIdx >= 0 && chs.length - 1 - lastIdx >= 3 && r.counts.reduce((a, b) => a + b, 0) >= 3; }) : [];
+      if (gone.length) out.push(el('p', { class: 'st-warn', text: `Sumiram há 3 capítulos ou mais: ${gone.map(r => { const li = r.counts.reduce((k, n, i) => n ? i : k, -1); return `${charKey(r.e.title)} (último no ${li + 1})`; }).join(', ')}.` }));
+    } else out.push(el('p', { class: 'hint', text: 'Para ver quem aparece em cada capítulo, cadastre os personagens no Mundo.' }));
+    // palavras mais usadas
+    const names = new Set(people.map(e => nNorm(charKey(e.title)))), freq = new Map();
+    chs.forEach(c => storyPlain(c.text || '').toLowerCase().replace(/\p{L}{4,}/gu, (m) => { if (!RV_STOP.has(m) && !names.has(nNorm(m))) freq.set(m, (freq.get(m) || 0) + 1); return m; }));
+    const top = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 24);
+    const mente = [...freq.entries()].filter(([k]) => k.endsWith('mente')).reduce((n, [, v]) => n + v, 0);
+    if (top.length) out.push(el('h3', { class: 'st-sec', text: 'Palavras que você mais usa' }),
+      el('p', { class: 'hint', style: 'margin:0 0 6px', text: `Bom para achar vícios de escrita.${mente ? ` Advérbios em -mente: ${fmtNum(mente)} (${(mente / Math.max(1, total) * 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} a cada mil palavras).` : ''} Use o Buscar para trocar.` }),
+      el('div', { class: 'st-words' }, top.map(([k, v]) => el('span', {}, k, el('b', { text: fmtNum(v) })))));
+    body.replaceChildren(...out);
+    $('statsDlg').showModal();
+  }
 
   // =====================================================================
   // Linha do tempo (sem IA): acontecimentos em ordem, ligados a capítulos e personagens

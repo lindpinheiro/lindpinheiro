@@ -206,6 +206,43 @@
   .proj-filters .chip { min-height: 34px; padding: 4px 12px; }
   .proj-heading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; font-weight: 700; margin: 0 0 14px; line-height: 1.25; }
   #currentTitle { display: none !important; }
+  .world-views { display: flex; margin-top: 12px; }
+  .world-views button { flex: 1; }
+  /* ---------- mapa de personagens ---------- */
+  .cmap-card { padding: 12px; }
+  .cmap-tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+  .cmap-tools .grow { flex: 1; }
+  .cmap-tools button { min-height: 36px; }
+  .cmap-stage { position: relative; height: min(64vh, 620px); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; touch-action: none; cursor: grab; user-select: none;
+    background: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--muted) 35%, transparent) 1px, transparent 0) 0 0 / 22px 22px, var(--surface-2); }
+  .cmap-stage.panning { cursor: grabbing; }
+  .cmap-stage svg { width: 100%; height: 100%; display: block; }
+  .cmap-node { cursor: pointer; }
+  .cmap-node circle.ring { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+  .cmap-node.sel circle.ring { stroke: var(--accent); stroke-width: 4; }
+  .cmap-node text { fill: var(--text); font: 600 13px system-ui, sans-serif; text-anchor: middle; paint-order: stroke; stroke: var(--surface-2); stroke-width: 4px; }
+  .cmap-node .ini { fill: var(--accent); font-size: 18px; stroke: none; dominant-baseline: central; }
+  .cmap-link line { stroke-width: 3; }
+  .cmap-link .hit { stroke: transparent; stroke-width: 16; cursor: pointer; }
+  .cmap-link text { font: 600 11.5px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--surface-2); stroke-width: 5px; cursor: pointer; }
+  .cmap-link.sel line:not(.hit) { stroke-width: 5; }
+  .cmap-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--muted); pointer-events: none; }
+  .cmap-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; font-size: .82rem; color: var(--muted); }
+  .cmap-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .cmap-legend i { width: 18px; height: 3px; border-radius: 2px; display: inline-block; }
+  .cmap-panel { margin-top: 10px; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .cmap-panel h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+  .cmap-panel .links { display: grid; gap: 6px; margin: 8px 0; }
+  .cmap-panel .lk { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: var(--surface-2); }
+  .cmap-panel .lk .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .cmap-panel .lk .t { flex: 1; min-width: 0; }
+  .cmap-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cmap-form .full { grid-column: 1 / -1; }
+  @media (max-width: 560px) { .cmap-form { grid-template-columns: 1fr; } }
+  .cmap-sug { display: grid; gap: 6px; max-height: 50vh; overflow: auto; margin: 8px 0; }
+  .cmap-sug label { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 8px; border: 1px solid var(--border); border-radius: 10px; font-weight: 400; }
+  .cmap-stage.full { position: fixed; inset: 0; z-index: 80; height: auto; border-radius: 0; }
+  .cmap-exit { position: fixed; top: 12px; right: 12px; z-index: 81; }
   .world-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
   .world-grid > .card { min-width: 0; }
   .entry { min-width: 0; max-width: 100%; }
@@ -777,6 +814,11 @@
 <symbol id="i-strikethrough" viewBox="0 0 24 24"><path d="M16 4H9a3 3 0 0 0-2.83 4" /> <path d="M14 12a4 4 0 0 1 0 8H6" /> <line x1="4" x2="20" y1="12" y2="12" /></symbol>
 <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" /> <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /> <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /> <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /> <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
 <symbol id="i-rotate-3d" viewBox="0 0 24 24"><path d="M16.466 7.5C15.643 4.237 13.952 2 12 2 9.239 2 7 6.477 7 12s2.239 10 5 10c.342 0 .677-.069 1-.2" /> <path d="m15.194 13.707 3.814 1.86-1.86 3.814" /> <path d="M19 15.57c-1.804.885-4.274 1.43-7 1.43-5.523 0-10-2.239-10-5s4.477-5 10-5c4.838 0 8.873 1.718 9.8 4" /></symbol>
+<symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
+<symbol id="i-folder-open" viewBox="0 0 24 24"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" /></symbol>
+<symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <line x1="21" x2="16.65" y1="21" y2="16.65" /> <line x1="11" x2="11" y1="8" y2="14" /> <line x1="8" x2="14" y1="11" y2="11" /></symbol>
+<symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <line x1="21" x2="16.65" y1="21" y2="16.65" /> <line x1="8" x2="14" y1="11" y2="11" /></symbol>
+<symbol id="i-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3" /> <path d="M21 8V5a2 2 0 0 0-2-2h-3" /> <path d="M3 16v3a2 2 0 0 0 2 2h3" /> <path d="M16 21h3a2 2 0 0 0 2-2v-3" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1118,6 +1160,13 @@
 </dialog>
 
 <!-- Versões anteriores -->
+<dialog id="cmapSugDlg" aria-labelledby="cmapSugTitle">
+  <div class="dlg-head"><h2 id="cmapSugTitle"><svg class="icon" aria-hidden="true"><use href="#i-share-2"/></svg>Sugestões de ligações</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">Personagens que aparecem juntos nos capítulos ou nos itens de Relações do Mundo. Feito pelo próprio app, sem IA e sem custo. Marque as que quer criar; depois escolha o tipo de cada uma no mapa.</p>
+  <div class="cmap-sug" id="cmapSugList"></div>
+  <div class="row end"><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="cmapSugGo">Criar as marcadas</button></div>
+</dialog>
+
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
   <div class="dlg-head"><h2 id="book3dTitle"><svg class="icon" aria-hidden="true"><use href="#i-rotate-3d"/></svg>Seu livro em 3D</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <div class="b3-wrap">
@@ -4450,6 +4499,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     };
     WORLD.forEach(([k, label]) => { if (k !== 'pendencias') block(label, w.e[k]); });
     w.folders.forEach(f => block(f.title || 'Outras informações', f.entries));
+    const rel = mapRelations(p);
+    if (rel) out.push('## Mapa de relações (feito pelo autor)\n' + rel);
     return out.join('\n\n');
   }
 
@@ -4578,6 +4629,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
   });
 
+  let worldView = local.get('fanfic.worldView', 'pastas');
   function renderWorld() {
     const p = cur(), w = worldOf(p);
     const sec = $('tab-mundo');
@@ -4600,7 +4652,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     use.checked = p.useWorld !== false;
     use.addEventListener('change', () => { p.useWorld = use.checked; saveProject(p); });
     head.append(el('label', { class: 'check', for: 'useWorld' }, use, el('span', { text: 'Usar o mundo como guia da IA ao escrever' })));
+    const views = [['pastas', 'folder-open', 'Pastas'], ['mapa', 'share-2', 'Mapa de personagens']];
+    if (!views.some(v => v[0] === worldView)) worldView = 'pastas';
+    head.append(el('div', { class: 'seg world-views', role: 'group', 'aria-label': 'Ver o mundo como' },
+      views.map(([k, ic, t]) => el('button', { type: 'button', icon: ic, text: t, 'aria-pressed': String(worldView === k), onclick: () => { worldView = k; local.set('fanfic.worldView', k); renderWorld(); } }))));
     sec.append(head);
+    if (worldView === 'mapa') { sec.append(charMap(p)); return; }
 
     const ICON = { personagens: 'users', relacoes: 'heart-handshake', lugares: 'map-pin', regras: 'scroll-text', grupos: 'shield', historia: 'history', glossario: 'book-a', pendencias: 'circle-help' };
     const grid = el('div', { class: 'world-grid' });
@@ -5210,6 +5267,249 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
   });
 
+
+
+  // =====================================================================
+  // Mapa de personagens (sem IA): personagens do Mundo ligados por relações
+  // =====================================================================
+  const REL_TYPES = [['amor', 'Amor', '#e0508a'], ['amizade', 'Amizade', '#2f9e55'], ['familia', 'Família', '#d4a017'], ['rivalidade', 'Rivalidade', '#e07a1f'],
+    ['inimigo', 'Inimigos', '#d93a3a'], ['trabalho', 'Trabalho', '#2f74d0'], ['outro', 'Outra', '#8a8a8a']];
+  const relType = (k) => REL_TYPES.find(t => t[0] === k) || REL_TYPES[REL_TYPES.length - 1];
+  function mapOf(p) {
+    const w = worldOf(p);
+    const m = w.map = w.map || {};
+    m.pos = m.pos || {}; m.links = m.links || [];
+    w.e.personagens.forEach(e => { if (!e.id) e.id = uid(); });
+    const ids = new Set(w.e.personagens.map(e => e.id));
+    m.links = m.links.filter(l => ids.has(l.a) && ids.has(l.b));
+    return m;
+  }
+  function mapRelations(p) {
+    if (!p.world || !p.world.map || !(p.world.map.links || []).length) return '';
+    const chars = (p.world.e && p.world.e.personagens) || [], name = (id) => (chars.find(e => e.id === id) || {}).title;
+    return p.world.map.links.filter(l => name(l.a) && name(l.b))
+      .map(l => `- ${name(l.a)} — ${relType(l.type)[1].toLowerCase()} — ${name(l.b)}${(l.label || '').trim() ? ` (${l.label.trim()})` : ''}`).join('\n');
+  }
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function sv(tag, attrs = {}, ...kids) {
+    const n = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) if (v != null) n.setAttribute(k, v);
+    kids.flat().forEach(k => k != null && n.append(k));
+    return n;
+  }
+  const charPortrait = (p, e) => {
+    const n = normTitle(e.title).split(' ')[0];
+    const r = (refsCache[p.id] || []).find(r => r.kind === 'image' && (r.imgKind || 'personagem') === 'personagem' && r.subject && (normTitle(r.subject) === normTitle(e.title) || normTitle(r.subject).split(' ')[0] === n));
+    return r ? r.data : '';
+  };
+  // nome curto para procurar no texto ("Theo Albuquerque (30 anos)" -> "Theo")
+  const charKey = (t) => (t || '').replace(/\(.*?\)/g, '').split(/[,:–—-]/)[0].trim().split(/\s+/)[0] || '';
+  let cmap = null; // { p, sel: {node|link}, view: {x,y,k} }
+  function charMap(p) {
+    const w = worldOf(p), m = mapOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
+    if (!cmap || cmap.p !== p) cmap = { p, sel: null, view: null };
+    // posições iniciais em círculo para quem ainda não tem
+    const R = Math.max(160, chars.length * 34);
+    chars.forEach((e, i) => { if (!m.pos[e.id]) { const a = (i / Math.max(1, chars.length)) * Math.PI * 2 - Math.PI / 2; m.pos[e.id] = { x: Math.round(Math.cos(a) * R), y: Math.round(Math.sin(a) * R) }; } });
+    const card = el('div', { class: 'card cmap-card' }), counts = el('span', { class: 'muted' });
+    const stage = el('div', { class: 'cmap-stage', role: 'application', 'aria-label': 'Mapa de personagens. Arraste os personagens; toque em um para ver e criar ligações.' });
+    const vp = sv('g'), linkG = sv('g'), nodeG = sv('g');
+    vp.append(linkG, nodeG);
+    const svgEl = sv('svg', {}, sv('defs', {}, chars.map(e => sv('clipPath', { id: 'cm-clip-' + e.id }, sv('circle', { r: 26 })))), vp);
+    stage.append(svgEl);
+    if (!chars.length) stage.append(el('div', { class: 'cmap-empty', text: 'Ainda não há personagens no Mundo. Crie-os na pasta Personagens (ou gere o Mundo a partir dos capítulos) e eles aparecem aqui.' }));
+    const panel = el('div', { class: 'cmap-panel', hidden: true });
+    const apply = () => { const v = cmap.view; vp.setAttribute('transform', `translate(${v.x},${v.y}) scale(${v.k})`); };
+    const save = () => { clearTimeout(cmap.saveT); cmap.saveT = setTimeout(() => saveProject(p), 400); };
+    const nodeEls = {};
+    function drawLinks() {
+      linkG.replaceChildren();
+      // ligações paralelas entre o mesmo par ficam curvas lado a lado
+      const pairN = {};
+      m.links.forEach(l => {
+        const A = m.pos[l.a], B = m.pos[l.b]; if (!A || !B) return;
+        const key = [l.a, l.b].sort().join('|'), idx = pairN[key] = (pairN[key] || 0) + 1;
+        const [, label, color] = relType(l.type);
+        const off = (idx - 1) * 18 * (idx % 2 ? 1 : -1);
+        const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len * off, ny = dx / len * off;
+        const ax = A.x + nx, ay = A.y + ny, bx = B.x + nx, by = B.y + ny;
+        const isSel = cmap.sel && cmap.sel.link === l.id;
+        const pick = (ev) => { ev.stopPropagation(); cmap.sel = { link: l.id }; drawAll(); };
+        const g = sv('g', { class: 'cmap-link' + (isSel ? ' sel' : '') },
+          sv('line', { x1: ax, y1: ay, x2: bx, y2: by, stroke: color, 'stroke-dasharray': l.type === 'outro' ? '6 5' : null, 'stroke-linecap': 'round' }),
+          sv('line', { class: 'hit', x1: ax, y1: ay, x2: bx, y2: by }),
+          sv('text', { x: (ax + bx) / 2, y: (ay + by) / 2, fill: color }, (l.label || '').trim() || label));
+        g.addEventListener('pointerdown', (ev) => ev.stopPropagation());
+        g.addEventListener('click', pick);
+        linkG.append(g);
+      });
+    }
+    function drawNodes() {
+      nodeG.replaceChildren();
+      chars.forEach(e => {
+        const P = m.pos[e.id], img = charPortrait(p, e), isSel = cmap.sel && cmap.sel.node === e.id;
+        const name = charKey(e.title) || e.title;
+        const g = sv('g', { class: 'cmap-node' + (isSel ? ' sel' : ''), transform: `translate(${P.x},${P.y})`, tabindex: 0, role: 'button', 'aria-label': e.title },
+          sv('circle', { class: 'ring', r: 30 }),
+          img ? sv('image', { href: img, x: -26, y: -26, width: 52, height: 52, 'clip-path': `url(#cm-clip-${e.id})`, preserveAspectRatio: 'xMidYMid slice' })
+            : sv('text', { class: 'ini', y: 0 }, name.slice(0, 2).toUpperCase()),
+          sv('text', { y: 48 }, name.length > 18 ? name.slice(0, 17) + '…' : name));
+        g.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); cmap.sel = { node: e.id }; drawAll(); } });
+        // arrastar o personagem (ou tocar para selecionar)
+        g.addEventListener('pointerdown', (ev) => {
+          ev.stopPropagation(); g.setPointerCapture(ev.pointerId);
+          const st = { x: ev.clientX, y: ev.clientY, px: P.x, py: P.y, moved: false };
+          const move = (mv) => {
+            const dx = (mv.clientX - st.x) / cmap.view.k, dy = (mv.clientY - st.y) / cmap.view.k;
+            if (!st.moved && Math.hypot(dx, dy) < 4) return;
+            st.moved = true; P.x = Math.round(st.px + dx); P.y = Math.round(st.py + dy);
+            g.setAttribute('transform', `translate(${P.x},${P.y})`); drawLinks();
+          };
+          const up = () => {
+            g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', up);
+            if (st.moved) save(); else { cmap.sel = cmap.sel && cmap.sel.node === e.id ? null : { node: e.id }; drawAll(); }
+          };
+          g.addEventListener('pointermove', move); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+        });
+        nodeEls[e.id] = g; nodeG.append(g);
+      });
+    }
+    function drawPanel() {
+      const sel = cmap.sel;
+      panel.hidden = !sel; panel.replaceChildren();
+      if (!sel) return;
+      const nameOf = (id) => (chars.find(e => e.id === id) || {}).title || '?';
+      const typeSel = (val) => el('select', { 'aria-label': 'Tipo de relação' }, REL_TYPES.map(([k, t]) => el('option', { value: k, text: t, selected: k === val ? '' : null })));
+      if (sel.link) {
+        const l = m.links.find(x => x.id === sel.link); if (!l) { cmap.sel = null; return drawPanel(); }
+        const ts = typeSel(l.type), lb = el('input', { type: 'text', value: l.label || '', placeholder: 'Legenda (opcional). Ex.: ex-namorados', 'aria-label': 'Legenda' });
+        ts.addEventListener('change', () => { l.type = ts.value; save(); drawLinks(); });
+        lb.addEventListener('input', () => { l.label = lb.value; save(); drawLinks(); });
+        panel.append(el('h3', { icon: 'share-2', text: `${nameOf(l.a)} e ${nameOf(l.b)}` }),
+          el('div', { class: 'cmap-form' }, el('div', {}, el('label', { text: 'Tipo', style: 'margin-top:0' }), ts), el('div', {}, el('label', { text: 'Legenda', style: 'margin-top:0' }), lb)),
+          el('div', { class: 'row end', style: 'margin-top:10px' },
+            el('button', { class: 'link', icon: 'trash-2', text: 'Apagar ligação', onclick: () => { m.links = m.links.filter(x => x !== l); cmap.sel = null; save(); drawAll(); } }),
+            el('button', { text: 'Fechar', onclick: () => { cmap.sel = null; drawAll(); } })));
+        return;
+      }
+      const e = chars.find(x => x.id === sel.node); if (!e) { cmap.sel = null; return drawPanel(); }
+      const mine = m.links.filter(l => l.a === e.id || l.b === e.id);
+      const others = chars.filter(x => x.id !== e.id);
+      const to = el('select', { 'aria-label': 'Ligar a' }, el('option', { value: '', text: 'Escolha o personagem…' }), others.map(x => el('option', { value: x.id, text: x.title })));
+      const ts = typeSel('amor'), lb = el('input', { type: 'text', placeholder: 'Legenda (opcional). Ex.: melhores amigos de infância', 'aria-label': 'Legenda' });
+      panel.append(el('h3', { icon: 'user', text: e.title }),
+        (e.text || '').trim() ? el('p', { class: 'muted', style: 'margin:0', text: e.text.trim().slice(0, 220) + (e.text.trim().length > 220 ? '…' : '') }) : null,
+        mine.length ? el('div', { class: 'links' }, mine.map(l => {
+          const [, t, c] = relType(l.type), other = l.a === e.id ? l.b : l.a;
+          return el('div', { class: 'lk' }, el('span', { class: 'dot', style: `background:${c}` }),
+            el('span', { class: 't' }, el('b', { text: nameOf(other) }), ` · ${(l.label || '').trim() || t}`),
+            el('button', { class: 'link plain', text: 'Editar', onclick: () => { cmap.sel = { link: l.id }; drawAll(); } }));
+        })) : el('p', { class: 'hint', text: 'Ainda sem ligações. Crie a primeira abaixo.' }),
+        el('div', { class: 'cmap-form' },
+          el('div', {}, el('label', { text: 'Ligar a', style: 'margin-top:0' }), to),
+          el('div', {}, el('label', { text: 'Tipo', style: 'margin-top:0' }), ts),
+          el('div', { class: 'full' }, el('label', { text: 'Legenda', style: 'margin-top:0' }), lb)),
+        el('div', { class: 'row end', style: 'margin-top:10px' },
+          el('button', { class: 'link plain', icon: 'pencil', text: 'Abrir ficha', onclick: () => openEntry(p, w.e.personagens, e, { label: 'Personagens', key: 'personagens' }) }),
+          el('button', { text: 'Fechar', onclick: () => { cmap.sel = null; drawAll(); } }),
+          el('button', { class: 'primary', icon: 'plus', text: 'Criar ligação', onclick: () => {
+            if (!to.value) { to.focus(); toast('Escolha com quem ligar.'); return; }
+            m.links.push({ id: uid(), a: e.id, b: to.value, type: ts.value, label: lb.value.trim() }); save(); drawAll(); toast('Ligação criada ✓');
+          } })));
+    }
+    function drawAll() { drawLinks(); drawNodes(); drawPanel(); counts.textContent = `${chars.length} personagem(ns) · ${m.links.length} ligação(ões)`; }
+    function fit() {
+      const r = stage.getBoundingClientRect(), pts = chars.map(e => m.pos[e.id]);
+      if (!r.width) return;
+      if (!pts.length) { cmap.view = { x: r.width / 2, y: r.height / 2, k: 1 }; return apply(); }
+      const xs = pts.map(q => q.x), ys = pts.map(q => q.y), pad = 70;
+      const minX = Math.min(...xs) - pad, maxX = Math.max(...xs) + pad, minY = Math.min(...ys) - pad, maxY = Math.max(...ys) + pad + 20;
+      const k = Math.min(1.4, r.width / (maxX - minX), r.height / (maxY - minY));
+      cmap.view = { k, x: r.width / 2 - (minX + maxX) / 2 * k, y: r.height / 2 - (minY + maxY) / 2 * k }; apply();
+    }
+    const zoomAt = (f, cx, cy) => {
+      const v = cmap.view, k = Math.max(.25, Math.min(3, v.k * f)), r = stage.getBoundingClientRect();
+      cx = cx ?? r.left + r.width / 2; cy = cy ?? r.top + r.height / 2;
+      const wx = (cx - r.left - v.x) / v.k, wy = (cy - r.top - v.y) / v.k;
+      cmap.view = { k, x: cx - r.left - wx * k, y: cy - r.top - wy * k }; apply();
+    };
+    // arrastar o fundo move o mapa; dois dedos dão zoom; roda do mouse também
+    const ptrs = new Map(); let pan = null, pinch = null;
+    stage.addEventListener('pointerdown', (ev) => {
+      ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY }); stage.setPointerCapture(ev.pointerId);
+      if (ptrs.size === 1) { pan = { x: ev.clientX, y: ev.clientY, vx: cmap.view.x, vy: cmap.view.y, moved: false }; stage.classList.add('panning'); }
+      else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: cmap.view.k }; pan = null; }
+    });
+    stage.addEventListener('pointermove', (ev) => {
+      if (!ptrs.has(ev.pointerId)) return;
+      ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (pinch && ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); zoomAt(pinch.k * d / pinch.d / cmap.view.k, (a.x + b.x) / 2, (a.y + b.y) / 2); }
+      else if (pan) { const dx = ev.clientX - pan.x, dy = ev.clientY - pan.y; if (Math.hypot(dx, dy) > 3) pan.moved = true; cmap.view.x = pan.vx + dx; cmap.view.y = pan.vy + dy; apply(); }
+    });
+    const endPtr = (ev) => {
+      ptrs.delete(ev.pointerId); if (ptrs.size < 2) pinch = null;
+      if (!ptrs.size) { if (pan && !pan.moved && cmap.sel) { cmap.sel = null; drawAll(); } pan = null; stage.classList.remove('panning'); }
+    };
+    stage.addEventListener('pointerup', endPtr); stage.addEventListener('pointercancel', endPtr);
+    stage.addEventListener('wheel', (ev) => { ev.preventDefault(); zoomAt(ev.deltaY < 0 ? 1.12 : 1 / 1.12, ev.clientX, ev.clientY); }, { passive: false });
+
+    const exitFull = el('button', { class: 'cmap-exit', icon: 'x', text: 'Sair da tela cheia', hidden: true, onclick: () => toggleFull(false) });
+    const toggleFull = (on) => { stage.classList.toggle('full', on); exitFull.hidden = !on; requestAnimationFrame(fit); };
+    card.append(
+      el('div', { class: 'cmap-tools' },
+        el('button', { icon: 'sparkles', text: 'Sugerir ligações', title: 'Procura quem aparece junto nos capítulos e nas Relações do Mundo (sem IA, de graça)', disabled: chars.length < 2, onclick: () => suggestLinks(p, () => renderWorld()) }),
+        el('button', { icon: 'plus', text: 'Personagem', onclick: () => openEntry(p, w.e.personagens, null, { label: 'Personagens', key: 'personagens' }) }),
+        el('span', { class: 'grow' }),
+        el('button', { class: 'icon-btn', icon: 'zoom-out', 'aria-label': 'Diminuir', title: 'Diminuir', onclick: () => zoomAt(1 / 1.25) }),
+        el('button', { class: 'icon-btn', icon: 'zoom-in', 'aria-label': 'Aumentar', title: 'Aumentar', onclick: () => zoomAt(1.25) }),
+        el('button', { class: 'icon-btn', icon: 'maximize', 'aria-label': 'Tela cheia', title: 'Tela cheia', onclick: () => toggleFull(!stage.classList.contains('full')) }),
+        el('button', { class: 'link plain', text: 'Organizar', title: 'Volta todos para um círculo', onclick: () => { if (!confirm('Reorganizar todos os personagens em círculo?')) return; m.pos = {}; saveProject(p); renderWorld(); } })),
+      stage, exitFull,
+      el('div', { class: 'cmap-legend' }, REL_TYPES.map(([, t, c]) => el('span', {}, el('i', { style: `background:${c}` }), t)), counts),
+      panel,
+      el('p', { class: 'hint', text: 'Arraste os personagens para organizar. Toque em um para criar ligações; toque numa linha para mudar o tipo ou a legenda. As fotos vêm das Referências (imagem de personagem com o mesmo nome). A IA lê este mapa ao escrever.' }));
+    stage.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && stage.classList.contains('full')) toggleFull(false); });
+    drawAll();
+    requestAnimationFrame(() => { if (cmap.view) apply(); else fit(); });
+    return card;
+  }
+  // sugestões sem IA: quem aparece no mesmo parágrafo nos capítulos + quem aparece junto num item de Relações
+  function suggestLinks(p, done) {
+    const w = worldOf(p), m = mapOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
+    const keys = chars.map(e => ({ e, re: new RegExp(`(^|[^\\p{L}])${charKey(e.title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'iu') })).filter(k => charKey(k.e.title).length > 1);
+    const has = (a, b) => m.links.some(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
+    const found = new Map();
+    const add = (a, b, why, n = 1) => {
+      if (a === b || has(a, b)) return;
+      const key = [a, b].sort().join('|'), f = found.get(key) || { a, b, n: 0, rel: '' };
+      if (why === 'rel') f.rel = f.rel || n; else f.n += n;
+      found.set(key, f);
+    };
+    p.chapters.forEach(c => mdParas(c.text).forEach(par => {
+      const inPar = keys.filter(k => k.re.test(par)).map(k => k.e.id);
+      for (let i = 0; i < inPar.length; i++) for (let j = i + 1; j < inPar.length; j++) add(inPar[i], inPar[j], 'cap');
+    }));
+    (w.e.relacoes || []).forEach(r => {
+      const txt = `${r.title || ''}\n${r.text || ''}`, inR = keys.filter(k => k.re.test(txt)).map(k => k.e.id);
+      for (let i = 0; i < inR.length; i++) for (let j = i + 1; j < inR.length; j++) add(inR[i], inR[j], 'rel', (r.title || '').trim().slice(0, 60));
+    });
+    const list = [...found.values()].filter(f => f.rel || f.n >= 2).sort((x, y) => (!!y.rel - !!x.rel) || y.n - x.n).slice(0, 30);
+    const name = (id) => chars.find(e => e.id === id).title;
+    const dlg = $('cmapSugDlg'), box = $('cmapSugList');
+    if (!list.length) { toast('Não achei novas ligações: os personagens quase não aparecem juntos nos capítulos.'); return; }
+    box.replaceChildren(...list.map((f, i) => {
+      const cb = el('input', { type: 'checkbox', 'data-i': i }); cb.checked = i < 12;
+      const why = [f.rel ? `nas Relações: "${f.rel}"` : '', f.n ? `juntos em ${f.n} parágrafo(s)` : ''].filter(Boolean).join(' · ');
+      return el('label', {}, cb, el('span', {}, el('b', { text: `${name(f.a)} e ${name(f.b)}` }), el('br'), el('span', { class: 'muted', text: why })));
+    }));
+    $('cmapSugGo').onclick = () => {
+      let n = 0;
+      box.querySelectorAll('input:checked').forEach(cb => { const f = list[cb.dataset.i]; m.links.push({ id: uid(), a: f.a, b: f.b, type: 'outro', label: f.rel || '' }); n++; });
+      dlg.close(); saveProject(p, true); done && done();
+      toast(n ? `${n} ligação(ões) criada(s) ✓ Toque em cada linha para escolher o tipo.` : 'Nada foi criado.');
+    };
+    dlg.showModal();
+  }
 
   // =====================================================================
   // Livro em 3D (sem IA): frente com a capa, lombada, contracapa e páginas

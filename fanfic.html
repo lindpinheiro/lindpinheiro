@@ -808,6 +808,30 @@
   .tl-ev h3, .tl-ev .when { padding-right: 100px; }
   .tl-chars { display: flex; flex-wrap: wrap; gap: 6px; }
   .tl-chars label { margin: 0; }
+  /* ---------- revisor automático ---------- */
+  .edit-backdrop .iss { text-decoration: underline wavy #e07a1f; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+  .review-panel { position: fixed; z-index: 70; right: 16px; top: 132px; width: 370px; max-height: calc(100vh - 150px); display: flex; flex-direction: column;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.4); }
+  @media (min-width: 901px) { body.rv-open main { padding-right: 400px; } body.rv-open .margin-notes { display: none; } body.rv-open .doc-wrap.has-notes { display: block; } }
+  @media (max-width: 900px) { .review-panel { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 50vh; border-radius: 16px 16px 0 0; } }
+  .review-panel .rv-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .review-panel .rv-head h3 { margin: 0; flex: 1; font-size: 1rem; display: flex; gap: 8px; align-items: center; }
+  .review-panel .rv-head .close { min-height: 34px; width: 34px; padding: 0; }
+  .review-panel .rv-tabs { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 12px 0; }
+  .review-panel .rv-tabs .chip { font-size: .78rem; padding: 3px 10px; min-height: 0; }
+  .review-panel .rv-actions { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 12px; }
+  .review-panel .rv-actions button { min-height: 34px; padding: 4px 10px; font-size: .85rem; }
+  .review-panel .rv-list { overflow: auto; padding: 0 12px 12px; display: grid; gap: 8px; }
+  .rv-item { border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; cursor: pointer; }
+  .rv-item:hover, .rv-item.on { border-color: var(--accent); }
+  .rv-item .rv-k { font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .rv-item .rv-q { font-family: Georgia, serif; margin: 2px 0; }
+  .rv-item .rv-q b { background: color-mix(in srgb, #e07a1f 26%, transparent); border-radius: 3px; padding: 0 2px; font-weight: 400; }
+  .rv-item .rv-q ins { text-decoration: none; background: color-mix(in srgb, #2f9e55 26%, transparent); border-radius: 3px; padding: 0 2px; }
+  .rv-item .rv-m { font-size: .84rem; color: var(--muted); }
+  .rv-item .rv-b { display: flex; gap: 6px; margin-top: 6px; }
+  .rv-item .rv-b button { min-height: 30px; padding: 2px 10px; font-size: .8rem; }
+  .rv-empty { padding: 18px 12px; text-align: center; color: var(--muted); }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -941,6 +965,8 @@
 <symbol id="i-milestone" viewBox="0 0 24 24"><path d="M12 13v8" /> <path d="M12 3v3" /> <path d="M4 6a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h13a2 2 0 0 0 1.152-.365l3.424-2.317a1 1 0 0 0 0-1.635l-3.424-2.318A2 2 0 0 0 17 6z" /></symbol>
 <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7" /> <path d="M12 19V5" /></symbol>
 <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14" /> <path d="m19 12-7 7-7-7" /></symbol>
+<symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /> <path d="M13 6h8" /> <path d="M13 12h8" /> <path d="M13 18h8" /></symbol>
+<symbol id="i-paintbrush" viewBox="0 0 24 24"><path d="m14.622 17.897-10.68-2.913" /> <path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z" /> <path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1477,6 +1503,7 @@
     <p class="hint">No EPUB, cada parte do livro vira um capítulo. No TXT, os capítulos são separados pelos títulos.</p>
     <p class="muted" id="impFileName"></p>
   </div>
+  <label class="check" style="margin-top:10px"><input type="checkbox" id="impFormat" checked><span>Arrumar a formatação (travessões, aspas, reticências, parágrafos)</span></label>
   <div class="status" id="impStatus" role="status"></div>
   <div class="progress" id="impProgress" hidden><div></div></div>
   <div class="row" style="margin-top:14px">
@@ -2715,7 +2742,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function createImported({ title, premise, parts }) {
     const p = newProject();
     p.title = title; p.premise = premise || '';
-    p.chapters = parts.map(x => ({ id: uid(), title: x.title || '', text: x.text }));
+    p.chapters = parts.map(x => ({ id: uid(), title: x.title || '', text: $('impFormat').checked ? formatText(x.text, true) : x.text }));
     projects.push(p); saveProject(p, true);
     openProject(p.id);
     $('importDlg').close();
@@ -3366,6 +3393,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const more = el('div', { class: 'menu add-menu more-menu', role: 'menu', hidden: true },
         el('button', { role: 'menuitem', class: 'menu-item', disabled: chBusy, onclick: () => { closeAddMenus(); guardEdit(() => openHistory(p, ch), true); } },
           el('span', { class: 'mi-ico' }, svgIcon('history')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: `Versões anteriores${historyOf(ch).length ? ` (${historyOf(ch).length})` : ''}` }))),
+        el('button', { role: 'menuitem', class: 'menu-item', disabled: chBusy || !ch.text.trim(), onclick: () => { closeAddMenus(); if (view.mode === 'editar') { const ta = $('chBody'); if (ta) openReview(p, ch, ta); } else { reviewWanted = ch.id; setMode('editar'); } } },
+          el('span', { class: 'mi-ico' }, svgIcon('list-checks')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Revisar sem IA' }), el('span', { class: 'mi-sub', text: 'Repetições, cara de tradução, pontuação' }))),
         el('button', { role: 'menuitem', class: 'menu-item', disabled: !ch.text.trim(), onclick: () => { closeAddMenus(); guardEdit(() => openImageGen(p, { kind: 'cena', chId: ch.id }), true); } },
           el('span', { class: 'mi-ico' }, svgIcon('image')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Gerar imagem da cena' }))),
         el('button', { role: 'menuitem', class: 'menu-item danger-item', disabled: chBusy, onclick: () => { closeAddMenus(); guardEdit(() => { discardEdit(); deleteChapter(p, ch); }, true); } },
@@ -3422,6 +3451,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ta.addEventListener('input', () => { d.text = ta.value; keepDraft(); refresh(); });
       const backdrop = el('div', { class: 'edit-backdrop', 'aria-hidden': 'true' });
       const paintMarks = () => { paintEditMarks(backdrop, ta.value, (ch.highlights || []).filter(h => !h.resolved)); };
+      backdrop._repaint = paintMarks;
       let markRaf = null, markT = null;
       ta.addEventListener('input', () => {
         cancelAnimationFrame(markRaf); markRaf = requestAnimationFrame(paintMarks);
@@ -3647,6 +3677,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('button', { type: 'button', text: '⁂', 'aria-label': 'Quebra de cena', title: 'Quebra de cena', onclick: () => fmtInsert(ta, '\n\n* * *\n\n') }),
       el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; colors.hidden = true; } }),
       el('span', { class: 'tb-sep', 'aria-hidden': 'true' }),
+      el('button', { type: 'button', class: 'tb-ai', icon: 'list-checks', text: 'Revisar', title: 'Revisor automático, sem IA: repetições, cara de tradução, pontuação', onclick: () => openReview(p, ch, ta) }),
+      el('button', { type: 'button', class: 'tb-ai', icon: 'paintbrush', text: 'Formatar', title: 'Arrumar travessões, aspas, reticências e parágrafos, sem IA (o trecho selecionado ou o capítulo)', onclick: () => formatInEditor(ta) }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'wand-sparkles', ai: true, text: 'Ajustar', title: 'Ajustar com IA o trecho selecionado ou o capítulo', onclick: () => adjustFromEditor(ch, ta) }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'spell-check', ai: true, text: 'Corrigir', title: 'Corrigir o português e organizar no formato de livro (o trecho selecionado ou o capítulo)', onclick: () => fixText(p, ch, ta) }));
     bar.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
@@ -3663,6 +3695,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     bar.append(el('span', { class: 'grow' }),
       el('button', { type: 'button', icon: 'chevron-up', class: 'fmt-hide', 'aria-label': 'Ocultar a barra de formatação', title: 'Ocultar', onclick: () => { local.set('fanfic.fmtHidden', true); paint(); } }));
     paint();
+    if (review && review.chId === ch.id) requestAnimationFrame(() => attachReview(p, ch, ta));
+    else if (reviewWanted === ch.id) { reviewWanted = null; requestAnimationFrame(() => openReview(p, ch, ta)); }
     return wrap;
   }
 
@@ -3755,8 +3789,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const txt = raw.slice(i, j);
       if (!k) frag.append(document.createTextNode(txt));
       else {
-        const [tk, st, c] = k.split('|'), sp = document.createElement('span');
-        if (tk) sp.className = 'tk'; else if (st) sp.className = 'st';
+        const [tk, st, c, iss] = k.split('|'), sp = document.createElement('span');
+        sp.className = [tk ? 'tk' : st ? 'st' : '', iss ? 'iss' : ''].filter(Boolean).join(' ');
         if (c && !tk) sp.style.color = c;
         sp.textContent = txt; frag.append(sp);
       }
@@ -3769,6 +3803,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const toks = [], segs = mdScan(raw, 0, {}, [], toks), attr = new Array(raw.length);
     segs.forEach(g => { if (g.s || g.c) for (let k = g.o; k < g.o + g.t.length; k++) attr[k] = '|' + (g.s ? 1 : '') + '|' + (g.c || ''); });
     toks.forEach(([x, y]) => { for (let k = x; k < y; k++) attr[k] = '1||'; });
+    if (box._issues) box._issues.forEach(([x, y]) => { for (let k = x; k < y && k < raw.length; k++) attr[k] = (attr[k] || '||') + '|1'; });
     const ranges = [];
     hls.forEach(h => { const r = rawQuoteRange(raw, h.quote); if (r && !ranges.some(x => r.start < x.end && r.end > x.start)) ranges.push(Object.assign(r, { h })); });
     ranges.sort((a, b) => a.start - b.start);
@@ -6121,6 +6156,177 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return makeZip(files, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
 
+
+
+  // =====================================================================
+  // Formatar (sem IA): travessões, aspas, reticências, parágrafos e quebras de cena
+  // =====================================================================
+  function formatText(t, whole) {
+    t = (t || '').replace(/\r\n?/g, '\n').replace(/[ \t ]+$/gm, '');
+    // texto com uma linha por parágrafo e nenhuma linha em branco: cada linha vira um parágrafo
+    if (whole && !/\n\s*\n/.test(t) && (t.match(/\n/g) || []).length > 2) t = t.replace(/\n/g, '\n\n');
+    t = t.replace(/^[ \t]*(\*[ \t]*){3,}$|^[ \t]*([-_~=#•·][ \t]*){3,}$|^[ \t]*[#⁂][ \t]*$/gm, '* * *');
+    t = t.replace(/^([ \t]*)(?:--?|–|—|―)[ \t]*(?=\S)/gm, '$1— ');                 // fala no começo do parágrafo
+    t = t.replace(/([^\s\-])[ \t]+(?:--?|–|―)[ \t]+(?=\S)/g, '$1 — ');               // interrupção da fala
+    t = t.replace(/(\S)[ \t]*—[ \t]*(?=[a-záéíóúâêôãõç])/g, (m, a) => /[\w,.!?…]/.test(a) ? `${a} — ` : m);
+    t = t.replace(/\.\s?\.\s?\./g, '…').replace(/…\.+/g, '…');
+    t = t.replace(/"([^"\n]*)"/g, '“$1”').replace(/(^|[\s(—])'([^'\n]+)'(?=[\s.,!?;:)…—]|$)/gm, '$1‘$2’');
+    // fala entre aspas no começo do parágrafo vira travessão: “Oi,” ela disse, “tudo bem?” -> — Oi — ela disse. — Tudo bem?
+    t = t.replace(/^[ \t]*“([^”\n]+?)([.,!?…]?)”,?[ \t]+(\p{Ll}[^\n]*)$/gmu, (m, fala, p, resto) => {
+      resto = resto.replace(/,?[ \t]*“([^”\n]+)”/g, (x, f2) => ` — ${f2}`);
+      return `— ${fala}${p === '.' || p === ',' ? '' : p} — ${resto}`;
+    });
+    t = t.replace(/^[ \t]*“([^”\n]+)”[ \t]*$/gm, '— $1');
+    t = t.replace(/[ \t]+([,.;:!?…])/g, '$1').replace(/([,;:!?])(?=[A-Za-zÀ-ÿ])/g, '$1 ').replace(/[ \t]{2,}/g, ' ');
+    t = t.replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '');
+    return t;
+  }
+  function formatInEditor(ta) {
+    const a = ta.selectionStart, b = ta.selectionEnd, all = a === b, src = all ? ta.value : ta.value.slice(a, b), out = formatText(src, all);
+    if (out === src) { toast('A formatação já está certinha ✓'); return; }
+    ta.focus(); ta.setRangeText(out, all ? 0 : a, all ? ta.value.length : b, 'select');
+    ta.dispatchEvent(new Event('input'));
+    toast(all ? 'Capítulo formatado ✓ Confira e salve (Ctrl+Z desfaz).' : 'Trecho formatado ✓');
+  }
+
+  // =====================================================================
+  // Revisor automático (sem IA): aponta e sugere, você decide
+  // =====================================================================
+  var review = null, reviewWanted = null;
+  const RV_KINDS = { pont: 'Pontuação', trad: 'Cara de tradução', rep: 'Repetição', estilo: 'Estilo' };
+  const BODY = 'cabelo|cabelos|olho|olhos|mão|mãos|boca|lábio|lábios|rosto|cabeça|braço|braços|perna|pernas|ombro|ombros|peito|nariz|testa|queixo|pescoço|dedo|dedos|coração|costas|cintura|pele|bochecha|bochechas|nuca|língua|joelho|joelhos|pé|pés|barriga|orelha|orelhas|sobrancelha|sobrancelhas';
+  const RV_STOP = new Set('a o as os um uma uns umas de do da dos das em no na nos nas por pelo pela pelos pelas para pra com sem sob sobre entre até que se não mais mas como quando onde porque pois já ainda também muito muita muitos muitas pouco tudo nada todo toda todos todas isso isto aquilo esse essa esses essas este esta estes estas aquele aquela ele ela eles elas eu tu você vocês nós me te se lhe nos vos seu sua seus suas meu minha meus minhas teu tua dele dela deles delas era foi ser estar estava está estão tinha tem ter havia há fazer fez faz disse ou e é sim só bem então depois antes agora sempre nunca outra outro outras outros mesmo mesma cada qual quem'.split(' '));
+  const CLICHES = [
+    [/solt(ou|ei|aram) (a|uma) respira[çc][ãa]o que (nem )?(sabia|sabiam) que (estava|estavam) (segurando|prendendo)/i, 'Clichê muito comum em fanfic traduzida.'],
+    [/borboletas no est[ôo]mago/i, 'Clichê. Que tal mostrar o nervosismo com uma ação?'],
+    [/um sorriso brinc(ou|ava) (n|em s)(os|eus) l[áa]bios/i, 'Clichê de tradução ("a smile played on his lips").'],
+    [/(o|seu) cora[çc][ãa]o (disparou|errou uma batida|pulou uma batida)/i, 'Clichê. Vale variar.'],
+    [/o tempo (parou|pareceu parar)/i, 'Clichê.'],
+    [/um arrepio (percorreu|desceu|subiu) (a|pela|sua) espinha/i, 'Clichê.'],
+    [/no final do dia/i, 'Tradução de "at the end of the day". Em português: "no fim das contas", "afinal".'],
+    [/fazer (o|a|uma) diferen[çc]a/i, 'Expressão de tradução; muitas vezes "importar" soa mais natural.']
+  ];
+  const INTERJ = [[/\bOh meu Deus\b/g, 'Meu Deus'], [/\bAh meu Deus\b/g, 'Meu Deus'], [/\bOh,? (?=[a-záéíóú])/g, ''], [/\bUau\b/g, 'Nossa'], [/\bOkay\b/gi, 'Tá'], [/\b[Oo]k\b(?=[,.!?…\s])/g, 'Tá'], [/\bDroga\b/g, 'Que saco']];
+  const POSS = { seu: 'o', sua: 'a', seus: 'os', suas: 'as' }, CONTR = { em: { o: 'no', a: 'na', os: 'nos', as: 'nas' }, de: { o: 'do', a: 'da', os: 'dos', as: 'das' }, por: { o: 'pelo', a: 'pela', os: 'pelos', as: 'pelas' } };
+  function reviewText(t, pt) {
+    const out = [], add = (s, e, kind, msg, fix) => { if (e > s && !out.some(x => s < x.e && e > x.s && x.kind === kind)) out.push({ s, e, kind, msg, fix }); };
+    const each = (re, fn) => { re.lastIndex = 0; let m; while ((m = re.exec(t))) { if (!m[0]) { re.lastIndex++; continue; } fn(m); } };
+    // pontuação (correções seguras)
+    each(/[^\S\n]{2,}/g, m => { if (m.index && t[m.index - 1] !== '\n') add(m.index, m.index + m[0].length, 'pont', 'Espaço duplo.', ' '); });
+    each(/[^\S\n]+(?=[,.;:!?…])/g, m => add(m.index, m.index + m[0].length, 'pont', 'Espaço antes da pontuação.', ''));
+    each(/[,;!?](?=[A-Za-zÀ-ÿ])/g, m => add(m.index, m.index + 1, 'pont', 'Falta espaço depois da pontuação.', m[0] + ' '));
+    each(/\.\.\.|\. \. \./g, m => add(m.index, m.index + m[0].length, 'pont', 'Reticências: use o caractere próprio.', '…'));
+    each(/^[ \t]*(?:--?|–)[ \t]*(?=\S)/gm, m => add(m.index, m.index + m[0].length, 'pont', 'Fala com hífen: use travessão.', '— '));
+    each(/(?<=[^\s\-])[^\S\n]+(?:--?|–)[^\S\n]+(?=\S)/g, m => add(m.index, m.index + m[0].length, 'pont', 'Hífen no lugar de travessão.', ' — '));
+    each(/[.]([^\S\n]+—[^\S\n]+)(?=(disse|perguntou|respondeu|falou|gritou|sussurrou|murmurou|retrucou|completou|continuou|explicou|resmungou|rebateu|admitiu|insistiu)\b)/g,
+      m => add(m.index, m.index + 1, 'pont', 'Antes de "— disse…", a fala não leva ponto.', ''));
+    each(/(?<![\p{L}])(\p{L}{2,})\s+\1(?![\p{L}])/giu, m => { if (!/^(ha|he|hi|não|ai|oi|já|tá|tic|toc|blá|bla)$/i.test(m[1])) add(m.index, m.index + m[0].length, 'pont', 'Palavra repetida.', m[1]); });
+    each(/(?<=[.!?]\s+)(\p{Ll})/gu, m => { const before = t.slice(Math.max(0, m.index - 6), m.index); if (!/(Sr|Sra|Dr|Dra|etc|p|vs)\.\s+$/i.test(before)) add(m.index, m.index + 1, 'pont', 'Depois de ponto final, letra maiúscula.', m[0].toUpperCase()); });
+    if (pt) {
+      // cara de tradução
+      each(new RegExp(`(?<![\\p{L}])(?:(em|de|por)\\s+)?(seu|sua|seus|suas)\\s+(${BODY})(?![\\p{L}])`, 'giu'), m => {
+        const prep = (m[1] || '').toLowerCase(), art = POSS[m[2].toLowerCase()];
+        let fix = (prep ? CONTR[prep][art] : art) + ' ' + m[3];
+        if (m[0][0] === m[0][0].toUpperCase() && m[0][0] !== m[0][0].toLowerCase()) fix = fix[0].toUpperCase() + fix.slice(1);
+        add(m.index, m.index + m[0].length, 'trad', 'Parte do corpo com possessivo soa traduzido; em português usamos o artigo.', fix);
+      });
+      INTERJ.forEach(([re, fix]) => each(re, m => add(m.index, m.index + m[0].length, 'trad', 'Interjeição com cara de tradução.', fix)));
+      each(/(?<![\p{L}])revir(ou|ei|aram|ando|a) os olhos/giu, m => add(m.index, m.index + m[0].length, 'trad', 'Muito usado em tradução. Que tal "bufou", "fez uma careta", "suspirou"?', null));
+      each(/(?<![\p{L}])(foi|foram|era|eram|será|serão|tinha sido|é|são)\s+\p{L}+(ad|id)[oa]s?\s+(por|pela|pelo|pelos|pelas)(?![\p{L}])/giu, m => add(m.index, m.index + m[0].length, 'trad', 'Voz passiva. Na ativa costuma soar mais natural.', null));
+      // sujeito repetido no começo de frases seguidas
+      each(/(?:^|[.!?…]\s+)(Ele|Ela|Eu|Eles|Elas)\s[^.!?…\n]{3,}[.!?…]\s+(\1)\s/gm, m => { const at = m.index + m[0].lastIndexOf(m[2] + ' '); add(at, at + m[2].length, 'trad', `"${m[2]}" de novo: dá para cortar, o verbo já mostra quem é.`, null); });
+      CLICHES.forEach(([re, msg]) => each(new RegExp(re.source, 'gi'), m => add(m.index, m.index + m[0].length, 'estilo', msg, null)));
+    }
+    // frases: muito longas, -mente demais, gerúndios em sequência
+    each(/[^.!?…\n]+[.!?…]*/g, m => {
+      const sen = m[0], words = sen.match(/\p{L}+/gu) || [];
+      if (words.length > 45) add(m.index, m.index + sen.length, 'estilo', `Frase longa (${words.length} palavras). Dividir ajuda a leitura.`, null);
+      const mente = [...sen.matchAll(/(?<![\p{L}])\p{L}{3,}mente(?![\p{L}])/gu)];
+      if (pt && mente.length >= 2) mente.slice(1).forEach(x => add(m.index + x.index, m.index + x.index + x[0].length, 'estilo', 'Muitos advérbios em -mente na mesma frase.', null));
+      const ger = [...sen.matchAll(/(?<![\p{L}])\p{L}{3,}(ando|endo|indo)(?![\p{L}])/gu)];
+      if (pt && ger.length >= 3) add(m.index + ger[2].index, m.index + ger[2].index + ger[2][0].length, 'estilo', 'Gerúndios em sequência deixam a frase arrastada.', null);
+    });
+    // repetição de palavras perto uma da outra (25 palavras)
+    const ws = [...t.matchAll(/\p{L}{5,}/gu)], last = new Map();
+    ws.forEach((w, i) => {
+      const k = w[0].toLowerCase(); if (RV_STOP.has(k)) return;
+      const stem = k.replace(/(s|es|mente)$/, '');
+      if (last.has(stem) && i - last.get(stem) <= 25) add(w.index, w.index + w[0].length, 'rep', `"${w[0]}" apareceu logo antes. Vale trocar por outra palavra ou cortar.`, null);
+      last.set(stem, i);
+    });
+    return out.sort((a, b) => a.s - b.s);
+  }
+  function openReview(p, ch, ta) {
+    if (review) clearInterval(review.watch);
+    review = { p, ch, chId: ch.id, filter: '', ignore: new Set((ch.rvIgnore || [])), sel: -1, miss: 0 };
+    // some sozinho quando o Editar deste capítulo fecha
+    review.watch = setInterval(() => { if (!review) return; if (review.ta && review.ta.isConnected) { review.miss = 0; return; } if (++review.miss > 2) closeReview(); }, 400);
+    attachReview(p, ch, ta);
+  }
+  function closeReview() {
+    const ta = review && review.ta;
+    if (review) clearInterval(review.watch);
+    review = null; $('reviewPanel')?.remove(); document.body.classList.remove('rv-open');
+    const bd = ta && ta.parentElement && ta.parentElement.querySelector('.edit-backdrop');
+    if (bd) { bd._issues = null; bd._repaint && bd._repaint(); }
+  }
+  function attachReview(p, ch, ta) {
+    if (!review) return;
+    review.ta = ta;
+    if (!ta._rv) { ta._rv = true; let t; ta.addEventListener('input', () => { if (!review || review.ta !== ta) return; clearTimeout(t); t = setTimeout(runReview, 350); }); }
+    runReview();
+  }
+  function runReview() {
+    const r = review; if (!r) return;
+    if (!r.ta || !r.ta.isConnected) return;
+    const key = (x) => `${x.kind}:${r.ta.value.slice(x.s, x.e)}:${x.msg}`;
+    r.issues = reviewText(r.ta.value, isPtBr(r.p)).filter(x => !r.ignore.has(key(x)));
+    r.key = key;
+    const bd = r.ta.parentElement.querySelector('.edit-backdrop');
+    if (bd) { bd._issues = r.issues.map(x => [x.s, x.e]); bd._repaint && bd._repaint(); }
+    renderReview();
+  }
+  function renderReview() {
+    const r = review; if (!r) return;
+    let panel = $('reviewPanel');
+    if (!panel) { panel = el('div', { id: 'reviewPanel', class: 'review-panel', role: 'region', 'aria-label': 'Revisor automático' }); document.body.append(panel); document.body.classList.add('rv-open'); }
+    const shown = r.issues.filter(x => !r.filter || x.kind === r.filter), fixable = r.issues.filter(x => x.kind === 'pont' && x.fix != null);
+    const counts = Object.keys(RV_KINDS).map(k => [k, r.issues.filter(x => x.kind === k).length]).filter(x => x[1]);
+    const list = el('div', { class: 'rv-list' });
+    shown.slice(0, 200).forEach(x => {
+      const v = r.ta.value, a = Math.max(0, x.s - 40), z = Math.min(v.length, x.e + 40);
+      const q = el('div', { class: 'rv-q' }, (a ? '…' : '') + v.slice(a, x.s).replace(/\s+/g, ' '), el('b', { text: v.slice(x.s, x.e) || ' ' }),
+        x.fix != null ? el('ins', { text: x.fix || '∅' }) : null, v.slice(x.e, z).replace(/\s+/g, ' ') + (z < v.length ? '…' : ''));
+      const item = el('div', { class: 'rv-item', onclick: (e) => { if (!e.target.closest('button')) rvGoto(x); } },
+        el('div', { class: 'rv-k', text: RV_KINDS[x.kind] }), q, el('div', { class: 'rv-m', text: x.msg }),
+        el('div', { class: 'rv-b' },
+          x.fix != null ? el('button', { class: 'primary', text: x.fix === '' ? 'Apagar' : 'Aplicar', onclick: () => rvApply([x]) }) : el('button', { text: 'Ver no texto', onclick: () => rvGoto(x) }),
+          el('button', { class: 'link plain', text: 'Ignorar', onclick: () => { r.ignore.add(r.key(x)); r.ch.rvIgnore = [...r.ignore].slice(-300); saveProject(r.p); runReview(); } })));
+      list.append(item);
+    });
+    if (!shown.length) list.append(el('div', { class: 'rv-empty', text: r.issues.length ? 'Nada nesta categoria.' : 'Nada para apontar. O texto está limpo ✓' }));
+    panel.replaceChildren(
+      el('div', { class: 'rv-head' }, el('h3', { icon: 'list-checks', text: `Revisor · ${r.issues.length}` }), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar o revisor', onclick: closeReview })),
+      counts.length > 1 ? el('div', { class: 'rv-tabs' }, el('button', { class: 'chip', 'aria-pressed': String(!r.filter), text: 'Tudo', onclick: () => { r.filter = ''; renderReview(); } }),
+        counts.map(([k, n]) => el('button', { class: 'chip', 'aria-pressed': String(r.filter === k), text: `${RV_KINDS[k]} ${n}`, onclick: () => { r.filter = k; renderReview(); } }))) : null,
+      fixable.length ? el('div', { class: 'rv-actions' }, el('button', { class: 'primary', icon: 'check', text: `Corrigir a pontuação (${fixable.length})`, onclick: () => rvApply(fixable) })) : null,
+      list);
+  }
+  function rvApply(xs) {
+    const r = review, ta = r.ta; if (!xs.length) return;
+    ta.focus();
+    [...xs].sort((a, b) => b.s - a.s).forEach(x => ta.setRangeText(x.fix, x.s, x.e, 'end'));
+    ta.dispatchEvent(new Event('input'));
+    clearTimeout(r.t); runReview();
+    toast(xs.length > 1 ? `${xs.length} correções aplicadas ✓ (Ctrl+Z desfaz)` : 'Corrigido ✓');
+  }
+  function rvGoto(x) {
+    const ta = review.ta, v = ta.value;
+    ta.focus({ preventScroll: true }); ta.setSelectionRange(x.s, x.e);
+    const para = (v.slice(0, x.s).match(/\n\s*\n/g) || []).length, tops = editParaTops(ta), r = ta.getBoundingClientRect();
+    const y = scrollY + r.top + (tops[para] || 0) - innerHeight * .3;
+    scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  }
 
   // =====================================================================
   // Linha do tempo (sem IA): acontecimentos em ordem, ligados a capítulos e personagens

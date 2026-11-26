@@ -810,7 +810,8 @@
   .tl-ev .acts button { min-height: 30px; width: 30px; padding: 0; border: 0; background: transparent; color: var(--muted); }
   .tl-ev .acts button:hover { color: var(--accent); }
   .tl-ev .acts button:disabled { opacity: .3; }
-  .tl-ev h3, .tl-ev .when { padding-right: 100px; }
+  .tl-ev .acts .tl-grip { cursor: grab; touch-action: none; }
+  .tl-ev h3, .tl-ev .when { padding-right: 130px; }
   .tl-chars { display: flex; flex-wrap: wrap; gap: 6px; }
   .tl-chars label { margin: 0; }
   /* ---------- revisor automático ---------- */
@@ -2261,7 +2262,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let cryptoKey = null, syncing = false, syncAgain = false, syncTimer = null;
 
   // configuração da IA que viaja junto com as histórias (no mesmo arquivo cifrado)
-  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy', 'freeFirst', 'freeModel'];
+  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy', 'freeFirst', 'freeModel', 'goals'];
   function aiForSync() {
     if (!settings.key) return null;
     const o = { updatedAt: settings.updatedAt || 0 };
@@ -5666,7 +5667,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Metas de escrita (sem IA): meta por dia, sequência de dias e meta do livro
   // =====================================================================
   function dayKey(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
-  function goalCfg() { return Object.assign({ daily: 500, count: 'me' }, local.get('fanfic.goals', {})); }
+  function goalCfg() { return Object.assign({ daily: 500, count: 'me' }, local.get('fanfic.goals', {}), settings.goals || {}); }
+  function setGoalCfg(c) { local.set('fanfic.goals', c); settings.goals = c; saveSettings(); }
   function logWords(p, n, who) {
     if (!p || !(n > 0)) return;
     const log = p.wlog = p.wlog || {}, k = dayKey(), e = log[k] = log[k] || [0, 0];
@@ -5745,8 +5747,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         (!pace.left ? ' Meta do livro alcançada!' : pace.perDay != null ? ` Para terminar no prazo (${pace.days} dia${pace.days > 1 ? 's' : ''}), escreva ${fmtNum(pace.perDay)} palavras por dia.` : ` Faltam ${fmtNum(pace.left)} palavras.`) })]
       : [el('p', { class: 'muted', style: 'margin:0', text: 'Defina o tamanho final para ver quanto falta e o ritmo até o prazo.' })]));
   }
-  $('goalDaily').addEventListener('input', () => { const c = goalCfg(); c.daily = Math.max(0, Number($('goalDaily').value) || 0); local.set('fanfic.goals', c); goalRender(); });
-  $('goalCount').addEventListener('change', () => { const c = goalCfg(); c.count = $('goalCount').value; local.set('fanfic.goals', c); goalRender(); });
+  $('goalDaily').addEventListener('input', () => { const c = goalCfg(); c.daily = Math.max(0, Number($('goalDaily').value) || 0); setGoalCfg(c); goalRender(); });
+  $('goalCount').addEventListener('change', () => { const c = goalCfg(); c.count = $('goalCount').value; setGoalCfg(c); goalRender(); });
   ['goalTotal', 'goalUntil'].forEach(id => $(id).addEventListener('input', () => {
     const p = goalP; p.goal = { total: Math.max(0, Number($('goalTotal').value) || 0), until: $('goalUntil').value || '' }; saveProject(p); goalRender();
   }));
@@ -6820,8 +6822,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     shown.forEach(ev => {
       const i = t.indexOf(ev), ch = ev.chId ? p.chapters.find(c => c.id === ev.chId) : null;
       const move = (d) => { const j = i + d; if (j < 0 || j >= t.length) return; t.splice(i, 1); t.splice(j, 0, ev); saveProject(p, true); renderWorld(); };
-      list.append(el('div', { class: 'tl-ev', style: ev.color ? `--tc:${ev.color}` : null },
-        el('div', { class: 'acts' },
+      const grip = el('button', { class: 'tl-grip', icon: 'grip-vertical', 'aria-label': 'Arrastar para mudar a ordem', title: 'Arraste para mudar a ordem', disabled: !!tlFilter });
+      const evEl = el('div', { class: 'tl-ev', style: ev.color ? `--tc:${ev.color}` : null, 'data-id': ev.id },
+        el('div', { class: 'acts' }, grip,
           el('button', { icon: 'arrow-up', 'aria-label': 'Mover para antes', title: 'Antes', disabled: i === 0 || !!tlFilter, onclick: () => move(-1) }),
           el('button', { icon: 'arrow-down', 'aria-label': 'Mover para depois', title: 'Depois', disabled: i === t.length - 1 || !!tlFilter, onclick: () => move(1) }),
           el('button', { icon: 'pencil', 'aria-label': 'Editar', title: 'Editar', onclick: () => openTimelineEvent(p, ev) })),
@@ -6830,12 +6833,37 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         (ev.text || '').trim() ? el('p', { class: 'txt', text: ev.text.trim() }) : null,
         (ch || (ev.chars || []).length) ? el('div', { class: 'chips' },
           ch ? el('button', { type: 'button', class: 'tc', icon: 'book-open', text: chTitle(p, ch), title: 'Abrir o capítulo', onclick: () => { view.tab = 'capitulos'; view.chapterId = ch.id; view.mode = 'ler'; renderTab(); scrollTo(0, 0); } }) : null,
-          (ev.chars || []).map(id => chars.find(e => e.id === id)).filter(Boolean).map(e => el('span', { class: 'tc', text: charKey(e.title) || e.title }))) : null));
+          (ev.chars || []).map(id => chars.find(e => e.id === id)).filter(Boolean).map(e => el('span', { class: 'tc', text: charKey(e.title) || e.title }))) : null);
+      grip.addEventListener('pointerdown', (pe) => dragTimeline(pe, p, list, evEl));
+      list.append(evEl);
     });
     if (!t.length) list.append(el('p', { class: 'muted', text: 'Nenhum acontecimento ainda. Crie o primeiro ou traga os capítulos para começar.' }));
     else if (!shown.length) list.append(el('p', { class: 'muted', text: 'Esse personagem ainda não aparece em nenhum acontecimento.' }));
     card.append(list, el('p', { class: 'hint', text: 'A ordem é a da história (não a dos capítulos): use as setas para ajustar, por exemplo, um flashback. A IA lê esta linha do tempo ao escrever.' }));
     return card;
+  }
+  function dragTimeline(e, p, list, item) {
+    e.preventDefault();
+    const r = item.getBoundingClientRect(), offY = e.clientY - r.top, lifted = item.cloneNode(true);
+    lifted.classList.add('lifted'); Object.assign(lifted.style, { position: 'fixed', zIndex: 90, left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', pointerEvents: 'none', boxShadow: '0 14px 40px rgba(0,0,0,.45)' });
+    document.body.append(lifted); item.style.opacity = '.35';
+    let lastY = e.clientY;
+    const auto = setInterval(() => { if (lastY < 70) scrollBy(0, -14); else if (lastY > innerHeight - 70) scrollBy(0, 14); }, 30);
+    const move = (ev) => {
+      lastY = ev.clientY; lifted.style.top = (ev.clientY - offY) + 'px';
+      const other = [...list.querySelectorAll('.tl-ev')].filter(x => x !== item).find(x => { const b = x.getBoundingClientRect(); return ev.clientY >= b.top && ev.clientY <= b.bottom; });
+      if (other) { const b = other.getBoundingClientRect(); list.insertBefore(item, ev.clientY > b.top + b.height / 2 ? other.nextSibling : other); }
+    };
+    const up = () => {
+      clearInterval(auto); lifted.remove(); item.style.opacity = '';
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      const t = timelineOf(p), order = [...list.querySelectorAll('.tl-ev')].map(x => x.dataset.id);
+      const before = t.map(x => x.id).join();
+      t.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+      if (t.map(x => x.id).join() !== before) { saveProject(p, true); toast('Ordem atualizada ✓'); }
+      renderWorld();
+    };
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   }
   function openTimelineEvent(p, ev) {
     const w = worldOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
@@ -7059,7 +7087,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { class: 'icon-btn', icon: 'zoom-out', 'aria-label': 'Diminuir', title: 'Diminuir', onclick: () => zoomAt(1 / 1.25) }),
         el('button', { class: 'icon-btn', icon: 'zoom-in', 'aria-label': 'Aumentar', title: 'Aumentar', onclick: () => zoomAt(1.25) }),
         el('button', { class: 'icon-btn', icon: 'maximize', 'aria-label': 'Tela cheia', title: 'Tela cheia', onclick: () => toggleFull(!stage.classList.contains('full')) }),
-        el('button', { class: 'link plain', text: 'Organizar', title: 'Volta todos para um círculo', onclick: () => { if (!confirm('Reorganizar todos os personagens em círculo?')) return; m.pos = {}; saveProject(p); renderWorld(); } })),
+        el('button', { class: 'link plain', text: 'Organizar', title: 'Aproxima quem tem ligação e afasta o resto', onclick: () => { autoLayoutMap(chars, m); saveProject(p, true); cmap.view = null; renderWorld(); toast('Mapa organizado ✓'); } })),
       stage, exitFull,
       el('div', { class: 'cmap-legend' }, REL_TYPES.map(([, t, c]) => el('span', {}, el('i', { style: `background:${c}` }), t)), counts),
       panel,
@@ -7068,6 +7096,27 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     drawAll();
     requestAnimationFrame(() => { if (cmap.view) apply(); else fit(); });
     return card;
+  }
+  // organiza o mapa: ligações puxam, personagens se empurram, tudo tende ao centro
+  function autoLayoutMap(chars, m) {
+    const n = chars.length; if (!n) return;
+    const P = chars.map((e, i) => { const q = m.pos[e.id] || {}; const a = i / n * Math.PI * 2; return { id: e.id, x: q.x ?? Math.cos(a) * 200, y: q.y ?? Math.sin(a) * 200, vx: 0, vy: 0 }; });
+    const idx = Object.fromEntries(P.map((q, i) => [q.id, i]));
+    const links = m.links.filter(l => idx[l.a] != null && idx[l.b] != null);
+    for (let it = 0, t = 1; it < 400; it++, t *= 0.99) {
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+        const a = P[i], b = P[j]; let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+        if (d2 < 1) { dx = Math.random() - .5; dy = Math.random() - .5; d2 = 1; }
+        const f = 26000 / d2, d = Math.sqrt(d2), fx = dx / d * f, fy = dy / d * f;
+        a.vx -= fx; a.vy -= fy; b.vx += fx; b.vy += fy;
+      }
+      links.forEach(l => {
+        const a = P[idx[l.a]], b = P[idx[l.b]], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, f = (d - 170) * .04;
+        a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f;
+      });
+      P.forEach(q => { q.vx -= q.x * .01; q.vy -= q.y * .01; const sp = Math.hypot(q.vx, q.vy), max = 40 * t; if (sp > max) { q.vx *= max / sp; q.vy *= max / sp; } q.x += q.vx; q.y += q.vy; q.vx *= .5; q.vy *= .5; });
+    }
+    P.forEach(q => { m.pos[q.id] = { x: Math.round(q.x), y: Math.round(q.y) }; });
   }
   // sugestões sem IA: quem aparece no mesmo parágrafo nos capítulos + quem aparece junto num item de Relações
   function suggestLinks(p, done) {

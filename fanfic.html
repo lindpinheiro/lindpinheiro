@@ -218,6 +218,7 @@
   .cmap-stage.panning { cursor: grabbing; }
   .cmap-stage svg { width: 100%; height: 100%; display: block; }
   .cmap-node { cursor: pointer; }
+  .cmap-node image { pointer-events: none; }
   .cmap-node circle.ring { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
   .cmap-node.sel circle.ring { stroke: var(--accent); stroke-width: 4; }
   .cmap-node text { fill: var(--text); font: 600 13px system-ui, sans-serif; text-anchor: middle; paint-order: stroke; stroke: var(--surface-2); stroke-width: 4px; }
@@ -684,7 +685,7 @@
   .b3-face { position: absolute; backface-visibility: hidden; overflow: hidden; }
   .b3-front, .b3-back { inset: 0; border-radius: 2px 5px 5px 2px; }
   .b3-front { transform: translateZ(calc(var(--d) / 2)); background: #3a2530; }
-  .b3-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .b3-front img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; user-select: none; }
   .b3-front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.35) 0, rgba(255,255,255,.12) 3%, transparent 7%, transparent 80%, rgba(255,255,255,.08)); pointer-events: none; }
   .b3-front .b3-ph { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 24px; text-align: center; color: #fff;
     background: linear-gradient(160deg, #9b4d63, #3a2530); font-family: Georgia, serif; }
@@ -7397,7 +7398,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     bk.style.setProperty('--w', '230px'); bk.style.setProperty('--h', '345px'); bk.style.setProperty('--d', d + 'px');
     const [r, g, b] = b3.tone || [74, 38, 52], light = (r * .3 + g * .59 + b * .11) > 150;
     bk.style.setProperty('--spine', `rgb(${r},${g},${b})`); bk.style.setProperty('--spine-ink', light ? '#1b1214' : '#f6eef0');
-    const front = b3.cover ? el('img', { src: b3.cover, alt: '' }) : el('div', { class: 'b3-ph' }, el('b', { text: title }), author ? el('span', { text: author }) : null);
+    const front = b3.cover ? el('img', { src: b3.cover, alt: '', draggable: 'false' }) : el('div', { class: 'b3-ph' }, el('b', { text: title }), author ? el('span', { text: author }) : null);
     bk.replaceChildren(
       el('div', { class: 'b3-face b3-front' }, front),
       el('div', { class: 'b3-face b3-back' }, el('div', { class: 'b3-btitle', text: title }), el('div', { class: 'b3-blurb', text: (p.blurb ?? '').trim() || (p.premise || '').trim() }), author ? el('div', { text: author }) : null, el('div', { class: 'b3-bar', 'aria-hidden': 'true' })),
@@ -7430,7 +7431,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   });
   (() => {
     const st = $('b3Stage'); let drag = null;
-    st.addEventListener('pointerdown', (e) => { b3StopSpin(); drag = { x: e.clientX, y: e.clientY, ry: b3.ry, rx: b3.rx }; st.setPointerCapture(e.pointerId); st.classList.add('dragging'); });
+    st.addEventListener('dragstart', (e) => e.preventDefault());
+    st.addEventListener('pointerdown', (e) => { if (e.button > 0) return; e.preventDefault(); b3StopSpin(); drag = { x: e.clientX, y: e.clientY, ry: b3.ry, rx: b3.rx }; st.setPointerCapture(e.pointerId); st.classList.add('dragging'); });
     st.addEventListener('pointermove', (e) => {
       if (!drag) return;
       b3.ry = drag.ry + (e.clientX - drag.x) * .5; b3.rx = Math.max(-35, Math.min(35, drag.rx - (e.clientY - drag.y) * .3)); b3Apply(false);

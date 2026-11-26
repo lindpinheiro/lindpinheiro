@@ -191,6 +191,12 @@
   #newProjectBtn .icon:last-child { width: .9em; height: .9em; margin-left: -2px; }
   .proj-row .proj-item { padding-right: 52px; }
   .proj-name { display: block; }
+  .proj-row .proj-item { display: flex; align-items: center; gap: 12px; }
+  .proj-text { min-width: 0; flex: 1; }
+  .proj-thumb { flex: none; width: 40px; aspect-ratio: 2 / 3; border-radius: 5px; object-fit: cover; background: var(--accent-soft); box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  span.proj-thumb { display: flex; align-items: center; justify-content: center; color: var(--muted); box-shadow: none; border: 1px dashed var(--border); background: transparent; }
+  span.proj-thumb .icon { width: 18px; height: 18px; }
+  .proj-row .check-dot { top: 50%; margin-top: -12px; z-index: 1; }
   .proj-row .star { position: absolute; top: 8px; right: 8px; min-height: 36px; width: 36px; padding: 0; border: 0; background: transparent; color: var(--muted); }
   .proj-row .star .icon { width: 20px; height: 20px; }
   .proj-row .star.on { color: #e5a521; }
@@ -437,6 +443,11 @@
   .info-field .v { white-space: pre-wrap; margin-top: 4px; }
   .info-meta { margin-top: 10px; }
   .reader strong { font-weight: 700; }
+  .color-pop { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; align-items: center; }
+  .color-pop .sw { width: 28px; height: 28px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--border); }
+  .color-pop .sw:hover { box-shadow: 0 0 0 2px var(--accent); }
+  .color-pop .sw-none { width: auto; border-radius: 14px; padding: 0 10px; font-size: .85rem; background: transparent; box-shadow: none; border: 1px solid var(--border); }
+  .sel-bar .color-pop { flex-basis: 100%; justify-content: center; }
   .reader p.scene-break { text-align: center; letter-spacing: .5em; color: var(--muted); }
   /* anotações na margem (tela larga, página do capítulo) */
   .margin-notes { display: none; }
@@ -553,9 +564,15 @@
   textarea.doc-edit:focus { outline: none; }
   .doc-edit-wrap { position: relative; max-width: 680px; margin: 0 auto; }
   .doc-edit-wrap textarea.doc-edit { position: relative; z-index: 1; }
-  .edit-backdrop { position: absolute; inset: 0; z-index: 0; pointer-events: none; color: transparent; overflow: hidden;
+  /* o texto que aparece no Editar é desenhado pelo fundo (com cores e riscado); o textarea fica por cima, só com o cursor e a seleção */
+  .doc-edit-wrap textarea.doc-edit { color: transparent; caret-color: var(--text); }
+  .doc-edit-wrap textarea.doc-edit::placeholder { color: var(--muted); }
+  .doc-edit-wrap textarea.doc-edit::selection { color: transparent; background: rgba(90,130,230,.38); }
+  .edit-backdrop .tk { color: var(--muted); opacity: .6; }
+  .edit-backdrop .st, .reader s { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .edit-backdrop { position: absolute; inset: 0; z-index: 0; pointer-events: none; color: var(--text); overflow: hidden;
     font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; line-height: 1.85; white-space: pre-wrap; overflow-wrap: break-word; word-wrap: break-word; }
-  .edit-backdrop mark { color: transparent; background: var(--mark-edit); border-radius: 3px; box-shadow: inset 0 -2px 0 #e5c43a; }
+  .edit-backdrop mark { color: inherit; background: var(--mark-edit); border-radius: 3px; box-shadow: inset 0 -2px 0 #e5c43a; }
   .edit-backdrop mark.important { background: var(--mark-edit-imp); box-shadow: inset 0 -2px 0 var(--accent); }
   input.doc-title { display: block; width: 100%; max-width: 680px; margin: 4px auto 18px; padding: 4px 0; border: 0; border-bottom: 1px dashed transparent; border-radius: 0;
     background: transparent; color: var(--text); text-align: center; font-family: Georgia, serif; font-size: 1.4rem; font-weight: 700; }
@@ -607,6 +624,12 @@
     max-height: calc(100vh - 24px); padding: 20px;
   }
   dialog::backdrop { background: rgba(0,0,0,.55); }
+  dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
+  dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
+  .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
+  .img-dlg .img-dlg-bar { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+  .img-dlg .img-dlg-bar button { background: rgba(20,16,18,.85); color: #fff; border-color: rgba(255,255,255,.25); }
+  .img-ref .img-body img { cursor: zoom-in; }
   .dlg-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
   .dlg-head h2 { flex: 1; margin: 0; }
   .dlg-head .close { min-height: 38px; min-width: 38px; padding: 0; font-size: 1.2rem; }
@@ -713,6 +736,8 @@
 <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /> <polyline points="17 8 12 3 7 8" /> <line x1="12" x2="12" y1="3" y2="15" /></symbol>
 <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /></symbol>
 <symbol id="i-wand-sparkles" viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /> <path d="m14 7 3 3" /> <path d="M5 6v4" /> <path d="M19 14v4" /> <path d="M10 2v2" /> <path d="M7 8H3" /> <path d="M21 16h-4" /> <path d="M11 3H9" /></symbol>
+<symbol id="i-strikethrough" viewBox="0 0 24 24"><path d="M16 4H9a3 3 0 0 0-2.83 4" /> <path d="M14 12a4 4 0 0 1 0 8H6" /> <line x1="4" x2="20" y1="12" y2="12" /></symbol>
+<symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" /> <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /> <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /> <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /> <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1049,6 +1074,14 @@
 </dialog>
 
 <!-- Versões anteriores -->
+<dialog id="imgDlg" class="img-dlg" aria-label="Imagem ampliada">
+  <img id="imgDlgImg" alt="">
+  <div class="img-dlg-bar">
+    <button type="button" id="imgDlgDown"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Baixar</button>
+    <button type="button" data-close><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg>Fechar</button>
+  </div>
+</dialog>
+
 <dialog id="histDlg" aria-labelledby="histTitle">
   <div class="dlg-head"><h2 id="histTitle"><svg class="icon" aria-hidden="true"><use href="#i-history"/></svg>Versões anteriores</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <p class="muted" style="margin-top:0">Cada mudança feita pela IA guarda a versão de antes (as últimas 5). Volte para qualquer uma; dá para desfazer.</p>
@@ -1309,7 +1342,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const mdParas = (text) => (text || '').split(/\n\s*\n/).map(t => t.replace(/^\n+|\n+$/g, '')).filter(t => t.trim());
   function storyHtml(text) {
     return mdParas(text).map(t => isSceneBreak(t) ? '<p style="text-align:center">* * *</p>'
-      : '<p>' + parseMd(t).map(x => { let h = escHtml(x.t).replace(/\n/g, '<br>'); if (x.b) h = `<b>${h}</b>`; if (x.i) h = `<i>${h}</i>`; return h; }).join('') + '</p>').join('\n');
+      : '<p>' + parseMd(t).map(x => { let h = escHtml(x.t).replace(/\n/g, '<br>'); if (x.b) h = `<b>${h}</b>`; if (x.i) h = `<i>${h}</i>`; if (x.s) h = `<s>${h}</s>`; if (x.c) h = `<span style="color:${x.c}">${h}</span>`; return h; }).join('') + '</p>').join('\n');
   }
   // versão sem os asteriscos, para onde não aceita formatação
   const storyPlain = (text) => mdParas(text).map(t => isSceneBreak(t) ? '* * *' : parseMd(t).map(x => x.t).join('')).join('\n\n');
@@ -1517,6 +1550,38 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let projFilter = local.get('fanfic.filter', 'todos'); // 'todos' | 'favoritos' | 'cat:Nome'
   const categories = () => [...new Set(projects.map(p => (p.category || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 
+  // miniatura da capa na lista (feita na hora, a partir da imagem guardada nas Referências)
+  const coverThumbs = new Map(); // projectId -> { refId, url }
+  function coverThumb(p) {
+    if (!p.coverRefId) return el('span', { class: 'proj-thumb', 'aria-hidden': 'true' }, svgIcon('book-open'));
+    const img = el('img', { class: 'proj-thumb', alt: '', 'data-thumb': p.id });
+    const have = coverThumbs.get(p.id);
+    if (have && have.refId === p.coverRefId) { if (have.url) img.src = have.url; return img; }
+    coverThumbs.set(p.id, { refId: p.coverRefId, url: '' });
+    (async () => {
+      const r = (refsCache[p.id] || []).find(x => x.id === p.coverRefId) || await db.tx('refs', 'readonly', st => st.get(p.coverRefId));
+      if (!r || !r.data) return;
+      const url = await new Promise(res => {
+        const im = new Image();
+        im.onload = () => {
+          try {
+            const h = 120, w = Math.round(h * im.naturalWidth / im.naturalHeight) || 80;
+            const c = document.createElement('canvas'); c.width = w; c.height = h;
+            c.getContext('2d').drawImage(im, 0, 0, w, h);
+            res(c.toDataURL('image/jpeg', .8));
+          } catch { res(r.data); }
+        };
+        im.onerror = () => res('');
+        im.src = r.data;
+      });
+      const cur = coverThumbs.get(p.id);
+      if (!url || !cur || cur.refId !== r.id) return;
+      cur.url = url;
+      document.querySelectorAll(`img.proj-thumb[data-thumb="${p.id}"]`).forEach(x => { x.src = url; });
+    })();
+    return img;
+  }
+
   function renderProjects() {
     const list = $('projList');
     list.innerHTML = '';
@@ -1555,11 +1620,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
               leaveDraft(() => guardEdit(() => openProject(p.id)));
             }
           },
-            el('span', { class: 'proj-name', text: p.title.trim() || 'Sem título' }),
-            el('span', { class: 'meta' },
-              (p.category || '').trim() ? el('span', { class: 'tag cat', text: p.category.trim() }) : null,
-              `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}`,
-              jobs.some(j => j.projectId === p.id) ? el('span', { class: 'proj-ai', text: ' · IA trabalhando…' }) : null));
+            coverThumb(p),
+            el('span', { class: 'proj-text' },
+              el('span', { class: 'proj-name', text: p.title.trim() || 'Sem título' }),
+              el('span', { class: 'meta' },
+                (p.category || '').trim() ? el('span', { class: 'tag cat', text: p.category.trim() }) : null,
+                `${p.chapters.length} cap. · ${fmtNum(words)} palavras · ${fmtDate(p.updatedAt)}`,
+                jobs.some(j => j.projectId === p.id) ? el('span', { class: 'proj-ai', text: ' · IA trabalhando…' }) : null)));
         // segurar o dedo no projeto também começa a seleção
         item.addEventListener('pointerdown', () => { pressT = setTimeout(() => { pressT = null; if (!selecting) { longPressed = true; setSelecting(true, p.id); } }, 550); });
         ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => item.addEventListener(t, () => { clearTimeout(pressT); pressT = null; }));
@@ -2509,7 +2576,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!editing) {
       const cover = p.coverRefId && (refsCache[p.id] || []).find(r => r.id === p.coverRefId);
       v.append(el('div', { class: 'card cover-card' },
-        cover ? el('img', { class: 'cover-img', src: cover.data, alt: `Capa de ${p.title || 'Sem título'}`, onclick: () => window.open(cover.data, '_blank') })
+        cover ? el('img', { class: 'cover-img', src: cover.data, alt: `Capa de ${p.title || 'Sem título'}`, title: 'Ampliar', onclick: () => openImage(cover.data, `Capa de ${p.title || 'Sem título'}`, p.title || 'capa') })
           : el('button', { type: 'button', class: 'cover-ph', 'aria-label': 'Enviar uma imagem de capa', title: 'Enviar uma imagem de capa', onclick: () => pickCoverFile(p) }, svgIcon('upload')),
         el('div', { class: 'cover-side' },
           el('h3', { text: 'Capa' }),
@@ -2845,7 +2912,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
         el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : '') }),
         el('h3', { text: chTitle(p, c) }),
-        el('div', { class: 'preview', text: c.text.slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
+        el('div', { class: 'preview', text: storyPlain(c.text.slice(0, 600)).replace(/\s*\n+\s*/g, ' ').slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
           el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
           el('button', { icon: 'copy', text: 'Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyChapter(c.text); } }))));
@@ -2853,16 +2920,28 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   // **negrito**, *itálico* / _itálico_ viram formatação; "* * *" vira quebra de cena
-  function parseMd(t) {
-    const segs = []; const re = /\*\*([^*\n]+?)\*\*|\*([^*\n]+?)\*|_([^_\n]+?)_/g; let last = 0, m;
+  // **negrito**, *itálico*, ~~riscado~~ e [cor=vermelho]texto[/cor] (podem ficar um dentro do outro)
+  var TEXT_COLORS = [['vermelho', '#d93a3a'], ['laranja', '#e07a1f'], ['amarelo', '#c99a06'], ['verde', '#2f9e55'], ['azul', '#2f74d0'], ['roxo', '#8a4fd6'], ['rosa', '#d6418a'], ['cinza', '#8a8a8a']];
+  function colorHex(c) { c = (c || '').toLowerCase(); const f = TEXT_COLORS.find(x => x[0] === c); return f ? f[1] : (/^#[0-9a-f]{3,8}$/.test(c) ? c : ''); }
+  var MD_RE = /\*\*((?:(?!\*\*)[^\n])+?)\*\*|\*([^*\n]+?)\*|_([^_\n]+?)_|~~((?:(?!~~)[^\n])+?)~~|\[cor=([#\w]+)\]((?:(?!\n\s*\n)[\s\S])*?)\[\/cor\]/g;
+  function mdScan(t, base, fl, out, toks) {
+    const re = new RegExp(MD_RE.source, 'g'); let last = 0, m;
     while ((m = re.exec(t))) {
-      if (m.index > last) segs.push({ t: t.slice(last, m.index) });
-      segs.push(m[1] != null ? { t: m[1], b: true } : { t: m[2] ?? m[3], i: true });
+      if (m.index > last) out.push(Object.assign({ t: t.slice(last, m.index), o: base + last }, fl));
+      let inner, open, nf;
+      if (m[1] != null) { inner = m[1]; open = 2; nf = Object.assign({}, fl, { b: true }); }
+      else if (m[2] != null || m[3] != null) { inner = m[2] ?? m[3]; open = 1; nf = Object.assign({}, fl, { i: true }); }
+      else if (m[4] != null) { inner = m[4]; open = 2; nf = Object.assign({}, fl, { s: true }); }
+      else { inner = m[6]; open = m[0].indexOf(']') + 1; nf = Object.assign({}, fl, { c: colorHex(m[5]) || fl.c }); }
+      const at = base + m.index;
+      if (toks) toks.push([at, at + open], [at + open + inner.length, at + m[0].length]);
+      mdScan(inner, at + open, nf, out, toks);
       last = re.lastIndex;
     }
-    if (last < t.length) segs.push({ t: t.slice(last) });
-    return segs;
+    if (last < t.length) out.push(Object.assign({ t: t.slice(last), o: base + last }, fl));
+    return out;
   }
+  function parseMd(t) { return mdScan(t, 0, {}, [], null); }
   // monta o parágrafo com a formatação e as marcações (marca-texto) do autor
   function mdParagraph(raw, highlights) {
     const pEl = document.createElement('p');
@@ -2882,6 +2961,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         let node = document.createTextNode(seg.t.slice(a - s0, b - s0));
         if (seg.b) { const w = document.createElement('strong'); w.append(node); node = w; }
         if (seg.i) { const w = document.createElement('em'); w.append(node); node = w; }
+        if (seg.s) { const w = document.createElement('s'); w.append(node); node = w; }
+        if (seg.c) { const w = document.createElement('span'); w.style.color = seg.c; w.append(node); node = w; }
         const r = ranges.find(r => a >= r.s && b <= r.e);
         if (r) { const w = document.createElement('mark'); w.dataset.hl = r.h.id; if (r.h.important) w.className = 'important'; w.title = r.h.note || 'Marcação'; w.append(node); node = w; }
         pEl.append(node);
@@ -2988,6 +3069,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         const k = e.key.toLowerCase();
         if (k === 'b') { e.preventDefault(); fmtWrap(ta, '**'); }
         if (k === 'i') { e.preventDefault(); fmtWrap(ta, '*'); }
+        if (k === 'x' && e.shiftKey) { e.preventDefault(); fmtWrap(ta, '~~'); }
       });
       const state = el('span', { class: 'muted saved', id: 'editState', role: 'status' });
       const refresh = () => {
@@ -3007,8 +3089,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         clearTimeout(markT); markT = setTimeout(layoutMarginNotes, 250);
       });
       paintMarks();
+      const syncT = setInterval(() => { if (!ta.isConnected) clearInterval(syncT); else if (backdrop._raw !== ta.value) paintMarks(); }, 400);
       card.append(title, editToolbar(ta, p, ch), el('div', { class: 'doc-edit-wrap' }, backdrop, ta), el('div', { class: 'row', style: 'justify-content:space-between;margin-top:6px' }, words, state),
-        el('p', { class: 'hint', text: 'Selecione um trecho para formatar ou pedir ajuste à IA. Atalhos: Ctrl+B negrito, Ctrl+I itálico.' }));
+        el('p', { class: 'hint', text: 'Selecione um trecho para formatar ou pedir ajuste à IA. Atalhos: Ctrl+B negrito, Ctrl+I itálico, Ctrl+Shift+X riscado.' }));
       refresh();
     } else {
       const body = el('div', { class: 'reader', id: 'chBody' });
@@ -3176,6 +3259,31 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
     ta.focus(); ta.dispatchEvent(new Event('input'));
   }
+  // pinta o trecho selecionado; null tira a cor
+  function fmtColor(ta, name) {
+    const a = ta.selectionStart, b = ta.selectionEnd, v = ta.value;
+    const before = v.slice(0, a).match(/\[cor=[#\w]+\]$/), afterClose = v.slice(b, b + 6) === '[/cor]';
+    if (before && afterClose) { // já está colorido: troca ou tira a cor
+      const o = a - before[0].length, inner = v.slice(a, b);
+      if (name) { ta.setRangeText(`[cor=${name}]`, o, a, 'preserve'); const d = `[cor=${name}]`.length - before[0].length; ta.setSelectionRange(a + d, b + d); }
+      else { ta.setRangeText(inner, o, b + 6, 'select'); }
+    } else {
+      const m = v.slice(a, b).match(/^\[cor=[#\w]+\]([\s\S]*)\[\/cor\]$/);
+      const inner = (m ? m[1] : v.slice(a, b)).replace(/\[cor=[#\w]+\]|\[\/cor\]/g, '');
+      if (!name) { ta.setRangeText(inner, a, b, 'select'); }
+      else {
+        const txt = inner || 'texto';
+        ta.setRangeText(`[cor=${name}]${txt}[/cor]`, a, b, 'end');
+        ta.setSelectionRange(a + name.length + 6, a + name.length + 6 + txt.length);
+      }
+    }
+    ta.focus(); ta.dispatchEvent(new Event('input'));
+  }
+  function colorPop(ta, onPick) {
+    return el('div', { class: 'color-pop', role: 'group', 'aria-label': 'Cor do texto' },
+      TEXT_COLORS.map(([n, hex]) => el('button', { type: 'button', class: 'sw', style: `background:${hex}`, 'aria-label': 'Cor ' + n, title: n[0].toUpperCase() + n.slice(1), onclick: () => { fmtColor(ta, n); onPick && onPick(); } })),
+      el('button', { type: 'button', class: 'sw sw-none', text: 'Sem cor', onclick: () => { fmtColor(ta, null); onPick && onPick(); } }));
+  }
   function fmtInsert(ta, str) {
     ta.focus();
     ta.setRangeText(str, ta.selectionStart, ta.selectionEnd, 'end');
@@ -3189,24 +3297,29 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function editToolbar(ta, p, ch) {
     const grid = emojiGrid(ta, () => { grid.hidden = true; });
     grid.hidden = true;
+    const colors = colorPop(ta, () => { colors.hidden = true; });
+    colors.hidden = true;
     const bar = el('div', { class: 'edit-toolbar', role: 'toolbar', 'aria-label': 'Formatação' },
       el('button', { type: 'button', icon: 'bold', 'aria-label': 'Negrito (Ctrl+B)', title: 'Negrito (Ctrl+B)', onclick: () => fmtWrap(ta, '**') }),
       el('button', { type: 'button', icon: 'italic', 'aria-label': 'Itálico (Ctrl+I)', title: 'Itálico (Ctrl+I)', onclick: () => fmtWrap(ta, '*') }),
+      el('button', { type: 'button', icon: 'strikethrough', 'aria-label': 'Riscado (Ctrl+Shift+X)', title: 'Riscado (Ctrl+Shift+X)', onclick: () => fmtWrap(ta, '~~') }),
+      el('button', { type: 'button', icon: 'palette', 'aria-label': 'Cor do texto', title: 'Cor do texto', onclick: () => { colors.hidden = !colors.hidden; grid.hidden = true; } }),
       el('button', { type: 'button', text: '—', 'aria-label': 'Travessão de fala', title: 'Travessão de fala', onclick: () => fmtInsert(ta, '— ') }),
       el('button', { type: 'button', text: '⁂', 'aria-label': 'Quebra de cena', title: 'Quebra de cena', onclick: () => fmtInsert(ta, '\n\n* * *\n\n') }),
-      el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; } }),
+      el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; colors.hidden = true; } }),
       el('span', { class: 'tb-sep', 'aria-hidden': 'true' }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'wand-sparkles', ai: true, text: 'Ajustar', title: 'Ajustar com IA o trecho selecionado ou o capítulo', onclick: () => adjustFromEditor(ch, ta) }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'spell-check', ai: true, text: 'Corrigir', title: 'Corrigir o português e organizar no formato de livro (o trecho selecionado ou o capítulo)', onclick: () => fixText(p, ch, ta) }));
     bar.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+    colors.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
     const wrap = el('div', { class: 'edit-tools' });
     const paint = () => {
       const hidden = !!local.get('fanfic.fmtHidden', false);
       wrap.classList.toggle('collapsed', hidden);
-      if (hidden) grid.hidden = true;
+      if (hidden) { grid.hidden = true; colors.hidden = true; }
       wrap.replaceChildren(...(hidden
         ? [el('button', { type: 'button', class: 'fmt-show', icon: 'type', iconEnd: 'chevron-down', text: 'Formatação', 'aria-label': 'Mostrar a barra de formatação', onclick: () => { local.set('fanfic.fmtHidden', false); paint(); } })]
-        : [bar, grid]));
+        : [bar, colors, grid]));
     };
     bar.append(el('span', { class: 'grow' }),
       el('button', { type: 'button', icon: 'chevron-up', class: 'fmt-hide', 'aria-label': 'Ocultar a barra de formatação', title: 'Ocultar', onclick: () => { local.set('fanfic.fmtHidden', true); paint(); } }));
@@ -3229,12 +3342,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     } else if (mode === 'edit') {
       const ta = $('chBody');
       const grid = emojiGrid(ta, () => hideSelBar()); grid.hidden = true;
+      const colors = colorPop(ta, () => hideSelBar()); colors.hidden = true;
       bar.append(
-        el('button', { type: 'button', class: 'chip', icon: 'bold', 'aria-label': 'Negrito', onclick: () => fmtWrap($('chBody'), '**') }),
-        el('button', { type: 'button', class: 'chip', icon: 'italic', 'aria-label': 'Itálico', onclick: () => fmtWrap($('chBody'), '*') }),
-        el('button', { type: 'button', class: 'chip', icon: 'smile', 'aria-label': 'Emojis', onclick: () => { grid.hidden = !grid.hidden; updateSelBar(); } }),
+        el('button', { type: 'button', class: 'chip', icon: 'bold', 'aria-label': 'Negrito', title: 'Negrito', onclick: () => fmtWrap($('chBody'), '**') }),
+        el('button', { type: 'button', class: 'chip', icon: 'italic', 'aria-label': 'Itálico', title: 'Itálico', onclick: () => fmtWrap($('chBody'), '*') }),
+        el('button', { type: 'button', class: 'chip', icon: 'strikethrough', 'aria-label': 'Riscado', title: 'Riscado', onclick: () => fmtWrap($('chBody'), '~~') }),
+        el('button', { type: 'button', class: 'chip', icon: 'palette', 'aria-label': 'Cor do texto', title: 'Cor do texto', onclick: () => { colors.hidden = !colors.hidden; grid.hidden = true; updateSelBar(); } }),
+        el('button', { type: 'button', class: 'chip', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; colors.hidden = true; updateSelBar(); } }),
         el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: 'Marcar', title: 'Marcar o trecho (a anotação é opcional)', onclick: markFromEditor }),
-        grid);
+        colors, grid);
     } else if (mode === 'multi') {
       bar.append(el('span', { class: 'sel-title', text: 'Para marcar, selecione dentro de um parágrafo.' }));
     } else {
@@ -3286,24 +3402,47 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (f) return f;
     const q = (quote || '').trim();
     if (!q || q.length > 400) return null;
-    const pat = [...q].map(c => /\s/.test(c) ? '\\s+' : c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(?:\\*\\*|\\*|_)?');
+    const pat = [...q].map(c => /\s/.test(c) ? '\\s+' : c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(?:\\*\\*|\\*|_|~~|\\[cor=[#\\w]+\\]|\\[\\/cor\\])*');
     try { const m = new RegExp(pat).exec(raw); if (m) return { start: m.index, end: m.index + m[0].length }; } catch {}
     return null;
   }
+  // o fundo do Editar desenha o texto com as cores, o riscado e os sinais de formatação mais apagados
+  function styledRaw(raw, a, b, attr) {
+    const frag = document.createDocumentFragment();
+    let i = a;
+    while (i < b) {
+      const k = attr[i] || ''; let j = i + 1;
+      while (j < b && (attr[j] || '') === k) j++;
+      const txt = raw.slice(i, j);
+      if (!k) frag.append(document.createTextNode(txt));
+      else {
+        const [tk, st, c] = k.split('|'), sp = document.createElement('span');
+        if (tk) sp.className = 'tk'; else if (st) sp.className = 'st';
+        if (c && !tk) sp.style.color = c;
+        sp.textContent = txt; frag.append(sp);
+      }
+      i = j;
+    }
+    return frag;
+  }
   function paintEditMarks(box, raw, hls) {
+    box._raw = raw;
+    const toks = [], segs = mdScan(raw, 0, {}, [], toks), attr = new Array(raw.length);
+    segs.forEach(g => { if (g.s || g.c) for (let k = g.o; k < g.o + g.t.length; k++) attr[k] = '|' + (g.s ? 1 : '') + '|' + (g.c || ''); });
+    toks.forEach(([x, y]) => { for (let k = x; k < y; k++) attr[k] = '1||'; });
     const ranges = [];
     hls.forEach(h => { const r = rawQuoteRange(raw, h.quote); if (r && !ranges.some(x => r.start < x.end && r.end > x.start)) ranges.push(Object.assign(r, { h })); });
     ranges.sort((a, b) => a.start - b.start);
     const frag = document.createDocumentFragment();
     let pos = 0;
     ranges.forEach(r => {
-      if (r.start > pos) frag.append(document.createTextNode(raw.slice(pos, r.start)));
+      if (r.start > pos) frag.append(styledRaw(raw, pos, r.start, attr));
       const m = document.createElement('mark');
       m.dataset.hl = r.h.id; if (r.h.important) m.className = 'important';
-      m.textContent = raw.slice(r.start, r.end);
+      m.append(styledRaw(raw, r.start, r.end, attr));
       frag.append(m); pos = r.end;
     });
-    frag.append(document.createTextNode(raw.slice(pos) + '\n '));
+    frag.append(styledRaw(raw, pos, raw.length, attr), document.createTextNode('\n '));
     box.replaceChildren(frag);
   }
   function marginNotes(p, ch) {
@@ -4117,7 +4256,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   });
 
   // Corrigir: português e formato de livro, sem mudar a história
-  const FIX_INSTR = 'Revise o texto como um revisor de livro. Corrija ortografia, acentuação, concordância, pontuação e erros de digitação em português do Brasil, e deixe com cara de texto escrito em português (tire construções com cara de tradução do inglês: sujeito repetido, possessivo com partes do corpo, voz passiva, expressões traduzidas ao pé da letra), sem mudar o sentido. Organize no formato padrão de livro: parágrafos separados por uma linha em branco (quebre blocos longos em parágrafos onde a cena muda de foco), cada fala de personagem em seu próprio parágrafo começando com travessão (—), e quebras de cena como * * *. NÃO mude a história, os acontecimentos, as falas, o estilo, a voz nem o vocabulário do autor; não acrescente nem corte conteúdo. Mantenha **negrito** e *itálico*.';
+  const FIX_INSTR = 'Revise o texto como um revisor de livro. Corrija ortografia, acentuação, concordância, pontuação e erros de digitação em português do Brasil, e deixe com cara de texto escrito em português (tire construções com cara de tradução do inglês: sujeito repetido, possessivo com partes do corpo, voz passiva, expressões traduzidas ao pé da letra), sem mudar o sentido. Organize no formato padrão de livro: parágrafos separados por uma linha em branco (quebre blocos longos em parágrafos onde a cena muda de foco), cada fala de personagem em seu próprio parágrafo começando com travessão (—), e quebras de cena como * * *. NÃO mude a história, os acontecimentos, as falas, o estilo, a voz nem o vocabulário do autor; não acrescente nem corte conteúdo. Mantenha **negrito**, *itálico*, ~~riscado~~ e as cores [cor=...]...[/cor] exatamente como estão.';
   function fixText(p, ch, ta) {
     if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.')) return;
     const s = ta ? ta.selectionStart : 0, e = ta ? ta.selectionEnd : 0;
@@ -4701,6 +4840,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     lugar: { label: 'lugar', what: 'Uma ilustração do lugar, usando o que está no Mundo.', aspect: '3:2' }
   };
   let genCtx = null, imageModelsCache = null;
+  function openImage(src, alt, name) {
+    const d = $('imgDlg'), img = $('imgDlgImg');
+    img.src = src; img.alt = alt || '';
+    $('imgDlgDown').onclick = () => downloadData(src, (name || 'imagem').replace(/[\\/:*?"<>|]+/g, '') + '.jpg');
+    d.showModal();
+  }
+  $('imgDlg').addEventListener('click', (e) => { if (e.target === e.currentTarget || e.target.id === 'imgDlgImg') e.currentTarget.close(); });
   function downloadData(url, name) {
     const a = el('a', { href: url, download: name || 'imagem.jpg' });
     document.body.append(a); a.click(); a.remove();
@@ -5356,7 +5502,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           el('button', { class: 'link plain', icon: 'download', 'aria-label': 'Baixar a imagem', title: 'Baixar', onclick: () => downloadData(r.data, (r.subject || r.name || 'imagem').replace(/[\\/:*?"<>|]+/g, '') + '.jpg') }),
           el('button', { class: 'link', text: 'Remover', onclick: () => removeRef(p, r) }))),
       el('div', { class: 'img-body' },
-        el('img', { src: r.data, alt: r.subject ? `Referência: ${r.subject}` : 'Imagem de referência' }),
+        el('img', { src: r.data, alt: r.subject ? `Referência: ${r.subject}` : 'Imagem de referência', title: 'Ampliar', onclick: () => openImage(r.data, r.subject || r.name, r.subject || r.name) }),
         el('div', { class: 'img-fields' },
           el('div', { class: 'grid2' },
             el('div', {}, el('label', { for: 'ikind-' + r.id, style: 'margin-top:0', text: 'É referência de' }), kind),

@@ -1387,7 +1387,7 @@
     <div class="lay-checks">
       <label class="check"><input type="checkbox" id="layTitlePage"><span>Folha de rosto (título e autor)</span></label>
       <label class="check"><input type="checkbox" id="layToc"><span>Sumário</span></label>
-      <label class="check lay-pdfonly"><input type="checkbox" id="layOdd"><span>Capítulo começa na página da direita</span></label>
+      <label class="check lay-pdfdocx"><input type="checkbox" id="layOdd"><span>Capítulo começa na página da direita</span></label>
       <label class="check lay-pdfdocx"><input type="checkbox" id="layHead"><span>Cabeçalho (autor e título)</span></label>
       <label class="check lay-pdfdocx"><input type="checkbox" id="layNums"><span>Número das páginas</span></label>
       <label class="check"><input type="checkbox" id="layCover"><span>Capa como primeira página</span></label>
@@ -6050,7 +6050,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     try {
       if (L.fmt === 'pdf') printBook(p, L);
       else if (L.fmt === 'epub') { downloadBlob(await buildEpub(p, L), fileName(p.title) + '.epub'); toast('EPUB baixado ✓'); }
-      else if (L.fmt === 'docx') { downloadBlob(buildDocx(p, L), fileName(p.title) + '.docx'); toast('Arquivo do Word baixado ✓'); }
+      else if (L.fmt === 'docx') { downloadBlob(await buildDocx(p, L), fileName(p.title) + '.docx'); toast('Arquivo do Word baixado ✓'); }
       else exportStory(p);
     } catch (e) { console.error(e); $('layStatus').textContent = 'Não deu certo: ' + e.message; $('layStatus').className = 'status err'; }
   });
@@ -6083,6 +6083,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       .front .au { font-size: 1.15em; letter-spacing: .08em; }
       .toc { break-before: page; break-after: page; }
       .blankpg { page: blankp; break-before: page; break-after: page; height: 1px; }
+      .chopen { page: chopen; }
+      @page chopen { @top-left { content: none } @top-right { content: none } }
+      p.cont { text-indent: 0; } p.cut { text-align-last: justify; }
+      .toc li { display: flex; align-items: flex-end; gap: 6px; }
+      .toc li .t { flex: 1; } .toc li .t::after { content: ""; }
+      .toc li .pg { min-width: 2em; text-align: right; font-variant-numeric: tabular-nums; }
       @page blankp { @top-left { content: none } @top-right { content: none } @bottom-left { content: none } @bottom-right { content: none } }
       .toc h2 { text-align: center; font-weight: 400; font-size: 1.4em; margin: 18% 0 1.6em; letter-spacing: .1em; text-transform: uppercase; }
       .toc ol { list-style: none; padding: 0; margin: 0; }
@@ -6103,29 +6109,64 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         main > section + section { border-top: 1px dashed #ccc; padding-top: 12mm; margin-top: 12mm; } main > .coverpage { margin: -${m.top}mm -${m.outer}mm 0 -${m.inner}mm; } .blankpg { display: none; } }
       @media print { .hint-bar { display: none; } }`;
     const front = L.titlePage ? `<section class="front"><h1>${xmlEsc(title)}</h1>${author ? `<div class="au">${xmlEsc(author)}</div>` : ''}</section>` : '';
-    const toc = L.toc ? `<section class="toc"><h2>Sumário</h2><ol>${chs.map(c => chName(c) ? `<li><small>${xmlEsc(chLabel(p, c))}</small>${xmlEsc(chName(c))}</li>` : `<li>${xmlEsc(chLabel(p, c))}</li>`).join('')}</ol></section>` : '';
+    const toc = L.toc ? `<section class="toc"><h2>Sumário</h2><ol>${chs.map(c => `<li><span class="t">${chName(c) ? `<small>${xmlEsc(chLabel(p, c))}</small>${xmlEsc(chName(c))}` : xmlEsc(chLabel(p, c))}</span><span class="pg"></span></li>`).join('')}</ol></section>` : '';
     const body = chs.map(c => `<section class="chapter"><div class="ch-head"><small>${xmlEsc(chLabel(p, c))}</small>${chName(c) ? `<h2>${xmlEsc(chName(c))}</h2>` : ''}<div class="orn">⁂</div></div>\n${bookHtml(c.text, L.black)}</section>`).join('\n');
     return `<!doctype html><html lang="${langCode(p)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${xmlEsc(title)}</title><style>${css}</style></head><body>` +
       `<div class="hint-bar"><span>Na janela de impressão, escolha <b>Salvar como PDF</b>, margens <b>Padrão</b> e desligue <b>Cabeçalhos e rodapés</b>.</span><button onclick="print()">Imprimir / salvar PDF</button></div>` +
       `<main>${cover ? `<section class="coverpage"><img src="${cover}" alt=""></section>` : ''}${front}${toc}${body}</main>` +
-      (L.odd ? `<script>(${rightPages.toString()})(${sz[2] - m.inner - m.outer}, ${sz[3] - m.top - m.bottom});<\/script>` : '') + '</body></html>';
+      `<script>(${paginateBook.toString()})(${sz[2] - m.inner - m.outer}, ${sz[3] - m.top - m.bottom}, ${!!L.odd});<\/script>` + '</body></html>';
   }
   // roda dentro da janela do livro: mede quantas páginas cada parte ocupa (colunas do mesmo tamanho da página)
   // e põe uma página em branco antes do que precisa abrir na direita (o Chrome não faz isso sozinho)
-  function rightPages(wmm, hmm) {
-    var main = document.querySelector('main'), secs = [].slice.call(main.children), page = 1;
-    var probe = document.createElement('div');
-    probe.style.cssText = 'position:absolute;left:-99999px;top:0;width:' + wmm + 'mm;height:' + hmm + 'mm;column-width:' + wmm + 'mm;column-gap:0;column-fill:auto;';
-    document.body.appendChild(probe);
-    var colW = probe.getBoundingClientRect().width;
+  // roda dentro da janela do livro: mede as páginas (colunas do tamanho da página) e
+  // 1) põe uma página em branco antes do que abre na direita, 2) tira o cabeçalho da 1ª página de cada capítulo
+  // (separa o começo do capítulo numa "página nomeada"), 3) escreve o número das páginas no sumário
+  function paginateBook(wmm, hmm, odd) {
+    var main = document.querySelector('main'), secs = [].slice.call(main.children), page = 1, starts = [];
+    var mk = function (h) { var d = document.createElement('div'); d.style.cssText = 'position:absolute;left:-99999px;top:0;width:' + wmm + 'mm;height:' + h + ';column-width:' + wmm + 'mm;column-gap:0;column-fill:auto;'; document.body.appendChild(d); return d; };
+    var probe = mk(hmm + 'mm');
+    var colW = probe.getBoundingClientRect().width, lineH = parseFloat(getComputedStyle(document.body).lineHeight) || 20;
+    var probe1 = mk('calc(' + hmm + 'mm - ' + Math.ceil(lineH * 1.1) + 'px)'); // um pouco menor: a 1ª página nunca transborda
+    function splitFirstPage(sec) {
+      var c = sec.cloneNode(true); probe1.innerHTML = ''; probe1.appendChild(c);
+      var limit = probe1.getBoundingClientRect().left + colW - 1, inCol2 = function (r) { return r.left > limit; }, stop = null, cut = null;
+      var ps = [].slice.call(c.querySelectorAll('p'));
+      for (var i = 0; i < ps.length && !stop; i++) {
+        var rs = [].slice.call(ps[i].getClientRects()); if (!rs.length) continue;
+        if (inCol2(rs[0])) { stop = ps[i]; break; }
+        if (!rs.some(inCol2)) continue;
+        var tw = document.createTreeWalker(ps[i], NodeFilter.SHOW_TEXT), n;
+        while ((n = tw.nextNode())) {
+          var at = function (k) { var r = document.createRange(); r.setStart(n, k); r.setEnd(n, Math.min(n.length, k + 1)); return r.getClientRects()[0]; };
+          var lr = at(n.length - 1); if (!lr || !inCol2(lr)) continue;
+          var lo = 0, hi = n.length - 1;
+          while (lo < hi) { var mid = (lo + hi) >> 1, r = at(mid); if (r && inCol2(r)) hi = mid; else lo = mid + 1; }
+          while (lo > 0 && !/\s/.test(n.data[lo - 1])) lo--;
+          cut = { p: ps[i], node: n, off: lo }; break;
+        }
+        stop = ps[i];
+      }
+      var open = document.createElement('div'); open.className = 'chopen';
+      if (cut && cut.off > 0) {
+        var r = document.createRange(); r.setStart(cut.p, 0); r.setEnd(cut.node, cut.off);
+        var first = cut.p.cloneNode(false); first.classList.add('cut'); first.appendChild(r.extractContents()); cut.p.parentNode.insertBefore(first, cut.p);
+        cut.p.classList.remove('first'); cut.p.classList.add('cont');
+      }
+      while (c.firstChild && c.firstChild !== stop) open.appendChild(c.firstChild);
+      c.insertBefore(open, c.firstChild);
+      sec.replaceWith(c);
+      return c;
+    }
     secs.forEach(function (sec) {
-      var right = sec.classList.contains('front') || sec.classList.contains('toc') || sec.classList.contains('chapter');
+      var right = odd && (sec.classList.contains('front') || sec.classList.contains('toc') || sec.classList.contains('chapter'));
       if (right && page % 2 === 0) { var b = document.createElement('div'); b.className = 'blankpg'; main.insertBefore(b, sec); page++; }
       var n = 1;
       if (!sec.classList.contains('coverpage')) { probe.innerHTML = ''; probe.appendChild(sec.cloneNode(true)); n = Math.max(1, Math.round(probe.scrollWidth / colW)); }
+      if (sec.classList.contains('chapter')) { starts.push(page); try { splitFirstPage(sec); } catch (e) { /* fica com o cabeçalho */ } }
       page += n;
     });
-    probe.remove();
+    [].slice.call(document.querySelectorAll('.toc .pg')).forEach(function (s, i) { if (starts[i]) s.textContent = starts[i]; });
+    probe.remove(); probe1.remove();
   }
   function printBook(p, L) {
     const w = window.open('', '_blank');
@@ -6234,7 +6275,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return makeZip(files, 'application/epub+zip');
   }
   // ---------- Word (.docx) ----------
-  function buildDocx(p, L) {
+  async function buildDocx(p, L) {
     const sz = PAGE_SIZES.find(x => x[0] === L.size) || PAGE_SIZES[0], m = pageMargins(sz), tw = (mm) => Math.round(mm * 56.6929);
     const title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim(), font = L.font, half = Math.round(Number(L.pt) * 2);
     const run = (x) => {
@@ -6244,21 +6285,39 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const para = (style, inner, extra = '') => `<w:p><w:pPr>${style ? `<w:pStyle w:val="${style}"/>` : ''}${extra}</w:pPr>${inner}</w:p>`;
     const textRun = (t) => `<w:r><w:t xml:space="preserve">${xmlEsc(t)}</w:t></w:r>`;
     let body = '';
+    const footer = L.nums ? '<w:footerReference w:type="default" r:id="rIdFooter"/><w:footerReference w:type="first" r:id="rIdFooter"/>' : '';
+    const header = L.head ? '<w:headerReference w:type="default" r:id="rIdHeader"/><w:headerReference w:type="first" r:id="rIdHeaderFirst"/>' : '';
+    // cada capítulo é uma seção: com "página da direita", a seção começa numa página ímpar; a 1ª página da seção fica sem cabeçalho
+    const sect = (type) => `<w:sectPr>${header}${footer}${type ? `<w:type w:val="${type}"/>` : ''}<w:pgSz w:w="${tw(sz[2])}" w:h="${tw(sz[3])}"/><w:pgMar w:top="${tw(m.top)}" w:right="${tw(m.outer)}" w:bottom="${tw(m.bottom)}" w:left="${tw(m.inner)}" w:header="${tw(9)}" w:footer="${tw(9)}" w:gutter="0"/><w:titlePg/></w:sectPr>`;
+    const chType = L.odd ? 'oddPage' : 'nextPage';
+    // capa como primeira página
+    const cover = L.cover ? coverData(p) : '', media = [];
+    if (cover) {
+      const dims = await new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res([2, 3]); im.src = cover; });
+      const maxW = (sz[2] - m.inner - m.outer) * 36000, maxH = (sz[3] - m.top - m.bottom) * 36000, k = Math.min(maxW / dims[0], maxH / dims[1]);
+      const W = Math.round(dims[0] * k), H = Math.round(dims[1] * k), png = cover.startsWith('data:image/png');
+      media.push([`word/media/capa.${png ? 'png' : 'jpeg'}`, dataUrlBytes(cover), png]);
+      body += `<w:p><w:pPr><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${W}" cy="${H}"/><wp:docPr id="1" name="Capa"/>` +
+        `<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">` +
+        `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="1" name="capa"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdCover"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
+        `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${W}" cy="${H}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>` +
+        `<w:p><w:pPr>${sect('')}</w:pPr></w:p>`;
+    }
     if (L.titlePage) body += para('Title', textRun(title), '<w:spacing w:before="3000"/>') + (author ? para('Subtitle', textRun(author)) : '');
     if (L.toc) body += para('TOCHeading', textRun('Sumário'), L.titlePage ? '<w:pageBreakBefore/>' : '') +
       `<w:p><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> TOC \\o "1-1" \\h \\z \\u </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>Abra no Word e atualize o sumário (botão direito, Atualizar campo).</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`;
-    bookChapters(p).forEach((c, i) => {
-      body += para('Heading1', textRun(chName(c) ? `${chLabel(p, c)}: ${chName(c)}` : chLabel(p, c)), i || L.titlePage || L.toc ? '' : '<w:pageBreakBefore w:val="false"/>');
+    if (L.titlePage || L.toc) body += `<w:p><w:pPr>${sect('')}</w:pPr></w:p>`;
+    const chs = bookChapters(p);
+    chs.forEach((c, i) => {
+      if (i) body += `<w:p><w:pPr>${sect(chType)}</w:pPr></w:p>`; // fecha a seção do capítulo anterior
+      body += para('Heading1', textRun(chName(c) ? `${chLabel(p, c)}: ${chName(c)}` : chLabel(p, c)));
       let first = true;
       mdParas(c.text).forEach(t => {
         if (isSceneBreak(t)) { body += para('SceneBreak', textRun('* * *')); first = true; return; }
         body += para(first ? 'FirstPara' : '', parseMd(t).map(run).join('')); first = false;
       });
     });
-    const footer = L.nums ? '<w:footerReference w:type="default" r:id="rIdFooter"/>' : '';
-    const header = L.head ? '<w:headerReference w:type="default" r:id="rIdHeader"/>' : '';
-    const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${body}` +
-      `<w:sectPr>${header}${footer}<w:pgSz w:w="${tw(sz[2])}" w:h="${tw(sz[3])}"/><w:pgMar w:top="${tw(m.top)}" w:right="${tw(m.outer)}" w:bottom="${tw(m.bottom)}" w:left="${tw(m.inner)}" w:header="${tw(9)}" w:footer="${tw(9)}" w:gutter="0"/><w:titlePg/></w:sectPr></w:body></w:document>`;
+    const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><w:body>${body}${sect(L.titlePage || L.toc || cover || chs.length > 1 ? chType : '')}</w:body></w:document>`;
     const lineTw = Math.round(240 * Number(L.lead) / 1.15);
     const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
       `<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="${xmlEsc(font)}" w:hAnsi="${xmlEsc(font)}" w:cs="${xmlEsc(font)}"/><w:sz w:val="${half}"/><w:szCs w:val="${half}"/><w:lang w:val="${langCode(p)}"/></w:rPr></w:rPrDefault>` +
@@ -6268,23 +6327,25 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `<w:style w:type="paragraph" w:styleId="SceneBreak"><w:name w:val="Quebra de cena"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="200"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="400"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${half * 3}"/></w:rPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.3)}"/></w:rPr></w:style>` +
-      `<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="FirstPara"/><w:pPr><w:keepNext/><w:pageBreakBefore/><w:spacing w:before="2400" w:after="720"/><w:ind w:firstLine="0"/><w:jc w:val="center"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.6)}"/></w:rPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="FirstPara"/><w:pPr><w:keepNext/><w:spacing w:before="2400" w:after="720"/><w:ind w:firstLine="0"/><w:jc w:val="center"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.6)}"/></w:rPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="TOCHeading"><w:name w:val="TOC Heading"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="1200" w:after="480"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.4)}"/></w:rPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="TOC1"><w:name w:val="toc 1"/><w:basedOn w:val="Normal"/><w:pPr><w:tabs><w:tab w:val="right" w:leader="dot" w:pos="${tw(sz[2] - m.inner - m.outer)}"/></w:tabs><w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="HeaderFooter"><w:name w:val="header"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:color w:val="666666"/><w:sz w:val="${half - 4}"/></w:rPr></w:style></w:styles>`;
     const files = [
-      ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>' +
+      ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpeg" ContentType="image/jpeg"/>' +
         '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
-        '<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' +
+        '<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/header2.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' +
         '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>'],
       ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>'],
       ['docProps/core.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${xmlEsc(title)}</dc:title><dc:creator>${xmlEsc(author)}</dc:creator><dc:language>${langCode(p)}</dc:language></cp:coreProperties>`],
-      ['word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rIdHeader" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>'],
+      ['word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rIdHeader" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rIdHeaderFirst" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header2.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' +
+        (media.length ? `<Relationship Id="rIdCover" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="${media[0][0].replace('word/', '')}"/>` : '') + '</Relationships>'],
       ['word/settings.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:defaultTabStop w:val="708"/>' + (L.toc ? '<w:updateFields w:val="true"/>' : '') + '</w:settings>'],
       ['word/header1.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="HeaderFooter"/></w:pPr><w:r><w:t xml:space="preserve">${xmlEsc(author ? `${author}  ·  ${title}` : title)}</w:t></w:r></w:p></w:hdr>`],
+      ['word/header2.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p/></w:hdr>'],
       ['word/footer1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="HeaderFooter"/></w:pPr><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>'],
       ['word/styles.xml', styles],
-      ['word/document.xml', doc]];
+      ['word/document.xml', doc], ...media.map(([n, b]) => [n, b])];
     return makeZip(files, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
 

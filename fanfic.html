@@ -1211,6 +1211,7 @@ Escreva prosa envolvente, com diálogos naturais, emoção, tensão e química e
 Respeite exatamente o nível de intensidade, o tom, a narração e as regras do autor.
 Mantenha a continuidade com os capítulos anteriores e com o resumo (nomes, fatos, personalidades).
 Use o material de referência como apoio de universo, personagens e estilo, sem copiar trechos literalmente.
+Escreva direto no idioma da história como um autor nativo dele, nunca como quem traduz do inglês.
 
 Regras inegociáveis:
 - Todos os personagens em qualquer cena romântica ou sexual são adultos (18+). Nunca envolva menores, nem por insinuação.
@@ -3598,7 +3599,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const askBlock = asks.length ? `MARCAÇÕES DO AUTOR ${only ? '' : 'PEDINDO FEEDBACK '}(responda a TODAS, uma sugestão para cada, com "marcacao" igual ao código):\n` +
       asks.map((h, i) => `[M${i + 1}] Trecho marcado: “${h.quote}”\n     Anotação do autor: ${(h.note || '').trim() || (only ? '(sem anotação: melhore este trecho)' : '(sem anotação: dê sua opinião sincera sobre este trecho)')}`).join('\n') + '\n\n' : '';
     const prompt = withLang(p, `${buildContext(p, idx, ch.text.slice(0, 2000), ecoOn() ? 'lite' : 'full')}\n\nCAPÍTULO PARA REVISAR (${chTitle(p, ch)}):\n${ch.text}\n\n` + askBlock +
-      (opts.extra ? `PEDIDO GERAL DO AUTOR: ${opts.extra}\n\n` : '') +
+      (opts.extra ? `PEDIDO GERAL DO AUTOR: ${opts.extra}\n\n` : '') + ptStyle(p) +
       (only ? `TAREFA: Você é um editor literário experiente. Para CADA marcação acima, proponha uma mudança pontual que atenda à anotação: em "trecho" copie exatamente o trecho a trocar (o marcado ou um pouco mais, se precisar) e em "novo" escreva como ficaria melhor; ` +
           `explique em "feedback" o que mudou e por quê. Não reescreva o capítulo e não sugira nada além das marcações. Respeite a voz e o estilo do autor. `
         : `TAREFA: Você é um editor literário experiente. ` + (asks.length ? `Primeiro responda às marcações do autor; depois s` : 'S') +
@@ -3922,6 +3923,20 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   const langOf = (p) => p.lang || DEFAULT_LANG;
   const langLower = (p) => { const l = langOf(p); return l.charAt(0).toLowerCase() + l.slice(1); };
+  // português do Brasil escrito direto, sem "cara de tradução" do inglês
+  const isPtBr = (p) => /português do brasil/i.test(langOf(p));
+  function ptStyle(p) {
+    if (!isPtBr(p)) return '';
+    return `ESCREVA COMO UM AUTOR BRASILEIRO, DIRETO EM PORTUGUÊS (não pense em inglês para depois traduzir):\n` +
+      `- Use o ritmo, a ordem das palavras e as expressões do português do Brasil; o texto deve parecer escrito aqui, não traduzido.\n` +
+      `- Corte o sujeito repetido ("ele", "ela", "eu") quando o verbo já mostra quem é; o português omite muito mais que o inglês.\n` +
+      `- Partes do corpo sem possessivo: "passou a mão no cabelo", "mordeu o lábio" (não "em seu cabelo", "seu lábio").\n` +
+      `- Evite voz passiva, excesso de advérbios em -mente, gerúndios em cadeia e frases que começam com "Ele então…".\n` +
+      `- Nada de expressões traduzidas ao pé da letra: "revirou os olhos" (não "rolou os olhos"), "fazer sentido" e "no final do dia" com moderação, ` +
+      `nada de "Ok", "Uau", "Oh meu Deus", "Droga!" de reflexo; prefira o que um brasileiro diria ("Tá bom", "Nossa", "Meu Deus", "Que merda").\n` +
+      `- Diálogos com travessão (—), como nos livros brasileiros; nos diálogos, o jeito de falar do Brasil (pra, tá, tô, a gente, cê) quando combinar com o personagem e o tom.\n` +
+      `- Material de referência em inglês: use só como informação (fatos, nomes, personalidades); nunca imite a construção das frases dele.\n\n`;
+  }
   function langLine(p, strong) {
     const lang = langOf(p);
     if (lang === 'English') return 'LANGUAGE: write everything in English.';
@@ -3972,7 +3987,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const povLine = !isPovMode(p) ? '' : pov ? `\nPONTO DE VISTA (POV) DESTE CAPÍTULO: ${pov}. Narre todo o capítulo em terceira pessoa pelo olhar de ${pov}.`
       : `\nPONTO DE VISTA (POV) DESTE CAPÍTULO: escolha um dos personagens de POV (${(p.povChars || 'os protagonistas').trim()})${lastPov ? `; o capítulo anterior foi pelo olhar de ${lastPov}, então de preferência alterne` : ''}. Mantenha o mesmo POV no capítulo inteiro. Na primeira linha do texto, escreva só "POV: Nome" e depois comece o capítulo.`;
     if (!(await confirmAI(n === 1 ? 'Escrever o capítulo 1. Depois dele, o mundo da história também é criado (mais um pedido).' : `Escrever o capítulo ${n}.`))) { setDraft('write:' + p.id, dir); return; }
-    const makePrompt = (strong) => withLang(p, `${buildContext(p, p.chapters.length, dir)}\n\n` +
+    const makePrompt = (strong) => withLang(p, `${buildContext(p, p.chapters.length, dir)}\n\n` + ptStyle(p) +
       `TAREFA: Escreva o capítulo ${n}` + (n === 1 ? ' (o início da história)' : ', continuando de onde o anterior parou') +
       `, com cerca de ${length} palavras.` +
       (dir ? `\nO QUE DEVE ACONTECER: ${dir}` : '') + povLine +
@@ -4027,7 +4042,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const original = ch.text;
     const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, '')}\n\n` +
       `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` +
-      (isPovMode(p) && ch.pov ? `PONTO DE VISTA (POV) DESTE CAPÍTULO: ${ch.pov}; continue pelo olhar dele.\n` : '') +
+      (isPovMode(p) && ch.pov ? `PONTO DE VISTA (POV) DESTE CAPÍTULO: ${ch.pov}; continue pelo olhar dele.\n` : '') + ptStyle(p) +
       `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
       `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.`, strong);
     const sep = !original ? '' : /[.!?…"”»*)\]]\s*$/.test(original) ? '\n\n' : ' ';
@@ -4089,7 +4104,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       : 'O capítulo inteiro vai ser reescrito. Para mudar só uma parte, feche, selecione o trecho e toque em Ajustar de novo.';
     $('adjustText').value = drafts['adj:' + ch.id] || '';
     renderChips($('adjustChips'), ['Mais diálogo', 'Mais sentimentos', 'Mais detalhes', 'Mais curto', 'Mais longo',
-      'Mais romântico', 'Mais intenso', 'Ritmo mais lento', 'Corrigir o português'], $('adjustText'));
+      'Mais romântico', 'Mais intenso', 'Ritmo mais lento', 'Corrigir o português',
+      'Mais natural em português (sem cara de tradução)'], $('adjustText'));
     $('adjustDlg').showModal();
   }
 
@@ -4101,7 +4117,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   });
 
   // Corrigir: português e formato de livro, sem mudar a história
-  const FIX_INSTR = 'Revise o texto como um revisor de livro. Corrija ortografia, acentuação, concordância, pontuação e erros de digitação em português do Brasil. Organize no formato padrão de livro: parágrafos separados por uma linha em branco (quebre blocos longos em parágrafos onde a cena muda de foco), cada fala de personagem em seu próprio parágrafo começando com travessão (—), e quebras de cena como * * *. NÃO mude a história, os acontecimentos, as falas, o estilo, a voz nem o vocabulário do autor; não acrescente nem corte conteúdo. Mantenha **negrito** e *itálico*.';
+  const FIX_INSTR = 'Revise o texto como um revisor de livro. Corrija ortografia, acentuação, concordância, pontuação e erros de digitação em português do Brasil, e deixe com cara de texto escrito em português (tire construções com cara de tradução do inglês: sujeito repetido, possessivo com partes do corpo, voz passiva, expressões traduzidas ao pé da letra), sem mudar o sentido. Organize no formato padrão de livro: parágrafos separados por uma linha em branco (quebre blocos longos em parágrafos onde a cena muda de foco), cada fala de personagem em seu próprio parágrafo começando com travessão (—), e quebras de cena como * * *. NÃO mude a história, os acontecimentos, as falas, o estilo, a voz nem o vocabulário do autor; não acrescente nem corte conteúdo. Mantenha **negrito** e *itálico*.';
   function fixText(p, ch, ta) {
     if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.')) return;
     const s = ta ? ta.selectionStart : 0, e = ta ? ta.selectionEnd : 0;
@@ -4139,7 +4155,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         `TAREFA: Reescreva este capítulo seguindo este pedido: ${instr}\n` +
         `Mantenha o que não foi pedido para mudar. Devolva só o texto do capítulo, sem título.`;
     // na correção não precisa do contexto da obra (mais barato)
-    const makePrompt = (strong) => withLang(p, opts.fix ? task : `${buildContext(p, idx, instr, ecoOn() ? 'lite' : 'full')}\n\n${task}`, strong);
+    const makePrompt = (strong) => withLang(p, opts.fix ? ptStyle(p) + task : `${buildContext(p, idx, instr, ecoOn() ? 'lite' : 'full')}\n\n${ptStyle(p)}${task}`, strong);
     const before = original.slice(0, start), after = original.slice(end);
     if (edit && edit.chId === ch.id) discardEdit();
     view = { tab: 'capitulos', chapterId: ch.id, mode: view.mode };
@@ -5196,7 +5212,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         if (ecoOn()) {
           // mais barato: a IA devolve só os trechos a trocar (em vez de reescrever o capítulo inteiro)
           const ask = withLang(p, `${buildContext(p, idx, x.instr, 'lite')}\n\nCAPÍTULO ATUAL:\n${ch.text}\n\n` +
-            `TAREFA: Aplique esta mudança decidida pelo autor: ${x.instr}\nMude só o necessário. Responda SOMENTE com um objeto JSON {"trocas": [{"trecho": "cópia EXATA de um trecho do capítulo", "novo": "o trecho reescrito"}]}. ` +
+            ptStyle(p) + `TAREFA: Aplique esta mudança decidida pelo autor: ${x.instr}\nMude só o necessário. Responda SOMENTE com um objeto JSON {"trocas": [{"trecho": "cópia EXATA de um trecho do capítulo", "novo": "o trecho reescrito"}]}. ` +
             `Cada "trecho" deve ser copiado letra por letra do capítulo. Se a mudança exigir reescrever a maior parte do capítulo, responda {"reescrever": true}.`, false);
           const r0 = await callAI(ask, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
           let data; try { data = JSON.parse(r0.text.slice(r0.text.indexOf('{'), r0.text.lastIndexOf('}') + 1)); } catch { data = null; }
@@ -5207,7 +5223,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           }
         }
         if (newText == null) {
-          const task = `CAPÍTULO ATUAL:\n${ch.text}\n\nTAREFA: Reescreva este capítulo para aplicar esta mudança decidida pelo autor na bíblia da obra: ${x.instr}\n` +
+          const task = `CAPÍTULO ATUAL:\n${ch.text}\n\n${ptStyle(p)}TAREFA: Reescreva este capítulo para aplicar esta mudança decidida pelo autor na bíblia da obra: ${x.instr}\n` +
             `Mude só o que for necessário para isso e para manter a coerência; mantenha todo o resto (cenas, falas, estilo, tamanho) igual. Devolva só o texto do capítulo, sem título.`;
           const r = await aiWrite(p, (strong) => withLang(p, `${buildContext(p, idx, x.instr, ecoOn() ? 'lite' : 'full')}\n\n${task}`, strong), {
             signal: b.ctrl.signal, onRetry: () => b.update({ words: 0 }), onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
@@ -5714,7 +5730,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (hasSummary) parts.push(`RESUMO DA HISTÓRIA ATÉ AGORA (memória; se algo aqui discordar do texto dos capítulos, vale o texto dos capítulos, que o autor pode ter editado):\n${p.summary}`);
     const lastTail = upto > 0 ? p.chapters[upto - 1].text.slice(-2500) : '';
     const refs = pickReferences(p, [p.characters, p.premise, p.fandom, p.tone, lastTail, extraQuery].join('\n'), { guides: false, cap: eco && guides ? 20000 : Infinity });
-    if (refs) parts.push(`MATERIAL DE REFERÊNCIA enviado pelo autor (apoio; não copie trechos literalmente; pode estar em outro idioma, mas a história é escrita em ${langOf(p)}):\n${refs}`);
+    if (refs) parts.push(`MATERIAL DE REFERÊNCIA enviado pelo autor (apoio; não copie trechos literalmente; pode estar em outro idioma, mas a história é escrita em ${langOf(p)}: use só a informação, nunca o jeito das frases):\n${refs}`);
     // com a linha da história, bastam o fim do capítulo anterior (para emendar) e os capítulos que ainda não têm resumo
     let prev;
     if (covered) {

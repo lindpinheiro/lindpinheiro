@@ -1491,7 +1491,7 @@
 
 <dialog id="histDlg" aria-labelledby="histTitle">
   <div class="dlg-head"><h2 id="histTitle"><svg class="icon" aria-hidden="true"><use href="#i-history"/></svg>Versões anteriores</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
-  <p class="muted" style="margin-top:0">Cada mudança feita pela IA guarda a versão de antes (as últimas 5). Volte para qualquer uma; dá para desfazer.</p>
+  <p class="muted" style="margin-top:0">Cada mudança, sua ou da IA, guarda a versão de antes (as últimas 10). Volte para qualquer uma; dá para desfazer.</p>
   <div id="histList" class="hist-list"></div>
 </dialog>
 
@@ -3439,7 +3439,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: chBusy, title: chBusy ? 'A IA está mexendo neste capítulo' : '', onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
     if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { pendingAnchor = captureAnchor(); saveEdit(); view.mode = 'ler'; renderChapters(); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
     else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyChapter(ch.text) }, el('span', { text: 'Copiar' })));
-    if (!writingThis && historyOf(ch).length) tools.append(el('button', { icon: 'undo-2', 'aria-label': 'Desfazer a última mudança da IA', title: `Desfazer: ${historyOf(ch).at(-1).label}`, disabled: chBusy, onclick: () => guardEdit(() => undoChapter(p, ch), true) }));
+    if (!writingThis && historyOf(ch).length) tools.append(el('button', { icon: 'undo-2', 'aria-label': 'Desfazer a última mudança', title: `Desfazer: ${historyOf(ch).at(-1).label}`, disabled: chBusy, onclick: () => guardEdit(() => undoChapter(p, ch), true) }));
     if (!writingThis) {
       const more = el('div', { class: 'menu add-menu more-menu', role: 'menu', hidden: true },
         el('button', { role: 'menuitem', class: 'menu-item', disabled: chBusy, onclick: () => { closeAddMenus(); guardEdit(() => openHistory(p, ch), true); } },
@@ -3566,7 +3566,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function saveEdit() {
     const t = editTarget();
-    if (t && editDirty()) { logWords(t.p, countWords(edit.text) - countWords(t.ch.text), 'me'); t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); setTimeout(() => offerNames(t.p, [t.ch]), 900); }
+    if (t && editDirty()) {
+      logWords(t.p, countWords(edit.text) - countWords(t.ch.text), 'me');
+      // guarda a versão de antes; várias salvadas seguidas (em 10 min) contam como uma edição só
+      const lastV = historyOf(t.ch).at(-1);
+      if (t.ch.text.trim() && edit.text !== t.ch.text && !(lastV && lastV.mine && Date.now() - lastV.at < 6e5)) { pushHistory(t.ch, 'Sua edição'); t.ch.history.at(-1).mine = true; }
+      t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); setTimeout(() => offerNames(t.p, [t.ch]), 900); }
     discardEdit();
   }
   function discardEdit() { edit = null; local.del('fanfic.editdraft'); }
@@ -4257,7 +4262,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   // cada mudança da IA guarda a versão anterior (até 5); dá para desfazer uma por uma ou voltar a qualquer uma
-  const HISTORY_MAX = 5;
+  const HISTORY_MAX = 10;
   function pushHistory(ch, label, before = ch.text) {
     if (!ch.history) ch.history = ch.prev != null ? [{ text: ch.prev, at: ch.editedAt || Date.now(), label: 'Mudança anterior da IA' }] : [];
     ch.history.push({ text: before, at: Date.now(), label: label || 'Mudança da IA' });
@@ -4296,7 +4301,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           toast('Versão restaurada ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
         } }))));
     });
-    if (!h.length) box.append(el('p', { class: 'muted', text: 'Ainda não há versões anteriores. Cada mudança feita pela IA guarda a versão de antes aqui.' }));
+    if (!h.length) box.append(el('p', { class: 'muted', text: 'Ainda não há versões anteriores. Cada mudança, sua ou da IA, guarda a versão de antes aqui.' }));
     $('histDlg').showModal();
   }
 

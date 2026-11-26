@@ -283,7 +283,7 @@
   label { display: block; font-weight: 600; margin: 16px 0 6px; }
   .hint { color: var(--muted); font-size: .85rem; font-weight: 400; margin: 4px 0 0; }
   .lead { color: var(--muted); margin: 0 0 14px; font-size: .95rem; }
-  input[type=text], input[type=password], input[type=number], select, textarea {
+  input[type=text], input[type=password], input[type=number], input[type=date], select, textarea {
     width: 100%; font: inherit; color: var(--text); background: var(--surface-2);
     border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
   }
@@ -761,6 +761,30 @@
   .st-pronto { background: color-mix(in srgb, #2f9e55 24%, transparent); color: #46c272; }
   .bcard.ghost { opacity: .35; border-style: dashed; }
   .bcard.lifted { position: fixed; z-index: 90; pointer-events: none; box-shadow: 0 14px 40px rgba(0,0,0,.45); transform: rotate(2deg); }
+  /* ---------- metas de escrita ---------- */
+  .goal-strip { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); cursor: pointer; width: 100%; text-align: left; min-height: 0; font-weight: 400; }
+  .goal-strip:hover { border-color: var(--accent); }
+  .goal-strip .gs-main { flex: 1; min-width: 0; display: grid; gap: 5px; }
+  .goal-strip .gs-line { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; font-size: .9rem; }
+  .goal-strip b { font-size: 1.05rem; }
+  .gbar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .gbar > i { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
+  .streak { display: inline-flex; align-items: center; gap: 4px; color: #e07a1f; font-weight: 700; }
+  .streak .icon { width: 16px; height: 16px; }
+  .goal-hero { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 6px 0 12px; }
+  .goal-hero > div { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .goal-hero .k { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .goal-hero .v { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+  .goal-hero .s { font-size: .8rem; color: var(--muted); }
+  @media (max-width: 520px) { .goal-hero { grid-template-columns: 1fr 1fr; } .goal-hero > div:last-child { grid-column: 1 / -1; } }
+  .wchart { position: relative; height: 150px; display: flex; align-items: flex-end; gap: 2px; padding: 0 0 18px; border-bottom: 1px solid var(--border); margin-top: 8px; }
+  .wchart .wbar { flex: 1; min-width: 0; height: 100%; display: flex; align-items: flex-end; position: relative; }
+  .wchart .wbar i { display: block; width: 100%; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 0; }
+  .wchart .wbar:hover i, .wchart .wbar:focus i { filter: brightness(1.25); }
+  .wchart .wbar span { position: absolute; bottom: -17px; left: 50%; transform: translateX(-50%); font-size: .62rem; color: var(--muted); white-space: nowrap; }
+  .wchart .goal-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--muted); pointer-events: none; }
+  .wchart .goal-line em { position: absolute; right: 0; top: -16px; font-size: .7rem; font-style: normal; color: var(--muted); background: var(--surface); padding: 0 4px; }
+  .wtip { position: absolute; z-index: 5; pointer-events: none; background: var(--text); color: var(--bg); font-size: .8rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -889,6 +913,8 @@
 <symbol id="i-grip-vertical" viewBox="0 0 24 24"><circle cx="9" cy="12" r="1" /> <circle cx="9" cy="5" r="1" /> <circle cx="9" cy="19" r="1" /> <circle cx="15" cy="12" r="1" /> <circle cx="15" cy="5" r="1" /> <circle cx="15" cy="19" r="1" /></symbol>
 <symbol id="i-layout-grid" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1" /> <rect width="7" height="7" x="14" y="3" rx="1" /> <rect width="7" height="7" x="14" y="14" rx="1" /> <rect width="7" height="7" x="3" y="14" rx="1" /></symbol>
 <symbol id="i-list" viewBox="0 0 24 24"><path d="M3 12h.01" /> <path d="M3 18h.01" /> <path d="M3 6h.01" /> <path d="M8 12h13" /> <path d="M8 18h13" /> <path d="M8 6h13" /></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <circle cx="12" cy="12" r="6" /> <circle cx="12" cy="12" r="2" /></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1296,6 +1322,24 @@
   <div class="find-sum" id="findSum" role="status"></div>
   <div class="find-list" id="findList"></div>
   <div class="row end" style="margin-top:12px"><button type="button" data-close>Fechar</button><button type="button" class="primary" id="findAll" disabled><svg class="icon" aria-hidden="true"><use href="#i-replace-all"/></svg>Substituir todas</button></div>
+</dialog>
+
+<dialog id="goalDlg" aria-labelledby="goalTitle">
+  <div class="dlg-head"><h2 id="goalTitle"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg>Metas de escrita</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="goal-hero" id="goalHero"></div>
+  <b>Palavras por dia (últimos 30 dias, todos os projetos)</b>
+  <div class="wchart" id="goalChart" role="img"></div>
+  <div class="lay-grid" style="margin-top:8px">
+    <div><label for="goalDaily">Meta por dia (palavras)</label><input type="number" id="goalDaily" min="0" step="50" placeholder="Ex.: 500"></div>
+    <div><label for="goalCount">O que conta</label><select id="goalCount"><option value="me">Só o que eu escrevo</option><option value="all">O que eu escrevo e o que a IA escreve</option></select></div>
+  </div>
+  <h3 style="margin:16px 0 0" id="goalBookTitle">Meta deste livro</h3>
+  <div class="lay-grid">
+    <div><label for="goalTotal">Tamanho final (palavras)</label><input type="number" id="goalTotal" min="0" step="1000" placeholder="Ex.: 60000"></div>
+    <div><label for="goalUntil">Terminar até</label><input type="date" id="goalUntil"></div>
+  </div>
+  <div id="goalBook" style="margin-top:10px"></div>
+  <p class="hint">"O que eu escrevo" conta as palavras que você acrescenta ao salvar no Editar. O que a IA escreve conta quando ela escreve ou continua um capítulo.</p>
 </dialog>
 
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
@@ -3158,6 +3202,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { icon: 'book-open', text: 'Baixar / diagramar', onclick: () => openLayout(p) }),
         writeButton(p))));
 
+    sec.append(goalStrip(p));
     if (chView === 'mural') { sec.append(chapterBoard(p)); return; }
     p.chapters.forEach((c, i) => {
       const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
@@ -3398,7 +3443,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function saveEdit() {
     const t = editTarget();
-    if (t && editDirty()) { t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); }
+    if (t && editDirty()) { logWords(t.p, countWords(edit.text) - countWords(t.ch.text), 'me'); t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); }
     discardEdit();
   }
   function discardEdit() { edit = null; local.del('fanfic.editdraft'); }
@@ -4397,7 +4442,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         onThinking: () => b.update({ thinking: true }),
         onText: (t) => { ch.text = t; paintChapter(ch, t); b.update({ words: countWords(t) }); }
       });
-      ch.text = r.text;
+      ch.text = r.text; logWords(p, countWords(r.text), 'ai');
       // quando a IA escolhe o POV, ela avisa na primeira linha ("POV: Nome"); guarda e tira do texto
       if (isPovMode(p) && !ch.pov) { const m = /^\s*POV:\s*([^\n]{1,40})\n+/i.exec(ch.text); if (m) { ch.pov = m[1].trim().replace(/[.*_]+$/g, ''); ch.text = ch.text.slice(m[0].length); } }
       b.stop();
@@ -4447,7 +4492,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         onText: (t) => { paintChapter(ch, original + sep + t); b.update({ words: countWords(original + sep + t) }); }
       });
       pushHistory(ch, 'Continuar escrevendo', original);
-      ch.text = original + sep + r.text;
+      ch.text = original + sep + r.text; logWords(p, countWords(r.text), 'ai');
       b.stop();
       toast('Capítulo continuado ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
@@ -5407,6 +5452,97 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
 
 
+
+
+  // =====================================================================
+  // Metas de escrita (sem IA): meta por dia, sequência de dias e meta do livro
+  // =====================================================================
+  function dayKey(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+  function goalCfg() { return Object.assign({ daily: 500, count: 'me' }, local.get('fanfic.goals', {})); }
+  function logWords(p, n, who) {
+    if (!p || !(n > 0)) return;
+    const log = p.wlog = p.wlog || {}, k = dayKey(), e = log[k] = log[k] || [0, 0];
+    e[who === 'ai' ? 1 : 0] += n;
+    const keys = Object.keys(log).sort(); if (keys.length > 400) keys.slice(0, keys.length - 400).forEach(x => delete log[x]);
+  }
+  // palavras de um dia somando todos os projetos
+  function dayWords(k, cfg = goalCfg()) {
+    return projects.reduce((n, p) => { const e = (p.wlog || {})[k]; return n + (e ? e[0] + (cfg.count === 'all' ? e[1] : 0) : 0); }, 0);
+  }
+  function streakDays(cfg = goalCfg()) {
+    if (!(cfg.daily > 0)) return 0;
+    const d = new Date(); let n = 0;
+    if (dayWords(dayKey(d), cfg) < cfg.daily) d.setDate(d.getDate() - 1); // hoje ainda não conta contra
+    while (dayWords(dayKey(d), cfg) >= cfg.daily) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function bookWordsNow(p) { return p.chapters.reduce((n, c) => n + countWords(c.text), 0); }
+  function bookPace(p) {
+    const g = p.goal || {}; if (!(g.total > 0)) return null;
+    const have = bookWordsNow(p), left = Math.max(0, g.total - have);
+    let perDay = null, days = null;
+    if (g.until) { const end = new Date(g.until + 'T23:59:59'); days = Math.max(1, Math.ceil((end - new Date()) / 864e5)); perDay = Math.ceil(left / days); }
+    return { have, left, total: g.total, days, perDay, pct: Math.min(100, Math.round(have / g.total * 100)) };
+  }
+  function goalStrip(p) {
+    const cfg = goalCfg(), today = dayWords(dayKey(), cfg), st = streakDays(cfg), pace = bookPace(p);
+    const pct = cfg.daily > 0 ? Math.min(100, Math.round(today / cfg.daily * 100)) : 0;
+    return el('button', { type: 'button', class: 'goal-strip', onclick: () => openGoals(p), 'aria-label': 'Abrir as metas de escrita' },
+      svgIcon('target'),
+      el('span', { class: 'gs-main' },
+        el('span', { class: 'gs-line' },
+          el('span', {}, 'Hoje: ', el('b', { text: fmtNum(today) }), cfg.daily > 0 ? ` / ${fmtNum(cfg.daily)} palavras` : ' palavras'),
+          st ? el('span', { class: 'streak' }, svgIcon('flame'), `${st} dia${st > 1 ? 's' : ''} seguido${st > 1 ? 's' : ''}`) : null,
+          pace ? el('span', { class: 'muted', text: `Livro: ${pace.pct}%${pace.perDay != null && pace.left ? ` · ${fmtNum(pace.perDay)}/dia até o prazo` : ''}` }) : null),
+        cfg.daily > 0 ? el('span', { class: 'gbar', 'aria-hidden': 'true' }, el('i', { style: `width:${pct}%` })) : null),
+      el('span', { class: 'link plain', text: 'Metas' }));
+  }
+  var goalP = null;
+  function openGoals(p) {
+    goalP = p; const cfg = goalCfg(), g = p.goal || {};
+    $('goalDaily').value = cfg.daily || ''; $('goalCount').value = cfg.count;
+    $('goalTotal').value = g.total || ''; $('goalUntil').value = g.until || '';
+    $('goalBookTitle').textContent = `Meta deste livro (${(p.title || '').trim() || 'Sem título'})`;
+    goalRender(); $('goalDlg').showModal();
+  }
+  function goalRender() {
+    const p = goalP, cfg = goalCfg(), today = dayWords(dayKey(), cfg), st = streakDays(cfg);
+    const days = [...Array(30)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - 29 + i); return { d, k: dayKey(d), n: dayWords(dayKey(d), cfg) }; });
+    const week = days.slice(-7).reduce((n, x) => n + x.n, 0), best = Math.max(...days.map(x => x.n));
+    $('goalHero').replaceChildren(
+      el('div', {}, el('div', { class: 'k', text: 'Hoje' }), el('div', { class: 'v', text: fmtNum(today) }), el('div', { class: 's', text: cfg.daily > 0 ? (today >= cfg.daily ? 'Meta do dia batida!' : `faltam ${fmtNum(cfg.daily - today)}`) : 'sem meta por dia' })),
+      el('div', {}, el('div', { class: 'k', text: 'Sequência' }), el('div', { class: 'v' }, st ? el('span', { class: 'streak', style: 'font-size:inherit' }, svgIcon('flame'), String(st)) : '0'), el('div', { class: 's', text: 'dias seguidos batendo a meta' })),
+      el('div', {}, el('div', { class: 'k', text: 'Últimos 7 dias' }), el('div', { class: 'v', text: fmtNum(week) }), el('div', { class: 's', text: `média de ${fmtNum(Math.round(week / 7))} por dia` })));
+    const top = Math.max(best, cfg.daily || 0, 10) * 1.12, chart = $('goalChart');
+    chart.setAttribute('aria-label', `Palavras por dia nos últimos 30 dias. Hoje: ${today}. Melhor dia: ${best}.`);
+    const tip = el('div', { class: 'wtip', hidden: true });
+    chart.replaceChildren(...days.map((x, i) => {
+      const label = `${x.d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}: ${fmtNum(x.n)} palavras`;
+      const bar = el('div', { class: 'wbar', tabindex: 0, 'aria-label': label },
+        el('i', { style: `height:${x.n ? Math.max(2, x.n / top * 100) : 0}%` }),
+        i % 5 === 4 || i === 29 ? el('span', { text: i === 29 ? 'hoje' : x.d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) }) : null);
+      const show = () => {
+        const dl = $('goalDlg'), D = dl.getBoundingClientRect(), r = bar.getBoundingClientRect(); tip.textContent = label; tip.hidden = false;
+        tip.style.left = Math.max(4, Math.min(D.width - tip.offsetWidth - 4, r.left - D.left + r.width / 2 - tip.offsetWidth / 2)) + 'px'; tip.style.top = (r.top - D.top + dl.scrollTop + r.height - (bar.firstChild.offsetHeight || 0) - 34) + 'px';
+      };
+      bar.addEventListener('pointerenter', show); bar.addEventListener('focus', show);
+      bar.addEventListener('pointerleave', () => { tip.hidden = true; }); bar.addEventListener('blur', () => { tip.hidden = true; });
+      return bar;
+    }), cfg.daily > 0 ? el('div', { class: 'goal-line', style: `bottom:calc(18px + ${cfg.daily / top} * (100% - 18px))` }, el('em', { text: `meta ${fmtNum(cfg.daily)}` })) : null);
+    $('goalDlg').querySelector('.wtip')?.remove(); $('goalDlg').append(tip);
+    const pace = bookPace(p), box = $('goalBook');
+    box.replaceChildren(...(pace ? [
+      el('div', { class: 'gbar', style: 'height:10px' }, el('i', { style: `width:${pace.pct}%` })),
+      el('p', { style: 'margin:6px 0 0', text: `${fmtNum(pace.have)} de ${fmtNum(pace.total)} palavras (${pace.pct}%).` +
+        (!pace.left ? ' Meta do livro alcançada!' : pace.perDay != null ? ` Para terminar no prazo (${pace.days} dia${pace.days > 1 ? 's' : ''}), escreva ${fmtNum(pace.perDay)} palavras por dia.` : ` Faltam ${fmtNum(pace.left)} palavras.`) })]
+      : [el('p', { class: 'muted', style: 'margin:0', text: 'Defina o tamanho final para ver quanto falta e o ritmo até o prazo.' })]));
+  }
+  $('goalDaily').addEventListener('input', () => { const c = goalCfg(); c.daily = Math.max(0, Number($('goalDaily').value) || 0); local.set('fanfic.goals', c); goalRender(); });
+  $('goalCount').addEventListener('change', () => { const c = goalCfg(); c.count = $('goalCount').value; local.set('fanfic.goals', c); goalRender(); });
+  ['goalTotal', 'goalUntil'].forEach(id => $(id).addEventListener('input', () => {
+    const p = goalP; p.goal = { total: Math.max(0, Number($('goalTotal').value) || 0), until: $('goalUntil').value || '' }; saveProject(p); goalRender();
+  }));
+  $('goalDlg').addEventListener('close', () => { if (goalP && currentId === goalP.id && view.tab === 'capitulos' && !view.chapterId) renderTab(); });
 
   // =====================================================================
   // Mural de cenas (sem IA): capítulos em cartões, com status e cor; arraste para mudar a ordem

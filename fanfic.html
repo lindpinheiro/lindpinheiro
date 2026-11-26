@@ -474,6 +474,11 @@
   .add-menu .mi-sub { white-space: normal; }
   #entryDlg { width: min(820px, calc(100vw - 24px)); }
   #entryText { min-height: 42vh; font-size: 1rem; line-height: 1.6; }
+  .entry-sheet { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; margin-top: 4px; }
+  .entry-sheet .full { grid-column: 1 / -1; }
+  .entry-sheet label { margin-top: 8px; }
+  .entry-sheet textarea { min-height: 0; }
+  @media (max-width: 560px) { .entry-sheet { grid-template-columns: 1fr; } }
   .entry-ai { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; margin-top: 10px; }
   .entry-ai input { flex: 1 1 100%; }
   .dlg-foot { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
@@ -805,9 +810,81 @@
   .tl-ev .acts button { min-height: 30px; width: 30px; padding: 0; border: 0; background: transparent; color: var(--muted); }
   .tl-ev .acts button:hover { color: var(--accent); }
   .tl-ev .acts button:disabled { opacity: .3; }
-  .tl-ev h3, .tl-ev .when { padding-right: 100px; }
+  .tl-ev .acts .tl-grip { cursor: grab; touch-action: none; }
+  .tl-ev h3, .tl-ev .when { padding-right: 130px; }
   .tl-chars { display: flex; flex-wrap: wrap; gap: 6px; }
   .tl-chars label { margin: 0; }
+  /* ---------- revisor automático ---------- */
+  .edit-backdrop .iss { text-decoration: underline wavy #e07a1f; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+  .review-panel { position: fixed; z-index: 70; right: 16px; top: 132px; width: 370px; max-height: calc(100vh - 150px); display: flex; flex-direction: column;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.4); }
+  @media (min-width: 901px) { body.rv-open main { padding-right: 400px; } body.rv-open .margin-notes { display: none; } body.rv-open .doc-wrap.has-notes { display: block; } }
+  @media (max-width: 900px) { .review-panel { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 50vh; border-radius: 16px 16px 0 0; } }
+  .review-panel .rv-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .review-panel .rv-head h3 { margin: 0; flex: 1; font-size: 1rem; display: flex; gap: 8px; align-items: center; }
+  .review-panel .rv-head .close { min-height: 34px; width: 34px; padding: 0; }
+  .review-panel .rv-tabs { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 12px 0; }
+  .review-panel .rv-tabs .chip { font-size: .78rem; padding: 3px 10px; min-height: 0; }
+  .review-panel .rv-actions { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 12px; }
+  .review-panel .rv-actions button { min-height: 34px; padding: 4px 10px; font-size: .85rem; }
+  .review-panel .rv-list { overflow: auto; padding: 0 12px 12px; display: grid; gap: 8px; }
+  .rv-item { border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; cursor: pointer; }
+  .rv-item:hover, .rv-item.on { border-color: var(--accent); }
+  .rv-item .rv-k { font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .rv-item .rv-q { font-family: Georgia, serif; margin: 2px 0; }
+  .rv-item .rv-q b { background: color-mix(in srgb, #e07a1f 26%, transparent); border-radius: 3px; padding: 0 2px; font-weight: 400; }
+  .rv-item .rv-q ins { text-decoration: none; background: color-mix(in srgb, #2f9e55 26%, transparent); border-radius: 3px; padding: 0 2px; }
+  .rv-item .rv-m { font-size: .84rem; color: var(--muted); }
+  .rv-item .rv-b { display: flex; gap: 6px; margin-top: 6px; }
+  .rv-item .rv-b button { min-height: 30px; padding: 2px 10px; font-size: .8rem; }
+  .rv-empty { padding: 18px 12px; text-align: center; color: var(--muted); }
+  /* ---------- nomes novos ---------- */
+  .nm-list { display: grid; gap: 8px; max-height: 44vh; overflow: auto; margin: 8px 0; }
+  .nm-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; }
+  .nm-row .nm-n { font-weight: 700; }
+  .nm-row .nm-c { font-size: .82rem; color: var(--muted); font-family: Georgia, serif; }
+  .nm-row select { width: auto; min-height: 36px; padding: 4px 8px; }
+  .nm-var { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 10px; border: 1px dashed var(--border); border-radius: 10px; }
+  .nm-var .grow { flex: 1; min-width: 160px; }
+  @media (max-width: 520px) { .nm-row { grid-template-columns: auto 1fr; } .nm-row select { grid-column: 1 / -1; width: 100%; } }
+  /* ---------- estatísticas ---------- */
+  dialog.stats-dlg { width: min(900px, calc(100vw - 16px)); }
+  .st-hero { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 14px; }
+  @media (max-width: 620px) { .st-hero { grid-template-columns: 1fr 1fr; } }
+  .st-hero > div { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .st-hero .k { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .st-hero .v { font-size: 1.45rem; font-weight: 700; line-height: 1.2; }
+  .st-hero .s { font-size: .78rem; color: var(--muted); }
+  .st-sec { margin: 16px 0 6px; font-size: 1rem; }
+  .st-bars { display: grid; gap: 4px; }
+  .st-bar { display: grid; grid-template-columns: minmax(70px, min(200px, 32%)) 1fr 52px; gap: 8px; align-items: center; font-size: .84rem; }
+  .st-bar .lb { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .st-bar .tr { position: relative; height: 14px; }
+  .st-bar .tr i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 0 4px 4px 0; }
+  .st-bar .tr .avg { position: absolute; top: -3px; bottom: -3px; border-left: 1.5px dashed var(--muted); }
+  .st-bar .n { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .st-heat-wrap { overflow: auto; max-height: 46vh; border: 1px solid var(--border); border-radius: 10px; }
+  .st-heat { border-collapse: separate; border-spacing: 2px; font-size: .78rem; }
+  .st-heat th { position: sticky; background: var(--surface); font-weight: 600; color: var(--muted); padding: 4px 6px; white-space: nowrap; }
+  .st-heat thead th { top: 0; z-index: 1; }
+  .st-heat tbody th { left: 0; text-align: left; color: var(--text); z-index: 1; }
+  .st-heat td { width: 30px; min-width: 30px; height: 26px; text-align: center; border-radius: 4px; background: var(--surface-2); color: var(--text); font-variant-numeric: tabular-nums; }
+  .st-heat td.z { color: transparent; }
+  .st-warn { margin: 6px 0 0; font-size: .84rem; color: var(--muted); }
+  .st-words { display: flex; flex-wrap: wrap; gap: 6px; }
+  .st-words span { border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; font-size: .84rem; }
+  .st-words span b { color: var(--muted); font-weight: 600; margin-left: 4px; }
+  /* ---------- plano e estruturas ---------- */
+  .plan-box { margin: 0 0 12px; padding: 12px 14px; border: 1px dashed var(--accent); border-radius: 12px; background: var(--accent-soft); }
+  .plan-box .pb-k { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .plan-box p { margin: 4px 0 8px; white-space: pre-wrap; }
+  .tpl-list { display: grid; gap: 10px; margin: 8px 0; }
+  .tpl { text-align: left; display: grid; gap: 4px; padding: 12px 14px; border-radius: 12px; min-height: 0; font-weight: 400; }
+  .tpl b { font-size: 1rem; }
+  .tpl span { color: var(--muted); font-size: .86rem; }
+  .tpl[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); }
+  .tpl-steps { margin: 6px 0 0; padding-left: 20px; font-size: .86rem; color: var(--muted); max-height: 30vh; overflow: auto; }
+  .bcard.plan { border-style: dashed; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -941,6 +1018,9 @@
 <symbol id="i-milestone" viewBox="0 0 24 24"><path d="M12 13v8" /> <path d="M12 3v3" /> <path d="M4 6a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h13a2 2 0 0 0 1.152-.365l3.424-2.317a1 1 0 0 0 0-1.635l-3.424-2.318A2 2 0 0 0 17 6z" /></symbol>
 <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7" /> <path d="M12 19V5" /></symbol>
 <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14" /> <path d="m19 12-7 7-7-7" /></symbol>
+<symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /> <path d="M13 6h8" /> <path d="M13 12h8" /> <path d="M13 18h8" /></symbol>
+<symbol id="i-paintbrush" viewBox="0 0 24 24"><path d="m14.622 17.897-10.68-2.913" /> <path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z" /> <path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15" /></symbol>
+<symbol id="i-bar-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16" /> <path d="M18 17V9" /> <path d="M13 17V5" /> <path d="M8 17v-3" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1308,7 +1388,7 @@
     <div class="lay-checks">
       <label class="check"><input type="checkbox" id="layTitlePage"><span>Folha de rosto (título e autor)</span></label>
       <label class="check"><input type="checkbox" id="layToc"><span>Sumário</span></label>
-      <label class="check lay-pdfonly"><input type="checkbox" id="layOdd"><span>Capítulo começa na página da direita</span></label>
+      <label class="check lay-pdfdocx"><input type="checkbox" id="layOdd"><span>Capítulo começa na página da direita</span></label>
       <label class="check lay-pdfdocx"><input type="checkbox" id="layHead"><span>Cabeçalho (autor e título)</span></label>
       <label class="check lay-pdfdocx"><input type="checkbox" id="layNums"><span>Número das páginas</span></label>
       <label class="check"><input type="checkbox" id="layCover"><span>Capa como primeira página</span></label>
@@ -1384,6 +1464,34 @@
   <div class="row end" style="margin-top:12px"><button type="button" class="link" id="tlDel">Apagar</button><span style="flex:1"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="tlSave">Salvar</button></div>
 </dialog>
 
+<dialog id="namesDlg" aria-labelledby="namesTitle">
+  <div class="dlg-head"><h2 id="namesTitle"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Nomes novos na história</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">Achei estes nomes nos capítulos e eles ainda não estão no Mundo. Escolha onde guardar cada um (feito pelo próprio app, sem IA).</p>
+  <div class="nm-list" id="namesList"></div>
+  <div id="namesVarWrap"><b>Grafias parecidas</b><p class="hint" style="margin:2px 0 6px">Podem ser o mesmo nome escrito de jeitos diferentes. Unificar troca em todos os capítulos (dá para desfazer em Versões anteriores).</p><div class="nm-list" id="namesVar"></div></div>
+  <div class="row end" style="margin-top:8px"><button type="button" data-close>Agora não</button><button type="button" class="primary" id="namesGo">Guardar no Mundo</button></div>
+</dialog>
+
+<dialog id="statsDlg" class="stats-dlg" aria-labelledby="statsTitle">
+  <div class="dlg-head"><h2 id="statsTitle"><svg class="icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Estatísticas da história</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div id="statsBody"></div>
+</dialog>
+
+<dialog id="planDlg" aria-labelledby="planTitle">
+  <div class="dlg-head"><h2 id="planTitle"><svg class="icon" aria-hidden="true"><use href="#i-layout-grid"/></svg><span>Cartão de planejamento</span></h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">Um capítulo ainda sem texto, só com o plano. Depois é só escrever, você mesmo ou com a IA seguindo o plano.</p>
+  <label for="planName" style="margin-top:0">Título</label><input type="text" id="planName" placeholder="Ex.: O primeiro encontro">
+  <label for="planText">O que acontece</label><textarea id="planText" rows="5" placeholder="Ex.: Rex chega ao vale e encontra Tyr no riacho. Discutem pelo lugar. Termina com os dois sendo obrigados a dividir a caverna."></textarea>
+  <div class="row end" style="margin-top:12px"><button type="button" class="link" id="planDel">Apagar cartão</button><span style="flex:1"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="planSave">Salvar</button></div>
+</dialog>
+
+<dialog id="tplDlg" aria-labelledby="tplTitle">
+  <div class="dlg-head"><h2 id="tplTitle"><svg class="icon" aria-hidden="true"><use href="#i-milestone"/></svg>Estruturas prontas</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">Cria cartões de planejamento no Mural, um para cada etapa. Você troca os títulos e escreve o que acontece em cada um (sem IA).</p>
+  <div class="tpl-list" id="tplList"></div>
+  <div class="row end"><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="tplGo" disabled>Criar os cartões</button></div>
+</dialog>
+
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
   <div class="dlg-head"><h2 id="book3dTitle"><svg class="icon" aria-hidden="true"><use href="#i-rotate-3d"/></svg>Seu livro em 3D</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <div class="b3-wrap">
@@ -1415,7 +1523,7 @@
 
 <dialog id="histDlg" aria-labelledby="histTitle">
   <div class="dlg-head"><h2 id="histTitle"><svg class="icon" aria-hidden="true"><use href="#i-history"/></svg>Versões anteriores</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
-  <p class="muted" style="margin-top:0">Cada mudança feita pela IA guarda a versão de antes (as últimas 5). Volte para qualquer uma; dá para desfazer.</p>
+  <p class="muted" style="margin-top:0">Cada mudança, sua ou da IA, guarda a versão de antes (as últimas 10). Volte para qualquer uma; dá para desfazer.</p>
   <div id="histList" class="hist-list"></div>
 </dialog>
 
@@ -1435,7 +1543,8 @@
   <div class="dlg-head"><h2 id="entryFolder"></h2><button class="close" id="entryClose" aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <label for="entryTitle" style="margin-top:0">Título</label>
   <input type="text" id="entryTitle" placeholder="Ex.: nome do personagem, do lugar ou da regra">
-  <label for="entryText">Texto</label>
+  <div class="entry-sheet" id="entrySheet" hidden></div>
+  <label for="entryText" id="entryTextLabel">Texto</label>
   <textarea id="entryText" placeholder="Escreva aqui tudo sobre este item."></textarea>
   <div class="entry-ai">
     <input type="text" id="entryAsk" aria-label="Pedido para a IA" placeholder="Pedido para a IA (opcional). Ex.: complete com o que aparece nos capítulos">
@@ -1477,6 +1586,7 @@
     <p class="hint">No EPUB, cada parte do livro vira um capítulo. No TXT, os capítulos são separados pelos títulos.</p>
     <p class="muted" id="impFileName"></p>
   </div>
+  <label class="check" style="margin-top:10px"><input type="checkbox" id="impFormat" checked><span>Arrumar a formatação (travessões, aspas, reticências, parágrafos)</span></label>
   <div class="status" id="impStatus" role="status"></div>
   <div class="progress" id="impProgress" hidden><div></div></div>
   <div class="row" style="margin-top:14px">
@@ -2152,7 +2262,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let cryptoKey = null, syncing = false, syncAgain = false, syncTimer = null;
 
   // configuração da IA que viaja junto com as histórias (no mesmo arquivo cifrado)
-  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy', 'freeFirst', 'freeModel'];
+  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy', 'freeFirst', 'freeModel', 'goals'];
   function aiForSync() {
     if (!settings.key) return null;
     const o = { updatedAt: settings.updatedAt || 0 };
@@ -2715,7 +2825,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function createImported({ title, premise, parts }) {
     const p = newProject();
     p.title = title; p.premise = premise || '';
-    p.chapters = parts.map(x => ({ id: uid(), title: x.title || '', text: x.text }));
+    p.chapters = parts.map(x => ({ id: uid(), title: x.title || '', text: $('impFormat').checked ? formatText(x.text, true) : x.text }));
     projects.push(p); saveProject(p, true);
     openProject(p.id);
     $('importDlg').close();
@@ -3240,6 +3350,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
         el('button', { icon: 'search', text: 'Buscar', title: 'Buscar e substituir em todos os capítulos (Ctrl+Shift+F)', onclick: () => openFind(p) }),
+        el('button', { icon: 'bar-chart', text: 'Estatísticas', onclick: () => openStats(p) }),
         el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyWholeStory(p) }),
         el('button', { icon: 'book-open', text: 'Baixar / diagramar', onclick: () => openLayout(p) }),
         writeButton(p))));
@@ -3251,7 +3362,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
         el('div', { class: 'num' }, `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : ''), c.status ? el('span', { class: 'st-chip st-' + c.status, style: 'margin-left:8px', text: CH_STATUS.find(x => x[0] === c.status)[1] }) : null),
         el('h3', { text: chTitle(p, c) }),
-        el('div', { class: 'preview', text: storyPlain(c.text.slice(0, 600)).replace(/\s*\n+\s*/g, ' ').slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
+        el('div', { class: 'preview', text: storyPlain(c.text.slice(0, 600)).replace(/\s*\n+\s*/g, ' ').slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : (c.plan || '').trim() ? 'Plano: ' + c.plan.trim().slice(0, 240) : '(vazio)') }),
         el('div', { class: 'row' },
           el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
           el('button', { icon: 'copy', text: 'Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyChapter(c.text); } }))));
@@ -3361,11 +3472,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { 'aria-pressed': String(view.mode === 'editar'), disabled: chBusy, title: chBusy ? 'A IA está mexendo neste capítulo' : '', onclick: () => setMode('editar') }, svgIcon('pencil', 'hide-m'), 'Editar')));
     if (editing) tools.append(el('button', { class: 'primary', id: 'saveEditBtn', icon: 'check', text: 'Salvar', disabled: !editDirty(), onclick: () => { pendingAnchor = captureAnchor(); saveEdit(); view.mode = 'ler'; renderChapters(); toast('Salvo ✓ A IA vai usar este texto nos próximos capítulos.'); } }));
     else tools.append(el('button', { icon: 'copy', 'aria-label': 'Copiar o capítulo', disabled: writingThis, onclick: () => copyChapter(ch.text) }, el('span', { text: 'Copiar' })));
-    if (!writingThis && historyOf(ch).length) tools.append(el('button', { icon: 'undo-2', 'aria-label': 'Desfazer a última mudança da IA', title: `Desfazer: ${historyOf(ch).at(-1).label}`, disabled: chBusy, onclick: () => guardEdit(() => undoChapter(p, ch), true) }));
+    if (!writingThis && historyOf(ch).length) tools.append(el('button', { icon: 'undo-2', 'aria-label': 'Desfazer a última mudança', title: `Desfazer: ${historyOf(ch).at(-1).label}`, disabled: chBusy, onclick: () => guardEdit(() => undoChapter(p, ch), true) }));
     if (!writingThis) {
       const more = el('div', { class: 'menu add-menu more-menu', role: 'menu', hidden: true },
         el('button', { role: 'menuitem', class: 'menu-item', disabled: chBusy, onclick: () => { closeAddMenus(); guardEdit(() => openHistory(p, ch), true); } },
           el('span', { class: 'mi-ico' }, svgIcon('history')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: `Versões anteriores${historyOf(ch).length ? ` (${historyOf(ch).length})` : ''}` }))),
+        el('button', { role: 'menuitem', class: 'menu-item', disabled: chBusy || !ch.text.trim(), onclick: () => { closeAddMenus(); if (view.mode === 'editar') { const ta = $('chBody'); if (ta) openReview(p, ch, ta); } else { reviewWanted = ch.id; setMode('editar'); } } },
+          el('span', { class: 'mi-ico' }, svgIcon('list-checks')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Revisar sem IA' }), el('span', { class: 'mi-sub', text: 'Repetições, cara de tradução, pontuação' }))),
         el('button', { role: 'menuitem', class: 'menu-item', disabled: !ch.text.trim(), onclick: () => { closeAddMenus(); guardEdit(() => openImageGen(p, { kind: 'cena', chId: ch.id }), true); } },
           el('span', { class: 'mi-ico' }, svgIcon('image')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Gerar imagem da cena' }))),
         el('button', { role: 'menuitem', class: 'menu-item danger-item', disabled: chBusy, onclick: () => { closeAddMenus(); guardEdit(() => { discardEdit(); deleteChapter(p, ch); }, true); } },
@@ -3390,6 +3503,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('button', { class: 'primary', icon: 'languages', ai: true, text: `Reescrever em ${langLower(p)}`, onclick: () => guardEdit(() => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
         `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`)) })));
 
+    if (!writingThis && (ch.plan || '').trim()) sec.append(planBox(p, ch, editing));
     const card = el('div', { class: 'card' });
     const words = el('span', { class: 'muted', id: 'chWords' });
 
@@ -3422,6 +3536,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ta.addEventListener('input', () => { d.text = ta.value; keepDraft(); refresh(); });
       const backdrop = el('div', { class: 'edit-backdrop', 'aria-hidden': 'true' });
       const paintMarks = () => { paintEditMarks(backdrop, ta.value, (ch.highlights || []).filter(h => !h.resolved)); };
+      backdrop._repaint = paintMarks;
       let markRaf = null, markT = null;
       ta.addEventListener('input', () => {
         cancelAnimationFrame(markRaf); markRaf = requestAnimationFrame(paintMarks);
@@ -3485,7 +3600,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function saveEdit() {
     const t = editTarget();
-    if (t && editDirty()) { logWords(t.p, countWords(edit.text) - countWords(t.ch.text), 'me'); t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); }
+    if (t && editDirty()) {
+      logWords(t.p, countWords(edit.text) - countWords(t.ch.text), 'me');
+      // guarda a versão de antes; várias salvadas seguidas (em 10 min) contam como uma edição só
+      const lastV = historyOf(t.ch).at(-1);
+      if (t.ch.text.trim() && edit.text !== t.ch.text && !(lastV && lastV.mine && Date.now() - lastV.at < 6e5)) { pushHistory(t.ch, 'Sua edição'); t.ch.history.at(-1).mine = true; }
+      t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); setTimeout(() => offerNames(t.p, [t.ch]), 900); }
     discardEdit();
   }
   function discardEdit() { edit = null; local.del('fanfic.editdraft'); }
@@ -3647,6 +3767,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('button', { type: 'button', text: '⁂', 'aria-label': 'Quebra de cena', title: 'Quebra de cena', onclick: () => fmtInsert(ta, '\n\n* * *\n\n') }),
       el('button', { type: 'button', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; colors.hidden = true; } }),
       el('span', { class: 'tb-sep', 'aria-hidden': 'true' }),
+      el('button', { type: 'button', class: 'tb-ai', icon: 'list-checks', text: 'Revisar', title: 'Revisor automático, sem IA: repetições, cara de tradução, pontuação', onclick: () => openReview(p, ch, ta) }),
+      el('button', { type: 'button', class: 'tb-ai', icon: 'paintbrush', text: 'Formatar', title: 'Arrumar travessões, aspas, reticências e parágrafos, sem IA (o trecho selecionado ou o capítulo)', onclick: () => formatInEditor(ta) }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'wand-sparkles', ai: true, text: 'Ajustar', title: 'Ajustar com IA o trecho selecionado ou o capítulo', onclick: () => adjustFromEditor(ch, ta) }),
       el('button', { type: 'button', class: 'tb-ai', icon: 'spell-check', ai: true, text: 'Corrigir', title: 'Corrigir o português e organizar no formato de livro (o trecho selecionado ou o capítulo)', onclick: () => fixText(p, ch, ta) }));
     bar.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
@@ -3663,6 +3785,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     bar.append(el('span', { class: 'grow' }),
       el('button', { type: 'button', icon: 'chevron-up', class: 'fmt-hide', 'aria-label': 'Ocultar a barra de formatação', title: 'Ocultar', onclick: () => { local.set('fanfic.fmtHidden', true); paint(); } }));
     paint();
+    if (review && review.chId === ch.id) requestAnimationFrame(() => attachReview(p, ch, ta));
+    else if (reviewWanted === ch.id) { reviewWanted = null; requestAnimationFrame(() => openReview(p, ch, ta)); }
     return wrap;
   }
 
@@ -3755,8 +3879,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const txt = raw.slice(i, j);
       if (!k) frag.append(document.createTextNode(txt));
       else {
-        const [tk, st, c] = k.split('|'), sp = document.createElement('span');
-        if (tk) sp.className = 'tk'; else if (st) sp.className = 'st';
+        const [tk, st, c, iss] = k.split('|'), sp = document.createElement('span');
+        sp.className = [tk ? 'tk' : st ? 'st' : '', iss ? 'iss' : ''].filter(Boolean).join(' ');
         if (c && !tk) sp.style.color = c;
         sp.textContent = txt; frag.append(sp);
       }
@@ -3769,6 +3893,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const toks = [], segs = mdScan(raw, 0, {}, [], toks), attr = new Array(raw.length);
     segs.forEach(g => { if (g.s || g.c) for (let k = g.o; k < g.o + g.t.length; k++) attr[k] = '|' + (g.s ? 1 : '') + '|' + (g.c || ''); });
     toks.forEach(([x, y]) => { for (let k = x; k < y; k++) attr[k] = '1||'; });
+    if (box._issues) box._issues.forEach(([x, y]) => { for (let k = x; k < y && k < raw.length; k++) attr[k] = (attr[k] || '||') + '|1'; });
     const ranges = [];
     hls.forEach(h => { const r = rawQuoteRange(raw, h.quote); if (r && !ranges.some(x => r.start < x.end && r.end > x.start)) ranges.push(Object.assign(r, { h })); });
     ranges.sort((a, b) => a.start - b.start);
@@ -4171,7 +4296,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   // cada mudança da IA guarda a versão anterior (até 5); dá para desfazer uma por uma ou voltar a qualquer uma
-  const HISTORY_MAX = 5;
+  const HISTORY_MAX = 10;
   function pushHistory(ch, label, before = ch.text) {
     if (!ch.history) ch.history = ch.prev != null ? [{ text: ch.prev, at: ch.editedAt || Date.now(), label: 'Mudança anterior da IA' }] : [];
     ch.history.push({ text: before, at: Date.now(), label: label || 'Mudança da IA' });
@@ -4210,7 +4335,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           toast('Versão restaurada ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
         } }))));
     });
-    if (!h.length) box.append(el('p', { class: 'muted', text: 'Ainda não há versões anteriores. Cada mudança feita pela IA guarda a versão de antes aqui.' }));
+    if (!h.length) box.append(el('p', { class: 'muted', text: 'Ainda não há versões anteriores. Cada mudança, sua ou da IA, guarda a versão de antes aqui.' }));
     $('histDlg').showModal();
   }
 
@@ -4484,7 +4609,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         onThinking: () => b.update({ thinking: true }),
         onText: (t) => { ch.text = t; paintChapter(ch, t); b.update({ words: countWords(t) }); }
       });
-      ch.text = r.text; logWords(p, countWords(r.text), 'ai');
+      ch.text = r.text; logWords(p, countWords(r.text), 'ai'); setTimeout(() => offerNames(p, [ch]), 1500);
       // quando a IA escolhe o POV, ela avisa na primeira linha ("POV: Nome"); guarda e tira do texto
       if (isPovMode(p) && !ch.pov) { const m = /^\s*POV:\s*([^\n]{1,40})\n+/i.exec(ch.text); if (m) { ch.pov = m[1].trim().replace(/[.*_]+$/g, ''); ch.text = ch.text.slice(m[0].length); } }
       b.stop();
@@ -4515,14 +4640,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function continueChapter(ch) {
     const p = cur();
     if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.') || !ensureReady(p, () => continueChapter(ch))) return;
-    if (!(await confirmAI('Continuar escrevendo este capítulo.'))) return;
+    if (!(await confirmAI(ch.text.trim() ? 'Continuar escrevendo este capítulo.' : 'Escrever este capítulo seguindo o plano.'))) return;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
+    const plan = (ch.plan || '').trim();
     const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, '')}\n\n` +
-      `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` +
+      (plan ? `PLANO DESTE CAPÍTULO (feito pelo autor; siga):\nTítulo: ${ch.title || ''}\n${plan}\n\n` : '') +
+      (original ? `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` : '') +
       (isPovMode(p) && ch.pov ? `PONTO DE VISTA (POV) DESTE CAPÍTULO: ${ch.pov}; continue pelo olhar dele.\n` : '') + ptStyle(p) +
-      `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
-      `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.`, strong);
+      (original ? `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
+        `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.`
+        : `TAREFA: Escreva este capítulo inteiro, do começo, seguindo o plano. Cerca de ${Number(p.length || 1500)} palavras. Comece direto na história, sem título.`), strong);
     const sep = !original ? '' : /[.!?…"”»*)\]]\s*$/.test(original) ? '\n\n' : ' ';
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
     const b = startBusy('continue', 'Continuando', ch.id);
@@ -4763,11 +4891,46 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   // janela grande do item: título, texto e ajuda da IA para este item
   let entryCtx = null;
+
+  // ficha de personagem: campos fixos que viram linhas "**Idade:** 30" no texto do item (a IA lê do mesmo jeito)
+  var CHAR_FIELDS = [['Nome completo', 'Ex.: Rex Albuquerque'], ['Idade', 'Ex.: 28 anos'], ['Aparência', 'Altura, corpo, cabelo, olhos, marcas, roupas', true],
+    ['Personalidade', 'Como é, qualidades e defeitos', true], ['Jeito de falar', 'Gírias, sotaque, tom, palavras que usa'], ['O que quer', 'O desejo ou objetivo'],
+    ['Medo', 'Do que tem medo'], ['Segredo', 'O que esconde'], ['Passado', 'O que aconteceu antes da história', true]];
+  let sheetOn = false;
+  const sheetRe = (label) => new RegExp(`^[ \\t]*(?:[-*•][ \\t]+)?\\**${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\**[ \\t]*:[ \\t]*\\**[ \\t]*(.*)$`, 'im');
+  function entrySheetSetup(on) {
+    sheetOn = on;
+    $('entrySheet').hidden = !on;
+    $('entryTextLabel').textContent = on ? 'Mais detalhes' : 'Texto';
+    if (!on) return;
+    $('entrySheet').replaceChildren(...CHAR_FIELDS.map(([label, ph, big], i) => el('div', { class: big ? 'full' : '' },
+      el('label', { for: 'sheet' + i, text: label }),
+      big ? el('textarea', { id: 'sheet' + i, rows: 2, placeholder: ph }) : el('input', { type: 'text', id: 'sheet' + i, placeholder: ph }))));
+  }
+  function entrySetText(t) {
+    if (!sheetOn) { $('entryText').value = t; return; }
+    let rest = t || '';
+    CHAR_FIELDS.forEach(([label], i) => {
+      const m = sheetRe(label).exec(rest);
+      $('sheet' + i).value = m ? m[1].replace(/\*+$/, '').trim() : '';
+      if (m) rest = rest.slice(0, m.index) + rest.slice(m.index + m[0].length + (rest[m.index + m[0].length] === '\n' ? 1 : 0));
+    });
+    $('entryText').value = rest.replace(/^\n+/, '');
+  }
+  function entryFullText() {
+    const rest = $('entryText').value;
+    if (!sheetOn) return rest;
+    const lines = CHAR_FIELDS.map(([label], i) => { const v = $('sheet' + i).value.replace(/\s*\n\s*/g, ' ').trim(); return v ? `**${label}:** ${v}` : ''; }).filter(Boolean);
+    return lines.length ? lines.join('\n') + (rest.trim() ? '\n\n' + rest.trim() : '') : rest;
+  }
+
   function openEntry(p, list, e, folder) {
     entryCtx = { p, list, e, folder, before: null, ctrl: null };
     $('entryFolder').textContent = folder.label + (e ? '' : ' · novo item');
     $('entryTitle').value = e ? e.title || '' : '';
-    $('entryText').value = e ? e.text || '' : '';
+    entrySheetSetup(folder.key === 'personagens');
+    entrySetText(e ? e.text || '' : '');
+    entryCtx.orig = entryFullText();
     $('entryAsk').value = '';
     $('entryDelete').hidden = !e;
     $('entryUndo').hidden = true;
@@ -4784,7 +4947,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const entryDirty = () => {
     if (!entryCtx) return false;
     const e = entryCtx.e;
-    return $('entryTitle').value !== (e ? e.title || '' : '') || $('entryText').value !== (e ? e.text || '' : '');
+    return $('entryTitle').value !== (e ? e.title || '' : '') || entryFullText() !== entryCtx.orig;
   };
   function closeEntry(force) {
     if (entryCtx?.ctrl) entryCtx.ctrl.abort();
@@ -4796,7 +4959,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('entryClose').addEventListener('click', () => closeEntry());
   $('entrySave').addEventListener('click', () => {
     const c = entryCtx; if (!c) return;
-    const title = $('entryTitle').value.trim(), text = $('entryText').value.trim();
+    const title = $('entryTitle').value.trim(), text = entryFullText().trim();
     if (!title && !text) { entryStatus('Escreva pelo menos o título.', 'err'); $('entryTitle').focus(); return; }
     if (c.e) {
       if (c.e.title !== title || c.e.text !== text) { c.e.title = title; c.e.text = text; c.e.edited = true; }
@@ -4809,7 +4972,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     c.list.splice(i, 1); saveProject(c.p, true); closeEntry(true); renderWorld();
     toast('Item excluído.', { action: 'Desfazer', onAction: () => { c.list.splice(i, 0, item); saveProject(c.p, true); renderWorld(); } });
   });
-  $('entryUndo').addEventListener('click', () => { if (entryCtx?.before != null) { $('entryText').value = entryCtx.before; entryCtx.before = null; $('entryUndo').hidden = true; } });
+  $('entryUndo').addEventListener('click', () => { if (entryCtx?.before != null) { entrySetText(entryCtx.before); entryCtx.before = null; $('entryUndo').hidden = true; } });
   $('entryAi').addEventListener('click', async () => {
     const c = entryCtx; if (!c) return;
     if (c.ctrl) { c.ctrl.abort(); return; }
@@ -4832,21 +4995,21 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         chaptersTxt = block + chaptersTxt;
       }
     }
-    const currentText = $('entryText').value.trim(), ask = $('entryAsk').value.trim();
+    const currentText = entryFullText().trim(), ask = $('entryAsk').value.trim();
     const line = ecoOn() ? recapLine(p, p.chapters.length) : '';
     const prompt = `${bible(p)}\n\n` + (worldText(p) ? `MUNDO DA HISTÓRIA:\n${worldText(p)}\n\n` : '') + (line ? `LINHA DA HISTÓRIA:\n${line}\n\n` : '') + (chaptersTxt ? `${ecoOn() ? 'TRECHOS DOS CAPÍTULOS QUE CITAM O ITEM' : 'CAPÍTULOS'}:\n${chaptersTxt}\n` : '') +
       `TAREFA: Escreva o texto do item "${title}" da pasta "${c.folder.label}" do worldbuilding (${c.folder.hint || ''}). ` +
       (currentText ? `Texto atual do item (mantenha o que o autor escreveu e complete):\n${currentText}\n\n` : '') +
       (ask ? `Pedido do autor: ${ask}\n\n` : '') +
       `Use o que os capítulos e as infos mostram; não contradiga a história. Responda SOMENTE com o texto do item, sem título e sem comentários.`;
-    c.before = $('entryText').value; c.ctrl = new AbortController();
+    c.before = entryFullText(); c.ctrl = new AbortController();
     const job = startBusy('entry', 'Item do mundo', null); job.ctrl = c.ctrl;
     entryAiBtn(true); entryStatus('A IA está escrevendo…');
     try {
       const r = await callAI(prompt, { signal: c.ctrl.signal, support: true, simple: 'text', onText: (t) => { if (entryCtx === c) $('entryText').value = t; } });
-      if (entryCtx === c) { $('entryText').value = r.text.trim(); $('entryUndo').hidden = !c.before; entryStatus('Pronto. Confira e toque em Salvar.', 'ok'); }
+      if (entryCtx === c) { entrySetText(r.text.trim()); $('entryUndo').hidden = !c.before; entryStatus('Pronto. Confira e toque em Salvar.', 'ok'); }
     } catch (err) {
-      if (entryCtx === c) { $('entryText').value = c.before; c.before = null; }
+      if (entryCtx === c) { entrySetText(c.before); c.before = null; }
       if (err.name === 'AbortError') entryStatus('Parado. O texto anterior foi mantido.');
       else { entryStatus((err.message || 'Não deu certo.') + (err.charged === false ? ' Nada foi cobrado.' : '') + ' Toque em "Escrever com IA" para tentar de novo.', 'err'); if (err.action) handleAIError(err, null); }
     } finally {
@@ -4872,7 +5035,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         const pr = w.prev.e ? w.prev : { e: w.prev, folders: w.folders };
         w.prev = { e: w.e, folders: w.folders }; w.e = pr.e; w.folders = pr.folders; saveProject(p, true); renderWorld();
       } }) : null),
-      el('p', { class: 'hint', text: 'Só atualiza quando você toca no botão. A IA só acrescenta o que falta: nunca muda o que já está criado. Para editar um item, toque nele.' }));
+      el('p', { class: 'hint', text: 'Só atualiza quando você toca no botão. A IA só acrescenta o que falta: nunca muda o que já está criado. Para editar um item, toque nele.' }),
+      p.chapters.some(c => (c.text || '').trim()) ? el('button', { class: 'link plain', icon: 'users', text: 'Procurar nomes novos nos capítulos (sem IA)', onclick: () => { if (!openNames(p, p.chapters)) toast('Nenhum nome novo: tudo o que aparece nos capítulos já está no Mundo ✓'); } }) : null);
     const use = el('input', { type: 'checkbox', id: 'useWorld' });
     use.checked = p.useWorld !== false;
     use.addEventListener('change', () => { p.useWorld = use.checked; saveProject(p); });
@@ -5503,7 +5667,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Metas de escrita (sem IA): meta por dia, sequência de dias e meta do livro
   // =====================================================================
   function dayKey(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
-  function goalCfg() { return Object.assign({ daily: 500, count: 'me' }, local.get('fanfic.goals', {})); }
+  function goalCfg() { return Object.assign({ daily: 500, count: 'me' }, local.get('fanfic.goals', {}), settings.goals || {}); }
+  function setGoalCfg(c) { local.set('fanfic.goals', c); settings.goals = c; saveSettings(); }
   function logWords(p, n, who) {
     if (!p || !(n > 0)) return;
     const log = p.wlog = p.wlog || {}, k = dayKey(), e = log[k] = log[k] || [0, 0];
@@ -5582,8 +5747,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         (!pace.left ? ' Meta do livro alcançada!' : pace.perDay != null ? ` Para terminar no prazo (${pace.days} dia${pace.days > 1 ? 's' : ''}), escreva ${fmtNum(pace.perDay)} palavras por dia.` : ` Faltam ${fmtNum(pace.left)} palavras.`) })]
       : [el('p', { class: 'muted', style: 'margin:0', text: 'Defina o tamanho final para ver quanto falta e o ritmo até o prazo.' })]));
   }
-  $('goalDaily').addEventListener('input', () => { const c = goalCfg(); c.daily = Math.max(0, Number($('goalDaily').value) || 0); local.set('fanfic.goals', c); goalRender(); });
-  $('goalCount').addEventListener('change', () => { const c = goalCfg(); c.count = $('goalCount').value; local.set('fanfic.goals', c); goalRender(); });
+  $('goalDaily').addEventListener('input', () => { const c = goalCfg(); c.daily = Math.max(0, Number($('goalDaily').value) || 0); setGoalCfg(c); goalRender(); });
+  $('goalCount').addEventListener('change', () => { const c = goalCfg(); c.count = $('goalCount').value; setGoalCfg(c); goalRender(); });
   ['goalTotal', 'goalUntil'].forEach(id => $(id).addEventListener('input', () => {
     const p = goalP; p.goal = { total: Math.max(0, Number($('goalTotal').value) || 0), until: $('goalUntil').value || '' }; saveProject(p); goalRender();
   }));
@@ -5603,12 +5768,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function chapterBoard(p) {
     const wrap = el('div', {});
     const counts = CH_STATUS.map(([k, t]) => [k, t, p.chapters.filter(c => chStatus(c) === k).length]).filter(x => x[2]);
-    wrap.append(el('div', { class: 'board-sum' }, counts.map(([k, t, n]) => el('span', { class: 'st-chip st-' + k, text: `${t} · ${n}` }))));
+    wrap.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:10px' },
+      el('div', { class: 'board-sum', style: 'margin:0' }, counts.map(([k, t, n]) => el('span', { class: 'st-chip st-' + k, text: `${t} · ${n}` }))),
+      el('div', { class: 'row' },
+        el('button', { icon: 'plus', text: 'Cartão', title: 'Planejar um capítulo antes de escrever', onclick: () => openPlan(p, null) }),
+        el('button', { icon: 'milestone', text: 'Estrutura pronta', onclick: () => openTemplates(p) }))));
     const board = el('div', { class: 'board', role: 'list', 'aria-label': 'Mural de capítulos' });
     p.chapters.forEach((c, i) => {
-      const st = chStatus(c), sum = c.recap && c.recap.text ? c.recap.text : storyPlain((c.text || '').slice(0, 500)).replace(/\s+/g, ' ').slice(0, 240);
+      const st = chStatus(c), sum = c.recap && c.recap.text ? c.recap.text : (c.text || '').trim() ? storyPlain((c.text || '').slice(0, 500)).replace(/\s+/g, ' ').slice(0, 240) : (c.plan || '').trim() ? 'Plano: ' + c.plan.trim() : '';
       const grip = el('button', { type: 'button', class: 'grip', icon: 'grip-vertical', 'aria-label': `Mover o capítulo ${i + 1}. Use as setas para mudar a posição.`, title: 'Arraste para mudar a ordem' });
-      const card = el('article', { class: 'bcard', role: 'listitem', style: c.color ? `--bc:${c.color}` : null, 'data-i': i,
+      const card = el('article', { class: 'bcard' + ((c.text || '').trim() ? '' : ' plan'), role: 'listitem', style: c.color ? `--bc:${c.color}` : null, 'data-i': i,
         onclick: (e) => { if (e.target.closest('button')) return; view.chapterId = c.id; view.mode = 'ler'; renderChapters(); scrollTo(0, 0); } },
         el('div', { class: 'bc-top' },
           el('span', { class: 'bc-num', text: `CAP. ${i + 1}` + (c.pov ? ` · ${c.pov.toUpperCase()}` : '') }),
@@ -5883,7 +6052,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     try {
       if (L.fmt === 'pdf') printBook(p, L);
       else if (L.fmt === 'epub') { downloadBlob(await buildEpub(p, L), fileName(p.title) + '.epub'); toast('EPUB baixado ✓'); }
-      else if (L.fmt === 'docx') { downloadBlob(buildDocx(p, L), fileName(p.title) + '.docx'); toast('Arquivo do Word baixado ✓'); }
+      else if (L.fmt === 'docx') { downloadBlob(await buildDocx(p, L), fileName(p.title) + '.docx'); toast('Arquivo do Word baixado ✓'); }
       else exportStory(p);
     } catch (e) { console.error(e); $('layStatus').textContent = 'Não deu certo: ' + e.message; $('layStatus').className = 'status err'; }
   });
@@ -5916,6 +6085,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       .front .au { font-size: 1.15em; letter-spacing: .08em; }
       .toc { break-before: page; break-after: page; }
       .blankpg { page: blankp; break-before: page; break-after: page; height: 1px; }
+      .chopen { page: chopen; }
+      @page chopen { @top-left { content: none } @top-right { content: none } }
+      p.cont { text-indent: 0; } p.cut { text-align-last: justify; }
+      .toc li { display: flex; align-items: flex-end; gap: 6px; }
+      .toc li .t { flex: 1; } .toc li .t::after { content: ""; }
+      .toc li .pg { min-width: 2em; text-align: right; font-variant-numeric: tabular-nums; }
       @page blankp { @top-left { content: none } @top-right { content: none } @bottom-left { content: none } @bottom-right { content: none } }
       .toc h2 { text-align: center; font-weight: 400; font-size: 1.4em; margin: 18% 0 1.6em; letter-spacing: .1em; text-transform: uppercase; }
       .toc ol { list-style: none; padding: 0; margin: 0; }
@@ -5936,29 +6111,64 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         main > section + section { border-top: 1px dashed #ccc; padding-top: 12mm; margin-top: 12mm; } main > .coverpage { margin: -${m.top}mm -${m.outer}mm 0 -${m.inner}mm; } .blankpg { display: none; } }
       @media print { .hint-bar { display: none; } }`;
     const front = L.titlePage ? `<section class="front"><h1>${xmlEsc(title)}</h1>${author ? `<div class="au">${xmlEsc(author)}</div>` : ''}</section>` : '';
-    const toc = L.toc ? `<section class="toc"><h2>Sumário</h2><ol>${chs.map(c => chName(c) ? `<li><small>${xmlEsc(chLabel(p, c))}</small>${xmlEsc(chName(c))}</li>` : `<li>${xmlEsc(chLabel(p, c))}</li>`).join('')}</ol></section>` : '';
+    const toc = L.toc ? `<section class="toc"><h2>Sumário</h2><ol>${chs.map(c => `<li><span class="t">${chName(c) ? `<small>${xmlEsc(chLabel(p, c))}</small>${xmlEsc(chName(c))}` : xmlEsc(chLabel(p, c))}</span><span class="pg"></span></li>`).join('')}</ol></section>` : '';
     const body = chs.map(c => `<section class="chapter"><div class="ch-head"><small>${xmlEsc(chLabel(p, c))}</small>${chName(c) ? `<h2>${xmlEsc(chName(c))}</h2>` : ''}<div class="orn">⁂</div></div>\n${bookHtml(c.text, L.black)}</section>`).join('\n');
     return `<!doctype html><html lang="${langCode(p)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${xmlEsc(title)}</title><style>${css}</style></head><body>` +
       `<div class="hint-bar"><span>Na janela de impressão, escolha <b>Salvar como PDF</b>, margens <b>Padrão</b> e desligue <b>Cabeçalhos e rodapés</b>.</span><button onclick="print()">Imprimir / salvar PDF</button></div>` +
       `<main>${cover ? `<section class="coverpage"><img src="${cover}" alt=""></section>` : ''}${front}${toc}${body}</main>` +
-      (L.odd ? `<script>(${rightPages.toString()})(${sz[2] - m.inner - m.outer}, ${sz[3] - m.top - m.bottom});<\/script>` : '') + '</body></html>';
+      `<script>(${paginateBook.toString()})(${sz[2] - m.inner - m.outer}, ${sz[3] - m.top - m.bottom}, ${!!L.odd});<\/script>` + '</body></html>';
   }
   // roda dentro da janela do livro: mede quantas páginas cada parte ocupa (colunas do mesmo tamanho da página)
   // e põe uma página em branco antes do que precisa abrir na direita (o Chrome não faz isso sozinho)
-  function rightPages(wmm, hmm) {
-    var main = document.querySelector('main'), secs = [].slice.call(main.children), page = 1;
-    var probe = document.createElement('div');
-    probe.style.cssText = 'position:absolute;left:-99999px;top:0;width:' + wmm + 'mm;height:' + hmm + 'mm;column-width:' + wmm + 'mm;column-gap:0;column-fill:auto;';
-    document.body.appendChild(probe);
-    var colW = probe.getBoundingClientRect().width;
+  // roda dentro da janela do livro: mede as páginas (colunas do tamanho da página) e
+  // 1) põe uma página em branco antes do que abre na direita, 2) tira o cabeçalho da 1ª página de cada capítulo
+  // (separa o começo do capítulo numa "página nomeada"), 3) escreve o número das páginas no sumário
+  function paginateBook(wmm, hmm, odd) {
+    var main = document.querySelector('main'), secs = [].slice.call(main.children), page = 1, starts = [];
+    var mk = function (h) { var d = document.createElement('div'); d.style.cssText = 'position:absolute;left:-99999px;top:0;width:' + wmm + 'mm;height:' + h + ';column-width:' + wmm + 'mm;column-gap:0;column-fill:auto;'; document.body.appendChild(d); return d; };
+    var probe = mk(hmm + 'mm');
+    var colW = probe.getBoundingClientRect().width, lineH = parseFloat(getComputedStyle(document.body).lineHeight) || 20;
+    var probe1 = mk('calc(' + hmm + 'mm - ' + Math.ceil(lineH * 1.1) + 'px)'); // um pouco menor: a 1ª página nunca transborda
+    function splitFirstPage(sec) {
+      var c = sec.cloneNode(true); probe1.innerHTML = ''; probe1.appendChild(c);
+      var limit = probe1.getBoundingClientRect().left + colW - 1, inCol2 = function (r) { return r.left > limit; }, stop = null, cut = null;
+      var ps = [].slice.call(c.querySelectorAll('p'));
+      for (var i = 0; i < ps.length && !stop; i++) {
+        var rs = [].slice.call(ps[i].getClientRects()); if (!rs.length) continue;
+        if (inCol2(rs[0])) { stop = ps[i]; break; }
+        if (!rs.some(inCol2)) continue;
+        var tw = document.createTreeWalker(ps[i], NodeFilter.SHOW_TEXT), n;
+        while ((n = tw.nextNode())) {
+          var at = function (k) { var r = document.createRange(); r.setStart(n, k); r.setEnd(n, Math.min(n.length, k + 1)); return r.getClientRects()[0]; };
+          var lr = at(n.length - 1); if (!lr || !inCol2(lr)) continue;
+          var lo = 0, hi = n.length - 1;
+          while (lo < hi) { var mid = (lo + hi) >> 1, r = at(mid); if (r && inCol2(r)) hi = mid; else lo = mid + 1; }
+          while (lo > 0 && !/\s/.test(n.data[lo - 1])) lo--;
+          cut = { p: ps[i], node: n, off: lo }; break;
+        }
+        stop = ps[i];
+      }
+      var open = document.createElement('div'); open.className = 'chopen';
+      if (cut && cut.off > 0) {
+        var r = document.createRange(); r.setStart(cut.p, 0); r.setEnd(cut.node, cut.off);
+        var first = cut.p.cloneNode(false); first.classList.add('cut'); first.appendChild(r.extractContents()); cut.p.parentNode.insertBefore(first, cut.p);
+        cut.p.classList.remove('first'); cut.p.classList.add('cont');
+      }
+      while (c.firstChild && c.firstChild !== stop) open.appendChild(c.firstChild);
+      c.insertBefore(open, c.firstChild);
+      sec.replaceWith(c);
+      return c;
+    }
     secs.forEach(function (sec) {
-      var right = sec.classList.contains('front') || sec.classList.contains('toc') || sec.classList.contains('chapter');
+      var right = odd && (sec.classList.contains('front') || sec.classList.contains('toc') || sec.classList.contains('chapter'));
       if (right && page % 2 === 0) { var b = document.createElement('div'); b.className = 'blankpg'; main.insertBefore(b, sec); page++; }
       var n = 1;
       if (!sec.classList.contains('coverpage')) { probe.innerHTML = ''; probe.appendChild(sec.cloneNode(true)); n = Math.max(1, Math.round(probe.scrollWidth / colW)); }
+      if (sec.classList.contains('chapter')) { starts.push(page); try { splitFirstPage(sec); } catch (e) { /* fica com o cabeçalho */ } }
       page += n;
     });
-    probe.remove();
+    [].slice.call(document.querySelectorAll('.toc .pg')).forEach(function (s, i) { if (starts[i]) s.textContent = starts[i]; });
+    probe.remove(); probe1.remove();
   }
   function printBook(p, L) {
     const w = window.open('', '_blank');
@@ -6067,7 +6277,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return makeZip(files, 'application/epub+zip');
   }
   // ---------- Word (.docx) ----------
-  function buildDocx(p, L) {
+  async function buildDocx(p, L) {
     const sz = PAGE_SIZES.find(x => x[0] === L.size) || PAGE_SIZES[0], m = pageMargins(sz), tw = (mm) => Math.round(mm * 56.6929);
     const title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim(), font = L.font, half = Math.round(Number(L.pt) * 2);
     const run = (x) => {
@@ -6077,21 +6287,39 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const para = (style, inner, extra = '') => `<w:p><w:pPr>${style ? `<w:pStyle w:val="${style}"/>` : ''}${extra}</w:pPr>${inner}</w:p>`;
     const textRun = (t) => `<w:r><w:t xml:space="preserve">${xmlEsc(t)}</w:t></w:r>`;
     let body = '';
+    const footer = L.nums ? '<w:footerReference w:type="default" r:id="rIdFooter"/><w:footerReference w:type="first" r:id="rIdFooter"/>' : '';
+    const header = L.head ? '<w:headerReference w:type="default" r:id="rIdHeader"/><w:headerReference w:type="first" r:id="rIdHeaderFirst"/>' : '';
+    // cada capítulo é uma seção: com "página da direita", a seção começa numa página ímpar; a 1ª página da seção fica sem cabeçalho
+    const sect = (type) => `<w:sectPr>${header}${footer}${type ? `<w:type w:val="${type}"/>` : ''}<w:pgSz w:w="${tw(sz[2])}" w:h="${tw(sz[3])}"/><w:pgMar w:top="${tw(m.top)}" w:right="${tw(m.outer)}" w:bottom="${tw(m.bottom)}" w:left="${tw(m.inner)}" w:header="${tw(9)}" w:footer="${tw(9)}" w:gutter="0"/><w:titlePg/></w:sectPr>`;
+    const chType = L.odd ? 'oddPage' : 'nextPage';
+    // capa como primeira página
+    const cover = L.cover ? coverData(p) : '', media = [];
+    if (cover) {
+      const dims = await new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res([2, 3]); im.src = cover; });
+      const maxW = (sz[2] - m.inner - m.outer) * 36000, maxH = (sz[3] - m.top - m.bottom) * 36000, k = Math.min(maxW / dims[0], maxH / dims[1]);
+      const W = Math.round(dims[0] * k), H = Math.round(dims[1] * k), png = cover.startsWith('data:image/png');
+      media.push([`word/media/capa.${png ? 'png' : 'jpeg'}`, dataUrlBytes(cover), png]);
+      body += `<w:p><w:pPr><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${W}" cy="${H}"/><wp:docPr id="1" name="Capa"/>` +
+        `<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">` +
+        `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="1" name="capa"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdCover"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
+        `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${W}" cy="${H}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>` +
+        `<w:p><w:pPr>${sect('')}</w:pPr></w:p>`;
+    }
     if (L.titlePage) body += para('Title', textRun(title), '<w:spacing w:before="3000"/>') + (author ? para('Subtitle', textRun(author)) : '');
     if (L.toc) body += para('TOCHeading', textRun('Sumário'), L.titlePage ? '<w:pageBreakBefore/>' : '') +
       `<w:p><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> TOC \\o "1-1" \\h \\z \\u </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>Abra no Word e atualize o sumário (botão direito, Atualizar campo).</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`;
-    bookChapters(p).forEach((c, i) => {
-      body += para('Heading1', textRun(chName(c) ? `${chLabel(p, c)}: ${chName(c)}` : chLabel(p, c)), i || L.titlePage || L.toc ? '' : '<w:pageBreakBefore w:val="false"/>');
+    if (L.titlePage || L.toc) body += `<w:p><w:pPr>${sect('')}</w:pPr></w:p>`;
+    const chs = bookChapters(p);
+    chs.forEach((c, i) => {
+      if (i) body += `<w:p><w:pPr>${sect(chType)}</w:pPr></w:p>`; // fecha a seção do capítulo anterior
+      body += para('Heading1', textRun(chName(c) ? `${chLabel(p, c)}: ${chName(c)}` : chLabel(p, c)));
       let first = true;
       mdParas(c.text).forEach(t => {
         if (isSceneBreak(t)) { body += para('SceneBreak', textRun('* * *')); first = true; return; }
         body += para(first ? 'FirstPara' : '', parseMd(t).map(run).join('')); first = false;
       });
     });
-    const footer = L.nums ? '<w:footerReference w:type="default" r:id="rIdFooter"/>' : '';
-    const header = L.head ? '<w:headerReference w:type="default" r:id="rIdHeader"/>' : '';
-    const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${body}` +
-      `<w:sectPr>${header}${footer}<w:pgSz w:w="${tw(sz[2])}" w:h="${tw(sz[3])}"/><w:pgMar w:top="${tw(m.top)}" w:right="${tw(m.outer)}" w:bottom="${tw(m.bottom)}" w:left="${tw(m.inner)}" w:header="${tw(9)}" w:footer="${tw(9)}" w:gutter="0"/><w:titlePg/></w:sectPr></w:body></w:document>`;
+    const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><w:body>${body}${sect(L.titlePage || L.toc || cover || chs.length > 1 ? chType : '')}</w:body></w:document>`;
     const lineTw = Math.round(240 * Number(L.lead) / 1.15);
     const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
       `<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="${xmlEsc(font)}" w:hAnsi="${xmlEsc(font)}" w:cs="${xmlEsc(font)}"/><w:sz w:val="${half}"/><w:szCs w:val="${half}"/><w:lang w:val="${langCode(p)}"/></w:rPr></w:rPrDefault>` +
@@ -6101,26 +6329,459 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       `<w:style w:type="paragraph" w:styleId="SceneBreak"><w:name w:val="Quebra de cena"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="200"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="400"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${half * 3}"/></w:rPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.3)}"/></w:rPr></w:style>` +
-      `<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="FirstPara"/><w:pPr><w:keepNext/><w:pageBreakBefore/><w:spacing w:before="2400" w:after="720"/><w:ind w:firstLine="0"/><w:jc w:val="center"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.6)}"/></w:rPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="FirstPara"/><w:pPr><w:keepNext/><w:spacing w:before="2400" w:after="720"/><w:ind w:firstLine="0"/><w:jc w:val="center"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.6)}"/></w:rPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="TOCHeading"><w:name w:val="TOC Heading"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="1200" w:after="480"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.4)}"/></w:rPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="TOC1"><w:name w:val="toc 1"/><w:basedOn w:val="Normal"/><w:pPr><w:tabs><w:tab w:val="right" w:leader="dot" w:pos="${tw(sz[2] - m.inner - m.outer)}"/></w:tabs><w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>` +
       `<w:style w:type="paragraph" w:styleId="HeaderFooter"><w:name w:val="header"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:color w:val="666666"/><w:sz w:val="${half - 4}"/></w:rPr></w:style></w:styles>`;
     const files = [
-      ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>' +
+      ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpeg" ContentType="image/jpeg"/>' +
         '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
-        '<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' +
+        '<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/header2.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' +
         '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>'],
       ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>'],
       ['docProps/core.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${xmlEsc(title)}</dc:title><dc:creator>${xmlEsc(author)}</dc:creator><dc:language>${langCode(p)}</dc:language></cp:coreProperties>`],
-      ['word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rIdHeader" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>'],
+      ['word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rIdHeader" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rIdHeaderFirst" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header2.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' +
+        (media.length ? `<Relationship Id="rIdCover" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="${media[0][0].replace('word/', '')}"/>` : '') + '</Relationships>'],
       ['word/settings.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:defaultTabStop w:val="708"/>' + (L.toc ? '<w:updateFields w:val="true"/>' : '') + '</w:settings>'],
       ['word/header1.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="HeaderFooter"/></w:pPr><w:r><w:t xml:space="preserve">${xmlEsc(author ? `${author}  ·  ${title}` : title)}</w:t></w:r></w:p></w:hdr>`],
+      ['word/header2.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p/></w:hdr>'],
       ['word/footer1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="HeaderFooter"/></w:pPr><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>'],
       ['word/styles.xml', styles],
-      ['word/document.xml', doc]];
+      ['word/document.xml', doc], ...media.map(([n, b]) => [n, b])];
     return makeZip(files, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
 
+
+
+  // =====================================================================
+  // Formatar (sem IA): travessões, aspas, reticências, parágrafos e quebras de cena
+  // =====================================================================
+  function formatText(t, whole) {
+    t = (t || '').replace(/\r\n?/g, '\n').replace(/[ \t ]+$/gm, '');
+    // texto com uma linha por parágrafo e nenhuma linha em branco: cada linha vira um parágrafo
+    if (whole && !/\n\s*\n/.test(t) && (t.match(/\n/g) || []).length > 2) t = t.replace(/\n/g, '\n\n');
+    t = t.replace(/^[ \t]*(\*[ \t]*){3,}$|^[ \t]*([-_~=#•·][ \t]*){3,}$|^[ \t]*[#⁂][ \t]*$/gm, '* * *');
+    t = t.replace(/^([ \t]*)(?:--?|–|—|―)[ \t]*(?=\S)/gm, '$1— ');                 // fala no começo do parágrafo
+    t = t.replace(/([^\s\-])[ \t]+(?:--?|–|―)[ \t]+(?=\S)/g, '$1 — ');               // interrupção da fala
+    t = t.replace(/(\S)[ \t]*—[ \t]*(?=[a-záéíóúâêôãõç])/g, (m, a) => /[\w,.!?…]/.test(a) ? `${a} — ` : m);
+    t = t.replace(/\.\s?\.\s?\./g, '…').replace(/…\.+/g, '…');
+    t = t.replace(/"([^"\n]*)"/g, '“$1”').replace(/(^|[\s(—])'([^'\n]+)'(?=[\s.,!?;:)…—]|$)/gm, '$1‘$2’');
+    // fala entre aspas no começo do parágrafo vira travessão: “Oi,” ela disse, “tudo bem?” -> — Oi — ela disse. — Tudo bem?
+    t = t.replace(/^[ \t]*“([^”\n]+?)([.,!?…]?)”,?[ \t]+(\p{Ll}[^\n]*)$/gmu, (m, fala, p, resto) => {
+      resto = resto.replace(/,?[ \t]*“([^”\n]+)”/g, (x, f2) => ` — ${f2}`);
+      return `— ${fala}${p === '.' || p === ',' ? '' : p} — ${resto}`;
+    });
+    t = t.replace(/^[ \t]*“([^”\n]+)”[ \t]*$/gm, '— $1');
+    t = t.replace(/[ \t]+([,.;:!?…])/g, '$1').replace(/([,;:!?])(?=[A-Za-zÀ-ÿ])/g, '$1 ').replace(/[ \t]{2,}/g, ' ');
+    t = t.replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '');
+    return t;
+  }
+  function formatInEditor(ta) {
+    const a = ta.selectionStart, b = ta.selectionEnd, all = a === b, src = all ? ta.value : ta.value.slice(a, b), out = formatText(src, all);
+    if (out === src) { toast('A formatação já está certinha ✓'); return; }
+    ta.focus(); ta.setRangeText(out, all ? 0 : a, all ? ta.value.length : b, 'select');
+    ta.dispatchEvent(new Event('input'));
+    toast(all ? 'Capítulo formatado ✓ Confira e salve (Ctrl+Z desfaz).' : 'Trecho formatado ✓');
+  }
+
+  // =====================================================================
+  // Revisor automático (sem IA): aponta e sugere, você decide
+  // =====================================================================
+  var review = null, reviewWanted = null;
+  const RV_KINDS = { pont: 'Pontuação', trad: 'Cara de tradução', rep: 'Repetição', estilo: 'Estilo' };
+  const BODY = 'cabelo|cabelos|olho|olhos|mão|mãos|boca|lábio|lábios|rosto|cabeça|braço|braços|perna|pernas|ombro|ombros|peito|nariz|testa|queixo|pescoço|dedo|dedos|coração|costas|cintura|pele|bochecha|bochechas|nuca|língua|joelho|joelhos|pé|pés|barriga|orelha|orelhas|sobrancelha|sobrancelhas';
+  const RV_STOP = new Set('a o as os um uma uns umas de do da dos das em no na nos nas por pelo pela pelos pelas para pra com sem sob sobre entre até que se não mais mas como quando onde porque pois já ainda também muito muita muitos muitas pouco tudo nada todo toda todos todas isso isto aquilo esse essa esses essas este esta estes estas aquele aquela ele ela eles elas eu tu você vocês nós me te se lhe nos vos seu sua seus suas meu minha meus minhas teu tua dele dela deles delas era foi ser estar estava está estão tinha tem ter havia há fazer fez faz disse ou e é sim só bem então depois antes agora sempre nunca outra outro outras outros mesmo mesma cada qual quem'.split(' '));
+  const CLICHES = [
+    [/solt(ou|ei|aram) (a|uma) respira[çc][ãa]o que (nem )?(sabia|sabiam) que (estava|estavam) (segurando|prendendo)/i, 'Clichê muito comum em fanfic traduzida.'],
+    [/borboletas no est[ôo]mago/i, 'Clichê. Que tal mostrar o nervosismo com uma ação?'],
+    [/um sorriso brinc(ou|ava) (n|em s)(os|eus) l[áa]bios/i, 'Clichê de tradução ("a smile played on his lips").'],
+    [/(o|seu) cora[çc][ãa]o (disparou|errou uma batida|pulou uma batida)/i, 'Clichê. Vale variar.'],
+    [/o tempo (parou|pareceu parar)/i, 'Clichê.'],
+    [/um arrepio (percorreu|desceu|subiu) (a|pela|sua) espinha/i, 'Clichê.'],
+    [/no final do dia/i, 'Tradução de "at the end of the day". Em português: "no fim das contas", "afinal".'],
+    [/fazer (o|a|uma) diferen[çc]a/i, 'Expressão de tradução; muitas vezes "importar" soa mais natural.']
+  ];
+  const INTERJ = [[/\bOh meu Deus\b/g, 'Meu Deus'], [/\bAh meu Deus\b/g, 'Meu Deus'], [/\bOh,? (?=[a-záéíóú])/g, ''], [/\bUau\b/g, 'Nossa'], [/\bOkay\b/gi, 'Tá'], [/\b[Oo]k\b(?=[,.!?…\s])/g, 'Tá'], [/\bDroga\b/g, 'Que saco']];
+  const POSS = { seu: 'o', sua: 'a', seus: 'os', suas: 'as' }, CONTR = { em: { o: 'no', a: 'na', os: 'nos', as: 'nas' }, de: { o: 'do', a: 'da', os: 'dos', as: 'das' }, por: { o: 'pelo', a: 'pela', os: 'pelos', as: 'pelas' } };
+  function reviewText(t, pt) {
+    const out = [], add = (s, e, kind, msg, fix) => { if (e > s && !out.some(x => s < x.e && e > x.s && x.kind === kind)) out.push({ s, e, kind, msg, fix }); };
+    const each = (re, fn) => { re.lastIndex = 0; let m; while ((m = re.exec(t))) { if (!m[0]) { re.lastIndex++; continue; } fn(m); } };
+    // pontuação (correções seguras)
+    each(/[^\S\n]{2,}/g, m => { if (m.index && t[m.index - 1] !== '\n') add(m.index, m.index + m[0].length, 'pont', 'Espaço duplo.', ' '); });
+    each(/[^\S\n]+(?=[,.;:!?…])/g, m => add(m.index, m.index + m[0].length, 'pont', 'Espaço antes da pontuação.', ''));
+    each(/[,;!?](?=[A-Za-zÀ-ÿ])/g, m => add(m.index, m.index + 1, 'pont', 'Falta espaço depois da pontuação.', m[0] + ' '));
+    each(/\.\.\.|\. \. \./g, m => add(m.index, m.index + m[0].length, 'pont', 'Reticências: use o caractere próprio.', '…'));
+    each(/^[ \t]*(?:--?|–)[ \t]*(?=\S)/gm, m => add(m.index, m.index + m[0].length, 'pont', 'Fala com hífen: use travessão.', '— '));
+    each(/(?<=[^\s\-])[^\S\n]+(?:--?|–)[^\S\n]+(?=\S)/g, m => add(m.index, m.index + m[0].length, 'pont', 'Hífen no lugar de travessão.', ' — '));
+    each(/[.]([^\S\n]+—[^\S\n]+)(?=(disse|perguntou|respondeu|falou|gritou|sussurrou|murmurou|retrucou|completou|continuou|explicou|resmungou|rebateu|admitiu|insistiu)\b)/g,
+      m => add(m.index, m.index + 1, 'pont', 'Antes de "— disse…", a fala não leva ponto.', ''));
+    each(/(?<![\p{L}])(\p{L}{2,})\s+\1(?![\p{L}])/giu, m => { if (!/^(ha|he|hi|não|ai|oi|já|tá|tic|toc|blá|bla)$/i.test(m[1])) add(m.index, m.index + m[0].length, 'pont', 'Palavra repetida.', m[1]); });
+    each(/(?<=[.!?]\s+)(\p{Ll})/gu, m => { const before = t.slice(Math.max(0, m.index - 6), m.index); if (!/(Sr|Sra|Dr|Dra|etc|p|vs)\.\s+$/i.test(before)) add(m.index, m.index + 1, 'pont', 'Depois de ponto final, letra maiúscula.', m[0].toUpperCase()); });
+    if (pt) {
+      // cara de tradução
+      each(new RegExp(`(?<![\\p{L}])(?:(em|de|por)\\s+)?(seu|sua|seus|suas)\\s+(${BODY})(?![\\p{L}])`, 'giu'), m => {
+        const prep = (m[1] || '').toLowerCase(), art = POSS[m[2].toLowerCase()];
+        let fix = (prep ? CONTR[prep][art] : art) + ' ' + m[3];
+        if (m[0][0] === m[0][0].toUpperCase() && m[0][0] !== m[0][0].toLowerCase()) fix = fix[0].toUpperCase() + fix.slice(1);
+        add(m.index, m.index + m[0].length, 'trad', 'Parte do corpo com possessivo soa traduzido; em português usamos o artigo.', fix);
+      });
+      INTERJ.forEach(([re, fix]) => each(re, m => add(m.index, m.index + m[0].length, 'trad', 'Interjeição com cara de tradução.', fix)));
+      each(/(?<![\p{L}])revir(ou|ei|aram|ando|a) os olhos/giu, m => add(m.index, m.index + m[0].length, 'trad', 'Muito usado em tradução. Que tal "bufou", "fez uma careta", "suspirou"?', null));
+      each(/(?<![\p{L}])(foi|foram|era|eram|será|serão|tinha sido|é|são)\s+\p{L}+(ad|id)[oa]s?\s+(por|pela|pelo|pelos|pelas)(?![\p{L}])/giu, m => add(m.index, m.index + m[0].length, 'trad', 'Voz passiva. Na ativa costuma soar mais natural.', null));
+      // sujeito repetido no começo de frases seguidas
+      each(/(?:^|[.!?…]\s+)(Ele|Ela|Eu|Eles|Elas)\s[^.!?…\n]{3,}[.!?…]\s+(\1)\s/gm, m => { const at = m.index + m[0].lastIndexOf(m[2] + ' '); add(at, at + m[2].length, 'trad', `"${m[2]}" de novo: dá para cortar, o verbo já mostra quem é.`, null); });
+      CLICHES.forEach(([re, msg]) => each(new RegExp(re.source, 'gi'), m => add(m.index, m.index + m[0].length, 'estilo', msg, null)));
+    }
+    // frases: muito longas, -mente demais, gerúndios em sequência
+    each(/[^.!?…\n]+[.!?…]*/g, m => {
+      const sen = m[0], words = sen.match(/\p{L}+/gu) || [];
+      if (words.length > 45) add(m.index, m.index + sen.length, 'estilo', `Frase longa (${words.length} palavras). Dividir ajuda a leitura.`, null);
+      const mente = [...sen.matchAll(/(?<![\p{L}])\p{L}{3,}mente(?![\p{L}])/gu)];
+      if (pt && mente.length >= 2) mente.slice(1).forEach(x => add(m.index + x.index, m.index + x.index + x[0].length, 'estilo', 'Muitos advérbios em -mente na mesma frase.', null));
+      const ger = [...sen.matchAll(/(?<![\p{L}])\p{L}{3,}(ando|endo|indo)(?![\p{L}])/gu)];
+      if (pt && ger.length >= 3) add(m.index + ger[2].index, m.index + ger[2].index + ger[2][0].length, 'estilo', 'Gerúndios em sequência deixam a frase arrastada.', null);
+    });
+    // repetição de palavras perto uma da outra (25 palavras)
+    const ws = [...t.matchAll(/\p{L}{5,}/gu)], last = new Map();
+    ws.forEach((w, i) => {
+      const k = w[0].toLowerCase(); if (RV_STOP.has(k)) return;
+      const stem = k.replace(/(s|es|mente)$/, '');
+      if (last.has(stem) && i - last.get(stem) <= 25) add(w.index, w.index + w[0].length, 'rep', `"${w[0]}" apareceu logo antes. Vale trocar por outra palavra ou cortar.`, null);
+      last.set(stem, i);
+    });
+    return out.sort((a, b) => a.s - b.s);
+  }
+  function openReview(p, ch, ta) {
+    if (review) clearInterval(review.watch);
+    review = { p, ch, chId: ch.id, filter: '', ignore: new Set((ch.rvIgnore || [])), sel: -1, miss: 0 };
+    // some sozinho quando o Editar deste capítulo fecha
+    review.watch = setInterval(() => { if (!review) return; if (review.ta && review.ta.isConnected) { review.miss = 0; return; } if (++review.miss > 2) closeReview(); }, 400);
+    attachReview(p, ch, ta);
+  }
+  function closeReview() {
+    const ta = review && review.ta;
+    if (review) clearInterval(review.watch);
+    review = null; $('reviewPanel')?.remove(); document.body.classList.remove('rv-open');
+    const bd = ta && ta.parentElement && ta.parentElement.querySelector('.edit-backdrop');
+    if (bd) { bd._issues = null; bd._repaint && bd._repaint(); }
+  }
+  function attachReview(p, ch, ta) {
+    if (!review) return;
+    review.ta = ta;
+    if (!ta._rv) { ta._rv = true; let t; ta.addEventListener('input', () => { if (!review || review.ta !== ta) return; clearTimeout(t); t = setTimeout(runReview, 350); }); }
+    runReview();
+  }
+  function runReview() {
+    const r = review; if (!r) return;
+    if (!r.ta || !r.ta.isConnected) return;
+    const key = (x) => `${x.kind}:${r.ta.value.slice(x.s, x.e)}:${x.msg}`;
+    r.issues = reviewText(r.ta.value, isPtBr(r.p)).filter(x => !r.ignore.has(key(x)));
+    r.key = key;
+    const bd = r.ta.parentElement.querySelector('.edit-backdrop');
+    if (bd) { bd._issues = r.issues.map(x => [x.s, x.e]); bd._repaint && bd._repaint(); }
+    renderReview();
+  }
+  function renderReview() {
+    const r = review; if (!r) return;
+    let panel = $('reviewPanel');
+    if (!panel) { panel = el('div', { id: 'reviewPanel', class: 'review-panel', role: 'region', 'aria-label': 'Revisor automático' }); document.body.append(panel); document.body.classList.add('rv-open'); }
+    const shown = r.issues.filter(x => !r.filter || x.kind === r.filter), fixable = r.issues.filter(x => x.kind === 'pont' && x.fix != null);
+    const counts = Object.keys(RV_KINDS).map(k => [k, r.issues.filter(x => x.kind === k).length]).filter(x => x[1]);
+    const list = el('div', { class: 'rv-list' });
+    shown.slice(0, 200).forEach(x => {
+      const v = r.ta.value, a = Math.max(0, x.s - 40), z = Math.min(v.length, x.e + 40);
+      const q = el('div', { class: 'rv-q' }, (a ? '…' : '') + v.slice(a, x.s).replace(/\s+/g, ' '), el('b', { text: v.slice(x.s, x.e) || ' ' }),
+        x.fix != null ? el('ins', { text: x.fix || '∅' }) : null, v.slice(x.e, z).replace(/\s+/g, ' ') + (z < v.length ? '…' : ''));
+      const item = el('div', { class: 'rv-item', onclick: (e) => { if (!e.target.closest('button')) rvGoto(x); } },
+        el('div', { class: 'rv-k', text: RV_KINDS[x.kind] }), q, el('div', { class: 'rv-m', text: x.msg }),
+        el('div', { class: 'rv-b' },
+          x.fix != null ? el('button', { class: 'primary', text: x.fix === '' ? 'Apagar' : 'Aplicar', onclick: () => rvApply([x]) }) : el('button', { text: 'Ver no texto', onclick: () => rvGoto(x) }),
+          el('button', { class: 'link plain', text: 'Ignorar', onclick: () => { r.ignore.add(r.key(x)); r.ch.rvIgnore = [...r.ignore].slice(-300); saveProject(r.p); runReview(); } })));
+      list.append(item);
+    });
+    if (!shown.length) list.append(el('div', { class: 'rv-empty', text: r.issues.length ? 'Nada nesta categoria.' : 'Nada para apontar. O texto está limpo ✓' }));
+    panel.replaceChildren(
+      el('div', { class: 'rv-head' }, el('h3', { icon: 'list-checks', text: `Revisor · ${r.issues.length}` }), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar o revisor', onclick: closeReview })),
+      counts.length > 1 ? el('div', { class: 'rv-tabs' }, el('button', { class: 'chip', 'aria-pressed': String(!r.filter), text: 'Tudo', onclick: () => { r.filter = ''; renderReview(); } }),
+        counts.map(([k, n]) => el('button', { class: 'chip', 'aria-pressed': String(r.filter === k), text: `${RV_KINDS[k]} ${n}`, onclick: () => { r.filter = k; renderReview(); } }))) : null,
+      fixable.length ? el('div', { class: 'rv-actions' }, el('button', { class: 'primary', icon: 'check', text: `Corrigir a pontuação (${fixable.length})`, onclick: () => rvApply(fixable) })) : null,
+      list);
+  }
+  function rvApply(xs) {
+    const r = review, ta = r.ta; if (!xs.length) return;
+    ta.focus();
+    [...xs].sort((a, b) => b.s - a.s).forEach(x => ta.setRangeText(x.fix, x.s, x.e, 'end'));
+    ta.dispatchEvent(new Event('input'));
+    clearTimeout(r.t); runReview();
+    toast(xs.length > 1 ? `${xs.length} correções aplicadas ✓ (Ctrl+Z desfaz)` : 'Corrigido ✓');
+  }
+  function rvGoto(x) {
+    const ta = review.ta, v = ta.value;
+    ta.focus({ preventScroll: true }); ta.setSelectionRange(x.s, x.e);
+    const para = (v.slice(0, x.s).match(/\n\s*\n/g) || []).length, tops = editParaTops(ta), r = ta.getBoundingClientRect();
+    const y = scrollY + r.top + (tops[para] || 0) - innerHeight * .3;
+    scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  }
+
+
+  // =====================================================================
+  // Nomes novos (sem IA): nomes próprios dos capítulos que ainda não estão no Mundo
+  // =====================================================================
+  const NAME_SKIP = new Set(('deus senhor senhora sr sra srta dr dra dona seu oi olá ok tá não sim ah oh eh hum uau nossa meu minha porra merda caramba droga ' +
+    'janeiro fevereiro março abril maio junho julho agosto setembro outubro novembro dezembro segunda terça quarta quinta sexta sábado domingo natal páscoa ' +
+    'capítulo parte prólogo epílogo fim pov então mas quando depois antes ainda agora talvez claro obrigado obrigada desculpa por favor bom boa tudo nada ' +
+    'ele ela eles elas eu você vocês nós isso aquilo este esta esse essa aquele aquela mais menos só já também nunca sempre onde como porque quem qual').split(' '));
+  const nNorm = (t) => normTitle(t).replace(/[^a-z0-9 ]/g, '');
+  function knownNames(p) {
+    const w = p.world ? worldOf(p) : null, txt = [p.title, p.characters, p.premise, p.fandom, p.notes, p.bibleFacts];
+    if (w) { WORLD.forEach(([k]) => w.e[k].forEach(e => txt.push(e.title, e.text))); w.folders.forEach(f => f.entries.forEach(e => txt.push(e.title, e.text))); }
+    const set = new Set();
+    txt.filter(Boolean).join('\n').replace(/\p{L}+/gu, (m) => { set.add(nNorm(m)); return m; });
+    return set;
+  }
+  function scanNames(p, chs) {
+    const known = knownNames(p), ign = new Set((p.nameIgnore || []).map(nNorm)), found = new Map(), lowerSeen = new Set();
+    const all = p.chapters.map(c => storyPlain(c.text || '')).join('\n\n');
+    all.replace(/(?<![\p{L}])\p{Ll}{3,}(?![\p{L}])/gu, (m) => { lowerSeen.add(nNorm(m)); return m; });
+    chs.forEach(c => {
+      const t = storyPlain(c.text || ''), re = /(?<![\p{L}])\p{Lu}\p{Ll}{2,}(?:\s+(?:d[aeo]s?\s+)?\p{Lu}\p{Ll}{2,})*(?![\p{L}])/gu; let m;
+      while ((m = re.exec(t))) {
+        const name = m[0].replace(/\s+/g, ' '), parts = name.split(' ').filter(x => !/^d[aeo]s?$/.test(x)), key = nNorm(name);
+        const atStart = m.index === 0 || /(^|[.!?…:—"“]\s*|\n\s*)$/.test(t.slice(Math.max(0, m.index - 4), m.index));
+        if (parts.every(x => NAME_SKIP.has(nNorm(x)) || known.has(nNorm(x)))) continue;
+        if (ign.has(key) || known.has(key)) continue;
+        if (parts.length === 1 && lowerSeen.has(key)) continue; // é palavra comum ("Vale" e "vale")
+        const f = found.get(key) || { name, n: 0, mid: 0, ctx: '', ch: c, place: 0 };
+        f.n++; if (!atStart) f.mid++;
+        if (/(?<![\p{L}])(em|no|na|para|pra|pelo|pela|até|de|do|da)\s+$/iu.test(t.slice(Math.max(0, m.index - 6), m.index))) f.place++;
+        if (!f.ctx) { const a = Math.max(0, m.index - 50), z = Math.min(t.length, m.index + name.length + 50); f.ctx = (a ? '…' : '') + t.slice(a, z).replace(/\s+/g, ' ') + (z < t.length ? '…' : ''); }
+        found.set(key, f);
+      }
+    });
+    // nome que só aparece em começo de frase uma vez pode ser palavra comum
+    const fresh = [...found.values()].filter(f => f.mid >= 1 && (f.n >= 2 || f.name.includes(' '))).sort((a, b) => b.n - a.n).slice(0, 25);
+    return fresh;
+  }
+  // nomes do Mundo e dos capítulos que diferem por um acento ou uma letra (Theo × Téo)
+  function nameVariants(p) {
+    const w = p.world ? worldOf(p) : null; if (!w) return [];
+    const names = w.e.personagens.map(e => charKey(e.title)).filter(n => n && n.length >= 3);
+    const text = p.chapters.map(c => storyPlain(c.text || '')).join('\n'), counts = new Map();
+    text.replace(/(?<![\p{L}])\p{Lu}\p{Ll}{2,}(?![\p{L}])/gu, (m) => { counts.set(m, (counts.get(m) || 0) + 1); return m; });
+    const dist = (a, b) => { if (Math.abs(a.length - b.length) > 1) return 9; const d = [...Array(b.length + 1).keys()]; for (let i = 1; i <= a.length; i++) { let prev = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; } } return d[b.length]; };
+    const out = [], seen = new Set((p.variantOk || []));
+    names.forEach(n => counts.forEach((c, word) => {
+      if (word === n || seen.has(`${n}|${word}`)) return;
+      const a = nNorm(n), b = nNorm(word);
+      if ((a === b || (a.length >= 4 && dist(a, b) === 1)) && !names.includes(word)) out.push({ main: n, other: word, nMain: counts.get(n) || 0, nOther: c });
+    }));
+    return out.slice(0, 10);
+  }
+  const offeredNames = new Set();
+  function offerNames(p, chs) {
+    if (!p || !p.chapters.includes(chs[0])) return;
+    const fresh = scanNames(p, chs).filter(f => !offeredNames.has(p.id + '|' + nNorm(f.name)));
+    if (!fresh.length) return;
+    fresh.forEach(f => offeredNames.add(p.id + '|' + nNorm(f.name)));
+    toast(`Nomes novos: ${fresh.slice(0, 3).map(f => f.name).join(', ')}${fresh.length > 3 ? '…' : ''}. Guardar no Mundo?`, { action: 'Ver', onAction: () => openNames(p, chs), ms: 9000 });
+  }
+  let namesCtx = null;
+  function openNames(p, chs) {
+    const fresh = scanNames(p, chs), vars = nameVariants(p);
+    if (!fresh.length && !vars.length) return false;
+    namesCtx = { p, fresh };
+    const KINDS = [['personagens', 'Personagem'], ['lugares', 'Lugar'], ['grupos', 'Grupo'], ['glossario', 'Termo'], ['', 'Não guardar'], ['ignorar', 'Não é nome (ignorar sempre)']];
+    $('namesList').replaceChildren(...(fresh.length ? fresh.map((f, i) => {
+      const sel = el('select', { 'data-i': i, 'aria-label': `Onde guardar ${f.name}` }, KINDS.map(([v, t]) => el('option', { value: v, text: t })));
+      sel.value = f.place > f.n / 2 ? 'lugares' : 'personagens';
+      return el('div', { class: 'nm-row' }, el('span', { class: 'nm-n', text: f.name }), el('span', { class: 'nm-c', text: `${f.n}× · ${f.ctx}` }), sel);
+    }) : [el('p', { class: 'muted', style: 'margin:0', text: 'Nenhum nome novo.' })]));
+    $('namesVarWrap').hidden = !vars.length;
+    $('namesVar').replaceChildren(...vars.map(v => el('div', { class: 'nm-var' },
+      el('span', { class: 'grow' }, el('b', { text: v.main }), ` (${v.nMain}×) e `, el('b', { text: v.other }), ` (${v.nOther}×)`),
+      el('button', { text: `Unificar para ${v.main}`, onclick: (e) => { unifyName(p, v.other, v.main); e.currentTarget.closest('.nm-var').remove(); } }),
+      el('button', { class: 'link plain', text: 'São diferentes', onclick: (e) => { p.variantOk = [...(p.variantOk || []), `${v.main}|${v.other}`]; saveProject(p); e.currentTarget.closest('.nm-var').remove(); } }))));
+    $('namesGo').hidden = !fresh.length;
+    $('namesDlg').showModal();
+    return true;
+  }
+  function unifyName(p, from, to) {
+    const re = new RegExp(`(?<![\\p{L}])${from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'gu');
+    let n = 0;
+    p.chapters.forEach(c => { if (!re.test(c.text)) return; re.lastIndex = 0; pushHistory(c, `Unificar "${from}" para "${to}"`); c.text = c.text.replace(re, () => { n++; return to; }); c.editedAt = Date.now(); });
+    saveProject(p, true); if (currentId === p.id) renderTab();
+    toast(`${n} troca(s): "${from}" virou "${to}" ✓`);
+  }
+  $('namesGo').addEventListener('click', () => {
+    const c = namesCtx; if (!c) return;
+    const w = worldOf(c.p); let n = 0;
+    $('namesList').querySelectorAll('select').forEach(sel => {
+      const f = c.fresh[sel.dataset.i], k = sel.value;
+      if (k === 'ignorar') { c.p.nameIgnore = [...(c.p.nameIgnore || []), f.name]; return; }
+      if (!k) return;
+      const chN = c.p.chapters.indexOf(f.ch) + 1;
+      w.e[k].push({ id: uid(), title: f.name, text: chN ? `Aparece no capítulo ${chN}: ${f.ctx}` : '', by: 'user', edited: true }); n++;
+    });
+    saveProject(c.p, true); $('namesDlg').close();
+    if (currentId === c.p.id && view.tab === 'mundo') renderWorld();
+    toast(n ? `${n} item(ns) guardado(s) no Mundo ✓` : 'Pronto ✓');
+  });
+
+
+  // =====================================================================
+  // Estatísticas (sem IA): tamanho dos capítulos, quem aparece onde, diálogo, palavras mais usadas
+  // =====================================================================
+  const fmtTime = (min) => min < 60 ? `${Math.max(1, Math.round(min))} min` : `${Math.floor(min / 60)} h ${String(Math.round(min % 60)).padStart(2, '0')} min`;
+  function chapterStats(c) {
+    const paras = mdParas(c.text || '').filter(t => !isSceneBreak(t));
+    let dlg = 0, all = 0;
+    paras.forEach(t => {
+      const plain = parseMd(t).map(x => x.t).join(''), n = countWords(plain); all += n;
+      if (/^\s*[—–-]/.test(plain)) { // fala com travessão: só a parte falada (sem "— disse ela")
+        const parts = plain.split(/\s[—–]\s/); dlg += parts.filter((_, i) => i % 2 === 0).reduce((k, x) => k + countWords(x), 0);
+      } else (plain.match(/[“"][^”"]+[”"]/g) || []).forEach(q => { dlg += countWords(q); });
+    });
+    return { words: all, dlg };
+  }
+  function openStats(p) {
+    const chs = p.chapters, st = chs.map(chapterStats), total = st.reduce((n, x) => n + x.words, 0), dlg = st.reduce((n, x) => n + x.dlg, 0);
+    const avg = chs.length ? total / chs.length : 0, max = Math.max(1, ...st.map(x => x.words));
+    const body = $('statsBody');
+    const tile = (k, v, sub) => el('div', {}, el('div', { class: 'k', text: k }), el('div', { class: 'v', text: v }), sub ? el('div', { class: 's', text: sub }) : null);
+    const out = [el('div', { class: 'st-hero' },
+      tile('Palavras', fmtNum(total), `${fmtNum(Math.round(total / 250))} páginas de livro`),
+      tile('Capítulos', fmtNum(chs.length), `média de ${fmtNum(Math.round(avg))} palavras`),
+      tile('Tempo de leitura', fmtTime(total / 220), 'lendo 220 palavras por minuto'),
+      tile('Diálogo', `${total ? Math.round(dlg / total * 100) : 0}%`, 'do texto é fala'))];
+    // tamanho de cada capítulo
+    out.push(el('h3', { class: 'st-sec', text: 'Tamanho dos capítulos' }),
+      el('p', { class: 'hint', style: 'margin:0 0 6px', text: 'A linha tracejada é a média. Capítulos muito maiores ou menores que a média mudam o ritmo da leitura.' }),
+      el('div', { class: 'st-bars', role: 'list' }, chs.map((c, i) => el('div', { class: 'st-bar', role: 'listitem', title: `${fmtNum(st[i].words)} palavras · ${st[i].words ? Math.round(st[i].dlg / st[i].words * 100) : 0}% de diálogo · ${fmtTime(st[i].words / 220)} de leitura` },
+        el('span', { class: 'lb', text: `${i + 1}. ${chTitle(p, c)}` }),
+        el('span', { class: 'tr', 'aria-hidden': 'true' }, el('i', { style: `width:${st[i].words / max * 100}%` }), el('span', { class: 'avg', style: `left:${avg / max * 100}%` })),
+        el('span', { class: 'n', text: fmtNum(st[i].words) })))));
+    // quem aparece em cada capítulo
+    const w = p.world ? worldOf(p) : null, people = w ? w.e.personagens.filter(e => charKey(e.title).length > 1) : [];
+    if (people.length && chs.length) {
+      const rows = people.map(e => {
+        const re = new RegExp(`(?<![\\p{L}])${charKey(e.title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'giu');
+        return { e, counts: chs.map(c => (storyPlain(c.text || '').match(re) || []).length) };
+      }).sort((a, b) => b.counts.reduce((n, x) => n + x, 0) - a.counts.reduce((n, x) => n + x, 0));
+      const peak = Math.max(1, ...rows.flatMap(r => r.counts));
+      const shade = (n) => n ? `background: color-mix(in srgb, var(--accent) ${Math.round(18 + 70 * Math.sqrt(n / peak))}%, var(--surface-2))` : '';
+      out.push(el('h3', { class: 'st-sec', text: 'Quem aparece em cada capítulo' }),
+        el('p', { class: 'hint', style: 'margin:0 0 6px', text: 'Quantas vezes o nome aparece. Quanto mais forte a cor, mais presente o personagem.' }),
+        el('div', { class: 'st-heat-wrap' }, el('table', { class: 'st-heat' },
+          el('thead', {}, el('tr', {}, el('th', { text: 'Personagem' }), chs.map((c, i) => el('th', { scope: 'col', title: chTitle(p, c), text: String(i + 1) })))),
+          el('tbody', {}, rows.map(r => el('tr', {}, el('th', { scope: 'row', text: charKey(r.e.title) }),
+            r.counts.map((n, i) => el('td', { class: n ? '' : 'z', style: shade(n), title: `${charKey(r.e.title)} no capítulo ${i + 1}: ${n}×`, text: String(n) }))))))));
+      const gone = chs.length >= 5 ? rows.filter(r => { const lastIdx = r.counts.reduce((k, n, i) => n ? i : k, -1); return lastIdx >= 0 && chs.length - 1 - lastIdx >= 3 && r.counts.reduce((a, b) => a + b, 0) >= 3; }) : [];
+      if (gone.length) out.push(el('p', { class: 'st-warn', text: `Sumiram há 3 capítulos ou mais: ${gone.map(r => { const li = r.counts.reduce((k, n, i) => n ? i : k, -1); return `${charKey(r.e.title)} (último no ${li + 1})`; }).join(', ')}.` }));
+    } else out.push(el('p', { class: 'hint', text: 'Para ver quem aparece em cada capítulo, cadastre os personagens no Mundo.' }));
+    // palavras mais usadas
+    const names = new Set(people.map(e => nNorm(charKey(e.title)))), freq = new Map();
+    chs.forEach(c => storyPlain(c.text || '').toLowerCase().replace(/\p{L}{4,}/gu, (m) => { if (!RV_STOP.has(m) && !names.has(nNorm(m))) freq.set(m, (freq.get(m) || 0) + 1); return m; }));
+    const top = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 24);
+    const mente = [...freq.entries()].filter(([k]) => k.endsWith('mente')).reduce((n, [, v]) => n + v, 0);
+    if (top.length) out.push(el('h3', { class: 'st-sec', text: 'Palavras que você mais usa' }),
+      el('p', { class: 'hint', style: 'margin:0 0 6px', text: `Bom para achar vícios de escrita.${mente ? ` Advérbios em -mente: ${fmtNum(mente)} (${(mente / Math.max(1, total) * 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} a cada mil palavras).` : ''} Use o Buscar para trocar.` }),
+      el('div', { class: 'st-words' }, top.map(([k, v]) => el('span', {}, k, el('b', { text: fmtNum(v) })))));
+    body.replaceChildren(...out);
+    $('statsDlg').showModal();
+  }
+
+
+  // =====================================================================
+  // Cartões de planejamento e estruturas prontas (sem IA)
+  // =====================================================================
+  function planBox(p, ch, editing) {
+    const empty = !(ch.text || '').trim();
+    return el('div', { class: 'plan-box' },
+      el('div', { class: 'pb-k', text: 'Plano do capítulo' }), el('p', { text: ch.plan.trim() }),
+      el('div', { class: 'row' },
+        empty && !editing ? el('button', { class: 'primary', icon: 'pencil', text: 'Escrever eu mesmo', onclick: () => { view.mode = 'editar'; renderChapters(); } }) : null,
+        empty ? el('button', { icon: 'sparkles', ai: true, text: 'Escrever com IA seguindo o plano', onclick: () => guardEdit(() => continueChapter(ch)) }) : null,
+        el('button', { class: 'link plain', icon: 'pencil', text: 'Editar o plano', onclick: () => openPlan(p, ch) })));
+  }
+  let planCtx = null;
+  function openPlan(p, ch) {
+    planCtx = { p, ch };
+    $('planTitle').lastChild.textContent = ch ? 'Plano do capítulo' : 'Novo cartão de planejamento';
+    $('planName').value = ch ? ch.title || '' : ''; $('planText').value = ch ? ch.plan || '' : '';
+    $('planDel').hidden = !ch || !!(ch.text || '').trim();
+    $('planDlg').showModal(); $(ch ? 'planText' : 'planName').focus();
+  }
+  $('planSave').addEventListener('click', () => {
+    const c = planCtx; if (!c) return;
+    const title = $('planName').value.trim(), plan = $('planText').value.trim();
+    if (!title && !plan) { $('planName').focus(); return; }
+    if (c.ch) { c.ch.title = title; c.ch.plan = plan; }
+    else c.p.chapters.push({ id: uid(), title: title || `Capítulo ${c.p.chapters.length + 1}`, text: '', plan, status: 'ideia' });
+    saveProject(c.p, true); $('planDlg').close(); renderChapters(); renderProjects(); toast('Plano salvo ✓');
+  });
+  $('planDel').addEventListener('click', () => {
+    const c = planCtx; if (!c || !c.ch || !confirm('Apagar este cartão?')) return;
+    c.p.chapters = c.p.chapters.filter(x => x !== c.ch); if (view.chapterId === c.ch.id) view.chapterId = null;
+    saveProject(c.p, true); $('planDlg').close(); renderChapters(); renderProjects();
+  });
+  var STORY_TEMPLATES = [
+    { id: '3atos', name: 'Três atos', desc: 'O clássico: começo, meio e fim, com duas viradas.', steps: [
+      ['Apresentação', 'Mostre o mundo e o protagonista no dia a dia: o que ele quer e o que falta na vida dele.'],
+      ['O chamado', 'Algo acontece e tira o protagonista da rotina. A história começa de verdade.'],
+      ['Primeira virada', 'O protagonista decide agir (ou é forçado). Não dá mais para voltar atrás.'],
+      ['Complicações', 'Obstáculos crescentes, aliados e rivais. Cada tentativa traz um novo problema.'],
+      ['Ponto central', 'Uma revelação ou vitória falsa muda o jogo. Os riscos ficam maiores.'],
+      ['Tudo dá errado', 'O pior momento: perda, traição ou derrota. Parece que não há saída.'],
+      ['Clímax', 'O confronto final. O protagonista usa o que aprendeu para enfrentar o problema principal.'],
+      ['Resolução', 'As consequências. Mostre como o protagonista e o mundo mudaram.']] },
+    { id: 'heroi', name: 'Jornada do Herói', desc: 'As 12 etapas de Campbell e Vogler. Boa para aventura e fantasia.', steps: [
+      ['Mundo comum', 'O herói antes da aventura: rotina, defeitos e desejos.'], ['Chamado à aventura', 'Surge um problema ou convite que muda tudo.'],
+      ['Recusa do chamado', 'Medo e dúvida: o herói hesita.'], ['Encontro com o mentor', 'Alguém dá conselho, treino ou um presente.'],
+      ['Travessia do limiar', 'O herói entra no mundo novo; não há volta.'], ['Testes, aliados e inimigos', 'Aprende as regras do mundo novo e faz alianças.'],
+      ['Aproximação da caverna', 'Preparação para o maior perigo.'], ['A provação', 'O grande teste: quase morte, perda ou confronto com o medo.'],
+      ['A recompensa', 'O herói conquista o que buscava (objeto, verdade, amor).'], ['O caminho de volta', 'As consequências o perseguem; ainda há perigo.'],
+      ['Ressurreição', 'O teste final, onde o herói mostra que mudou.'], ['Retorno com o elixir', 'Volta para casa transformado, trazendo algo para os outros.']] },
+    { id: 'cat', name: 'Save the Cat', desc: 'As 15 batidas de Blake Snyder. Ritmo de filme, ótima para histórias rápidas.', steps: [
+      ['Imagem de abertura', 'Um retrato de como o protagonista está no começo.'], ['Tema apresentado', 'Alguém diz, sem querer, a lição que ele vai aprender.'],
+      ['Preparação', 'O mundo, os personagens e o que precisa mudar.'], ['Catalisador', 'O acontecimento que muda tudo.'], ['Debate', 'O protagonista hesita: vai ou não vai?'],
+      ['Entrada no segundo ato', 'Ele escolhe entrar no mundo novo.'], ['História B', 'Uma relação nova (muitas vezes o romance) que carrega o tema.'],
+      ['Diversão e brincadeiras', 'A promessa da premissa: as cenas que o leitor veio ver.'], ['Ponto central', 'Vitória ou derrota falsa; o relógio começa a correr.'],
+      ['Os vilões se aproximam', 'Pressão de fora e dúvidas de dentro.'], ['Tudo está perdido', 'O fundo do poço; algo ou alguém "morre".'],
+      ['Noite escura da alma', 'O protagonista sofre e entende o que precisa mudar.'], ['Entrada no terceiro ato', 'A solução aparece, juntando a história A e a B.'],
+      ['Final', 'O plano em ação, com uma reviravolta, e a vitória.'], ['Imagem final', 'O oposto da imagem de abertura: a transformação.']] },
+    { id: 'romance', name: 'Romance', desc: 'As etapas de uma história de amor, do encontro ao final feliz. Ótima para fanfic.', steps: [
+      ['Antes do amor', 'Cada um na própria vida: o que falta, o que esconde, por que não está pronto para amar.'],
+      ['O encontro', 'O primeiro encontro, com faísca: atrito, constrangimento ou atração imediata.'],
+      ['Não pode dar certo', 'Os motivos (de fora e de dentro) para os dois não ficarem juntos.'],
+      ['Forçados a ficar perto', 'Algo obriga os dois a conviver: trabalho, viagem, segredo, aposta.'],
+      ['A guarda baixa', 'Momentos de verdade; um conhece o lado escondido do outro.'],
+      ['Primeiro beijo', 'A tensão explode. Tudo muda entre eles.'],
+      ['Felizes, mas…', 'Fase boa do casal, enquanto o grande problema ainda está escondido.'],
+      ['A crise', 'O segredo vem à tona ou o medo vence. Eles se afastam.'],
+      ['Separados', 'Cada um sofre e entende o que precisa mudar em si.'],
+      ['O grande gesto', 'Um deles (ou os dois) arrisca tudo para provar o amor.'],
+      ['Felizes para sempre', 'O casal junto e mudado. Um final que mostra o futuro deles.']] }
+  ];
+  let tplPick = null, tplP = null;
+  function openTemplates(p) {
+    tplP = p; tplPick = null; $('tplGo').disabled = true;
+    $('tplList').replaceChildren(...STORY_TEMPLATES.map(t => {
+      const steps = el('ol', { class: 'tpl-steps', hidden: true }, t.steps.map(([n]) => el('li', { text: n })));
+      const b = el('button', { type: 'button', class: 'tpl', 'aria-pressed': 'false', onclick: () => {
+        tplPick = t; $('tplGo').disabled = false;
+        $('tplList').querySelectorAll('.tpl').forEach(x => { x.setAttribute('aria-pressed', String(x === b)); x.querySelector('.tpl-steps').hidden = x !== b; });
+      } }, el('b', { text: `${t.name} · ${t.steps.length} cartões` }), el('span', { text: t.desc }), steps);
+      return b;
+    }));
+    $('tplDlg').showModal();
+  }
+  $('tplGo').addEventListener('click', () => {
+    const p = tplP, t = tplPick; if (!p || !t) return;
+    t.steps.forEach(([n, d]) => p.chapters.push({ id: uid(), title: n, text: '', plan: d, status: 'ideia', tpl: t.id }));
+    saveProject(p, true); $('tplDlg').close();
+    chView = 'mural'; local.set('fanfic.chView', 'mural'); view.chapterId = null; renderChapters(); renderProjects();
+    toast(`${t.steps.length} cartões criados no Mural ✓ Toque em um para escrever o plano.`);
+  });
 
   // =====================================================================
   // Linha do tempo (sem IA): acontecimentos em ordem, ligados a capítulos e personagens
@@ -6161,8 +6822,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     shown.forEach(ev => {
       const i = t.indexOf(ev), ch = ev.chId ? p.chapters.find(c => c.id === ev.chId) : null;
       const move = (d) => { const j = i + d; if (j < 0 || j >= t.length) return; t.splice(i, 1); t.splice(j, 0, ev); saveProject(p, true); renderWorld(); };
-      list.append(el('div', { class: 'tl-ev', style: ev.color ? `--tc:${ev.color}` : null },
-        el('div', { class: 'acts' },
+      const grip = el('button', { class: 'tl-grip', icon: 'grip-vertical', 'aria-label': 'Arrastar para mudar a ordem', title: 'Arraste para mudar a ordem', disabled: !!tlFilter });
+      const evEl = el('div', { class: 'tl-ev', style: ev.color ? `--tc:${ev.color}` : null, 'data-id': ev.id },
+        el('div', { class: 'acts' }, grip,
           el('button', { icon: 'arrow-up', 'aria-label': 'Mover para antes', title: 'Antes', disabled: i === 0 || !!tlFilter, onclick: () => move(-1) }),
           el('button', { icon: 'arrow-down', 'aria-label': 'Mover para depois', title: 'Depois', disabled: i === t.length - 1 || !!tlFilter, onclick: () => move(1) }),
           el('button', { icon: 'pencil', 'aria-label': 'Editar', title: 'Editar', onclick: () => openTimelineEvent(p, ev) })),
@@ -6171,12 +6833,37 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         (ev.text || '').trim() ? el('p', { class: 'txt', text: ev.text.trim() }) : null,
         (ch || (ev.chars || []).length) ? el('div', { class: 'chips' },
           ch ? el('button', { type: 'button', class: 'tc', icon: 'book-open', text: chTitle(p, ch), title: 'Abrir o capítulo', onclick: () => { view.tab = 'capitulos'; view.chapterId = ch.id; view.mode = 'ler'; renderTab(); scrollTo(0, 0); } }) : null,
-          (ev.chars || []).map(id => chars.find(e => e.id === id)).filter(Boolean).map(e => el('span', { class: 'tc', text: charKey(e.title) || e.title }))) : null));
+          (ev.chars || []).map(id => chars.find(e => e.id === id)).filter(Boolean).map(e => el('span', { class: 'tc', text: charKey(e.title) || e.title }))) : null);
+      grip.addEventListener('pointerdown', (pe) => dragTimeline(pe, p, list, evEl));
+      list.append(evEl);
     });
     if (!t.length) list.append(el('p', { class: 'muted', text: 'Nenhum acontecimento ainda. Crie o primeiro ou traga os capítulos para começar.' }));
     else if (!shown.length) list.append(el('p', { class: 'muted', text: 'Esse personagem ainda não aparece em nenhum acontecimento.' }));
     card.append(list, el('p', { class: 'hint', text: 'A ordem é a da história (não a dos capítulos): use as setas para ajustar, por exemplo, um flashback. A IA lê esta linha do tempo ao escrever.' }));
     return card;
+  }
+  function dragTimeline(e, p, list, item) {
+    e.preventDefault();
+    const r = item.getBoundingClientRect(), offY = e.clientY - r.top, lifted = item.cloneNode(true);
+    lifted.classList.add('lifted'); Object.assign(lifted.style, { position: 'fixed', zIndex: 90, left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', pointerEvents: 'none', boxShadow: '0 14px 40px rgba(0,0,0,.45)' });
+    document.body.append(lifted); item.style.opacity = '.35';
+    let lastY = e.clientY;
+    const auto = setInterval(() => { if (lastY < 70) scrollBy(0, -14); else if (lastY > innerHeight - 70) scrollBy(0, 14); }, 30);
+    const move = (ev) => {
+      lastY = ev.clientY; lifted.style.top = (ev.clientY - offY) + 'px';
+      const other = [...list.querySelectorAll('.tl-ev')].filter(x => x !== item).find(x => { const b = x.getBoundingClientRect(); return ev.clientY >= b.top && ev.clientY <= b.bottom; });
+      if (other) { const b = other.getBoundingClientRect(); list.insertBefore(item, ev.clientY > b.top + b.height / 2 ? other.nextSibling : other); }
+    };
+    const up = () => {
+      clearInterval(auto); lifted.remove(); item.style.opacity = '';
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      const t = timelineOf(p), order = [...list.querySelectorAll('.tl-ev')].map(x => x.dataset.id);
+      const before = t.map(x => x.id).join();
+      t.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+      if (t.map(x => x.id).join() !== before) { saveProject(p, true); toast('Ordem atualizada ✓'); }
+      renderWorld();
+    };
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   }
   function openTimelineEvent(p, ev) {
     const w = worldOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
@@ -6400,7 +7087,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { class: 'icon-btn', icon: 'zoom-out', 'aria-label': 'Diminuir', title: 'Diminuir', onclick: () => zoomAt(1 / 1.25) }),
         el('button', { class: 'icon-btn', icon: 'zoom-in', 'aria-label': 'Aumentar', title: 'Aumentar', onclick: () => zoomAt(1.25) }),
         el('button', { class: 'icon-btn', icon: 'maximize', 'aria-label': 'Tela cheia', title: 'Tela cheia', onclick: () => toggleFull(!stage.classList.contains('full')) }),
-        el('button', { class: 'link plain', text: 'Organizar', title: 'Volta todos para um círculo', onclick: () => { if (!confirm('Reorganizar todos os personagens em círculo?')) return; m.pos = {}; saveProject(p); renderWorld(); } })),
+        el('button', { class: 'link plain', text: 'Organizar', title: 'Aproxima quem tem ligação e afasta o resto', onclick: () => { autoLayoutMap(chars, m); saveProject(p, true); cmap.view = null; renderWorld(); toast('Mapa organizado ✓'); } })),
       stage, exitFull,
       el('div', { class: 'cmap-legend' }, REL_TYPES.map(([, t, c]) => el('span', {}, el('i', { style: `background:${c}` }), t)), counts),
       panel,
@@ -6409,6 +7096,27 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     drawAll();
     requestAnimationFrame(() => { if (cmap.view) apply(); else fit(); });
     return card;
+  }
+  // organiza o mapa: ligações puxam, personagens se empurram, tudo tende ao centro
+  function autoLayoutMap(chars, m) {
+    const n = chars.length; if (!n) return;
+    const P = chars.map((e, i) => { const q = m.pos[e.id] || {}; const a = i / n * Math.PI * 2; return { id: e.id, x: q.x ?? Math.cos(a) * 200, y: q.y ?? Math.sin(a) * 200, vx: 0, vy: 0 }; });
+    const idx = Object.fromEntries(P.map((q, i) => [q.id, i]));
+    const links = m.links.filter(l => idx[l.a] != null && idx[l.b] != null);
+    for (let it = 0, t = 1; it < 400; it++, t *= 0.99) {
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+        const a = P[i], b = P[j]; let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+        if (d2 < 1) { dx = Math.random() - .5; dy = Math.random() - .5; d2 = 1; }
+        const f = 26000 / d2, d = Math.sqrt(d2), fx = dx / d * f, fy = dy / d * f;
+        a.vx -= fx; a.vy -= fy; b.vx += fx; b.vy += fy;
+      }
+      links.forEach(l => {
+        const a = P[idx[l.a]], b = P[idx[l.b]], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, f = (d - 170) * .04;
+        a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f;
+      });
+      P.forEach(q => { q.vx -= q.x * .01; q.vy -= q.y * .01; const sp = Math.hypot(q.vx, q.vy), max = 40 * t; if (sp > max) { q.vx *= max / sp; q.vy *= max / sp; } q.x += q.vx; q.y += q.vy; q.vx *= .5; q.vy *= .5; });
+    }
+    P.forEach(q => { m.pos[q.id] = { x: Math.round(q.x), y: Math.round(q.y) }; });
   }
   // sugestões sem IA: quem aparece no mesmo parágrafo nos capítulos + quem aparece junto num item de Relações
   function suggestLinks(p, done) {

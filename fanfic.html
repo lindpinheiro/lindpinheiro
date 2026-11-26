@@ -386,6 +386,12 @@
   .gen-ref .gen-cap { position: absolute; left: 0; right: 0; bottom: 0; font-size: .65rem; font-weight: 600; padding: 2px 4px; background: rgba(0,0,0,.6); color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .gen-ref.add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: .72rem; color: var(--muted); border-style: dashed; }
   .gen-ref:disabled { opacity: .45; }
+  .gen-base { display: flex; gap: 12px; align-items: center; padding: 10px; margin: 4px 0 6px; border: 1px solid var(--accent); border-radius: 12px; background: var(--accent-soft); }
+  .gen-base img { width: 64px; height: 84px; object-fit: cover; border-radius: 8px; flex: none; cursor: zoom-in; }
+  .gen-base .gb-text { flex: 1; min-width: 0; }
+  .gen-base .gb-text b { display: block; }
+  .gen-base .gb-text .hint { margin: 2px 0 0; }
+  .gen-result img { cursor: zoom-in; }
   .gen-result { margin-top: 14px; display: grid; gap: 10px; justify-items: center; }
   .gen-result img { max-width: 100%; max-height: 52vh; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
   .cover-card { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
@@ -1044,11 +1050,16 @@
     <button type="button" data-gen="lugar" aria-pressed="false">Lugar</button>
   </div>
   <p class="hint" id="genWhat"></p>
+  <div class="gen-base" id="genBase" hidden>
+    <img id="genBaseImg" alt="Imagem que vai ser melhorada">
+    <div class="gb-text"><b id="genBaseTitle">Melhorando esta imagem</b><p class="hint">A IA parte dela e muda só o que você pedir. A original continua guardada.</p></div>
+    <button type="button" class="link plain" id="genBaseOff">Criar do zero</button>
+  </div>
   <div id="genChWrap" hidden><label for="genCh" style="margin-top:0">Capítulo</label><select id="genCh"></select></div>
   <div id="genSubWrap" hidden><label for="genSub" style="margin-top:0" id="genSubLabel">Quem?</label><input type="text" id="genSub" list="genSubList" autocomplete="off"><datalist id="genSubList"></datalist></div>
   <label>Estilo</label>
   <div class="chips" id="genStyles"></div>
-  <label for="genExtra">Algo mais? <span class="muted">(opcional)</span></label>
+  <label for="genExtra" id="genExtraLabel">Algo mais? <span class="muted">(opcional)</span></label>
   <textarea id="genExtra" rows="2" placeholder="Ex.: pôr do sol, tons quentes, os dois de costas olhando o mar"></textarea>
   <label>Referências visuais <span class="muted">(opcional)</span></label>
   <p class="hint" id="genRefsHint" style="margin-top:0">Escolha até 4 imagens para a IA seguir: rosto, cabelo, roupa, lugar ou estilo.</p>
@@ -2583,6 +2594,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           el('p', { class: 'muted', style: 'margin:0 0 10px', text: cover ? 'A capa fica guardada nas Referências, junto com as outras imagens.' : 'Envie a sua capa ou crie uma com IA a partir das infos da obra, do mundo e dos personagens.' }),
           el('div', { class: 'row' },
             el('button', { icon: 'upload', text: cover ? 'Trocar por uma imagem' : 'Enviar capa', onclick: () => pickCoverFile(p) }),
+            cover ? el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, text: 'Melhorar capa', title: 'Gerar uma versão nova a partir desta capa', onclick: () => openImageGen(p, { kind: 'capa', baseId: cover.id }) }) : null,
             el('button', { class: cover ? '' : 'primary', icon: 'image', ai: true, text: cover ? 'Gerar nova capa' : 'Gerar capa com IA', onclick: () => openImageGen(p, { kind: 'capa' }) }),
             cover ? el('button', { icon: 'download', text: 'Baixar', onclick: () => downloadData(cover.data, `${(p.title || 'capa').replace(/[\\/:*?"<>|]+/g, '')}.jpg`) }) : null,
             el('button', { class: 'link plain', icon: 'sparkles', text: 'Outras imagens', onclick: () => openImageGen(p, { kind: 'personagem' }) })))));
@@ -4866,7 +4878,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   const genStatus = (msg, kind) => { const st = $('genStatus'); st.textContent = msg; st.className = 'status' + (kind ? ' ' + kind : ''); };
   function genGoLabel(running) {
-    $('genGo').replaceChildren(svgIcon(running ? 'square' : 'image'), running ? 'Parar' : 'Gerar imagem',
+    const improving = genCtx && genCtx.base;
+    $('genGo').replaceChildren(svgIcon(running ? 'square' : improving ? 'wand-sparkles' : 'image'), running ? 'Parar' : improving ? 'Gerar versão melhorada' : 'Gerar imagem',
       ...(running ? [] : [el('span', { class: 'ai-ico', 'aria-hidden': 'true' }, svgIcon('sparkles'))]));
   }
   function setGenKind(k) {
@@ -4888,12 +4901,65 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     setGenKind(b.dataset.gen);
   }));
   function renderGenStyles() {
-    $('genStyles').replaceChildren(...GEN_STYLES.map(st => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(genCtx.style === st), text: st,
-      onclick: () => { genCtx.style = st; settings.imageStyle = st; local.set('fanfic.settings', settings); renderGenStyles(); } })));
+    const keep = genCtx.base ? [el('button', { type: 'button', class: 'chip', 'aria-pressed': String(!genCtx.style), text: 'Manter o estilo atual', onclick: () => { genCtx.style = ''; renderGenStyles(); } })] : [];
+    $('genStyles').replaceChildren(...keep, ...GEN_STYLES.map(st => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(genCtx.style === st), text: st,
+      onclick: () => { genCtx.style = st; if (!genCtx.base) { settings.imageStyle = st; local.set('fanfic.settings', settings); } renderGenStyles(); } })));
+  }
+  // "Melhorar": a imagem escolhida vira o ponto de partida da nova
+  function setGenBase(r) {
+    const c = genCtx; if (!c) return;
+    c.base = r || null;
+    if (r) { c.style = ''; c.sel.delete(r.id); }
+    else c.style = settings.imageStyle || GEN_STYLES[0];
+    $('genBase').hidden = !r;
+    $('genTitle').lastChild.textContent = r ? 'Melhorar imagem com IA' : 'Gerar imagem com IA';
+    document.querySelector('.gen-kinds').hidden = !!r;
+    if (r) {
+      $('genBaseImg').src = r.data;
+      $('genBaseTitle').textContent = `Melhorando: ${r.imgKind === 'capa' || r.id === c.p.coverRefId ? 'a capa' : (r.subject || r.name || 'imagem')}`;
+      $('genWhat').textContent = 'Diga o que mudar. Ex.: título maior e dourado, céu mais alaranjado, mais nitidez nos rostos.';
+      $('genChWrap').hidden = true; $('genSubWrap').hidden = true;
+      $('genExtraLabel').textContent = 'O que melhorar?';
+      $('genExtra').placeholder = 'Ex.: deixe o título maior e dourado, o céu mais alaranjado e o T-Rex vermelho sorrindo';
+    } else {
+      $('genExtraLabel').replaceChildren('Algo mais? ', el('span', { class: 'muted', text: '(opcional)' }));
+      $('genExtra').placeholder = 'Ex.: pôr do sol, tons quentes, os dois de costas olhando o mar';
+      setGenKind(c.kind);
+    }
+    renderGenStyles(); renderGenRefs(); genGoLabel(false);
+  }
+  $('genBaseOff').addEventListener('click', () => setGenBase(null));
+  $('genBaseImg').addEventListener('click', () => { const b = genCtx && genCtx.base; if (b) openImage(b.data, b.subject || b.name, b.subject || b.name); });
+  // proporção mais próxima da imagem de base, entre as que os modelos aceitam
+  function imageAspect(data) {
+    return new Promise(res => {
+      const im = new Image();
+      im.onload = () => {
+        const r = im.naturalWidth / im.naturalHeight;
+        const opts = ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9'];
+        res(opts.reduce((best, o) => { const [a, b] = o.split(':').map(Number); return Math.abs(Math.log(a / b / r)) < Math.abs(Math.log(best[0] / best[1] / r)) ? [a, b] : best; }, [1, 1]).join(':'));
+      };
+      im.onerror = () => res('2:3');
+      im.src = data;
+    });
+  }
+  function buildEditPrompt(p, base, extra, style) {
+    const cut = (t, n) => { t = (t || '').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
+    const title = (p.title || '').trim() || 'Sem título';
+    const isCover = base.imgKind === 'capa' || base.id === p.coverRefId;
+    const what = isCover ? 'a capa do livro' : `uma imagem (${IMG_LABEL[base.imgKind] || 'imagem'}${base.subject ? ': ' + base.subject : ''})`;
+    const ctx = [`História: "${title}"${p.category ? ` (${p.category})` : ''}${p.fandom ? `, universo: ${p.fandom}` : ''}.`,
+      p.premise ? `Enredo: ${cut(p.premise, 600)}` : '', p.characters ? `Personagens: ${cut(p.characters, 800)}` : '',
+      (base.note || '').trim() ? `Descrição da imagem: ${cut(base.note, 400)}` : ''].filter(Boolean).join('\n');
+    return `A imagem anexada é ${what}. Crie uma NOVA VERSÃO dela, partindo dessa imagem.\n\nO QUE MUDAR (pedido do autor): ${extra}\n\n` +
+      `Mude só o que foi pedido. Mantenha todo o resto igual: composição, enquadramento, personagens (rosto, corpo, cores, roupas), cenário, iluminação` + (style ? '' : ', estilo visual') + ' e formato.' +
+      (isCover ? ` Se a capa tem o título "${title}", mantenha-o escrito exatamente assim, bem legível.` : '') +
+      (style ? `\nEstilo visual desejado: ${style}.` : '') +
+      `\n\nCONTEXTO DA HISTÓRIA (só para entender):\n${ctx}\n\nRegras: imagem bonita e bem acabada; todos os personagens são adultos; sem nudez, sem conteúdo sexual explícito e sem violência gráfica.`;
   }
   async function openImageGen(p, opts = {}) {
     if (!isConfigured()) { openSetup(1, () => openImageGen(p, opts)); return; }
-    genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null, sel: new Set(), canSee: true };
+    genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null, sel: new Set(), canSee: true, base: null };
     const chs = p.chapters.filter(c => c.text.trim());
     $('genCh').replaceChildren(...chs.map(c => el('option', { value: c.id, text: `${p.chapters.indexOf(c) + 1}. ${chTitle(p, c)}` })));
     $('genCh').value = opts.chId || (chs.at(-1) || {}).id || '';
@@ -4901,8 +4967,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('genExtra').value = '';
     $('genResult').hidden = true;
     setGenKind(opts.kind === 'cena' && !chs.length ? 'capa' : (opts.kind || 'capa'));
-    renderGenStyles(); genGoLabel(false); renderGenRefs();
+    setGenBase(opts.baseId ? (refsCache[p.id] || []).find(r => r.id === opts.baseId) : null);
     $('genDlg').showModal();
+    if (genCtx.base) $('genExtra').focus();
     const sel = $('genModel');
     const list = await loadImageModels();
     if (!list.length) {
@@ -4912,7 +4979,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
     sel.disabled = false; $('genGo').disabled = false;
     sel.replaceChildren(...list.map(m => el('option', { value: m.id, text: (m.name || m.id) + (isFree(m) ? ' · grátis' : '') })));
-    const pref = list.find(m => m.id === settings.imageModel) || list.find(m => /gemini.*image/i.test(m.id)) || list[0];
+    const sees = (m) => !m.architecture || (m.architecture.input_modalities || []).includes('image');
+    let pref = list.find(m => m.id === settings.imageModel) || list.find(m => /gemini.*image/i.test(m.id)) || list[0];
+    if (genCtx.base && !sees(pref)) pref = list.find(m => sees(m) && /gemini.*image/i.test(m.id)) || list.find(sees) || pref;
     sel.value = pref.id;
     const costLine = () => {
       const m = list.find(x => x.id === sel.value);
@@ -4930,10 +4999,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const imgs = (refsCache[c.p.id] || []).filter(r => r.kind === 'image');
     for (const id of [...c.sel]) if (!imgs.some(r => r.id === id)) c.sel.delete(id);
     $('genRefsHint').textContent = c.canSee
-      ? `Escolha até 4 imagens para a IA seguir: rosto, cabelo, roupa, lugar ou estilo.${c.sel.size ? ` (${c.sel.size} escolhida${c.sel.size > 1 ? 's' : ''})` : ''}`
+      ? `${c.base ? 'Se quiser, escolha mais imagens para a IA seguir' : 'Escolha até 4 imagens para a IA seguir'}: rosto, cabelo, roupa, lugar ou estilo.${c.sel.size ? ` (${c.sel.size} escolhida${c.sel.size > 1 ? 's' : ''})` : ''}`
+      : c.base ? 'Este modelo não aceita imagens, então não consegue melhorar uma imagem. Escolha outro modelo de imagem (por exemplo, o Gemini Image).'
       : 'Este modelo não usa imagens de referência. Escolha outro modelo de imagem para usar.';
     $('genRefs').replaceChildren(
-      ...imgs.map(r => {
+      ...imgs.filter(r => !c.base || r.id !== c.base.id).map(r => {
         const on = c.sel.has(r.id);
         const label = `${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}`;
         return el('button', { type: 'button', class: 'gen-ref', 'aria-pressed': String(on), title: label, 'aria-label': label, disabled: !c.canSee || (!on && c.sel.size >= 4),
@@ -5019,20 +5089,30 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('genGo').addEventListener('click', async () => {
     const c = genCtx; if (!c) return;
     if (c.ctrl) { c.ctrl.abort(); return; }
-    const p = c.p, kind = c.kind;
-    const sub = $('genSub').value.trim();
-    const ch = kind === 'cena' ? p.chapters.find(x => x.id === $('genCh').value) : null;
-    if ((kind === 'personagem' || kind === 'lugar') && !sub) { genStatus(kind === 'personagem' ? 'Diga qual personagem.' : 'Diga qual lugar.', 'err'); $('genSub').focus(); return; }
+    const p = c.p, base = c.base, kind = base ? (base.imgKind || 'outro') : c.kind;
+    const sub = base ? (base.subject || '') : $('genSub').value.trim();
+    const ch = kind === 'cena' && !base ? p.chapters.find(x => x.id === $('genCh').value) : null;
+    if (base) {
+      if (!$('genExtra').value.trim()) { genStatus('Diga o que você quer melhorar.', 'err'); $('genExtra').focus(); return; }
+      if (!c.canSee) { genStatus('Este modelo não aceita imagens. Escolha outro modelo de imagem (por exemplo, o Gemini Image).', 'err'); $('genModel').focus(); return; }
+    } else if ((kind === 'personagem' || kind === 'lugar') && !sub) { genStatus(kind === 'personagem' ? 'Diga qual personagem.' : 'Diga qual lugar.', 'err'); $('genSub').focus(); return; }
     if (kind === 'cena' && !ch) { genStatus('Escolha um capítulo.', 'err'); return; }
     const model = $('genModel').value;
     if (!model) return;
     const name = $('genModel').selectedOptions[0]?.textContent || model;
-    const what = kind === 'capa' ? 'a capa' : kind === 'cena' ? `uma imagem da cena de "${chTitle(p, ch)}"` : `uma imagem de ${sub}`;
+    const isCover = base && (kind === 'capa' || base.id === p.coverRefId);
+    const what = base ? (isCover ? 'uma versão melhorada da capa' : `uma versão melhorada de ${sub || 'imagem'}`) : kind === 'capa' ? 'a capa' : kind === 'cena' ? `uma imagem da cena de "${chTitle(p, ch)}"` : `uma imagem de ${sub}`;
     if (!(await confirmAI(`Gerar ${what} com ${name}.`))) return;
-    const prompt = buildImagePrompt(p, kind, sub, ch, c.style, $('genExtra').value.trim());
+    const prompt = base ? buildEditPrompt(p, base, $('genExtra').value.trim(), c.style) : buildImagePrompt(p, kind, sub, ch, c.style, $('genExtra').value.trim());
     // referências visuais escolhidas pela pessoa
     const chosen = c.canSee ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.sel.has(r.id)).slice(0, 4) : [];
-    const content = chosen.length ? [
+    const content = base ? [
+      { type: 'text', text: prompt },
+      { type: 'text', text: 'Imagem que deve ser melhorada:' },
+      { type: 'image_url', image_url: { url: base.data } },
+      ...chosen.flatMap(r => [
+        { type: 'text', text: `Referência extra — ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}${(r.note || '').trim() ? ` (${r.note.trim().slice(0, 300)})` : ''}:` },
+        { type: 'image_url', image_url: { url: r.data } }])] : chosen.length ? [
       { type: 'text', text: prompt + '\n\nUse as imagens de referência anexadas para manter a aparência (rosto, cabelo, corpo, roupas), o lugar ou o estilo, conforme cada uma indica.' },
       ...chosen.flatMap(r => [
         { type: 'text', text: `Referência — ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}${(r.note || '').trim() ? ` (${r.note.trim().slice(0, 300)})` : ''}:` },
@@ -5042,26 +5122,33 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     genGoLabel(true); $('genResult').hidden = true;
     genStatus('Gerando a imagem… pode levar até um minuto.');
     try {
-      const r = await requestImage(model, content, GEN_KIND[kind].aspect, c.ctrl.signal);
-      recordSpend({ op: uid(), action: `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
+      const aspect = base ? await imageAspect(base.data) : GEN_KIND[kind].aspect;
+      const r = await requestImage(model, content, aspect, c.ctrl.signal);
+      recordSpend({ op: uid(), action: base ? `Melhorar imagem · ${isCover ? 'capa' : sub || 'imagem'}` : `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
       const data = await shrinkImage(await (await fetch(r.url)).blob());
-      const ref = { id: uid(), projectId: p.id, kind: 'image', name: kind === 'capa' ? 'Capa gerada' : kind === 'cena' ? `Cena · ${chTitle(p, ch)}` : `${sub} (gerada)`, type: 'img', text: '', data, chars: 0,
-        imgKind: kind, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : sub, note: '', enabled: false, generated: true, addedAt: Date.now(), updatedAt: Date.now() };
+      const ref = base
+        ? { id: uid(), projectId: p.id, kind: 'image', name: isCover ? 'Capa melhorada' : `${(base.name || 'Imagem').replace(/\s*\((gerada|melhorada)\)$/, '')} (melhorada)`, type: 'img', text: '', data, chars: 0,
+            imgKind: base.imgKind || 'outro', subject: base.subject || '', note: base.note || '', enabled: false, generated: true, from: base.id, addedAt: Date.now(), updatedAt: Date.now() }
+        : { id: uid(), projectId: p.id, kind: 'image', name: kind === 'capa' ? 'Capa gerada' : kind === 'cena' ? `Cena · ${chTitle(p, ch)}` : `${sub} (gerada)`, type: 'img', text: '', data, chars: 0,
+            imgKind: kind, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : sub, note: '', enabled: false, generated: true, addedAt: Date.now(), updatedAt: Date.now() };
       await db.put('refs', ref);
       (refsCache[p.id] = refsCache[p.id] || []).push(ref);
       markDirty('refs');
       if (kind === 'capa' && !p.coverRefId) { p.coverRefId = ref.id; saveProject(p, true); }
       $('genImg').src = r.url;
+      $('genImg').onclick = () => openImage(data, ref.subject || ref.name, ref.subject || ref.name);
       $('genActions').replaceChildren(
+        el('button', { icon: 'wand-sparkles', ai: true, text: 'Melhorar esta', onclick: () => { $('genResult').hidden = true; $('genExtra').value = ''; setGenBase(ref); genStatus(''); $('genExtra').focus(); } }),
         p.coverRefId === ref.id ? el('span', { class: 'tag', text: 'É a capa' }) : el('button', { icon: 'check', text: 'Usar como capa', onclick: (e) => { p.coverRefId = ref.id; saveProject(p, true); e.currentTarget.replaceWith(el('span', { class: 'tag', text: 'É a capa' })); toast('Capa definida ✓'); if (currentId === p.id) renderTab(); } }),
         el('button', { icon: 'download', text: 'Baixar', onclick: () => downloadData(r.url, `${(ref.subject || 'imagem').replace(/[\\/:*?"<>|]+/g, '')}.png`) }),
         el('button', { class: 'link', text: 'Excluir', onclick: () => { $('genResult').hidden = true; genStatus(''); removeRef(p, ref); } }));
       $('genResult').hidden = false;
       renderGenRefs();
-      genStatus('Pronto! A imagem ficou guardada nas Referências. Toque em Gerar imagem para fazer outra.', 'ok');
+      genStatus(base ? 'Pronto! A versão nova ficou guardada nas Referências e a original continua lá. Gere de novo para outra tentativa ou toque em "Melhorar esta" para seguir a partir dela.'
+        : 'Pronto! A imagem ficou guardada nas Referências. Toque em Gerar imagem para fazer outra.', 'ok');
     } catch (e) {
       if (e.name === 'AbortError') genStatus('Parado.');
-      else { genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ' Toque em "Gerar imagem" para tentar de novo.', 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
+      else { genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ` Toque em "${base ? 'Gerar versão melhorada' : 'Gerar imagem'}" para tentar de novo.`, 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
     } finally {
       job.stop(); c.ctrl = null; genGoLabel(false);
       if (currentId === p.id) renderTab();
@@ -5509,7 +5596,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
             el('div', {}, el('label', { for: 'isub-' + r.id, style: 'margin-top:0', text: 'De quem ou do quê?' }), subject)),
           el('label', { for: 'inote-' + r.id, text: 'Descrição para a IA' }), note,
           el('div', { class: 'row', style: 'justify-content:space-between;margin-top:8px' },
-            el('label', { class: 'check', for: 'iuse-' + r.id, style: 'margin:0' }, use, el('span', { text: 'Usar ao escrever' })), describe))));
+            el('label', { class: 'check', for: 'iuse-' + r.id, style: 'margin:0' }, use, el('span', { text: 'Usar ao escrever' })),
+            el('div', { class: 'row' }, describe,
+              el('button', { icon: 'wand-sparkles', ai: true, text: 'Melhorar com IA', title: 'Gerar uma versão nova a partir desta imagem', onclick: () => openImageGen(p, { kind: GEN_KIND[r.imgKind] ? r.imgKind : 'capa', baseId: r.id }) }))))));
   }
 
   // reduz a imagem (até 1024 px, JPEG) para caber no aparelho e na sincronização

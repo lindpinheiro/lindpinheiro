@@ -721,6 +721,23 @@
   .lay-preview p { margin: 0; text-indent: 1.4em; text-align: justify; hyphens: auto; }
   .lay-preview p.first { text-indent: 0; }
   .lay-cover-box { border: 1px dashed var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 12px; }
+  /* ---------- buscar e substituir ---------- */
+  .find-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  @media (max-width: 560px) { .find-row { grid-template-columns: 1fr; } }
+  .find-opts { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; }
+  .find-opts label { margin: 0; }
+  .find-sum { margin: 12px 0 6px; font-weight: 600; }
+  .find-list { display: grid; gap: 10px; max-height: 46vh; overflow: auto; padding-right: 2px; }
+  .find-group h4 { margin: 0 0 4px; font-size: .9rem; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+  .find-hit { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; }
+  .find-hit .ctx { flex: 1; min-width: 0; font-family: Georgia, serif; font-size: .95rem; line-height: 1.5; }
+  .find-hit mark { background: var(--mark-edit); color: inherit; border-radius: 3px; padding: 0 1px; }
+  .find-hit del { color: var(--muted); }
+  .find-hit ins { text-decoration: none; background: color-mix(in srgb, #2f9e55 25%, transparent); border-radius: 3px; padding: 0 1px; }
+  .find-hit .acts { display: flex; flex-direction: column; gap: 4px; }
+  .find-hit .acts button { min-height: 32px; padding: 4px 10px; font-size: .85rem; }
+  .flash-find { animation: flashFind 1.6s ease-out; }
+  @keyframes flashFind { 0%, 40% { background: var(--mark-edit); } 100% { background: transparent; } }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -844,6 +861,8 @@
 <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /> <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" /> <rect x="6" y="14" width="12" height="8" rx="1" /></symbol>
 <symbol id="i-tablet" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /> <line x1="12" x2="12.01" y1="18" y2="18" /></symbol>
 <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <path d="M14 2v4a2 2 0 0 0 2 2h4" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <path d="m21 21-4.3-4.3" /></symbol>
+<symbol id="i-replace-all" viewBox="0 0 24 24"><path d="M14 4a1 1 0 0 1 1-1" /> <path d="M15 10a1 1 0 0 1-1-1" /> <path d="M21 4a1 1 0 0 0-1-1" /> <path d="M21 9a1 1 0 0 1-1 1" /> <path d="m3 7 3 3 3-3" /> <path d="M6 10V5a2 2 0 0 1 2-2h2" /> <rect x="3" y="14" width="7" height="7" rx="1" /> <rect x="14" y="14" width="7" height="7" rx="1" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1235,6 +1254,22 @@
     </div>
     <div class="row end" style="margin-top:10px"><button type="button" id="layCoverGo"><svg class="icon" aria-hidden="true"><use href="#i-printer"/></svg>Gerar capa completa (PDF)</button></div>
   </div>
+</dialog>
+
+<dialog id="findDlg" aria-labelledby="findTitle">
+  <div class="dlg-head"><h2 id="findTitle"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Buscar e substituir</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="find-row">
+    <div><label for="findQ" style="margin-top:0">Buscar</label><input type="text" enterkeyhint="search" id="findQ" placeholder="Ex.: Theo" autocomplete="off"></div>
+    <div><label for="findR" style="margin-top:0">Substituir por <span class="muted">(opcional)</span></label><input type="text" id="findR" placeholder="Ex.: Téo" autocomplete="off"></div>
+  </div>
+  <div class="find-opts">
+    <label class="check"><input type="checkbox" id="findWord" checked><span>Só a palavra inteira</span></label>
+    <label class="check"><input type="checkbox" id="findCase"><span>Diferenciar maiúsculas</span></label>
+    <label class="check"><input type="checkbox" id="findMore"><span>Procurar também no Mundo e nas Infos</span></label>
+  </div>
+  <div class="find-sum" id="findSum" role="status"></div>
+  <div class="find-list" id="findList"></div>
+  <div class="row end" style="margin-top:12px"><button type="button" data-close>Fechar</button><button type="button" class="primary" id="findAll" disabled><svg class="icon" aria-hidden="true"><use href="#i-replace-all"/></svg>Substituir todas</button></div>
 </dialog>
 
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
@@ -3089,6 +3124,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     sec.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:12px' },
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
+        el('button', { icon: 'search', text: 'Buscar', title: 'Buscar e substituir em todos os capítulos (Ctrl+Shift+F)', onclick: () => openFind(p) }),
         el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyWholeStory(p) }),
         el('button', { icon: 'book-open', text: 'Baixar / diagramar', onclick: () => openLayout(p) }),
         writeButton(p))));
@@ -5339,6 +5375,122 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
 
 
+
+
+  // =====================================================================
+  // Buscar e substituir (sem IA) em todos os capítulos, e se quiser no Mundo e nas Infos
+  // =====================================================================
+  let findCtx = null;
+  const INFO_FIELDS = [['title', 'Título'], ['premise', 'Ideia'], ['characters', 'Personagens'], ['tone', 'Tom e estilo'], ['notes', 'O que quero e o que não quero'], ['bibleFacts', 'Decisões e fatos fixos'], ['blurb', 'Contracapa']];
+  function findRegex() {
+    const q = $('findQ').value; if (!q.trim()) return null;
+    const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+    const src = $('findWord').checked ? `(?<![\\p{L}\\p{N}])${esc}(?![\\p{L}\\p{N}])` : esc;
+    try { return new RegExp(src, 'gu' + ($('findCase').checked ? '' : 'i')); } catch { return null; }
+  }
+  // mantém o jeito da palavra encontrada: "theo" -> "téo", "Theo" -> "Téo", "THEO" -> "TÉO"
+  function keepCase(found, repl) {
+    if (!repl || $('findCase').checked) return repl;
+    if (found.length > 1 && found === found.toUpperCase() && found !== found.toLowerCase()) return repl.toUpperCase();
+    if (found[0] && found[0] === found[0].toUpperCase() && found[0] !== found[0].toLowerCase()) return repl[0].toUpperCase() + repl.slice(1);
+    return repl;
+  }
+  // lugares onde procurar: { kind, label, get(), set(v), ch? }
+  function findTargets(p) {
+    const t = p.chapters.map((c, i) => ({ kind: 'ch', ch: c, label: `Capítulo ${i + 1}${c.title ? ': ' + c.title : ''}`, get: () => c.text || '', set: (v) => { c.text = v; c.editedAt = Date.now(); } }));
+    if ($('findMore').checked) {
+      INFO_FIELDS.forEach(([k, l]) => t.push({ kind: 'info', label: `Infos · ${l}`, get: () => p[k] || '', set: (v) => { p[k] = v; } }));
+      if (p.world) {
+        const w = worldOf(p);
+        [...WORLD.map(([k, l]) => [l, w.e[k]]), ...w.folders.map(f => [f.title || 'Pasta', f.entries])].forEach(([l, list]) => list.forEach(e => {
+          t.push({ kind: 'world', label: `Mundo · ${l} · ${e.title || 'Sem título'}`, get: () => e.title || '', set: (v) => { e.title = v; e.edited = true; } });
+          t.push({ kind: 'world', label: `Mundo · ${l} · ${e.title || 'Sem título'}`, get: () => e.text || '', set: (v) => { e.text = v; e.edited = true; } });
+        }));
+      }
+    }
+    return t;
+  }
+  function findRun() {
+    const p = findCtx.p, re = findRegex(), repl = $('findR').value, list = $('findList');
+    list.replaceChildren(); findCtx.total = 0;
+    if (!re) { $('findSum').textContent = 'Digite o que procurar.'; $('findAll').disabled = true; return; }
+    const groups = new Map();
+    findTargets(p).forEach(tg => {
+      const txt = tg.get(); re.lastIndex = 0; let m;
+      while ((m = re.exec(txt))) {
+        if (!m[0]) { re.lastIndex++; continue; }
+        if (!groups.has(tg.label)) groups.set(tg.label, []);
+        groups.get(tg.label).push({ tg, at: m.index, len: m[0].length, found: m[0], txt });
+        findCtx.total++;
+      }
+    });
+    const shown = [...groups.entries()];
+    $('findSum').textContent = findCtx.total ? `${fmtNum(findCtx.total)} ocorrência(s) em ${shown.length} lugar(es)` : 'Nada encontrado.';
+    $('findAll').disabled = !findCtx.total;
+    let budget = 300;
+    shown.forEach(([label, hits]) => {
+      const g = el('div', { class: 'find-group' }, el('h4', {}, el('span', { text: label }), el('span', { class: 'tag', text: String(hits.length) })));
+      hits.forEach(h => {
+        if (budget-- <= 0) return;
+        const a = Math.max(0, h.at - 60), z = Math.min(h.txt.length, h.at + h.len + 60);
+        const clean = (t) => t.replace(/\*\*|~~|\[\/?cor[^\]]*\]|(^|\s)\*|\*(?=\s|$)/g, '$1').replace(/\s+/g, ' ');
+        const before = clean(h.txt.slice(a, h.at)), after = clean(h.txt.slice(h.at + h.len, z));
+        const ctx = el('div', { class: 'ctx' }, (a > 0 ? '…' : '') + before,
+          repl ? el('del', { text: h.found }) : el('mark', { text: h.found }), repl ? el('ins', { text: keepCase(h.found, repl) }) : null, after + (z < h.txt.length ? '…' : ''));
+        g.append(el('div', { class: 'find-hit' }, ctx, el('div', { class: 'acts' },
+          repl ? el('button', { text: 'Trocar', onclick: () => findReplace([h]) }) : null,
+          h.tg.kind === 'ch' ? el('button', { class: 'link plain', text: 'Abrir', onclick: () => findOpen(h) }) : null)));
+      });
+      list.append(g);
+    });
+    if (budget < 0) list.append(el('p', { class: 'hint', text: 'Mostrando as primeiras 300. "Substituir todas" troca todas.' }));
+  }
+  // troca de trás para frente para os índices continuarem certos
+  function findReplace(hits) {
+    const p = findCtx.p, repl = $('findR').value, by = new Map();
+    hits.forEach(h => { if (!by.has(h.tg)) by.set(h.tg, []); by.get(h.tg).push(h); });
+    let n = 0;
+    by.forEach((hs, tg) => {
+      let txt = tg.get();
+      if (txt !== hs[0].txt) return; // mudou desde a busca
+      if (tg.kind === 'ch') pushHistory(tg.ch, `Substituir "${$('findQ').value.trim()}" por "${repl}"`);
+      hs.sort((a, b) => b.at - a.at).forEach(h => { txt = txt.slice(0, h.at) + keepCase(h.found, repl) + txt.slice(h.at + h.len); n++; });
+      tg.set(txt);
+    });
+    saveProject(p, true);
+    if (currentId === p.id) renderTab();
+    toast(`${fmtNum(n)} troca(s) feita(s) ✓ Dá para desfazer em cada capítulo (Versões anteriores).`);
+    findRun();
+  }
+  function findOpen(h) {
+    const p = findCtx.p, q = h.found.toLowerCase();
+    $('findDlg').close();
+    view.tab = 'capitulos'; view.chapterId = h.tg.ch.id; view.mode = 'ler'; renderTab();
+    requestAnimationFrame(() => {
+      const para = [...document.querySelectorAll('#chBody p')].find(x => x.textContent.toLowerCase().includes(q));
+      if (para) { para.scrollIntoView({ block: 'center' }); para.classList.add('flash-find'); setTimeout(() => para.classList.remove('flash-find'), 1700); }
+    });
+  }
+  function openFind(p) {
+    guardEdit(() => {
+      findCtx = { p, total: 0 };
+      $('findDlg').showModal(); $('findQ').focus(); $('findQ').select(); findRun();
+    });
+  }
+  let findT = null;
+  ['findQ', 'findR'].forEach(id => $(id).addEventListener('input', () => { clearTimeout(findT); findT = setTimeout(findRun, 180); }));
+  ['findWord', 'findCase', 'findMore'].forEach(id => $(id).addEventListener('change', findRun));
+  $('findAll').addEventListener('click', () => {
+    const re = findRegex(); if (!re || !findCtx.total) return;
+    const repl = $('findR').value;
+    if (!confirm(repl ? `Trocar ${findCtx.total} ocorrência(s) de "${$('findQ').value.trim()}" por "${repl}"?` : `Apagar ${findCtx.total} ocorrência(s) de "${$('findQ').value.trim()}"?`)) return;
+    const hits = [];
+    findTargets(findCtx.p).forEach(tg => { const txt = tg.get(); re.lastIndex = 0; let m; while ((m = re.exec(txt))) { if (!m[0]) { re.lastIndex++; continue; } hits.push({ tg, at: m.index, len: m[0].length, found: m[0], txt }); } });
+    findReplace(hits);
+  });
+  addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'f' && cur() && !cur().draft) { e.preventDefault(); openFind(cur()); }
+  });
 
   // =====================================================================
   // Diagramação (sem IA): PDF para gráfica/KDP, EPUB e Word, gerados no aparelho

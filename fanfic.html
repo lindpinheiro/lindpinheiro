@@ -738,6 +738,29 @@
   .find-hit .acts button { min-height: 32px; padding: 4px 10px; font-size: .85rem; }
   .flash-find { animation: flashFind 1.6s ease-out; }
   @keyframes flashFind { 0%, 40% { background: var(--mark-edit); } 100% { background: transparent; } }
+  /* ---------- mural de cenas ---------- */
+  .ch-views { margin-bottom: 12px; display: inline-flex; }
+  .board-sum { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .bcard { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 12px 12px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+    border-top: 5px solid var(--bc, var(--border)); cursor: pointer; min-height: 170px; }
+  .bcard:hover { border-color: var(--accent); border-top-color: var(--bc, var(--accent)); }
+  .bcard .bc-top { display: flex; align-items: center; gap: 6px; }
+  .bcard .bc-num { font-size: .72rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); flex: 1; }
+  .bcard h3 { margin: 0; font-size: 1rem; line-height: 1.3; }
+  .bcard .bc-sum { font-size: .84rem; color: var(--muted); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+  .bcard .bc-foot { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--muted); }
+  .bcard .bc-foot .grow { flex: 1; }
+  .bcard .grip { min-height: 30px; width: 30px; padding: 0; border: 0; background: transparent; color: var(--muted); cursor: grab; touch-action: none; }
+  .bcard .grip:focus-visible { outline: 2px solid var(--accent); }
+  .bcard .dotc { width: 18px; height: 18px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--border); background: var(--bc, transparent); }
+  .st-chip { min-height: 0; padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; border: 1px solid transparent; }
+  .st-ideia { background: color-mix(in srgb, #8a8a8a 22%, transparent); color: var(--muted); }
+  .st-rascunho { background: color-mix(in srgb, #2f74d0 22%, transparent); color: #5b9bf0; }
+  .st-revisao { background: color-mix(in srgb, #e07a1f 22%, transparent); color: #ef9a4a; }
+  .st-pronto { background: color-mix(in srgb, #2f9e55 24%, transparent); color: #46c272; }
+  .bcard.ghost { opacity: .35; border-style: dashed; }
+  .bcard.lifted { position: fixed; z-index: 90; pointer-events: none; box-shadow: 0 14px 40px rgba(0,0,0,.45); transform: rotate(2deg); }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -863,6 +886,9 @@
 <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <path d="M14 2v4a2 2 0 0 0 2 2h4" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <path d="m21 21-4.3-4.3" /></symbol>
 <symbol id="i-replace-all" viewBox="0 0 24 24"><path d="M14 4a1 1 0 0 1 1-1" /> <path d="M15 10a1 1 0 0 1-1-1" /> <path d="M21 4a1 1 0 0 0-1-1" /> <path d="M21 9a1 1 0 0 1-1 1" /> <path d="m3 7 3 3 3-3" /> <path d="M6 10V5a2 2 0 0 1 2-2h2" /> <rect x="3" y="14" width="7" height="7" rx="1" /> <rect x="14" y="14" width="7" height="7" rx="1" /></symbol>
+<symbol id="i-grip-vertical" viewBox="0 0 24 24"><circle cx="9" cy="12" r="1" /> <circle cx="9" cy="5" r="1" /> <circle cx="9" cy="19" r="1" /> <circle cx="15" cy="12" r="1" /> <circle cx="15" cy="5" r="1" /> <circle cx="15" cy="19" r="1" /></symbol>
+<symbol id="i-layout-grid" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1" /> <rect width="7" height="7" x="14" y="3" rx="1" /> <rect width="7" height="7" x="14" y="14" rx="1" /> <rect width="7" height="7" x="3" y="14" rx="1" /></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M3 12h.01" /> <path d="M3 18h.01" /> <path d="M3 6h.01" /> <path d="M8 12h13" /> <path d="M8 18h13" /> <path d="M8 6h13" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -3098,6 +3124,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     scrollTo(scrollX, Math.max(0, target));
     return true;
   }
+  let chView = local.get('fanfic.chView', 'lista');
   function renderChaptersInner() {
     const p = cur();
     const sec = $('tab-capitulos');
@@ -3121,6 +3148,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
 
     const total = p.chapters.reduce((n, c) => n + countWords(c.text), 0);
+    sec.append(el('div', { class: 'seg ch-views', role: 'group', 'aria-label': 'Ver os capítulos como' },
+      [['lista', 'list', 'Lista'], ['mural', 'layout-grid', 'Mural']].map(([k, ic, t]) => el('button', { type: 'button', icon: ic, text: t, 'aria-pressed': String(chView === k), onclick: () => { chView = k; local.set('fanfic.chView', k); renderChapters(); } }))));
     sec.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:12px' },
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
@@ -3129,10 +3158,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { icon: 'book-open', text: 'Baixar / diagramar', onclick: () => openLayout(p) }),
         writeButton(p))));
 
+    if (chView === 'mural') { sec.append(chapterBoard(p)); return; }
     p.chapters.forEach((c, i) => {
       const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
       sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
-        el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : '') }),
+        el('div', { class: 'num' }, `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : ''), c.status ? el('span', { class: 'st-chip st-' + c.status, style: 'margin-left:8px', text: CH_STATUS.find(x => x[0] === c.status)[1] }) : null),
         el('h3', { text: chTitle(p, c) }),
         el('div', { class: 'preview', text: storyPlain(c.text.slice(0, 600)).replace(/\s*\n+\s*/g, ' ').slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
@@ -5376,6 +5406,81 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
 
 
+
+
+  // =====================================================================
+  // Mural de cenas (sem IA): capítulos em cartões, com status e cor; arraste para mudar a ordem
+  // =====================================================================
+  var CH_STATUS = [['ideia', 'Ideia'], ['rascunho', 'Rascunho'], ['revisao', 'Revisão'], ['pronto', 'Pronto']];
+  var CARD_COLORS = ['', '#e0508a', '#e07a1f', '#d4a017', '#2f9e55', '#2f74d0', '#8a4fd6'];
+  const chStatus = (c) => c.status || ((c.text || '').trim() ? 'rascunho' : 'ideia');
+  function moveChapter(p, from, to) {
+    if (from === to || to < 0 || to >= p.chapters.length) return false;
+    const [c] = p.chapters.splice(from, 1); p.chapters.splice(to, 0, c);
+    saveProject(p, true); return true;
+  }
+  function chapterBoard(p) {
+    const wrap = el('div', {});
+    const counts = CH_STATUS.map(([k, t]) => [k, t, p.chapters.filter(c => chStatus(c) === k).length]).filter(x => x[2]);
+    wrap.append(el('div', { class: 'board-sum' }, counts.map(([k, t, n]) => el('span', { class: 'st-chip st-' + k, text: `${t} · ${n}` }))));
+    const board = el('div', { class: 'board', role: 'list', 'aria-label': 'Mural de capítulos' });
+    p.chapters.forEach((c, i) => {
+      const st = chStatus(c), sum = c.recap && c.recap.text ? c.recap.text : storyPlain((c.text || '').slice(0, 500)).replace(/\s+/g, ' ').slice(0, 240);
+      const grip = el('button', { type: 'button', class: 'grip', icon: 'grip-vertical', 'aria-label': `Mover o capítulo ${i + 1}. Use as setas para mudar a posição.`, title: 'Arraste para mudar a ordem' });
+      const card = el('article', { class: 'bcard', role: 'listitem', style: c.color ? `--bc:${c.color}` : null, 'data-i': i,
+        onclick: (e) => { if (e.target.closest('button')) return; view.chapterId = c.id; view.mode = 'ler'; renderChapters(); scrollTo(0, 0); } },
+        el('div', { class: 'bc-top' },
+          el('span', { class: 'bc-num', text: `CAP. ${i + 1}` + (c.pov ? ` · ${c.pov.toUpperCase()}` : '') }),
+          el('button', { type: 'button', class: 'st-chip st-' + st, text: CH_STATUS.find(x => x[0] === st)[1], title: 'Toque para mudar o status',
+            onclick: () => { const k = CH_STATUS.findIndex(x => x[0] === st); c.status = CH_STATUS[(k + 1) % CH_STATUS.length][0]; saveProject(p, true); renderChapters(); } }),
+          grip),
+        el('h3', { text: chTitle(p, c) }),
+        el('div', { class: 'bc-sum', text: sum || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
+        el('div', { class: 'bc-foot' },
+          el('span', { class: 'grow', text: `${fmtNum(countWords(c.text))} palavras` }),
+          el('button', { type: 'button', class: 'dotc', 'aria-label': 'Mudar a cor do cartão', title: 'Cor do cartão',
+            onclick: () => { const k = CARD_COLORS.indexOf(c.color || ''); c.color = CARD_COLORS[(k + 1) % CARD_COLORS.length]; saveProject(p, true); renderChapters(); } })));
+      grip.addEventListener('keydown', (e) => {
+        const d = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[e.key];
+        if (!d) return; e.preventDefault();
+        if (moveChapter(p, i, i + d)) { renderChapters(); document.querySelectorAll('.bcard .grip')[i + d]?.focus(); toast(`Capítulo movido para a posição ${i + d + 1}`); }
+      });
+      grip.addEventListener('pointerdown', (e) => startCardDrag(e, p, board, card, i));
+      board.append(card);
+    });
+    wrap.append(board, el('p', { class: 'hint', text: 'Arraste pelo ⋮⋮ para mudar a ordem dos capítulos (no teclado: foque o ⋮⋮ e use as setas). Toque no status para mudar; toque na bolinha para dar uma cor ao cartão.' }));
+    return wrap;
+  }
+  function startCardDrag(e, p, board, card, from) {
+    e.preventDefault();
+    const r = card.getBoundingClientRect(), off = { x: e.clientX - r.left, y: e.clientY - r.top };
+    const lifted = card.cloneNode(true); lifted.classList.add('lifted');
+    Object.assign(lifted.style, { width: r.width + 'px', height: r.height + 'px', left: r.left + 'px', top: r.top + 'px' });
+    document.body.append(lifted); card.classList.add('ghost');
+    let scrollT = null, lastY = e.clientY;
+    const place = (x, y) => {
+      lifted.style.left = (x - off.x) + 'px'; lifted.style.top = (y - off.y) + 'px';
+      const cards = [...board.children].filter(c => c !== card);
+      let target = null;
+      for (const c of cards) { const b = c.getBoundingClientRect(); if (y >= b.top && y <= b.bottom && x >= b.left && x <= b.right) { target = c; break; } }
+      if (target) {
+        const b = target.getBoundingClientRect(), oneCol = getComputedStyle(board).gridTemplateColumns.split(' ').length === 1;
+        const after = oneCol ? (y - b.top) > b.height / 2 : (x - b.left) > b.width / 2;
+        board.insertBefore(card, after ? target.nextSibling : target);
+      }
+    };
+    const edge = () => { const h = innerHeight; if (lastY < 70) scrollBy(0, -14); else if (lastY > h - 70) scrollBy(0, 14); };
+    scrollT = setInterval(edge, 30);
+    const move = (ev) => { lastY = ev.clientY; place(ev.clientX, ev.clientY); };
+    const up = () => {
+      clearInterval(scrollT); lifted.remove(); card.classList.remove('ghost');
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      const to = [...board.children].indexOf(card);
+      if (moveChapter(p, from, to)) toast(`Capítulo movido para a posição ${to + 1} ✓`);
+      renderChapters();
+    };
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  }
 
   // =====================================================================
   // Buscar e substituir (sem IA) em todos os capítulos, e se quiser no Mundo e nas Infos

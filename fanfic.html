@@ -474,6 +474,11 @@
   .add-menu .mi-sub { white-space: normal; }
   #entryDlg { width: min(820px, calc(100vw - 24px)); }
   #entryText { min-height: 42vh; font-size: 1rem; line-height: 1.6; }
+  .entry-sheet { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; margin-top: 4px; }
+  .entry-sheet .full { grid-column: 1 / -1; }
+  .entry-sheet label { margin-top: 8px; }
+  .entry-sheet textarea { min-height: 0; }
+  @media (max-width: 560px) { .entry-sheet { grid-template-columns: 1fr; } }
   .entry-ai { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; margin-top: 10px; }
   .entry-ai input { flex: 1 1 100%; }
   .dlg-foot { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
@@ -1537,7 +1542,8 @@
   <div class="dlg-head"><h2 id="entryFolder"></h2><button class="close" id="entryClose" aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <label for="entryTitle" style="margin-top:0">Título</label>
   <input type="text" id="entryTitle" placeholder="Ex.: nome do personagem, do lugar ou da regra">
-  <label for="entryText">Texto</label>
+  <div class="entry-sheet" id="entrySheet" hidden></div>
+  <label for="entryText" id="entryTextLabel">Texto</label>
   <textarea id="entryText" placeholder="Escreva aqui tudo sobre este item."></textarea>
   <div class="entry-ai">
     <input type="text" id="entryAsk" aria-label="Pedido para a IA" placeholder="Pedido para a IA (opcional). Ex.: complete com o que aparece nos capítulos">
@@ -4884,11 +4890,46 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   // janela grande do item: título, texto e ajuda da IA para este item
   let entryCtx = null;
+
+  // ficha de personagem: campos fixos que viram linhas "**Idade:** 30" no texto do item (a IA lê do mesmo jeito)
+  var CHAR_FIELDS = [['Nome completo', 'Ex.: Rex Albuquerque'], ['Idade', 'Ex.: 28 anos'], ['Aparência', 'Altura, corpo, cabelo, olhos, marcas, roupas', true],
+    ['Personalidade', 'Como é, qualidades e defeitos', true], ['Jeito de falar', 'Gírias, sotaque, tom, palavras que usa'], ['O que quer', 'O desejo ou objetivo'],
+    ['Medo', 'Do que tem medo'], ['Segredo', 'O que esconde'], ['Passado', 'O que aconteceu antes da história', true]];
+  let sheetOn = false;
+  const sheetRe = (label) => new RegExp(`^[ \\t]*(?:[-*•][ \\t]+)?\\**${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\**[ \\t]*:[ \\t]*\\**[ \\t]*(.*)$`, 'im');
+  function entrySheetSetup(on) {
+    sheetOn = on;
+    $('entrySheet').hidden = !on;
+    $('entryTextLabel').textContent = on ? 'Mais detalhes' : 'Texto';
+    if (!on) return;
+    $('entrySheet').replaceChildren(...CHAR_FIELDS.map(([label, ph, big], i) => el('div', { class: big ? 'full' : '' },
+      el('label', { for: 'sheet' + i, text: label }),
+      big ? el('textarea', { id: 'sheet' + i, rows: 2, placeholder: ph }) : el('input', { type: 'text', id: 'sheet' + i, placeholder: ph }))));
+  }
+  function entrySetText(t) {
+    if (!sheetOn) { $('entryText').value = t; return; }
+    let rest = t || '';
+    CHAR_FIELDS.forEach(([label], i) => {
+      const m = sheetRe(label).exec(rest);
+      $('sheet' + i).value = m ? m[1].replace(/\*+$/, '').trim() : '';
+      if (m) rest = rest.slice(0, m.index) + rest.slice(m.index + m[0].length + (rest[m.index + m[0].length] === '\n' ? 1 : 0));
+    });
+    $('entryText').value = rest.replace(/^\n+/, '');
+  }
+  function entryFullText() {
+    const rest = $('entryText').value;
+    if (!sheetOn) return rest;
+    const lines = CHAR_FIELDS.map(([label], i) => { const v = $('sheet' + i).value.replace(/\s*\n\s*/g, ' ').trim(); return v ? `**${label}:** ${v}` : ''; }).filter(Boolean);
+    return lines.length ? lines.join('\n') + (rest.trim() ? '\n\n' + rest.trim() : '') : rest;
+  }
+
   function openEntry(p, list, e, folder) {
     entryCtx = { p, list, e, folder, before: null, ctrl: null };
     $('entryFolder').textContent = folder.label + (e ? '' : ' · novo item');
     $('entryTitle').value = e ? e.title || '' : '';
-    $('entryText').value = e ? e.text || '' : '';
+    entrySheetSetup(folder.key === 'personagens');
+    entrySetText(e ? e.text || '' : '');
+    entryCtx.orig = entryFullText();
     $('entryAsk').value = '';
     $('entryDelete').hidden = !e;
     $('entryUndo').hidden = true;
@@ -4905,7 +4946,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const entryDirty = () => {
     if (!entryCtx) return false;
     const e = entryCtx.e;
-    return $('entryTitle').value !== (e ? e.title || '' : '') || $('entryText').value !== (e ? e.text || '' : '');
+    return $('entryTitle').value !== (e ? e.title || '' : '') || entryFullText() !== entryCtx.orig;
   };
   function closeEntry(force) {
     if (entryCtx?.ctrl) entryCtx.ctrl.abort();
@@ -4917,7 +4958,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('entryClose').addEventListener('click', () => closeEntry());
   $('entrySave').addEventListener('click', () => {
     const c = entryCtx; if (!c) return;
-    const title = $('entryTitle').value.trim(), text = $('entryText').value.trim();
+    const title = $('entryTitle').value.trim(), text = entryFullText().trim();
     if (!title && !text) { entryStatus('Escreva pelo menos o título.', 'err'); $('entryTitle').focus(); return; }
     if (c.e) {
       if (c.e.title !== title || c.e.text !== text) { c.e.title = title; c.e.text = text; c.e.edited = true; }
@@ -4930,7 +4971,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     c.list.splice(i, 1); saveProject(c.p, true); closeEntry(true); renderWorld();
     toast('Item excluído.', { action: 'Desfazer', onAction: () => { c.list.splice(i, 0, item); saveProject(c.p, true); renderWorld(); } });
   });
-  $('entryUndo').addEventListener('click', () => { if (entryCtx?.before != null) { $('entryText').value = entryCtx.before; entryCtx.before = null; $('entryUndo').hidden = true; } });
+  $('entryUndo').addEventListener('click', () => { if (entryCtx?.before != null) { entrySetText(entryCtx.before); entryCtx.before = null; $('entryUndo').hidden = true; } });
   $('entryAi').addEventListener('click', async () => {
     const c = entryCtx; if (!c) return;
     if (c.ctrl) { c.ctrl.abort(); return; }
@@ -4953,21 +4994,21 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         chaptersTxt = block + chaptersTxt;
       }
     }
-    const currentText = $('entryText').value.trim(), ask = $('entryAsk').value.trim();
+    const currentText = entryFullText().trim(), ask = $('entryAsk').value.trim();
     const line = ecoOn() ? recapLine(p, p.chapters.length) : '';
     const prompt = `${bible(p)}\n\n` + (worldText(p) ? `MUNDO DA HISTÓRIA:\n${worldText(p)}\n\n` : '') + (line ? `LINHA DA HISTÓRIA:\n${line}\n\n` : '') + (chaptersTxt ? `${ecoOn() ? 'TRECHOS DOS CAPÍTULOS QUE CITAM O ITEM' : 'CAPÍTULOS'}:\n${chaptersTxt}\n` : '') +
       `TAREFA: Escreva o texto do item "${title}" da pasta "${c.folder.label}" do worldbuilding (${c.folder.hint || ''}). ` +
       (currentText ? `Texto atual do item (mantenha o que o autor escreveu e complete):\n${currentText}\n\n` : '') +
       (ask ? `Pedido do autor: ${ask}\n\n` : '') +
       `Use o que os capítulos e as infos mostram; não contradiga a história. Responda SOMENTE com o texto do item, sem título e sem comentários.`;
-    c.before = $('entryText').value; c.ctrl = new AbortController();
+    c.before = entryFullText(); c.ctrl = new AbortController();
     const job = startBusy('entry', 'Item do mundo', null); job.ctrl = c.ctrl;
     entryAiBtn(true); entryStatus('A IA está escrevendo…');
     try {
       const r = await callAI(prompt, { signal: c.ctrl.signal, support: true, simple: 'text', onText: (t) => { if (entryCtx === c) $('entryText').value = t; } });
-      if (entryCtx === c) { $('entryText').value = r.text.trim(); $('entryUndo').hidden = !c.before; entryStatus('Pronto. Confira e toque em Salvar.', 'ok'); }
+      if (entryCtx === c) { entrySetText(r.text.trim()); $('entryUndo').hidden = !c.before; entryStatus('Pronto. Confira e toque em Salvar.', 'ok'); }
     } catch (err) {
-      if (entryCtx === c) { $('entryText').value = c.before; c.before = null; }
+      if (entryCtx === c) { entrySetText(c.before); c.before = null; }
       if (err.name === 'AbortError') entryStatus('Parado. O texto anterior foi mantido.');
       else { entryStatus((err.message || 'Não deu certo.') + (err.charged === false ? ' Nada foi cobrado.' : '') + ' Toque em "Escrever com IA" para tentar de novo.', 'err'); if (err.action) handleAIError(err, null); }
     } finally {

@@ -868,6 +868,17 @@
   .st-words { display: flex; flex-wrap: wrap; gap: 6px; }
   .st-words span { border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; font-size: .84rem; }
   .st-words span b { color: var(--muted); font-weight: 600; margin-left: 4px; }
+  /* ---------- plano e estruturas ---------- */
+  .plan-box { margin: 0 0 12px; padding: 12px 14px; border: 1px dashed var(--accent); border-radius: 12px; background: var(--accent-soft); }
+  .plan-box .pb-k { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .plan-box p { margin: 4px 0 8px; white-space: pre-wrap; }
+  .tpl-list { display: grid; gap: 10px; margin: 8px 0; }
+  .tpl { text-align: left; display: grid; gap: 4px; padding: 12px 14px; border-radius: 12px; min-height: 0; font-weight: 400; }
+  .tpl b { font-size: 1rem; }
+  .tpl span { color: var(--muted); font-size: .86rem; }
+  .tpl[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); }
+  .tpl-steps { margin: 6px 0 0; padding-left: 20px; font-size: .86rem; color: var(--muted); max-height: 30vh; overflow: auto; }
+  .bcard.plan { border-style: dashed; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -1458,6 +1469,21 @@
 <dialog id="statsDlg" class="stats-dlg" aria-labelledby="statsTitle">
   <div class="dlg-head"><h2 id="statsTitle"><svg class="icon" aria-hidden="true"><use href="#i-bar-chart"/></svg>Estatísticas da história</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <div id="statsBody"></div>
+</dialog>
+
+<dialog id="planDlg" aria-labelledby="planTitle">
+  <div class="dlg-head"><h2 id="planTitle"><svg class="icon" aria-hidden="true"><use href="#i-layout-grid"/></svg><span>Cartão de planejamento</span></h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">Um capítulo ainda sem texto, só com o plano. Depois é só escrever, você mesmo ou com a IA seguindo o plano.</p>
+  <label for="planName" style="margin-top:0">Título</label><input type="text" id="planName" placeholder="Ex.: O primeiro encontro">
+  <label for="planText">O que acontece</label><textarea id="planText" rows="5" placeholder="Ex.: Rex chega ao vale e encontra Tyr no riacho. Discutem pelo lugar. Termina com os dois sendo obrigados a dividir a caverna."></textarea>
+  <div class="row end" style="margin-top:12px"><button type="button" class="link" id="planDel">Apagar cartão</button><span style="flex:1"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="planSave">Salvar</button></div>
+</dialog>
+
+<dialog id="tplDlg" aria-labelledby="tplTitle">
+  <div class="dlg-head"><h2 id="tplTitle"><svg class="icon" aria-hidden="true"><use href="#i-milestone"/></svg>Estruturas prontas</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">Cria cartões de planejamento no Mural, um para cada etapa. Você troca os títulos e escreve o que acontece em cada um (sem IA).</p>
+  <div class="tpl-list" id="tplList"></div>
+  <div class="row end"><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="tplGo" disabled>Criar os cartões</button></div>
 </dialog>
 
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
@@ -3329,7 +3355,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
         el('div', { class: 'num' }, `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : ''), c.status ? el('span', { class: 'st-chip st-' + c.status, style: 'margin-left:8px', text: CH_STATUS.find(x => x[0] === c.status)[1] }) : null),
         el('h3', { text: chTitle(p, c) }),
-        el('div', { class: 'preview', text: storyPlain(c.text.slice(0, 600)).replace(/\s*\n+\s*/g, ' ').slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
+        el('div', { class: 'preview', text: storyPlain(c.text.slice(0, 600)).replace(/\s*\n+\s*/g, ' ').slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : (c.plan || '').trim() ? 'Plano: ' + c.plan.trim().slice(0, 240) : '(vazio)') }),
         el('div', { class: 'row' },
           el('span', { class: 'muted', style: 'margin-right:auto', text: `${fmtNum(countWords(c.text))} palavras` }),
           el('button', { icon: 'copy', text: 'Copiar', 'aria-label': `Copiar o capítulo ${i + 1}`, onclick: (e) => { e.stopPropagation(); copyChapter(c.text); } }))));
@@ -3470,6 +3496,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('button', { class: 'primary', icon: 'languages', ai: true, text: `Reescrever em ${langLower(p)}`, onclick: () => guardEdit(() => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
         `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`)) })));
 
+    if (!writingThis && (ch.plan || '').trim()) sec.append(planBox(p, ch, editing));
     const card = el('div', { class: 'card' });
     const words = el('span', { class: 'muted', id: 'chWords' });
 
@@ -4606,14 +4633,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   async function continueChapter(ch) {
     const p = cur();
     if (locked(jobOnChapter(ch), 'A IA já está mexendo neste capítulo. Espere terminar.') || !ensureReady(p, () => continueChapter(ch))) return;
-    if (!(await confirmAI('Continuar escrevendo este capítulo.'))) return;
+    if (!(await confirmAI(ch.text.trim() ? 'Continuar escrevendo este capítulo.' : 'Escrever este capítulo seguindo o plano.'))) return;
     const idx = p.chapters.indexOf(ch);
     const original = ch.text;
+    const plan = (ch.plan || '').trim();
     const makePrompt = (strong) => withLang(p, `${buildContext(p, idx, '')}\n\n` +
-      `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` +
+      (plan ? `PLANO DESTE CAPÍTULO (feito pelo autor; siga):\nTítulo: ${ch.title || ''}\n${plan}\n\n` : '') +
+      (original ? `CAPÍTULO ATUAL (até onde foi escrito):\n${original}\n\n` : '') +
       (isPovMode(p) && ch.pov ? `PONTO DE VISTA (POV) DESTE CAPÍTULO: ${ch.pov}; continue pelo olhar dele.\n` : '') + ptStyle(p) +
-      `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
-      `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.`, strong);
+      (original ? `TAREFA: Continue este capítulo exatamente de onde o texto parou, sem repetir nada do que já está escrito. ` +
+        `Escreva cerca de ${Math.round(Number(p.length || 1500) / 2)} palavras e leve a cena a um bom ponto de pausa.`
+        : `TAREFA: Escreva este capítulo inteiro, do começo, seguindo o plano. Cerca de ${Number(p.length || 1500)} palavras. Comece direto na história, sem título.`), strong);
     const sep = !original ? '' : /[.!?…"”»*)\]]\s*$/.test(original) ? '\n\n' : ' ';
     view = { tab: 'capitulos', chapterId: ch.id, mode: 'ler' };
     const b = startBusy('continue', 'Continuando', ch.id);
@@ -5695,12 +5725,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function chapterBoard(p) {
     const wrap = el('div', {});
     const counts = CH_STATUS.map(([k, t]) => [k, t, p.chapters.filter(c => chStatus(c) === k).length]).filter(x => x[2]);
-    wrap.append(el('div', { class: 'board-sum' }, counts.map(([k, t, n]) => el('span', { class: 'st-chip st-' + k, text: `${t} · ${n}` }))));
+    wrap.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:10px' },
+      el('div', { class: 'board-sum', style: 'margin:0' }, counts.map(([k, t, n]) => el('span', { class: 'st-chip st-' + k, text: `${t} · ${n}` }))),
+      el('div', { class: 'row' },
+        el('button', { icon: 'plus', text: 'Cartão', title: 'Planejar um capítulo antes de escrever', onclick: () => openPlan(p, null) }),
+        el('button', { icon: 'milestone', text: 'Estrutura pronta', onclick: () => openTemplates(p) }))));
     const board = el('div', { class: 'board', role: 'list', 'aria-label': 'Mural de capítulos' });
     p.chapters.forEach((c, i) => {
-      const st = chStatus(c), sum = c.recap && c.recap.text ? c.recap.text : storyPlain((c.text || '').slice(0, 500)).replace(/\s+/g, ' ').slice(0, 240);
+      const st = chStatus(c), sum = c.recap && c.recap.text ? c.recap.text : (c.text || '').trim() ? storyPlain((c.text || '').slice(0, 500)).replace(/\s+/g, ' ').slice(0, 240) : (c.plan || '').trim() ? 'Plano: ' + c.plan.trim() : '';
       const grip = el('button', { type: 'button', class: 'grip', icon: 'grip-vertical', 'aria-label': `Mover o capítulo ${i + 1}. Use as setas para mudar a posição.`, title: 'Arraste para mudar a ordem' });
-      const card = el('article', { class: 'bcard', role: 'listitem', style: c.color ? `--bc:${c.color}` : null, 'data-i': i,
+      const card = el('article', { class: 'bcard' + ((c.text || '').trim() ? '' : ' plan'), role: 'listitem', style: c.color ? `--bc:${c.color}` : null, 'data-i': i,
         onclick: (e) => { if (e.target.closest('button')) return; view.chapterId = c.id; view.mode = 'ler'; renderChapters(); scrollTo(0, 0); } },
         el('div', { class: 'bc-top' },
           el('span', { class: 'bc-num', text: `CAP. ${i + 1}` + (c.pov ? ` · ${c.pov.toUpperCase()}` : '') }),
@@ -6551,6 +6585,99 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     body.replaceChildren(...out);
     $('statsDlg').showModal();
   }
+
+
+  // =====================================================================
+  // Cartões de planejamento e estruturas prontas (sem IA)
+  // =====================================================================
+  function planBox(p, ch, editing) {
+    const empty = !(ch.text || '').trim();
+    return el('div', { class: 'plan-box' },
+      el('div', { class: 'pb-k', text: 'Plano do capítulo' }), el('p', { text: ch.plan.trim() }),
+      el('div', { class: 'row' },
+        empty && !editing ? el('button', { class: 'primary', icon: 'pencil', text: 'Escrever eu mesmo', onclick: () => { view.mode = 'editar'; renderChapters(); } }) : null,
+        empty ? el('button', { icon: 'sparkles', ai: true, text: 'Escrever com IA seguindo o plano', onclick: () => guardEdit(() => continueChapter(ch)) }) : null,
+        el('button', { class: 'link plain', icon: 'pencil', text: 'Editar o plano', onclick: () => openPlan(p, ch) })));
+  }
+  let planCtx = null;
+  function openPlan(p, ch) {
+    planCtx = { p, ch };
+    $('planTitle').lastChild.textContent = ch ? 'Plano do capítulo' : 'Novo cartão de planejamento';
+    $('planName').value = ch ? ch.title || '' : ''; $('planText').value = ch ? ch.plan || '' : '';
+    $('planDel').hidden = !ch || !!(ch.text || '').trim();
+    $('planDlg').showModal(); $(ch ? 'planText' : 'planName').focus();
+  }
+  $('planSave').addEventListener('click', () => {
+    const c = planCtx; if (!c) return;
+    const title = $('planName').value.trim(), plan = $('planText').value.trim();
+    if (!title && !plan) { $('planName').focus(); return; }
+    if (c.ch) { c.ch.title = title; c.ch.plan = plan; }
+    else c.p.chapters.push({ id: uid(), title: title || `Capítulo ${c.p.chapters.length + 1}`, text: '', plan, status: 'ideia' });
+    saveProject(c.p, true); $('planDlg').close(); renderChapters(); renderProjects(); toast('Plano salvo ✓');
+  });
+  $('planDel').addEventListener('click', () => {
+    const c = planCtx; if (!c || !c.ch || !confirm('Apagar este cartão?')) return;
+    c.p.chapters = c.p.chapters.filter(x => x !== c.ch); if (view.chapterId === c.ch.id) view.chapterId = null;
+    saveProject(c.p, true); $('planDlg').close(); renderChapters(); renderProjects();
+  });
+  var STORY_TEMPLATES = [
+    { id: '3atos', name: 'Três atos', desc: 'O clássico: começo, meio e fim, com duas viradas.', steps: [
+      ['Apresentação', 'Mostre o mundo e o protagonista no dia a dia: o que ele quer e o que falta na vida dele.'],
+      ['O chamado', 'Algo acontece e tira o protagonista da rotina. A história começa de verdade.'],
+      ['Primeira virada', 'O protagonista decide agir (ou é forçado). Não dá mais para voltar atrás.'],
+      ['Complicações', 'Obstáculos crescentes, aliados e rivais. Cada tentativa traz um novo problema.'],
+      ['Ponto central', 'Uma revelação ou vitória falsa muda o jogo. Os riscos ficam maiores.'],
+      ['Tudo dá errado', 'O pior momento: perda, traição ou derrota. Parece que não há saída.'],
+      ['Clímax', 'O confronto final. O protagonista usa o que aprendeu para enfrentar o problema principal.'],
+      ['Resolução', 'As consequências. Mostre como o protagonista e o mundo mudaram.']] },
+    { id: 'heroi', name: 'Jornada do Herói', desc: 'As 12 etapas de Campbell e Vogler. Boa para aventura e fantasia.', steps: [
+      ['Mundo comum', 'O herói antes da aventura: rotina, defeitos e desejos.'], ['Chamado à aventura', 'Surge um problema ou convite que muda tudo.'],
+      ['Recusa do chamado', 'Medo e dúvida: o herói hesita.'], ['Encontro com o mentor', 'Alguém dá conselho, treino ou um presente.'],
+      ['Travessia do limiar', 'O herói entra no mundo novo; não há volta.'], ['Testes, aliados e inimigos', 'Aprende as regras do mundo novo e faz alianças.'],
+      ['Aproximação da caverna', 'Preparação para o maior perigo.'], ['A provação', 'O grande teste: quase morte, perda ou confronto com o medo.'],
+      ['A recompensa', 'O herói conquista o que buscava (objeto, verdade, amor).'], ['O caminho de volta', 'As consequências o perseguem; ainda há perigo.'],
+      ['Ressurreição', 'O teste final, onde o herói mostra que mudou.'], ['Retorno com o elixir', 'Volta para casa transformado, trazendo algo para os outros.']] },
+    { id: 'cat', name: 'Save the Cat', desc: 'As 15 batidas de Blake Snyder. Ritmo de filme, ótima para histórias rápidas.', steps: [
+      ['Imagem de abertura', 'Um retrato de como o protagonista está no começo.'], ['Tema apresentado', 'Alguém diz, sem querer, a lição que ele vai aprender.'],
+      ['Preparação', 'O mundo, os personagens e o que precisa mudar.'], ['Catalisador', 'O acontecimento que muda tudo.'], ['Debate', 'O protagonista hesita: vai ou não vai?'],
+      ['Entrada no segundo ato', 'Ele escolhe entrar no mundo novo.'], ['História B', 'Uma relação nova (muitas vezes o romance) que carrega o tema.'],
+      ['Diversão e brincadeiras', 'A promessa da premissa: as cenas que o leitor veio ver.'], ['Ponto central', 'Vitória ou derrota falsa; o relógio começa a correr.'],
+      ['Os vilões se aproximam', 'Pressão de fora e dúvidas de dentro.'], ['Tudo está perdido', 'O fundo do poço; algo ou alguém "morre".'],
+      ['Noite escura da alma', 'O protagonista sofre e entende o que precisa mudar.'], ['Entrada no terceiro ato', 'A solução aparece, juntando a história A e a B.'],
+      ['Final', 'O plano em ação, com uma reviravolta, e a vitória.'], ['Imagem final', 'O oposto da imagem de abertura: a transformação.']] },
+    { id: 'romance', name: 'Romance', desc: 'As etapas de uma história de amor, do encontro ao final feliz. Ótima para fanfic.', steps: [
+      ['Antes do amor', 'Cada um na própria vida: o que falta, o que esconde, por que não está pronto para amar.'],
+      ['O encontro', 'O primeiro encontro, com faísca: atrito, constrangimento ou atração imediata.'],
+      ['Não pode dar certo', 'Os motivos (de fora e de dentro) para os dois não ficarem juntos.'],
+      ['Forçados a ficar perto', 'Algo obriga os dois a conviver: trabalho, viagem, segredo, aposta.'],
+      ['A guarda baixa', 'Momentos de verdade; um conhece o lado escondido do outro.'],
+      ['Primeiro beijo', 'A tensão explode. Tudo muda entre eles.'],
+      ['Felizes, mas…', 'Fase boa do casal, enquanto o grande problema ainda está escondido.'],
+      ['A crise', 'O segredo vem à tona ou o medo vence. Eles se afastam.'],
+      ['Separados', 'Cada um sofre e entende o que precisa mudar em si.'],
+      ['O grande gesto', 'Um deles (ou os dois) arrisca tudo para provar o amor.'],
+      ['Felizes para sempre', 'O casal junto e mudado. Um final que mostra o futuro deles.']] }
+  ];
+  let tplPick = null, tplP = null;
+  function openTemplates(p) {
+    tplP = p; tplPick = null; $('tplGo').disabled = true;
+    $('tplList').replaceChildren(...STORY_TEMPLATES.map(t => {
+      const steps = el('ol', { class: 'tpl-steps', hidden: true }, t.steps.map(([n]) => el('li', { text: n })));
+      const b = el('button', { type: 'button', class: 'tpl', 'aria-pressed': 'false', onclick: () => {
+        tplPick = t; $('tplGo').disabled = false;
+        $('tplList').querySelectorAll('.tpl').forEach(x => { x.setAttribute('aria-pressed', String(x === b)); x.querySelector('.tpl-steps').hidden = x !== b; });
+      } }, el('b', { text: `${t.name} · ${t.steps.length} cartões` }), el('span', { text: t.desc }), steps);
+      return b;
+    }));
+    $('tplDlg').showModal();
+  }
+  $('tplGo').addEventListener('click', () => {
+    const p = tplP, t = tplPick; if (!p || !t) return;
+    t.steps.forEach(([n, d]) => p.chapters.push({ id: uid(), title: n, text: '', plan: d, status: 'ideia', tpl: t.id }));
+    saveProject(p, true); $('tplDlg').close();
+    chView = 'mural'; local.set('fanfic.chView', 'mural'); view.chapterId = null; renderChapters(); renderProjects();
+    toast(`${t.steps.length} cartões criados no Mural ✓ Toque em um para escrever o plano.`);
+  });
 
   // =====================================================================
   // Linha do tempo (sem IA): acontecimentos em ordem, ligados a capítulos e personagens

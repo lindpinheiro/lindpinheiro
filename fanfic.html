@@ -785,6 +785,29 @@
   .wchart .goal-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--muted); pointer-events: none; }
   .wchart .goal-line em { position: absolute; right: 0; top: -16px; font-size: .7rem; font-style: normal; color: var(--muted); background: var(--surface); padding: 0 4px; }
   .wtip { position: absolute; z-index: 5; pointer-events: none; background: var(--text); color: var(--bg); font-size: .8rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
+  /* ---------- linha do tempo ---------- */
+  .tl-tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+  .tl-tools .grow { flex: 1; }
+  .tl-tools select { width: auto; min-width: 170px; }
+  .tl { position: relative; padding-left: 28px; }
+  .tl::before { content: ""; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--border); border-radius: 2px; }
+  .tl-ev { position: relative; margin-bottom: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  .tl-ev::before { content: ""; position: absolute; left: -25px; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--tc, var(--accent)); box-shadow: 0 0 0 3px var(--surface-2); }
+  .tl-ev .when { font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .tl-ev h3 { margin: 2px 0 4px; font-size: 1rem; }
+  .tl-ev .txt { margin: 0; color: var(--muted); font-size: .9rem; white-space: pre-wrap; }
+  .tl-ev .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .tl-ev .chips .tc { display: inline-flex; align-items: center; gap: 4px; min-height: 0; padding: 2px 9px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: .76rem; font-weight: 600; line-height: 1.5; }
+  .tl-ev .chips .tc .icon { width: 12px; height: 12px; }
+  .tl-ev .chips button.tc { cursor: pointer; }
+  .tl-ev .chips button.tc:hover { border-color: var(--accent); }
+  .tl-ev .acts { position: absolute; top: 6px; right: 6px; display: flex; gap: 2px; }
+  .tl-ev .acts button { min-height: 30px; width: 30px; padding: 0; border: 0; background: transparent; color: var(--muted); }
+  .tl-ev .acts button:hover { color: var(--accent); }
+  .tl-ev .acts button:disabled { opacity: .3; }
+  .tl-ev h3, .tl-ev .when { padding-right: 100px; }
+  .tl-chars { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tl-chars label { margin: 0; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -915,6 +938,9 @@
 <symbol id="i-list" viewBox="0 0 24 24"><path d="M3 12h.01" /> <path d="M3 18h.01" /> <path d="M3 6h.01" /> <path d="M8 12h13" /> <path d="M8 18h13" /> <path d="M8 6h13" /></symbol>
 <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <circle cx="12" cy="12" r="6" /> <circle cx="12" cy="12" r="2" /></symbol>
 <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></symbol>
+<symbol id="i-milestone" viewBox="0 0 24 24"><path d="M12 13v8" /> <path d="M12 3v3" /> <path d="M4 6a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h13a2 2 0 0 0 1.152-.365l3.424-2.317a1 1 0 0 0 0-1.635l-3.424-2.318A2 2 0 0 0 17 6z" /></symbol>
+<symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7" /> <path d="M12 19V5" /></symbol>
+<symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14" /> <path d="m19 12-7 7-7-7" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1340,6 +1366,22 @@
   </div>
   <div id="goalBook" style="margin-top:10px"></div>
   <p class="hint">"O que eu escrevo" conta as palavras que você acrescenta ao salvar no Editar. O que a IA escreve conta quando ela escreve ou continua um capítulo.</p>
+</dialog>
+
+<dialog id="tlDlg" aria-labelledby="tlTitle">
+  <div class="dlg-head"><h2 id="tlTitle"><svg class="icon" aria-hidden="true"><use href="#i-milestone"/></svg><span>Acontecimento</span></h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="lay-grid">
+    <div><label for="tlWhen" style="margin-top:0">Quando</label><input type="text" id="tlWhen" placeholder="Ex.: 10 anos antes, Dia 3, Verão de 2019"></div>
+    <div><label for="tlCh" style="margin-top:0">Capítulo <span class="muted">(opcional)</span></label><select id="tlCh"></select></div>
+  </div>
+  <label for="tlName">O que acontece</label>
+  <input type="text" id="tlName" placeholder="Ex.: Rex e Tyr se conhecem no vale">
+  <label for="tlText">Detalhes <span class="muted">(opcional)</span></label>
+  <textarea id="tlText" rows="3"></textarea>
+  <label>Quem participa</label>
+  <div class="tl-chars" id="tlChars"></div>
+  <div class="status err" id="tlStatus" role="status"></div>
+  <div class="row end" style="margin-top:12px"><button type="button" class="link" id="tlDel">Apagar</button><span style="flex:1"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="tlSave">Salvar</button></div>
 </dialog>
 
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
@@ -4682,6 +4724,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     w.folders.forEach(f => block(f.title || 'Outras informações', f.entries));
     const rel = mapRelations(p);
     if (rel) out.push('## Mapa de relações (feito pelo autor)\n' + rel);
+    const tl = timelineText(p);
+    if (tl) out.push('## Linha do tempo (feita pelo autor, em ordem)\n' + tl);
     return out.join('\n\n');
   }
 
@@ -4833,12 +4877,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     use.checked = p.useWorld !== false;
     use.addEventListener('change', () => { p.useWorld = use.checked; saveProject(p); });
     head.append(el('label', { class: 'check', for: 'useWorld' }, use, el('span', { text: 'Usar o mundo como guia da IA ao escrever' })));
-    const views = [['pastas', 'folder-open', 'Pastas'], ['mapa', 'share-2', 'Mapa de personagens']];
+    const views = [['pastas', 'folder-open', 'Pastas'], ['mapa', 'share-2', 'Mapa'], ['tempo', 'milestone', 'Linha do tempo']];
     if (!views.some(v => v[0] === worldView)) worldView = 'pastas';
     head.append(el('div', { class: 'seg world-views', role: 'group', 'aria-label': 'Ver o mundo como' },
       views.map(([k, ic, t]) => el('button', { type: 'button', icon: ic, text: t, 'aria-pressed': String(worldView === k), onclick: () => { worldView = k; local.set('fanfic.worldView', k); renderWorld(); } }))));
     sec.append(head);
     if (worldView === 'mapa') { sec.append(charMap(p)); return; }
+    if (worldView === 'tempo') { sec.append(timelineView(p)); return; }
 
     const ICON = { personagens: 'users', relacoes: 'heart-handshake', lugares: 'map-pin', regras: 'scroll-text', grupos: 'shield', historia: 'history', glossario: 'book-a', pendencias: 'circle-help' };
     const grid = el('div', { class: 'world-grid' });
@@ -6076,12 +6121,97 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return makeZip(files, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
 
+
+  // =====================================================================
+  // Linha do tempo (sem IA): acontecimentos em ordem, ligados a capítulos e personagens
+  // =====================================================================
+  function timelineOf(p) { const w = worldOf(p); return w.timeline = w.timeline || []; }
+  function timelineText(p) {
+    const t = p.world && p.world.timeline; if (!t || !t.length) return '';
+    const chars = (p.world.e && p.world.e.personagens) || [];
+    return t.map(ev => {
+      const who = (ev.chars || []).map(id => (chars.find(e => e.id === id) || {}).title).filter(Boolean);
+      const ch = ev.chId ? p.chapters.findIndex(c => c.id === ev.chId) : -1;
+      return `- ${ev.when ? ev.when + ': ' : ''}${ev.title || ''}${ch >= 0 ? ` (capítulo ${ch + 1})` : ''}${who.length ? ` [${who.join(', ')}]` : ''}${(ev.text || '').trim() ? ` — ${ev.text.trim().slice(0, 240)}` : ''}`;
+    }).join('\n');
+  }
+  var tlFilter = '', tlEdit = null;
+  function timelineView(p) {
+    const w = worldOf(p), t = timelineOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
+    w.e.personagens.forEach(e => { if (!e.id) e.id = uid(); });
+    if (tlFilter && !chars.some(e => e.id === tlFilter)) tlFilter = '';
+    const card = el('div', { class: 'card' });
+    const filter = el('select', { 'aria-label': 'Filtrar por personagem' }, el('option', { value: '', text: 'Todos os personagens' }), chars.map(e => el('option', { value: e.id, text: e.title })));
+    filter.value = tlFilter; filter.addEventListener('change', () => { tlFilter = filter.value; renderWorld(); });
+    const linked = new Set(t.map(ev => ev.chId).filter(Boolean)), missing = p.chapters.filter(c => (c.text || '').trim() && !linked.has(c.id));
+    const hist = (w.e.historia || []).filter(e => (e.title || '').trim() && !t.some(ev => ev.from === e.id));
+    card.append(el('div', { class: 'tl-tools' },
+      el('button', { class: 'primary', icon: 'plus', text: 'Acontecimento', onclick: () => openTimelineEvent(p, null) }),
+      missing.length ? el('button', { icon: 'book-open', text: `Trazer os capítulos (${missing.length})`, title: 'Cria um acontecimento para cada capítulo, com o resumo dele (sem IA)', onclick: () => {
+        missing.forEach(c => t.push({ id: uid(), when: `Capítulo ${p.chapters.indexOf(c) + 1}`, title: chTitle(p, c), text: c.recap && c.recap.text ? c.recap.text : '', chId: c.id, chars: chars.filter(e => new RegExp(`(^|[^\\p{L}])${charKey(e.title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'iu').test(c.text)).map(e => e.id) }));
+        saveProject(p, true); renderWorld(); toast(`${missing.length} acontecimento(s) criado(s) ✓`);
+      } }) : null,
+      hist.length ? el('button', { icon: 'history', text: `Trazer da pasta História (${hist.length})`, onclick: () => {
+        hist.forEach(e => t.unshift({ id: uid(), when: 'Antes da história', title: e.title, text: e.text || '', chars: [], from: e.id }));
+        saveProject(p, true); renderWorld(); toast(`${hist.length} acontecimento(s) criado(s) ✓`);
+      } }) : null,
+      el('span', { class: 'grow' }), chars.length ? filter : null));
+    const list = el('div', { class: 'tl' });
+    const shown = t.filter(ev => !tlFilter || (ev.chars || []).includes(tlFilter));
+    shown.forEach(ev => {
+      const i = t.indexOf(ev), ch = ev.chId ? p.chapters.find(c => c.id === ev.chId) : null;
+      const move = (d) => { const j = i + d; if (j < 0 || j >= t.length) return; t.splice(i, 1); t.splice(j, 0, ev); saveProject(p, true); renderWorld(); };
+      list.append(el('div', { class: 'tl-ev', style: ev.color ? `--tc:${ev.color}` : null },
+        el('div', { class: 'acts' },
+          el('button', { icon: 'arrow-up', 'aria-label': 'Mover para antes', title: 'Antes', disabled: i === 0 || !!tlFilter, onclick: () => move(-1) }),
+          el('button', { icon: 'arrow-down', 'aria-label': 'Mover para depois', title: 'Depois', disabled: i === t.length - 1 || !!tlFilter, onclick: () => move(1) }),
+          el('button', { icon: 'pencil', 'aria-label': 'Editar', title: 'Editar', onclick: () => openTimelineEvent(p, ev) })),
+        ev.when ? el('div', { class: 'when', text: ev.when }) : null,
+        el('h3', { text: ev.title || 'Sem título' }),
+        (ev.text || '').trim() ? el('p', { class: 'txt', text: ev.text.trim() }) : null,
+        (ch || (ev.chars || []).length) ? el('div', { class: 'chips' },
+          ch ? el('button', { type: 'button', class: 'tc', icon: 'book-open', text: chTitle(p, ch), title: 'Abrir o capítulo', onclick: () => { view.tab = 'capitulos'; view.chapterId = ch.id; view.mode = 'ler'; renderTab(); scrollTo(0, 0); } }) : null,
+          (ev.chars || []).map(id => chars.find(e => e.id === id)).filter(Boolean).map(e => el('span', { class: 'tc', text: charKey(e.title) || e.title }))) : null));
+    });
+    if (!t.length) list.append(el('p', { class: 'muted', text: 'Nenhum acontecimento ainda. Crie o primeiro ou traga os capítulos para começar.' }));
+    else if (!shown.length) list.append(el('p', { class: 'muted', text: 'Esse personagem ainda não aparece em nenhum acontecimento.' }));
+    card.append(list, el('p', { class: 'hint', text: 'A ordem é a da história (não a dos capítulos): use as setas para ajustar, por exemplo, um flashback. A IA lê esta linha do tempo ao escrever.' }));
+    return card;
+  }
+  function openTimelineEvent(p, ev) {
+    const w = worldOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
+    tlEdit = { p, ev };
+    $('tlTitle').lastChild.textContent = ev ? 'Editar acontecimento' : 'Novo acontecimento';
+    $('tlWhen').value = ev ? ev.when || '' : ''; $('tlName').value = ev ? ev.title || '' : ''; $('tlText').value = ev ? ev.text || '' : '';
+    $('tlCh').replaceChildren(el('option', { value: '', text: 'Nenhum' }), ...p.chapters.map((c, i) => el('option', { value: c.id, text: `${i + 1}. ${chTitle(p, c)}` })));
+    $('tlCh').value = ev ? ev.chId || '' : '';
+    const sel = new Set(ev ? ev.chars || [] : (tlFilter ? [tlFilter] : []));
+    $('tlChars').replaceChildren(...(chars.length ? chars.map(e => {
+      const cb = el('input', { type: 'checkbox', value: e.id }); cb.checked = sel.has(e.id);
+      return el('label', { class: 'check chip' }, cb, el('span', { text: charKey(e.title) || e.title }));
+    }) : [el('span', { class: 'muted', text: 'Crie personagens no Mundo para marcar quem participa.' })]));
+    $('tlDel').hidden = !ev; $('tlStatus').textContent = '';
+    $('tlDlg').showModal(); $(ev ? 'tlName' : 'tlWhen').focus();
+  }
+  $('tlSave').addEventListener('click', () => {
+    const c = tlEdit; if (!c) return;
+    const title = $('tlName').value.trim();
+    if (!title) { $('tlStatus').textContent = 'Diga o que acontece.'; $('tlName').focus(); return; }
+    const data = { when: $('tlWhen').value.trim(), title, text: $('tlText').value.trim(), chId: $('tlCh').value || '', chars: [...$('tlChars').querySelectorAll('input:checked')].map(x => x.value) };
+    if (c.ev) Object.assign(c.ev, data); else timelineOf(c.p).push(Object.assign({ id: uid() }, data));
+    saveProject(c.p, true); $('tlDlg').close(); renderWorld(); toast('Acontecimento salvo ✓');
+  });
+  $('tlDel').addEventListener('click', () => {
+    const c = tlEdit; if (!c || !c.ev || !confirm('Apagar este acontecimento?')) return;
+    const t = timelineOf(c.p); t.splice(t.indexOf(c.ev), 1); saveProject(c.p, true); $('tlDlg').close(); renderWorld();
+  });
+
   // =====================================================================
   // Mapa de personagens (sem IA): personagens do Mundo ligados por relações
   // =====================================================================
-  const REL_TYPES = [['amor', 'Amor', '#e0508a'], ['amizade', 'Amizade', '#2f9e55'], ['familia', 'Família', '#d4a017'], ['rivalidade', 'Rivalidade', '#e07a1f'],
+  var REL_TYPES = [['amor', 'Amor', '#e0508a'], ['amizade', 'Amizade', '#2f9e55'], ['familia', 'Família', '#d4a017'], ['rivalidade', 'Rivalidade', '#e07a1f'],
     ['inimigo', 'Inimigos', '#d93a3a'], ['trabalho', 'Trabalho', '#2f74d0'], ['outro', 'Outra', '#8a8a8a']];
-  const relType = (k) => REL_TYPES.find(t => t[0] === k) || REL_TYPES[REL_TYPES.length - 1];
+  function relType(k) { return REL_TYPES.find(t => t[0] === k) || REL_TYPES[REL_TYPES.length - 1]; }
   function mapOf(p) {
     const w = worldOf(p);
     const m = w.map = w.map || {};

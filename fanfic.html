@@ -206,6 +206,43 @@
   .proj-filters .chip { min-height: 34px; padding: 4px 12px; }
   .proj-heading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; font-weight: 700; margin: 0 0 14px; line-height: 1.25; }
   #currentTitle { display: none !important; }
+  .world-views { display: flex; margin-top: 12px; }
+  .world-views button { flex: 1; }
+  /* ---------- mapa de personagens ---------- */
+  .cmap-card { padding: 12px; }
+  .cmap-tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+  .cmap-tools .grow { flex: 1; }
+  .cmap-tools button { min-height: 36px; }
+  .cmap-stage { position: relative; height: min(64vh, 620px); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; touch-action: none; cursor: grab; user-select: none;
+    background: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--muted) 35%, transparent) 1px, transparent 0) 0 0 / 22px 22px, var(--surface-2); }
+  .cmap-stage.panning { cursor: grabbing; }
+  .cmap-stage svg { width: 100%; height: 100%; display: block; }
+  .cmap-node { cursor: pointer; }
+  .cmap-node circle.ring { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+  .cmap-node.sel circle.ring { stroke: var(--accent); stroke-width: 4; }
+  .cmap-node text { fill: var(--text); font: 600 13px system-ui, sans-serif; text-anchor: middle; paint-order: stroke; stroke: var(--surface-2); stroke-width: 4px; }
+  .cmap-node .ini { fill: var(--accent); font-size: 18px; stroke: none; dominant-baseline: central; }
+  .cmap-link line { stroke-width: 3; }
+  .cmap-link .hit { stroke: transparent; stroke-width: 16; cursor: pointer; }
+  .cmap-link text { font: 600 11.5px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--surface-2); stroke-width: 5px; cursor: pointer; }
+  .cmap-link.sel line:not(.hit) { stroke-width: 5; }
+  .cmap-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--muted); pointer-events: none; }
+  .cmap-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; font-size: .82rem; color: var(--muted); }
+  .cmap-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .cmap-legend i { width: 18px; height: 3px; border-radius: 2px; display: inline-block; }
+  .cmap-panel { margin-top: 10px; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .cmap-panel h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+  .cmap-panel .links { display: grid; gap: 6px; margin: 8px 0; }
+  .cmap-panel .lk { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: var(--surface-2); }
+  .cmap-panel .lk .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .cmap-panel .lk .t { flex: 1; min-width: 0; }
+  .cmap-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cmap-form .full { grid-column: 1 / -1; }
+  @media (max-width: 560px) { .cmap-form { grid-template-columns: 1fr; } }
+  .cmap-sug { display: grid; gap: 6px; max-height: 50vh; overflow: auto; margin: 8px 0; }
+  .cmap-sug label { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 8px; border: 1px solid var(--border); border-radius: 10px; font-weight: 400; }
+  .cmap-stage.full { position: fixed; inset: 0; z-index: 80; height: auto; border-radius: 0; }
+  .cmap-exit { position: fixed; top: 12px; right: 12px; z-index: 81; }
   .world-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
   .world-grid > .card { min-width: 0; }
   .entry { min-width: 0; max-width: 100%; }
@@ -246,7 +283,7 @@
   label { display: block; font-weight: 600; margin: 16px 0 6px; }
   .hint { color: var(--muted); font-size: .85rem; font-weight: 400; margin: 4px 0 0; }
   .lead { color: var(--muted); margin: 0 0 14px; font-size: .95rem; }
-  input[type=text], input[type=password], input[type=number], select, textarea {
+  input[type=text], input[type=password], input[type=number], input[type=date], select, textarea {
     width: 100%; font: inherit; color: var(--text); background: var(--surface-2);
     border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
   }
@@ -630,6 +667,147 @@
     max-height: calc(100vh - 24px); padding: 20px;
   }
   dialog::backdrop { background: rgba(0,0,0,.55); }
+  /* ---------- livro em 3D ---------- */
+  dialog.book3d-dlg { width: min(860px, calc(100vw - 16px)); }
+  .b3-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 18px; align-items: start; }
+  @media (max-width: 680px) { .b3-wrap { grid-template-columns: 1fr; } }
+  .b3-stage { height: 430px; display: flex; align-items: center; justify-content: center; perspective: 1400px; touch-action: none; cursor: grab; user-select: none;
+    border-radius: 14px; background: radial-gradient(ellipse at 50% 85%, rgba(155,77,99,.28), transparent 60%), var(--surface-2); overflow: hidden; }
+  .b3-stage.dragging { cursor: grabbing; }
+  .book3d { position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  .book3d.live { transition: none; }
+  .b3-face { position: absolute; backface-visibility: hidden; overflow: hidden; }
+  .b3-front, .b3-back { inset: 0; border-radius: 2px 5px 5px 2px; }
+  .b3-front { transform: translateZ(calc(var(--d) / 2)); background: #3a2530; }
+  .b3-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .b3-front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.35) 0, rgba(255,255,255,.12) 3%, transparent 7%, transparent 80%, rgba(255,255,255,.08)); pointer-events: none; }
+  .b3-front .b3-ph { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 24px; text-align: center; color: #fff;
+    background: linear-gradient(160deg, #9b4d63, #3a2530); font-family: Georgia, serif; }
+  .b3-front .b3-ph b { font-size: 1.6rem; line-height: 1.2; }
+  .b3-back { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); background: var(--spine); color: var(--spine-ink); padding: 26px 22px; display: flex; flex-direction: column; gap: 10px; font-family: Georgia, serif; }
+  .b3-back .b3-blurb { font-size: .78rem; line-height: 1.5; overflow: hidden; flex: 1; white-space: pre-wrap; }
+  .b3-back .b3-btitle { font-weight: 700; font-size: 1rem; }
+  .b3-back .b3-bar { align-self: flex-end; width: 74px; height: 40px; background: repeating-linear-gradient(90deg, #111 0 2px, #fff 2px 3px, #111 3px 4px, #fff 4px 6px); border: 4px solid #fff; }
+  .b3-spine { width: var(--d); height: var(--h); left: calc((var(--w) - var(--d)) / 2); transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); background: var(--spine); color: var(--spine-ink);
+    display: flex; align-items: center; justify-content: center; }
+  .b3-spine span { writing-mode: vertical-rl; font-family: Georgia, serif; font-weight: 700; font-size: clamp(9px, calc(var(--d) * .42), 15px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-height: 92%; }
+  .b3-spine::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.25), rgba(255,255,255,.12) 45%, rgba(0,0,0,.25)); }
+  .b3-pages { width: var(--d); height: calc(var(--h) - 6px); top: 3px; left: calc((var(--w) - var(--d)) / 2); transform: rotateY(90deg) translateZ(calc(var(--w) / 2 - 3px));
+    background: repeating-linear-gradient(90deg, #f3eee4 0 1px, #d9d2c4 1px 2px); }
+  .b3-top, .b3-bottom { width: calc(var(--w) - 3px); height: var(--d); top: calc((var(--h) - var(--d)) / 2); background: repeating-linear-gradient(0deg, #f3eee4 0 1px, #d9d2c4 1px 2px); }
+  .b3-top { transform: rotateX(90deg) translateZ(calc(var(--h) / 2 - 3px)); }
+  .b3-bottom { transform: rotateX(-90deg) translateZ(calc(var(--h) / 2 - 3px)); }
+  .b3-views { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+  .b3-side label:first-child { margin-top: 0; }
+  /* ---------- diagramação ---------- */
+  dialog.layout-dlg { width: min(760px, calc(100vw - 16px)); }
+  .lay-fmts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 6px 0 4px; }
+  @media (max-width: 560px) { .lay-fmts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .lay-fmts button { flex-direction: column; gap: 2px; min-height: 64px; padding: 8px; font-size: .9rem; }
+  .lay-fmts button small { font-weight: 400; color: var(--muted); font-size: .75rem; }
+  .lay-fmts button[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .lay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  @media (max-width: 560px) { .lay-grid { grid-template-columns: 1fr; } }
+  .lay-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; margin-top: 10px; }
+  @media (max-width: 560px) { .lay-checks { grid-template-columns: 1fr; } }
+  .lay-checks label { margin: 0; }
+  .lay-preview { margin: 12px auto 0; background: #fbf8f2; color: #1d1a17; box-shadow: 0 6px 24px rgba(0,0,0,.35); border-radius: 3px; overflow: hidden; position: relative; }
+  .lay-preview .lp-in { position: absolute; overflow: hidden; }
+  .lay-preview .lp-head { position: absolute; left: 0; right: 0; text-align: center; font-size: 7px; letter-spacing: .08em; text-transform: uppercase; color: #8a7f75; }
+  .lay-preview .lp-num { position: absolute; left: 0; right: 0; text-align: center; font-size: 7px; color: #8a7f75; }
+  .lay-preview .lp-ch { text-align: center; padding-top: 22%; }
+  .lay-preview .lp-ch small { display: block; font-size: .55em; letter-spacing: .2em; text-transform: uppercase; color: #8a7f75; }
+  .lay-preview .lp-ch b { display: block; font-size: 1.25em; margin: .3em 0 1.2em; font-weight: 400; }
+  .lay-preview p { margin: 0; text-indent: 1.4em; text-align: justify; hyphens: auto; }
+  .lay-preview p.first { text-indent: 0; }
+  .lay-cover-box { border: 1px dashed var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 12px; }
+  /* ---------- buscar e substituir ---------- */
+  .find-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  @media (max-width: 560px) { .find-row { grid-template-columns: 1fr; } }
+  .find-opts { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; }
+  .find-opts label { margin: 0; }
+  .find-sum { margin: 12px 0 6px; font-weight: 600; }
+  .find-list { display: grid; gap: 10px; max-height: 46vh; overflow: auto; padding-right: 2px; }
+  .find-group h4 { margin: 0 0 4px; font-size: .9rem; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+  .find-hit { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; }
+  .find-hit .ctx { flex: 1; min-width: 0; font-family: Georgia, serif; font-size: .95rem; line-height: 1.5; }
+  .find-hit mark { background: var(--mark-edit); color: inherit; border-radius: 3px; padding: 0 1px; }
+  .find-hit del { color: var(--muted); }
+  .find-hit ins { text-decoration: none; background: color-mix(in srgb, #2f9e55 25%, transparent); border-radius: 3px; padding: 0 1px; }
+  .find-hit .acts { display: flex; flex-direction: column; gap: 4px; }
+  .find-hit .acts button { min-height: 32px; padding: 4px 10px; font-size: .85rem; }
+  .flash-find { animation: flashFind 1.6s ease-out; }
+  @keyframes flashFind { 0%, 40% { background: var(--mark-edit); } 100% { background: transparent; } }
+  /* ---------- mural de cenas ---------- */
+  .ch-views { margin-bottom: 12px; display: inline-flex; }
+  .board-sum { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .bcard { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 12px 12px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+    border-top: 5px solid var(--bc, var(--border)); cursor: pointer; min-height: 170px; }
+  .bcard:hover { border-color: var(--accent); border-top-color: var(--bc, var(--accent)); }
+  .bcard .bc-top { display: flex; align-items: center; gap: 6px; }
+  .bcard .bc-num { font-size: .72rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); flex: 1; }
+  .bcard h3 { margin: 0; font-size: 1rem; line-height: 1.3; }
+  .bcard .bc-sum { font-size: .84rem; color: var(--muted); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+  .bcard .bc-foot { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--muted); }
+  .bcard .bc-foot .grow { flex: 1; }
+  .bcard .grip { min-height: 30px; width: 30px; padding: 0; border: 0; background: transparent; color: var(--muted); cursor: grab; touch-action: none; }
+  .bcard .grip:focus-visible { outline: 2px solid var(--accent); }
+  .bcard .dotc { width: 18px; height: 18px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--border); background: var(--bc, transparent); }
+  .st-chip { min-height: 0; padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; border: 1px solid transparent; }
+  .st-ideia { background: color-mix(in srgb, #8a8a8a 22%, transparent); color: var(--muted); }
+  .st-rascunho { background: color-mix(in srgb, #2f74d0 22%, transparent); color: #5b9bf0; }
+  .st-revisao { background: color-mix(in srgb, #e07a1f 22%, transparent); color: #ef9a4a; }
+  .st-pronto { background: color-mix(in srgb, #2f9e55 24%, transparent); color: #46c272; }
+  .bcard.ghost { opacity: .35; border-style: dashed; }
+  .bcard.lifted { position: fixed; z-index: 90; pointer-events: none; box-shadow: 0 14px 40px rgba(0,0,0,.45); transform: rotate(2deg); }
+  /* ---------- metas de escrita ---------- */
+  .goal-strip { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); cursor: pointer; width: 100%; text-align: left; min-height: 0; font-weight: 400; }
+  .goal-strip:hover { border-color: var(--accent); }
+  .goal-strip .gs-main { flex: 1; min-width: 0; display: grid; gap: 5px; }
+  .goal-strip .gs-line { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; font-size: .9rem; }
+  .goal-strip b { font-size: 1.05rem; }
+  .gbar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .gbar > i { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
+  .streak { display: inline-flex; align-items: center; gap: 4px; color: #e07a1f; font-weight: 700; }
+  .streak .icon { width: 16px; height: 16px; }
+  .goal-hero { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 6px 0 12px; }
+  .goal-hero > div { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .goal-hero .k { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .goal-hero .v { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+  .goal-hero .s { font-size: .8rem; color: var(--muted); }
+  @media (max-width: 520px) { .goal-hero { grid-template-columns: 1fr 1fr; } .goal-hero > div:last-child { grid-column: 1 / -1; } }
+  .wchart { position: relative; height: 150px; display: flex; align-items: flex-end; gap: 2px; padding: 0 0 18px; border-bottom: 1px solid var(--border); margin-top: 8px; }
+  .wchart .wbar { flex: 1; min-width: 0; height: 100%; display: flex; align-items: flex-end; position: relative; }
+  .wchart .wbar i { display: block; width: 100%; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 0; }
+  .wchart .wbar:hover i, .wchart .wbar:focus i { filter: brightness(1.25); }
+  .wchart .wbar span { position: absolute; bottom: -17px; left: 50%; transform: translateX(-50%); font-size: .62rem; color: var(--muted); white-space: nowrap; }
+  .wchart .goal-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--muted); pointer-events: none; }
+  .wchart .goal-line em { position: absolute; right: 0; top: -16px; font-size: .7rem; font-style: normal; color: var(--muted); background: var(--surface); padding: 0 4px; }
+  .wtip { position: absolute; z-index: 5; pointer-events: none; background: var(--text); color: var(--bg); font-size: .8rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
+  /* ---------- linha do tempo ---------- */
+  .tl-tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+  .tl-tools .grow { flex: 1; }
+  .tl-tools select { width: auto; min-width: 170px; }
+  .tl { position: relative; padding-left: 28px; }
+  .tl::before { content: ""; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--border); border-radius: 2px; }
+  .tl-ev { position: relative; margin-bottom: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  .tl-ev::before { content: ""; position: absolute; left: -25px; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--tc, var(--accent)); box-shadow: 0 0 0 3px var(--surface-2); }
+  .tl-ev .when { font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .tl-ev h3 { margin: 2px 0 4px; font-size: 1rem; }
+  .tl-ev .txt { margin: 0; color: var(--muted); font-size: .9rem; white-space: pre-wrap; }
+  .tl-ev .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .tl-ev .chips .tc { display: inline-flex; align-items: center; gap: 4px; min-height: 0; padding: 2px 9px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: .76rem; font-weight: 600; line-height: 1.5; }
+  .tl-ev .chips .tc .icon { width: 12px; height: 12px; }
+  .tl-ev .chips button.tc { cursor: pointer; }
+  .tl-ev .chips button.tc:hover { border-color: var(--accent); }
+  .tl-ev .acts { position: absolute; top: 6px; right: 6px; display: flex; gap: 2px; }
+  .tl-ev .acts button { min-height: 30px; width: 30px; padding: 0; border: 0; background: transparent; color: var(--muted); }
+  .tl-ev .acts button:hover { color: var(--accent); }
+  .tl-ev .acts button:disabled { opacity: .3; }
+  .tl-ev h3, .tl-ev .when { padding-right: 100px; }
+  .tl-chars { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tl-chars label { margin: 0; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -744,6 +922,25 @@
 <symbol id="i-wand-sparkles" viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /> <path d="m14 7 3 3" /> <path d="M5 6v4" /> <path d="M19 14v4" /> <path d="M10 2v2" /> <path d="M7 8H3" /> <path d="M21 16h-4" /> <path d="M11 3H9" /></symbol>
 <symbol id="i-strikethrough" viewBox="0 0 24 24"><path d="M16 4H9a3 3 0 0 0-2.83 4" /> <path d="M14 12a4 4 0 0 1 0 8H6" /> <line x1="4" x2="20" y1="12" y2="12" /></symbol>
 <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" /> <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /> <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /> <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /> <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
+<symbol id="i-rotate-3d" viewBox="0 0 24 24"><path d="M16.466 7.5C15.643 4.237 13.952 2 12 2 9.239 2 7 6.477 7 12s2.239 10 5 10c.342 0 .677-.069 1-.2" /> <path d="m15.194 13.707 3.814 1.86-1.86 3.814" /> <path d="M19 15.57c-1.804.885-4.274 1.43-7 1.43-5.523 0-10-2.239-10-5s4.477-5 10-5c4.838 0 8.873 1.718 9.8 4" /></symbol>
+<symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /> <circle cx="6" cy="12" r="3" /> <circle cx="18" cy="19" r="3" /> <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /> <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></symbol>
+<symbol id="i-folder-open" viewBox="0 0 24 24"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" /></symbol>
+<symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <line x1="21" x2="16.65" y1="21" y2="16.65" /> <line x1="11" x2="11" y1="8" y2="14" /> <line x1="8" x2="14" y1="11" y2="11" /></symbol>
+<symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <line x1="21" x2="16.65" y1="21" y2="16.65" /> <line x1="8" x2="14" y1="11" y2="11" /></symbol>
+<symbol id="i-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3" /> <path d="M21 8V5a2 2 0 0 0-2-2h-3" /> <path d="M3 16v3a2 2 0 0 0 2 2h3" /> <path d="M16 21h3a2 2 0 0 0 2-2v-3" /></symbol>
+<symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /> <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" /> <rect x="6" y="14" width="12" height="8" rx="1" /></symbol>
+<symbol id="i-tablet" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /> <line x1="12" x2="12.01" y1="18" y2="18" /></symbol>
+<symbol id="i-file-text" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <path d="M14 2v4a2 2 0 0 0 2 2h4" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <path d="m21 21-4.3-4.3" /></symbol>
+<symbol id="i-replace-all" viewBox="0 0 24 24"><path d="M14 4a1 1 0 0 1 1-1" /> <path d="M15 10a1 1 0 0 1-1-1" /> <path d="M21 4a1 1 0 0 0-1-1" /> <path d="M21 9a1 1 0 0 1-1 1" /> <path d="m3 7 3 3 3-3" /> <path d="M6 10V5a2 2 0 0 1 2-2h2" /> <rect x="3" y="14" width="7" height="7" rx="1" /> <rect x="14" y="14" width="7" height="7" rx="1" /></symbol>
+<symbol id="i-grip-vertical" viewBox="0 0 24 24"><circle cx="9" cy="12" r="1" /> <circle cx="9" cy="5" r="1" /> <circle cx="9" cy="19" r="1" /> <circle cx="15" cy="12" r="1" /> <circle cx="15" cy="5" r="1" /> <circle cx="15" cy="19" r="1" /></symbol>
+<symbol id="i-layout-grid" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1" /> <rect width="7" height="7" x="14" y="3" rx="1" /> <rect width="7" height="7" x="14" y="14" rx="1" /> <rect width="7" height="7" x="3" y="14" rx="1" /></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M3 12h.01" /> <path d="M3 18h.01" /> <path d="M3 6h.01" /> <path d="M8 12h13" /> <path d="M8 18h13" /> <path d="M8 6h13" /></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <circle cx="12" cy="12" r="6" /> <circle cx="12" cy="12" r="2" /></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></symbol>
+<symbol id="i-milestone" viewBox="0 0 24 24"><path d="M12 13v8" /> <path d="M12 3v3" /> <path d="M4 6a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h13a2 2 0 0 0 1.152-.365l3.424-2.317a1 1 0 0 0 0-1.635l-3.424-2.318A2 2 0 0 0 17 6z" /></symbol>
+<symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7" /> <path d="M12 19V5" /></symbol>
+<symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14" /> <path d="m19 12-7 7-7-7" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1085,6 +1282,129 @@
 </dialog>
 
 <!-- Versões anteriores -->
+<dialog id="cmapSugDlg" aria-labelledby="cmapSugTitle">
+  <div class="dlg-head"><h2 id="cmapSugTitle"><svg class="icon" aria-hidden="true"><use href="#i-share-2"/></svg>Sugestões de ligações</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">Personagens que aparecem juntos nos capítulos ou nos itens de Relações do Mundo. Feito pelo próprio app, sem IA e sem custo. Marque as que quer criar; depois escolha o tipo de cada uma no mapa.</p>
+  <div class="cmap-sug" id="cmapSugList"></div>
+  <div class="row end"><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="cmapSugGo">Criar as marcadas</button></div>
+</dialog>
+
+<dialog id="layoutDlg" class="layout-dlg" aria-labelledby="layoutTitle">
+  <div class="dlg-head"><h2 id="layoutTitle"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg>Baixar e diagramar o livro</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="lay-fmts" role="group" aria-label="Formato">
+    <button type="button" data-fmt="pdf"><svg class="icon" aria-hidden="true"><use href="#i-printer"/></svg>PDF<small>gráfica, KDP, ler</small></button>
+    <button type="button" data-fmt="epub"><svg class="icon" aria-hidden="true"><use href="#i-tablet"/></svg>EPUB<small>Kindle, e-book</small></button>
+    <button type="button" data-fmt="docx"><svg class="icon" aria-hidden="true"><use href="#i-file-text"/></svg>Word<small>.docx, revisão</small></button>
+    <button type="button" data-fmt="md"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Texto<small>.md simples</small></button>
+  </div>
+  <p class="hint" id="layHint"></p>
+  <div id="layOpts">
+    <div class="lay-grid">
+      <div class="lay-pdfdocx"><label for="laySize">Tamanho da página</label><select id="laySize"></select></div>
+      <div><label for="layFont">Fonte</label><select id="layFont"></select></div>
+      <div class="lay-pdfdocx"><label for="layPt">Tamanho da letra</label><select id="layPt"><option value="10">10 pt</option><option value="10.5">10,5 pt</option><option value="11">11 pt</option><option value="11.5">11,5 pt</option><option value="12">12 pt</option><option value="13">13 pt</option></select></div>
+      <div class="lay-pdfdocx"><label for="layLead">Espaço entre linhas</label><select id="layLead"><option value="1.3">Justo</option><option value="1.42">Normal</option><option value="1.55">Folgado</option><option value="1.75">Bem folgado</option></select></div>
+    </div>
+    <div class="lay-checks">
+      <label class="check"><input type="checkbox" id="layTitlePage"><span>Folha de rosto (título e autor)</span></label>
+      <label class="check"><input type="checkbox" id="layToc"><span>Sumário</span></label>
+      <label class="check lay-pdfonly"><input type="checkbox" id="layOdd"><span>Capítulo começa na página da direita</span></label>
+      <label class="check lay-pdfdocx"><input type="checkbox" id="layHead"><span>Cabeçalho (autor e título)</span></label>
+      <label class="check lay-pdfdocx"><input type="checkbox" id="layNums"><span>Número das páginas</span></label>
+      <label class="check"><input type="checkbox" id="layCover"><span>Capa como primeira página</span></label>
+      <label class="check"><input type="checkbox" id="layBlack"><span>Texto todo em preto (sem as cores)</span></label>
+    </div>
+    <label for="layAuthor">Nome do autor</label>
+    <input type="text" id="layAuthor" placeholder="Aparece na folha de rosto, no cabeçalho e nos dados do e-book">
+    <div class="lay-pdfonly">
+      <div class="lay-preview" id="layPreview" aria-label="Prévia de uma página"></div>
+      <p class="hint" style="text-align:center" id="layPagesHint"></p>
+    </div>
+  </div>
+  <div class="status" id="layStatus" role="status"></div>
+  <div class="row" style="margin-top:12px"><button class="primary wide" id="layGo"></button></div>
+  <div class="lay-cover-box lay-pdfonly" id="layFullCover">
+    <b>Capa completa para gráfica</b>
+    <p class="hint" style="margin:2px 0 8px">Frente, lombada e contracapa num arquivo só, com sangria de 3 mm. A lombada é calculada pelo número de páginas do miolo (confira no PDF gerado).</p>
+    <div class="lay-grid">
+      <div><label for="layPageCount" style="margin-top:0">Páginas do miolo</label><input type="number" id="layPageCount" min="8" step="2"></div>
+      <div><label for="layPaper" style="margin-top:0">Papel</label><select id="layPaper"><option value="0.0572">Branco (KDP / offset 75 g)</option><option value="0.0635">Creme / pólen (90 g)</option><option value="0.07">Pólen soft 80 g</option></select></div>
+    </div>
+    <div class="row end" style="margin-top:10px"><button type="button" id="layCoverGo"><svg class="icon" aria-hidden="true"><use href="#i-printer"/></svg>Gerar capa completa (PDF)</button></div>
+  </div>
+</dialog>
+
+<dialog id="findDlg" aria-labelledby="findTitle">
+  <div class="dlg-head"><h2 id="findTitle"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Buscar e substituir</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="find-row">
+    <div><label for="findQ" style="margin-top:0">Buscar</label><input type="text" enterkeyhint="search" id="findQ" placeholder="Ex.: Theo" autocomplete="off"></div>
+    <div><label for="findR" style="margin-top:0">Substituir por <span class="muted">(opcional)</span></label><input type="text" id="findR" placeholder="Ex.: Téo" autocomplete="off"></div>
+  </div>
+  <div class="find-opts">
+    <label class="check"><input type="checkbox" id="findWord" checked><span>Só a palavra inteira</span></label>
+    <label class="check"><input type="checkbox" id="findCase"><span>Diferenciar maiúsculas</span></label>
+    <label class="check"><input type="checkbox" id="findMore"><span>Procurar também no Mundo e nas Infos</span></label>
+  </div>
+  <div class="find-sum" id="findSum" role="status"></div>
+  <div class="find-list" id="findList"></div>
+  <div class="row end" style="margin-top:12px"><button type="button" data-close>Fechar</button><button type="button" class="primary" id="findAll" disabled><svg class="icon" aria-hidden="true"><use href="#i-replace-all"/></svg>Substituir todas</button></div>
+</dialog>
+
+<dialog id="goalDlg" aria-labelledby="goalTitle">
+  <div class="dlg-head"><h2 id="goalTitle"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg>Metas de escrita</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="goal-hero" id="goalHero"></div>
+  <b>Palavras por dia (últimos 30 dias, todos os projetos)</b>
+  <div class="wchart" id="goalChart" role="img"></div>
+  <div class="lay-grid" style="margin-top:8px">
+    <div><label for="goalDaily">Meta por dia (palavras)</label><input type="number" id="goalDaily" min="0" step="50" placeholder="Ex.: 500"></div>
+    <div><label for="goalCount">O que conta</label><select id="goalCount"><option value="me">Só o que eu escrevo</option><option value="all">O que eu escrevo e o que a IA escreve</option></select></div>
+  </div>
+  <h3 style="margin:16px 0 0" id="goalBookTitle">Meta deste livro</h3>
+  <div class="lay-grid">
+    <div><label for="goalTotal">Tamanho final (palavras)</label><input type="number" id="goalTotal" min="0" step="1000" placeholder="Ex.: 60000"></div>
+    <div><label for="goalUntil">Terminar até</label><input type="date" id="goalUntil"></div>
+  </div>
+  <div id="goalBook" style="margin-top:10px"></div>
+  <p class="hint">"O que eu escrevo" conta as palavras que você acrescenta ao salvar no Editar. O que a IA escreve conta quando ela escreve ou continua um capítulo.</p>
+</dialog>
+
+<dialog id="tlDlg" aria-labelledby="tlTitle">
+  <div class="dlg-head"><h2 id="tlTitle"><svg class="icon" aria-hidden="true"><use href="#i-milestone"/></svg><span>Acontecimento</span></h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="lay-grid">
+    <div><label for="tlWhen" style="margin-top:0">Quando</label><input type="text" id="tlWhen" placeholder="Ex.: 10 anos antes, Dia 3, Verão de 2019"></div>
+    <div><label for="tlCh" style="margin-top:0">Capítulo <span class="muted">(opcional)</span></label><select id="tlCh"></select></div>
+  </div>
+  <label for="tlName">O que acontece</label>
+  <input type="text" id="tlName" placeholder="Ex.: Rex e Tyr se conhecem no vale">
+  <label for="tlText">Detalhes <span class="muted">(opcional)</span></label>
+  <textarea id="tlText" rows="3"></textarea>
+  <label>Quem participa</label>
+  <div class="tl-chars" id="tlChars"></div>
+  <div class="status err" id="tlStatus" role="status"></div>
+  <div class="row end" style="margin-top:12px"><button type="button" class="link" id="tlDel">Apagar</button><span style="flex:1"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="tlSave">Salvar</button></div>
+</dialog>
+
+<dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
+  <div class="dlg-head"><h2 id="book3dTitle"><svg class="icon" aria-hidden="true"><use href="#i-rotate-3d"/></svg>Seu livro em 3D</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="b3-wrap">
+    <div>
+      <div class="b3-stage" id="b3Stage" aria-label="Livro em 3D. Arraste para girar."><div class="book3d" id="book3d"></div></div>
+      <div class="b3-views" role="group" aria-label="Ver o livro">
+        <button type="button" data-b3="-28,8">Frente</button><button type="button" data-b3="-70,6">Lombada</button><button type="button" data-b3="160,6">Contracapa</button>
+        <button type="button" id="b3Spin"><svg class="icon" aria-hidden="true"><use href="#i-rotate-3d"/></svg>Girar</button>
+      </div>
+    </div>
+    <div class="b3-side">
+      <label for="b3Author">Nome do autor (aparece na lombada e na contracapa)</label>
+      <input type="text" id="b3Author" placeholder="Ex.: Lin Pinheiro">
+      <label for="b3Blurb">Texto da contracapa</label>
+      <textarea id="b3Blurb" rows="7" placeholder="A sinopse que fica atrás do livro"></textarea>
+      <p class="hint">A grossura do livro segue o número de palavras (<span id="b3Pages"></span>).</p>
+      <button type="button" class="primary wide" id="b3Mock"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Baixar imagem do livro</button>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="imgDlg" class="img-dlg" aria-label="Imagem ampliada">
   <img id="imgDlgImg" alt="">
   <div class="img-dlg-bar">
@@ -2597,6 +2917,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
             cover ? el('button', { class: 'primary', icon: 'wand-sparkles', ai: true, text: 'Melhorar capa', title: 'Gerar uma versão nova a partir desta capa', onclick: () => openImageGen(p, { kind: 'capa', baseId: cover.id }) }) : null,
             el('button', { class: cover ? '' : 'primary', icon: 'image', ai: true, text: cover ? 'Gerar nova capa' : 'Gerar capa com IA', onclick: () => openImageGen(p, { kind: 'capa' }) }),
             cover ? el('button', { icon: 'download', text: 'Baixar', onclick: () => downloadData(cover.data, `${(p.title || 'capa').replace(/[\\/:*?"<>|]+/g, '')}.jpg`) }) : null,
+            el('button', { icon: 'rotate-3d', text: 'Ver em 3D', onclick: () => openBook3d(p) }),
             el('button', { class: 'link plain', icon: 'sparkles', text: 'Outras imagens', onclick: () => openImageGen(p, { kind: 'personagem' }) })))));
       const field = (label, value) => (value || '').trim() ? el('div', { class: 'info-field' }, el('div', { class: 'k', text: label }), el('div', { class: 'v', text: value.trim() })) : null;
       const hasStory = p.chapters.length || worldText(p) || (refsCache[p.id] || []).length;
@@ -2889,6 +3210,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     scrollTo(scrollX, Math.max(0, target));
     return true;
   }
+  let chView = local.get('fanfic.chView', 'lista');
   function renderChaptersInner() {
     const p = cur();
     const sec = $('tab-capitulos');
@@ -2912,17 +3234,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
 
     const total = p.chapters.reduce((n, c) => n + countWords(c.text), 0);
+    sec.append(el('div', { class: 'seg ch-views', role: 'group', 'aria-label': 'Ver os capítulos como' },
+      [['lista', 'list', 'Lista'], ['mural', 'layout-grid', 'Mural']].map(([k, ic, t]) => el('button', { type: 'button', icon: ic, text: t, 'aria-pressed': String(chView === k), onclick: () => { chView = k; local.set('fanfic.chView', k); renderChapters(); } }))));
     sec.append(el('div', { class: 'row', style: 'justify-content:space-between;margin-bottom:12px' },
       el('span', { class: 'muted', text: `${p.chapters.length} capítulo(s) · ${fmtNum(total)} palavras` }),
       el('div', { class: 'row' },
+        el('button', { icon: 'search', text: 'Buscar', title: 'Buscar e substituir em todos os capítulos (Ctrl+Shift+F)', onclick: () => openFind(p) }),
         el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyWholeStory(p) }),
-        el('button', { icon: 'download', text: 'Baixar', onclick: () => exportStory(p) }),
+        el('button', { icon: 'book-open', text: 'Baixar / diagramar', onclick: () => openLayout(p) }),
         writeButton(p))));
 
+    sec.append(goalStrip(p));
+    if (chView === 'mural') { sec.append(chapterBoard(p)); return; }
     p.chapters.forEach((c, i) => {
       const open = (mode) => { view.chapterId = c.id; view.mode = mode; renderChapters(); scrollTo(0, 0); };
       sec.append(el('article', { class: 'card ch-item', onclick: () => open('ler') },
-        el('div', { class: 'num', text: `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : '') }),
+        el('div', { class: 'num' }, `CAPÍTULO ${i + 1}` + (c.pov ? ` · POV: ${c.pov.toUpperCase()}` : ''), c.status ? el('span', { class: 'st-chip st-' + c.status, style: 'margin-left:8px', text: CH_STATUS.find(x => x[0] === c.status)[1] }) : null),
         el('h3', { text: chTitle(p, c) }),
         el('div', { class: 'preview', text: storyPlain(c.text.slice(0, 600)).replace(/\s*\n+\s*/g, ' ').slice(0, 260) || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
         el('div', { class: 'row' },
@@ -3158,7 +3485,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function saveEdit() {
     const t = editTarget();
-    if (t && editDirty()) { t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); }
+    if (t && editDirty()) { logWords(t.p, countWords(edit.text) - countWords(t.ch.text), 'me'); t.ch.text = edit.text; t.ch.title = edit.title; t.ch.editedAt = Date.now(); if (t.ch.text.trim()) delete t.ch.isNew; saveProject(t.p, true); scheduleRecaps(); }
     discardEdit();
   }
   function discardEdit() { edit = null; local.del('fanfic.editdraft'); }
@@ -4157,7 +4484,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         onThinking: () => b.update({ thinking: true }),
         onText: (t) => { ch.text = t; paintChapter(ch, t); b.update({ words: countWords(t) }); }
       });
-      ch.text = r.text;
+      ch.text = r.text; logWords(p, countWords(r.text), 'ai');
       // quando a IA escolhe o POV, ela avisa na primeira linha ("POV: Nome"); guarda e tira do texto
       if (isPovMode(p) && !ch.pov) { const m = /^\s*POV:\s*([^\n]{1,40})\n+/i.exec(ch.text); if (m) { ch.pov = m[1].trim().replace(/[.*_]+$/g, ''); ch.text = ch.text.slice(m[0].length); } }
       b.stop();
@@ -4207,7 +4534,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         onText: (t) => { paintChapter(ch, original + sep + t); b.update({ words: countWords(original + sep + t) }); }
       });
       pushHistory(ch, 'Continuar escrevendo', original);
-      ch.text = original + sep + r.text;
+      ch.text = original + sep + r.text; logWords(p, countWords(r.text), 'ai');
       b.stop();
       toast('Capítulo continuado ✓', { action: 'Desfazer', onAction: () => undoChapter(p, ch) });
     } catch (e) {
@@ -4395,6 +4722,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     };
     WORLD.forEach(([k, label]) => { if (k !== 'pendencias') block(label, w.e[k]); });
     w.folders.forEach(f => block(f.title || 'Outras informações', f.entries));
+    const rel = mapRelations(p);
+    if (rel) out.push('## Mapa de relações (feito pelo autor)\n' + rel);
+    const tl = timelineText(p);
+    if (tl) out.push('## Linha do tempo (feita pelo autor, em ordem)\n' + tl);
     return out.join('\n\n');
   }
 
@@ -4523,6 +4854,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
   });
 
+  let worldView = local.get('fanfic.worldView', 'pastas');
   function renderWorld() {
     const p = cur(), w = worldOf(p);
     const sec = $('tab-mundo');
@@ -4545,7 +4877,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     use.checked = p.useWorld !== false;
     use.addEventListener('change', () => { p.useWorld = use.checked; saveProject(p); });
     head.append(el('label', { class: 'check', for: 'useWorld' }, use, el('span', { text: 'Usar o mundo como guia da IA ao escrever' })));
+    const views = [['pastas', 'folder-open', 'Pastas'], ['mapa', 'share-2', 'Mapa'], ['tempo', 'milestone', 'Linha do tempo']];
+    if (!views.some(v => v[0] === worldView)) worldView = 'pastas';
+    head.append(el('div', { class: 'seg world-views', role: 'group', 'aria-label': 'Ver o mundo como' },
+      views.map(([k, ic, t]) => el('button', { type: 'button', icon: ic, text: t, 'aria-pressed': String(worldView === k), onclick: () => { worldView = k; local.set('fanfic.worldView', k); renderWorld(); } }))));
     sec.append(head);
+    if (worldView === 'mapa') { sec.append(charMap(p)); return; }
+    if (worldView === 'tempo') { sec.append(timelineView(p)); return; }
 
     const ICON = { personagens: 'users', relacoes: 'heart-handshake', lugares: 'map-pin', regras: 'scroll-text', grupos: 'shield', historia: 'history', glossario: 'book-a', pendencias: 'circle-help' };
     const grid = el('div', { class: 'world-grid' });
@@ -5153,6 +5491,1079 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       job.stop(); c.ctrl = null; genGoLabel(false);
       if (currentId === p.id) renderTab();
     }
+  });
+
+
+
+
+
+
+
+  // =====================================================================
+  // Metas de escrita (sem IA): meta por dia, sequência de dias e meta do livro
+  // =====================================================================
+  function dayKey(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+  function goalCfg() { return Object.assign({ daily: 500, count: 'me' }, local.get('fanfic.goals', {})); }
+  function logWords(p, n, who) {
+    if (!p || !(n > 0)) return;
+    const log = p.wlog = p.wlog || {}, k = dayKey(), e = log[k] = log[k] || [0, 0];
+    e[who === 'ai' ? 1 : 0] += n;
+    const keys = Object.keys(log).sort(); if (keys.length > 400) keys.slice(0, keys.length - 400).forEach(x => delete log[x]);
+  }
+  // palavras de um dia somando todos os projetos
+  function dayWords(k, cfg = goalCfg()) {
+    return projects.reduce((n, p) => { const e = (p.wlog || {})[k]; return n + (e ? e[0] + (cfg.count === 'all' ? e[1] : 0) : 0); }, 0);
+  }
+  function streakDays(cfg = goalCfg()) {
+    if (!(cfg.daily > 0)) return 0;
+    const d = new Date(); let n = 0;
+    if (dayWords(dayKey(d), cfg) < cfg.daily) d.setDate(d.getDate() - 1); // hoje ainda não conta contra
+    while (dayWords(dayKey(d), cfg) >= cfg.daily) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function bookWordsNow(p) { return p.chapters.reduce((n, c) => n + countWords(c.text), 0); }
+  function bookPace(p) {
+    const g = p.goal || {}; if (!(g.total > 0)) return null;
+    const have = bookWordsNow(p), left = Math.max(0, g.total - have);
+    let perDay = null, days = null;
+    if (g.until) { const end = new Date(g.until + 'T23:59:59'); days = Math.max(1, Math.ceil((end - new Date()) / 864e5)); perDay = Math.ceil(left / days); }
+    return { have, left, total: g.total, days, perDay, pct: Math.min(100, Math.round(have / g.total * 100)) };
+  }
+  function goalStrip(p) {
+    const cfg = goalCfg(), today = dayWords(dayKey(), cfg), st = streakDays(cfg), pace = bookPace(p);
+    const pct = cfg.daily > 0 ? Math.min(100, Math.round(today / cfg.daily * 100)) : 0;
+    return el('button', { type: 'button', class: 'goal-strip', onclick: () => openGoals(p), 'aria-label': 'Abrir as metas de escrita' },
+      svgIcon('target'),
+      el('span', { class: 'gs-main' },
+        el('span', { class: 'gs-line' },
+          el('span', {}, 'Hoje: ', el('b', { text: fmtNum(today) }), cfg.daily > 0 ? ` / ${fmtNum(cfg.daily)} palavras` : ' palavras'),
+          st ? el('span', { class: 'streak' }, svgIcon('flame'), `${st} dia${st > 1 ? 's' : ''} seguido${st > 1 ? 's' : ''}`) : null,
+          pace ? el('span', { class: 'muted', text: `Livro: ${pace.pct}%${pace.perDay != null && pace.left ? ` · ${fmtNum(pace.perDay)}/dia até o prazo` : ''}` }) : null),
+        cfg.daily > 0 ? el('span', { class: 'gbar', 'aria-hidden': 'true' }, el('i', { style: `width:${pct}%` })) : null),
+      el('span', { class: 'link plain', text: 'Metas' }));
+  }
+  var goalP = null;
+  function openGoals(p) {
+    goalP = p; const cfg = goalCfg(), g = p.goal || {};
+    $('goalDaily').value = cfg.daily || ''; $('goalCount').value = cfg.count;
+    $('goalTotal').value = g.total || ''; $('goalUntil').value = g.until || '';
+    $('goalBookTitle').textContent = `Meta deste livro (${(p.title || '').trim() || 'Sem título'})`;
+    goalRender(); $('goalDlg').showModal();
+  }
+  function goalRender() {
+    const p = goalP, cfg = goalCfg(), today = dayWords(dayKey(), cfg), st = streakDays(cfg);
+    const days = [...Array(30)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - 29 + i); return { d, k: dayKey(d), n: dayWords(dayKey(d), cfg) }; });
+    const week = days.slice(-7).reduce((n, x) => n + x.n, 0), best = Math.max(...days.map(x => x.n));
+    $('goalHero').replaceChildren(
+      el('div', {}, el('div', { class: 'k', text: 'Hoje' }), el('div', { class: 'v', text: fmtNum(today) }), el('div', { class: 's', text: cfg.daily > 0 ? (today >= cfg.daily ? 'Meta do dia batida!' : `faltam ${fmtNum(cfg.daily - today)}`) : 'sem meta por dia' })),
+      el('div', {}, el('div', { class: 'k', text: 'Sequência' }), el('div', { class: 'v' }, st ? el('span', { class: 'streak', style: 'font-size:inherit' }, svgIcon('flame'), String(st)) : '0'), el('div', { class: 's', text: 'dias seguidos batendo a meta' })),
+      el('div', {}, el('div', { class: 'k', text: 'Últimos 7 dias' }), el('div', { class: 'v', text: fmtNum(week) }), el('div', { class: 's', text: `média de ${fmtNum(Math.round(week / 7))} por dia` })));
+    const top = Math.max(best, cfg.daily || 0, 10) * 1.12, chart = $('goalChart');
+    chart.setAttribute('aria-label', `Palavras por dia nos últimos 30 dias. Hoje: ${today}. Melhor dia: ${best}.`);
+    const tip = el('div', { class: 'wtip', hidden: true });
+    chart.replaceChildren(...days.map((x, i) => {
+      const label = `${x.d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}: ${fmtNum(x.n)} palavras`;
+      const bar = el('div', { class: 'wbar', tabindex: 0, 'aria-label': label },
+        el('i', { style: `height:${x.n ? Math.max(2, x.n / top * 100) : 0}%` }),
+        i % 5 === 4 || i === 29 ? el('span', { text: i === 29 ? 'hoje' : x.d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) }) : null);
+      const show = () => {
+        const dl = $('goalDlg'), D = dl.getBoundingClientRect(), r = bar.getBoundingClientRect(); tip.textContent = label; tip.hidden = false;
+        tip.style.left = Math.max(4, Math.min(D.width - tip.offsetWidth - 4, r.left - D.left + r.width / 2 - tip.offsetWidth / 2)) + 'px'; tip.style.top = (r.top - D.top + dl.scrollTop + r.height - (bar.firstChild.offsetHeight || 0) - 34) + 'px';
+      };
+      bar.addEventListener('pointerenter', show); bar.addEventListener('focus', show);
+      bar.addEventListener('pointerleave', () => { tip.hidden = true; }); bar.addEventListener('blur', () => { tip.hidden = true; });
+      return bar;
+    }), cfg.daily > 0 ? el('div', { class: 'goal-line', style: `bottom:calc(18px + ${cfg.daily / top} * (100% - 18px))` }, el('em', { text: `meta ${fmtNum(cfg.daily)}` })) : null);
+    $('goalDlg').querySelector('.wtip')?.remove(); $('goalDlg').append(tip);
+    const pace = bookPace(p), box = $('goalBook');
+    box.replaceChildren(...(pace ? [
+      el('div', { class: 'gbar', style: 'height:10px' }, el('i', { style: `width:${pace.pct}%` })),
+      el('p', { style: 'margin:6px 0 0', text: `${fmtNum(pace.have)} de ${fmtNum(pace.total)} palavras (${pace.pct}%).` +
+        (!pace.left ? ' Meta do livro alcançada!' : pace.perDay != null ? ` Para terminar no prazo (${pace.days} dia${pace.days > 1 ? 's' : ''}), escreva ${fmtNum(pace.perDay)} palavras por dia.` : ` Faltam ${fmtNum(pace.left)} palavras.`) })]
+      : [el('p', { class: 'muted', style: 'margin:0', text: 'Defina o tamanho final para ver quanto falta e o ritmo até o prazo.' })]));
+  }
+  $('goalDaily').addEventListener('input', () => { const c = goalCfg(); c.daily = Math.max(0, Number($('goalDaily').value) || 0); local.set('fanfic.goals', c); goalRender(); });
+  $('goalCount').addEventListener('change', () => { const c = goalCfg(); c.count = $('goalCount').value; local.set('fanfic.goals', c); goalRender(); });
+  ['goalTotal', 'goalUntil'].forEach(id => $(id).addEventListener('input', () => {
+    const p = goalP; p.goal = { total: Math.max(0, Number($('goalTotal').value) || 0), until: $('goalUntil').value || '' }; saveProject(p); goalRender();
+  }));
+  $('goalDlg').addEventListener('close', () => { if (goalP && currentId === goalP.id && view.tab === 'capitulos' && !view.chapterId) renderTab(); });
+
+  // =====================================================================
+  // Mural de cenas (sem IA): capítulos em cartões, com status e cor; arraste para mudar a ordem
+  // =====================================================================
+  var CH_STATUS = [['ideia', 'Ideia'], ['rascunho', 'Rascunho'], ['revisao', 'Revisão'], ['pronto', 'Pronto']];
+  var CARD_COLORS = ['', '#e0508a', '#e07a1f', '#d4a017', '#2f9e55', '#2f74d0', '#8a4fd6'];
+  const chStatus = (c) => c.status || ((c.text || '').trim() ? 'rascunho' : 'ideia');
+  function moveChapter(p, from, to) {
+    if (from === to || to < 0 || to >= p.chapters.length) return false;
+    const [c] = p.chapters.splice(from, 1); p.chapters.splice(to, 0, c);
+    saveProject(p, true); return true;
+  }
+  function chapterBoard(p) {
+    const wrap = el('div', {});
+    const counts = CH_STATUS.map(([k, t]) => [k, t, p.chapters.filter(c => chStatus(c) === k).length]).filter(x => x[2]);
+    wrap.append(el('div', { class: 'board-sum' }, counts.map(([k, t, n]) => el('span', { class: 'st-chip st-' + k, text: `${t} · ${n}` }))));
+    const board = el('div', { class: 'board', role: 'list', 'aria-label': 'Mural de capítulos' });
+    p.chapters.forEach((c, i) => {
+      const st = chStatus(c), sum = c.recap && c.recap.text ? c.recap.text : storyPlain((c.text || '').slice(0, 500)).replace(/\s+/g, ' ').slice(0, 240);
+      const grip = el('button', { type: 'button', class: 'grip', icon: 'grip-vertical', 'aria-label': `Mover o capítulo ${i + 1}. Use as setas para mudar a posição.`, title: 'Arraste para mudar a ordem' });
+      const card = el('article', { class: 'bcard', role: 'listitem', style: c.color ? `--bc:${c.color}` : null, 'data-i': i,
+        onclick: (e) => { if (e.target.closest('button')) return; view.chapterId = c.id; view.mode = 'ler'; renderChapters(); scrollTo(0, 0); } },
+        el('div', { class: 'bc-top' },
+          el('span', { class: 'bc-num', text: `CAP. ${i + 1}` + (c.pov ? ` · ${c.pov.toUpperCase()}` : '') }),
+          el('button', { type: 'button', class: 'st-chip st-' + st, text: CH_STATUS.find(x => x[0] === st)[1], title: 'Toque para mudar o status',
+            onclick: () => { const k = CH_STATUS.findIndex(x => x[0] === st); c.status = CH_STATUS[(k + 1) % CH_STATUS.length][0]; saveProject(p, true); renderChapters(); } }),
+          grip),
+        el('h3', { text: chTitle(p, c) }),
+        el('div', { class: 'bc-sum', text: sum || (jobOnChapter(c) ? 'Escrevendo…' : '(vazio)') }),
+        el('div', { class: 'bc-foot' },
+          el('span', { class: 'grow', text: `${fmtNum(countWords(c.text))} palavras` }),
+          el('button', { type: 'button', class: 'dotc', 'aria-label': 'Mudar a cor do cartão', title: 'Cor do cartão',
+            onclick: () => { const k = CARD_COLORS.indexOf(c.color || ''); c.color = CARD_COLORS[(k + 1) % CARD_COLORS.length]; saveProject(p, true); renderChapters(); } })));
+      grip.addEventListener('keydown', (e) => {
+        const d = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[e.key];
+        if (!d) return; e.preventDefault();
+        if (moveChapter(p, i, i + d)) { renderChapters(); document.querySelectorAll('.bcard .grip')[i + d]?.focus(); toast(`Capítulo movido para a posição ${i + d + 1}`); }
+      });
+      grip.addEventListener('pointerdown', (e) => startCardDrag(e, p, board, card, i));
+      board.append(card);
+    });
+    wrap.append(board, el('p', { class: 'hint', text: 'Arraste pelo ⋮⋮ para mudar a ordem dos capítulos (no teclado: foque o ⋮⋮ e use as setas). Toque no status para mudar; toque na bolinha para dar uma cor ao cartão.' }));
+    return wrap;
+  }
+  function startCardDrag(e, p, board, card, from) {
+    e.preventDefault();
+    const r = card.getBoundingClientRect(), off = { x: e.clientX - r.left, y: e.clientY - r.top };
+    const lifted = card.cloneNode(true); lifted.classList.add('lifted');
+    Object.assign(lifted.style, { width: r.width + 'px', height: r.height + 'px', left: r.left + 'px', top: r.top + 'px' });
+    document.body.append(lifted); card.classList.add('ghost');
+    let scrollT = null, lastY = e.clientY;
+    const place = (x, y) => {
+      lifted.style.left = (x - off.x) + 'px'; lifted.style.top = (y - off.y) + 'px';
+      const cards = [...board.children].filter(c => c !== card);
+      let target = null;
+      for (const c of cards) { const b = c.getBoundingClientRect(); if (y >= b.top && y <= b.bottom && x >= b.left && x <= b.right) { target = c; break; } }
+      if (target) {
+        const b = target.getBoundingClientRect(), oneCol = getComputedStyle(board).gridTemplateColumns.split(' ').length === 1;
+        const after = oneCol ? (y - b.top) > b.height / 2 : (x - b.left) > b.width / 2;
+        board.insertBefore(card, after ? target.nextSibling : target);
+      }
+    };
+    const edge = () => { const h = innerHeight; if (lastY < 70) scrollBy(0, -14); else if (lastY > h - 70) scrollBy(0, 14); };
+    scrollT = setInterval(edge, 30);
+    const move = (ev) => { lastY = ev.clientY; place(ev.clientX, ev.clientY); };
+    const up = () => {
+      clearInterval(scrollT); lifted.remove(); card.classList.remove('ghost');
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      const to = [...board.children].indexOf(card);
+      if (moveChapter(p, from, to)) toast(`Capítulo movido para a posição ${to + 1} ✓`);
+      renderChapters();
+    };
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  }
+
+  // =====================================================================
+  // Buscar e substituir (sem IA) em todos os capítulos, e se quiser no Mundo e nas Infos
+  // =====================================================================
+  let findCtx = null;
+  const INFO_FIELDS = [['title', 'Título'], ['premise', 'Ideia'], ['characters', 'Personagens'], ['tone', 'Tom e estilo'], ['notes', 'O que quero e o que não quero'], ['bibleFacts', 'Decisões e fatos fixos'], ['blurb', 'Contracapa']];
+  function findRegex() {
+    const q = $('findQ').value; if (!q.trim()) return null;
+    const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+    const src = $('findWord').checked ? `(?<![\\p{L}\\p{N}])${esc}(?![\\p{L}\\p{N}])` : esc;
+    try { return new RegExp(src, 'gu' + ($('findCase').checked ? '' : 'i')); } catch { return null; }
+  }
+  // mantém o jeito da palavra encontrada: "theo" -> "téo", "Theo" -> "Téo", "THEO" -> "TÉO"
+  function keepCase(found, repl) {
+    if (!repl || $('findCase').checked) return repl;
+    if (found.length > 1 && found === found.toUpperCase() && found !== found.toLowerCase()) return repl.toUpperCase();
+    if (found[0] && found[0] === found[0].toUpperCase() && found[0] !== found[0].toLowerCase()) return repl[0].toUpperCase() + repl.slice(1);
+    return repl;
+  }
+  // lugares onde procurar: { kind, label, get(), set(v), ch? }
+  function findTargets(p) {
+    const t = p.chapters.map((c, i) => ({ kind: 'ch', ch: c, label: `Capítulo ${i + 1}${c.title ? ': ' + c.title : ''}`, get: () => c.text || '', set: (v) => { c.text = v; c.editedAt = Date.now(); } }));
+    if ($('findMore').checked) {
+      INFO_FIELDS.forEach(([k, l]) => t.push({ kind: 'info', label: `Infos · ${l}`, get: () => p[k] || '', set: (v) => { p[k] = v; } }));
+      if (p.world) {
+        const w = worldOf(p);
+        [...WORLD.map(([k, l]) => [l, w.e[k]]), ...w.folders.map(f => [f.title || 'Pasta', f.entries])].forEach(([l, list]) => list.forEach(e => {
+          t.push({ kind: 'world', label: `Mundo · ${l} · ${e.title || 'Sem título'}`, get: () => e.title || '', set: (v) => { e.title = v; e.edited = true; } });
+          t.push({ kind: 'world', label: `Mundo · ${l} · ${e.title || 'Sem título'}`, get: () => e.text || '', set: (v) => { e.text = v; e.edited = true; } });
+        }));
+      }
+    }
+    return t;
+  }
+  function findRun() {
+    const p = findCtx.p, re = findRegex(), repl = $('findR').value, list = $('findList');
+    list.replaceChildren(); findCtx.total = 0;
+    if (!re) { $('findSum').textContent = 'Digite o que procurar.'; $('findAll').disabled = true; return; }
+    const groups = new Map();
+    findTargets(p).forEach(tg => {
+      const txt = tg.get(); re.lastIndex = 0; let m;
+      while ((m = re.exec(txt))) {
+        if (!m[0]) { re.lastIndex++; continue; }
+        if (!groups.has(tg.label)) groups.set(tg.label, []);
+        groups.get(tg.label).push({ tg, at: m.index, len: m[0].length, found: m[0], txt });
+        findCtx.total++;
+      }
+    });
+    const shown = [...groups.entries()];
+    $('findSum').textContent = findCtx.total ? `${fmtNum(findCtx.total)} ocorrência(s) em ${shown.length} lugar(es)` : 'Nada encontrado.';
+    $('findAll').disabled = !findCtx.total;
+    let budget = 300;
+    shown.forEach(([label, hits]) => {
+      const g = el('div', { class: 'find-group' }, el('h4', {}, el('span', { text: label }), el('span', { class: 'tag', text: String(hits.length) })));
+      hits.forEach(h => {
+        if (budget-- <= 0) return;
+        const a = Math.max(0, h.at - 60), z = Math.min(h.txt.length, h.at + h.len + 60);
+        const clean = (t) => t.replace(/\*\*|~~|\[\/?cor[^\]]*\]|(^|\s)\*|\*(?=\s|$)/g, '$1').replace(/\s+/g, ' ');
+        const before = clean(h.txt.slice(a, h.at)), after = clean(h.txt.slice(h.at + h.len, z));
+        const ctx = el('div', { class: 'ctx' }, (a > 0 ? '…' : '') + before,
+          repl ? el('del', { text: h.found }) : el('mark', { text: h.found }), repl ? el('ins', { text: keepCase(h.found, repl) }) : null, after + (z < h.txt.length ? '…' : ''));
+        g.append(el('div', { class: 'find-hit' }, ctx, el('div', { class: 'acts' },
+          repl ? el('button', { text: 'Trocar', onclick: () => findReplace([h]) }) : null,
+          h.tg.kind === 'ch' ? el('button', { class: 'link plain', text: 'Abrir', onclick: () => findOpen(h) }) : null)));
+      });
+      list.append(g);
+    });
+    if (budget < 0) list.append(el('p', { class: 'hint', text: 'Mostrando as primeiras 300. "Substituir todas" troca todas.' }));
+  }
+  // troca de trás para frente para os índices continuarem certos
+  function findReplace(hits) {
+    const p = findCtx.p, repl = $('findR').value, by = new Map();
+    hits.forEach(h => { if (!by.has(h.tg)) by.set(h.tg, []); by.get(h.tg).push(h); });
+    let n = 0;
+    by.forEach((hs, tg) => {
+      let txt = tg.get();
+      if (txt !== hs[0].txt) return; // mudou desde a busca
+      if (tg.kind === 'ch') pushHistory(tg.ch, `Substituir "${$('findQ').value.trim()}" por "${repl}"`);
+      hs.sort((a, b) => b.at - a.at).forEach(h => { txt = txt.slice(0, h.at) + keepCase(h.found, repl) + txt.slice(h.at + h.len); n++; });
+      tg.set(txt);
+    });
+    saveProject(p, true);
+    if (currentId === p.id) renderTab();
+    toast(`${fmtNum(n)} troca(s) feita(s) ✓ Dá para desfazer em cada capítulo (Versões anteriores).`);
+    findRun();
+  }
+  function findOpen(h) {
+    const p = findCtx.p, q = h.found.toLowerCase();
+    $('findDlg').close();
+    view.tab = 'capitulos'; view.chapterId = h.tg.ch.id; view.mode = 'ler'; renderTab();
+    requestAnimationFrame(() => {
+      const para = [...document.querySelectorAll('#chBody p')].find(x => x.textContent.toLowerCase().includes(q));
+      if (para) { para.scrollIntoView({ block: 'center' }); para.classList.add('flash-find'); setTimeout(() => para.classList.remove('flash-find'), 1700); }
+    });
+  }
+  function openFind(p) {
+    guardEdit(() => {
+      findCtx = { p, total: 0 };
+      $('findDlg').showModal(); $('findQ').focus(); $('findQ').select(); findRun();
+    });
+  }
+  let findT = null;
+  ['findQ', 'findR'].forEach(id => $(id).addEventListener('input', () => { clearTimeout(findT); findT = setTimeout(findRun, 180); }));
+  ['findWord', 'findCase', 'findMore'].forEach(id => $(id).addEventListener('change', findRun));
+  $('findAll').addEventListener('click', () => {
+    const re = findRegex(); if (!re || !findCtx.total) return;
+    const repl = $('findR').value;
+    if (!confirm(repl ? `Trocar ${findCtx.total} ocorrência(s) de "${$('findQ').value.trim()}" por "${repl}"?` : `Apagar ${findCtx.total} ocorrência(s) de "${$('findQ').value.trim()}"?`)) return;
+    const hits = [];
+    findTargets(findCtx.p).forEach(tg => { const txt = tg.get(); re.lastIndex = 0; let m; while ((m = re.exec(txt))) { if (!m[0]) { re.lastIndex++; continue; } hits.push({ tg, at: m.index, len: m[0].length, found: m[0], txt }); } });
+    findReplace(hits);
+  });
+  addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'f' && cur() && !cur().draft) { e.preventDefault(); openFind(cur()); }
+  });
+
+  // =====================================================================
+  // Diagramação (sem IA): PDF para gráfica/KDP, EPUB e Word, gerados no aparelho
+  // =====================================================================
+  const PAGE_SIZES = [['14x21', '14 × 21 cm (padrão no Brasil)', 140, 210], ['16x23', '16 × 23 cm', 160, 230], ['a5', 'A5 (14,8 × 21 cm)', 148, 210],
+    ['5x8', '5 × 8 pol (KDP)', 127, 203.2], ['5.5x8.5', '5,5 × 8,5 pol (KDP)', 139.7, 215.9], ['6x9', '6 × 9 pol (KDP)', 152.4, 228.6], ['a4', 'A4 (para ler ou revisar)', 210, 297]];
+  const BOOK_FONTS = [['Georgia', 'Georgia, "Times New Roman", serif'], ['Palatino', '"Palatino Linotype", Palatino, "Book Antiqua", serif'], ['Garamond', 'Garamond, "EB Garamond", "Times New Roman", serif'],
+    ['Times New Roman', '"Times New Roman", Times, serif'], ['Book Antiqua', '"Book Antiqua", "Palatino Linotype", serif']];
+  const langCode = (p) => { const l = (p.lang || DEFAULT_LANG).toLowerCase(); return l.includes('portugal') ? 'pt-PT' : l.includes('portugu') ? 'pt-BR' : l.includes('english') || l.includes('inglês') ? 'en' : l.includes('espa') ? 'es' : 'pt-BR'; };
+  const xmlEsc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const fileName = (t) => (t || 'livro').replace(/[\\/:*?"<>|]+/g, '').trim() || 'livro';
+  let layCtx = null;
+  function layoutOf(p) {
+    return p.layout = Object.assign({ fmt: 'pdf', size: '14x21', font: 'Georgia', pt: '11', lead: '1.42', titlePage: true, toc: true, odd: true, head: true, nums: true, cover: false, black: false, paper: '0.0572' }, p.layout || {});
+  }
+  // parágrafos do capítulo em HTML de livro (o primeiro e o depois de quebra de cena sem recuo)
+  function bookHtml(text, black, xhtml) {
+    let first = true;
+    return mdParas(text).map(t => {
+      if (isSceneBreak(t)) { first = true; return '<p class="sb">* * *</p>'; }
+      const h = parseMd(t).map(x => {
+        let s = xmlEsc(x.t).replace(/\n/g, xhtml ? '<br/>' : '<br>');
+        if (x.b) s = `<b>${s}</b>`; if (x.i) s = `<i>${s}</i>`; if (x.s) s = `<s>${s}</s>`;
+        if (x.c && !black) s = `<span style="color:${x.c}">${s}</span>`;
+        return s;
+      }).join('');
+      const cls = first ? ' class="first"' : ''; first = false;
+      return `<p${cls}>${h}</p>`;
+    }).join('\n');
+  }
+  const chLabel = (p, c) => `Capítulo ${p.chapters.indexOf(c) + 1}`;
+  const chName = (c) => (c.title || '').trim();
+  const bookChapters = (p) => p.chapters.filter(c => (c.text || '').trim());
+  // palavras por página (estimativa) para a prévia e para a lombada
+  function estPages(p, L) {
+    const sz = PAGE_SIZES.find(x => x[0] === L.size) || PAGE_SIZES[0], m = pageMargins(sz);
+    const area = (sz[2] - m.inner - m.outer) * (sz[3] - m.top - m.bottom);
+    const wpp = 300 * area / (140 - 36) / (210 - 40) * Math.pow(11 / Number(L.pt), 2) * (1.42 / Number(L.lead));
+    const chs = bookChapters(p);
+    let pages = chs.reduce((n, c) => { let k = Math.ceil((countWords(c.text) / wpp) + .35); if (L.odd && (n + k) % 2) k++; return n + k; }, 0);
+    pages += (L.titlePage ? 2 : 0) + (L.toc ? 2 : 0) + (L.cover ? 2 : 0);
+    return Math.max(8, Math.ceil(pages / 2) * 2);
+  }
+  function pageMargins(sz) {
+    const w = sz[2];
+    return w >= 200 ? { top: 22, bottom: 24, inner: 25, outer: 22 } : { top: 17, bottom: 19, inner: Math.round(w * .14), outer: Math.round(w * .11) };
+  }
+  function openLayout(p) {
+    const L = layoutOf(p);
+    layCtx = { p };
+    $('laySize').replaceChildren(...PAGE_SIZES.map(([v, t]) => el('option', { value: v, text: t })));
+    $('layFont').replaceChildren(...BOOK_FONTS.map(([v]) => el('option', { value: v, text: v })));
+    $('laySize').value = L.size; $('layFont').value = L.font; $('layPt').value = L.pt; $('layLead').value = L.lead; $('layPaper').value = L.paper;
+    [['layTitlePage', 'titlePage'], ['layToc', 'toc'], ['layOdd', 'odd'], ['layHead', 'head'], ['layNums', 'nums'], ['layCover', 'cover'], ['layBlack', 'black']].forEach(([id, k]) => { $(id).checked = !!L[k]; });
+    $('layAuthor').value = p.author || '';
+    $('layStatus').textContent = '';
+    layRender();
+    $('layoutDlg').showModal();
+  }
+  function layRead() {
+    const p = layCtx.p, L = layoutOf(p);
+    L.size = $('laySize').value; L.font = $('layFont').value; L.pt = $('layPt').value; L.lead = $('layLead').value; L.paper = $('layPaper').value;
+    [['layTitlePage', 'titlePage'], ['layToc', 'toc'], ['layOdd', 'odd'], ['layHead', 'head'], ['layNums', 'nums'], ['layCover', 'cover'], ['layBlack', 'black']].forEach(([id, k]) => { L[k] = $(id).checked; });
+    p.author = $('layAuthor').value;
+    saveProject(p);
+    return L;
+  }
+  function layRender() {
+    const p = layCtx.p, L = layoutOf(p), f = L.fmt;
+    document.querySelectorAll('[data-fmt]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.fmt === f)));
+    $('layOpts').hidden = f === 'md';
+    document.querySelectorAll('.lay-pdfonly').forEach(x => { x.hidden = f !== 'pdf'; });
+    document.querySelectorAll('.lay-pdfdocx').forEach(x => { x.hidden = !(f === 'pdf' || f === 'docx'); });
+    const HINT = {
+      pdf: 'Abre o livro pronto numa janela nova e chama a impressão: escolha "Salvar como PDF". Use as margens padrão e deixe "Cabeçalhos e rodapés" do navegador desligado. Funciona melhor no Chrome ou no Edge, no computador.',
+      epub: 'E-book que se ajusta a qualquer tela. Mande para o Kindle (Send to Kindle), Apple Livros, Google Play Livros ou Kobo.',
+      docx: 'Abre no Word, Google Docs ou LibreOffice. Bom para revisão, concurso ou editora. Ao abrir, o Word pode pedir para atualizar o sumário: confirme.',
+      md: 'Texto simples com marcações (# títulos, **negrito**). Bom para guardar ou colar em outro app.' };
+    $('layHint').textContent = HINT[f];
+    $('layGo').replaceChildren(svgIcon(f === 'pdf' ? 'printer' : 'download'), f === 'pdf' ? 'Gerar o PDF' : f === 'epub' ? 'Baixar o EPUB' : f === 'docx' ? 'Baixar o arquivo do Word' : 'Baixar o texto');
+    if (f === 'pdf') {
+      const pages = estPages(p, L);
+      $('layPagesHint').textContent = `Prévia de uma página · cerca de ${fmtNum(pages)} páginas`;
+      if (!$('layPageCount').dataset.touched) $('layPageCount').value = pages;
+      layPreview(p, L);
+    }
+  }
+  function layPreview(p, L) {
+    const sz = PAGE_SIZES.find(x => x[0] === L.size) || PAGE_SIZES[0], m = pageMargins(sz), scale = Math.min(260 / sz[2], 340 / sz[3]);
+    const box = $('layPreview'), px = (mm) => mm * scale;
+    box.style.width = px(sz[2]) + 'px'; box.style.height = px(sz[3]) + 'px';
+    const c = bookChapters(p)[0];
+    const inner = el('div', { class: 'lp-in', style: `left:${px(m.inner)}px;right:${px(m.outer)}px;top:${px(m.top)}px;bottom:${px(m.bottom)}px;font-family:${BOOK_FONTS.find(x => x[0] === L.font)[1]};font-size:${Number(L.pt) * .3528 * scale}px;line-height:${L.lead}` });
+    inner.innerHTML = (c ? `<div class="lp-ch"><small>${xmlEsc(chLabel(p, c))}</small><b>${xmlEsc(chName(c) || '')}</b></div>` + bookHtml(c.text.slice(0, 3000), L.black) : '<p class="first">(Sem capítulos ainda)</p>');
+    box.replaceChildren(inner, L.nums ? el('div', { class: 'lp-num', style: `bottom:${px(m.bottom * .45)}px`, text: '1' }) : null);
+  }
+  document.querySelectorAll('[data-fmt]').forEach(b => b.addEventListener('click', () => { layoutOf(layCtx.p).fmt = b.dataset.fmt; saveProject(layCtx.p); layRender(); }));
+  ['laySize', 'layFont', 'layPt', 'layLead', 'layTitlePage', 'layToc', 'layOdd', 'layHead', 'layNums', 'layCover', 'layBlack', 'layPaper'].forEach(id => $(id).addEventListener('change', () => { layRead(); layRender(); }));
+  $('layAuthor').addEventListener('input', () => { layRead(); });
+  $('layPageCount').addEventListener('input', () => { $('layPageCount').dataset.touched = '1'; });
+  $('layGo').addEventListener('click', async () => {
+    const p = layCtx.p, L = layRead();
+    if (!bookChapters(p).length) { $('layStatus').textContent = 'Escreva pelo menos um capítulo primeiro.'; $('layStatus').className = 'status err'; return; }
+    try {
+      if (L.fmt === 'pdf') printBook(p, L);
+      else if (L.fmt === 'epub') { downloadBlob(await buildEpub(p, L), fileName(p.title) + '.epub'); toast('EPUB baixado ✓'); }
+      else if (L.fmt === 'docx') { downloadBlob(buildDocx(p, L), fileName(p.title) + '.docx'); toast('Arquivo do Word baixado ✓'); }
+      else exportStory(p);
+    } catch (e) { console.error(e); $('layStatus').textContent = 'Não deu certo: ' + e.message; $('layStatus').className = 'status err'; }
+  });
+  function downloadBlob(blob, name) {
+    const a = el('a', { download: name }); a.href = URL.createObjectURL(blob); document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  const coverData = (p) => { const r = p.coverRefId && (refsCache[p.id] || []).find(r => r.id === p.coverRefId); return r ? r.data : ''; };
+  // ---------- PDF: página pronta para imprimir ----------
+  function bookDocument(p, L) {
+    const sz = PAGE_SIZES.find(x => x[0] === L.size) || PAGE_SIZES[0], m = pageMargins(sz);
+    const title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim(), font = BOOK_FONTS.find(x => x[0] === L.font)[1];
+    const chs = bookChapters(p), cover = L.cover ? coverData(p) : '';
+    const box = (pos, content) => `@${pos} { content: ${content}; font-family: ${font}; font-size: ${Math.max(7, Number(L.pt) - 2.5)}pt; color: #555; letter-spacing: .06em; }`;
+    const headL = L.head && author ? box('top-left', `"${author.replace(/"/g, '')}"`) : '', headR = L.head ? box('top-right', `"${title.replace(/"/g, '')}"`) : '';
+    const numL = L.nums ? box('bottom-left', 'counter(page)') : '', numR = L.nums ? box('bottom-right', 'counter(page)') : '';
+    const css = `
+      @page { size: ${sz[2]}mm ${sz[3]}mm; margin: ${m.top}mm ${m.outer}mm ${m.bottom}mm ${m.inner}mm; }
+      @page :left { margin-left: ${m.outer}mm; margin-right: ${m.inner}mm; ${headL} ${numL} }
+      @page :right { margin-left: ${m.inner}mm; margin-right: ${m.outer}mm; ${headR} ${numR} }
+      @page :first { @top-left { content: none } @top-right { content: none } @bottom-left { content: none } @bottom-right { content: none } }
+      @page :blank { @top-left { content: none } @top-right { content: none } @bottom-left { content: none } @bottom-right { content: none } }
+      @page coverpg { margin: 0; @top-left { content: none } @top-right { content: none } @bottom-left { content: none } @bottom-right { content: none } }
+      html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { margin: 0; font-family: ${font}; font-size: ${L.pt}pt; line-height: ${L.lead}; color: #111; hyphens: auto; -webkit-hyphens: auto; orphans: 2; widows: 2; }
+      .coverpage { page: coverpg; height: ${sz[3]}mm; break-after: page; }
+      .coverpage img { width: ${sz[2]}mm; height: ${sz[3]}mm; object-fit: cover; display: block; }
+      .front { break-after: page; text-align: center; padding-top: 28%; }
+      .front h1 { font-size: 2.1em; font-weight: 400; margin: 0 0 .6em; line-height: 1.2; }
+      .front .au { font-size: 1.15em; letter-spacing: .08em; }
+      .toc { break-before: page; break-after: page; }
+      .blankpg { page: blankp; break-before: page; break-after: page; height: 1px; }
+      @page blankp { @top-left { content: none } @top-right { content: none } @bottom-left { content: none } @bottom-right { content: none } }
+      .toc h2 { text-align: center; font-weight: 400; font-size: 1.4em; margin: 18% 0 1.6em; letter-spacing: .1em; text-transform: uppercase; }
+      .toc ol { list-style: none; padding: 0; margin: 0; }
+      .toc li { margin: 0 0 .55em; }
+      .toc li small { color: #666; letter-spacing: .08em; text-transform: uppercase; font-size: .72em; display: block; }
+      .chapter { break-before: page; }
+      .ch-head { text-align: center; padding-top: 22%; margin-bottom: 2.4em; }
+      .ch-head small { display: block; font-size: .78em; letter-spacing: .22em; text-transform: uppercase; color: #555; }
+      .ch-head h2 { font-weight: 400; font-size: 1.6em; margin: .4em 0 0; line-height: 1.25; }
+      .ch-head .orn { margin-top: .8em; color: #777; letter-spacing: .5em; }
+      p { margin: 0; text-indent: 1.5em; text-align: justify; }
+      p.first { text-indent: 0; }
+      p.first::first-line { font-variant: small-caps; letter-spacing: .03em; }
+      p.sb { text-indent: 0; text-align: center; margin: .9em 0; letter-spacing: .4em; }
+      .hint-bar { position: fixed; top: 0; left: 0; right: 0; background: #2b1f24; color: #fff; font: 14px/1.4 system-ui, sans-serif; padding: 10px 14px; display: flex; gap: 10px; align-items: center; z-index: 9; }
+      .hint-bar button { font: inherit; padding: 6px 12px; border-radius: 8px; border: 0; background: #e8a7b8; color: #2b1f24; font-weight: 700; cursor: pointer; }
+      @media screen { body { background: #ddd; padding: 64px 0 40px; } main { background: #fff; width: ${sz[2]}mm; margin: 0 auto; padding: ${m.top}mm ${m.outer}mm ${m.bottom}mm ${m.inner}mm; box-shadow: 0 4px 24px rgba(0,0,0,.2); }
+        main > section + section { border-top: 1px dashed #ccc; padding-top: 12mm; margin-top: 12mm; } main > .coverpage { margin: -${m.top}mm -${m.outer}mm 0 -${m.inner}mm; } .blankpg { display: none; } }
+      @media print { .hint-bar { display: none; } }`;
+    const front = L.titlePage ? `<section class="front"><h1>${xmlEsc(title)}</h1>${author ? `<div class="au">${xmlEsc(author)}</div>` : ''}</section>` : '';
+    const toc = L.toc ? `<section class="toc"><h2>Sumário</h2><ol>${chs.map(c => chName(c) ? `<li><small>${xmlEsc(chLabel(p, c))}</small>${xmlEsc(chName(c))}</li>` : `<li>${xmlEsc(chLabel(p, c))}</li>`).join('')}</ol></section>` : '';
+    const body = chs.map(c => `<section class="chapter"><div class="ch-head"><small>${xmlEsc(chLabel(p, c))}</small>${chName(c) ? `<h2>${xmlEsc(chName(c))}</h2>` : ''}<div class="orn">⁂</div></div>\n${bookHtml(c.text, L.black)}</section>`).join('\n');
+    return `<!doctype html><html lang="${langCode(p)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${xmlEsc(title)}</title><style>${css}</style></head><body>` +
+      `<div class="hint-bar"><span>Na janela de impressão, escolha <b>Salvar como PDF</b>, margens <b>Padrão</b> e desligue <b>Cabeçalhos e rodapés</b>.</span><button onclick="print()">Imprimir / salvar PDF</button></div>` +
+      `<main>${cover ? `<section class="coverpage"><img src="${cover}" alt=""></section>` : ''}${front}${toc}${body}</main>` +
+      (L.odd ? `<script>(${rightPages.toString()})(${sz[2] - m.inner - m.outer}, ${sz[3] - m.top - m.bottom});<\/script>` : '') + '</body></html>';
+  }
+  // roda dentro da janela do livro: mede quantas páginas cada parte ocupa (colunas do mesmo tamanho da página)
+  // e põe uma página em branco antes do que precisa abrir na direita (o Chrome não faz isso sozinho)
+  function rightPages(wmm, hmm) {
+    var main = document.querySelector('main'), secs = [].slice.call(main.children), page = 1;
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;left:-99999px;top:0;width:' + wmm + 'mm;height:' + hmm + 'mm;column-width:' + wmm + 'mm;column-gap:0;column-fill:auto;';
+    document.body.appendChild(probe);
+    var colW = probe.getBoundingClientRect().width;
+    secs.forEach(function (sec) {
+      var right = sec.classList.contains('front') || sec.classList.contains('toc') || sec.classList.contains('chapter');
+      if (right && page % 2 === 0) { var b = document.createElement('div'); b.className = 'blankpg'; main.insertBefore(b, sec); page++; }
+      var n = 1;
+      if (!sec.classList.contains('coverpage')) { probe.innerHTML = ''; probe.appendChild(sec.cloneNode(true)); n = Math.max(1, Math.round(probe.scrollWidth / colW)); }
+      page += n;
+    });
+    probe.remove();
+  }
+  function printBook(p, L) {
+    const w = window.open('', '_blank');
+    if (!w) { $('layStatus').textContent = 'O navegador bloqueou a janela nova. Permita pop-ups para este site e tente de novo.'; $('layStatus').className = 'status err'; return; }
+    w.document.open(); w.document.write(bookDocument(p, L)); w.document.close();
+    const go = () => setTimeout(() => { try { w.focus(); w.print(); } catch {} }, 400);
+    if (w.document.readyState === 'complete') go(); else w.addEventListener('load', go);
+    toast('Livro aberto em outra aba. Escolha "Salvar como PDF" ✓');
+  }
+  // capa completa: contracapa + lombada + frente, com 3 mm de sangria
+  $('layCoverGo').addEventListener('click', async () => {
+    const p = layCtx.p, L = layRead(), sz = PAGE_SIZES.find(x => x[0] === L.size) || PAGE_SIZES[0];
+    const pages = Math.max(8, Number($('layPageCount').value) || estPages(p, L)), spine = Math.max(2, pages * Number(L.paper)), bleed = 3;
+    const W = sz[2] * 2 + spine + bleed * 2, H = sz[3] + bleed * 2;
+    const title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim(), font = BOOK_FONTS.find(x => x[0] === L.font)[1];
+    const cover = coverData(p), tone = await coverTone(cover), [r, g, b] = tone || [74, 38, 52], ink = (r * .3 + g * .59 + b * .11) > 150 ? '#1b1214' : '#f6eef0';
+    const blurb = ((p.blurb ?? '').trim() || (p.premise || '').trim());
+    const html = `<!doctype html><html lang="${langCode(p)}"><head><meta charset="utf-8"><title>Capa - ${xmlEsc(title)}</title><style>
+      @page { size: ${W}mm ${H}mm; margin: 0; } html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { margin: 0; font-family: ${font}; } .sheet { position: relative; width: ${W}mm; height: ${H}mm; background: rgb(${r},${g},${b}); color: ${ink}; overflow: hidden; }
+      .back { position: absolute; left: 0; top: 0; width: ${sz[2] + bleed}mm; height: ${H}mm; box-sizing: border-box; padding: ${bleed + 18}mm 16mm ${bleed + 16}mm ${bleed + 16}mm; display: flex; flex-direction: column; gap: 6mm; }
+      .back h2 { margin: 0; font-size: 15pt; } .back p { margin: 0; font-size: 10.5pt; line-height: 1.5; white-space: pre-wrap; flex: 1; text-align: justify; }
+      .back .bc { align-self: flex-end; width: 50mm; height: 30mm; background: #fff; color: #555; font: 8pt system-ui, sans-serif; display: flex; align-items: center; justify-content: center; }
+      .spine { position: absolute; left: ${sz[2] + bleed}mm; top: 0; width: ${spine}mm; height: ${H}mm; display: flex; align-items: center; justify-content: center; }
+      .spine span { writing-mode: vertical-rl; font-size: ${Math.max(6, Math.min(14, spine * 2))}pt; font-weight: 700; white-space: nowrap; }
+      .front { position: absolute; right: 0; top: 0; width: ${sz[2] + bleed}mm; height: ${H}mm; }
+      .front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .front .ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20mm; box-sizing: border-box; }
+      .guide { position: absolute; top: 0; bottom: 0; border-left: .2mm dashed rgba(255,255,255,.5); } @media print { .guide, .hint-bar { display: none; } }
+      .hint-bar { position: fixed; top: 0; left: 0; right: 0; background: #2b1f24; color: #fff; font: 14px/1.4 system-ui, sans-serif; padding: 10px 14px; z-index: 9; }
+      @media screen { body { background: #ddd; padding: 60px 20px; } .sheet { margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,.25); } }
+      </style></head><body><div class="hint-bar">Capa completa: ${fmtNum(Math.round(W * 10) / 10)} × ${fmtNum(H)} mm, lombada de ${fmtNum(Math.round(spine * 10) / 10)} mm para ${pages} páginas. Salve como PDF com margens "Nenhuma". As linhas tracejadas (só na tela) marcam a lombada.</div>
+      <div class="sheet"><div class="back"><h2>${xmlEsc(title)}</h2><p>${xmlEsc(blurb)}</p>${author ? `<div>${xmlEsc(author)}</div>` : ''}<div class="bc">código de barras / ISBN</div></div>
+      <div class="spine"><span>${xmlEsc(author ? `${title}  ·  ${author}` : title)}</span></div>
+      <div class="front">${cover ? `<img src="${cover}" alt="">` : `<div class="ph"><h1 style="font-weight:400">${xmlEsc(title)}</h1>${author ? `<div>${xmlEsc(author)}</div>` : ''}</div>`}</div>
+      <div class="guide" style="left:${sz[2] + bleed}mm"></div><div class="guide" style="left:${sz[2] + bleed + spine}mm"></div></div></body></html>`;
+    const w = window.open('', '_blank');
+    if (!w) { toast('Permita pop-ups para este site e tente de novo.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    setTimeout(() => { try { w.focus(); w.print(); } catch {} }, 700);
+  });
+  // ---------- ZIP simples (sem compressão), usado no EPUB e no Word ----------
+  const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = (u8) => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function makeZip(files, type) {
+    const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+    const d = new Date(), dt = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate(), tm = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    files.forEach(([name, data]) => {
+      const nm = enc.encode(name), body = typeof data === 'string' ? enc.encode(data) : data, crc = crc32(body);
+      const h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(10, tm, true); h.setUint16(12, dt, true);
+      h.setUint32(14, crc, true); h.setUint32(18, body.length, true); h.setUint32(22, body.length, true); h.setUint16(26, nm.length, true); h.setUint16(28, 0, true);
+      parts.push(h, nm, body);
+      const c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, tm, true); c.setUint16(14, dt, true);
+      c.setUint32(16, crc, true); c.setUint32(20, body.length, true); c.setUint32(24, body.length, true); c.setUint16(28, nm.length, true); c.setUint32(42, off, true);
+      central.push(c, nm);
+      off += 30 + nm.length + body.length;
+    });
+    const csize = central.reduce((n, x) => n + x.byteLength, 0), e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, csize, true); e.setUint32(16, off, true);
+    return new Blob([...parts, ...central, e], { type });
+  }
+  const dataUrlBytes = (u) => { const b = atob(u.split(',')[1] || ''); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; };
+  // ---------- EPUB 3 (com toc.ncx para leitores antigos) ----------
+  async function buildEpub(p, L) {
+    const title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim() || 'Autor', lang = langCode(p), id = 'urn:uuid:' + (p.epubId = p.epubId || (crypto.randomUUID ? crypto.randomUUID() : uid()));
+    const chs = bookChapters(p), cover = L.cover !== false ? coverData(p) : '', font = BOOK_FONTS.find(x => x[0] === L.font)[1];
+    const modified = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+    const page = (t, body, cls) => `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${lang}" lang="${lang}"><head><meta charset="UTF-8"/><title>${xmlEsc(t)}</title><link rel="stylesheet" type="text/css" href="style.css"/></head><body${cls ? ` class="${cls}"` : ''}>${body}</body></html>`;
+    const css = `body { font-family: ${font}; line-height: 1.5; margin: 0 4%; } p { margin: 0; text-indent: 1.5em; text-align: justify; } p.first { text-indent: 0; } p.sb { text-indent: 0; text-align: center; margin: 1em 0; }
+      .ch-head { text-align: center; margin: 3em 0 2em; page-break-before: always; } .ch-head small { display: block; letter-spacing: .2em; text-transform: uppercase; font-size: .75em; color: #666; } .ch-head h1 { font-weight: normal; font-size: 1.5em; margin: .4em 0 0; }
+      .front { text-align: center; margin-top: 30%; } .front h1 { font-weight: normal; font-size: 2em; } .cover { margin: 0; padding: 0; text-align: center; } .cover img { max-width: 100%; max-height: 100vh; }
+      nav ol { list-style: none; padding: 0; } nav li { margin: .4em 0; } nav a { text-decoration: none; }`;
+    const files = [['mimetype', 'application/epub+zip'],
+      ['META-INF/container.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>'],
+      ['OEBPS/style.css', css]];
+    const man = [], spine = [];
+    if (cover) {
+      const isPng = cover.startsWith('data:image/png'), ext = isPng ? 'png' : 'jpg';
+      files.push([`OEBPS/cover.${ext}`, dataUrlBytes(cover)]);
+      man.push(`<item id="cover-img" href="cover.${ext}" media-type="image/${isPng ? 'png' : 'jpeg'}" properties="cover-image"/>`);
+      files.push(['OEBPS/cover.xhtml', page('Capa', `<div class="cover"><img src="cover.${ext}" alt="${xmlEsc(title)}"/></div>`, 'cover')]);
+      man.push('<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>'); spine.push('<itemref idref="cover" linear="yes"/>');
+    }
+    if (L.titlePage) {
+      files.push(['OEBPS/title.xhtml', page(title, `<div class="front"><h1>${xmlEsc(title)}</h1>${(p.author || '').trim() ? `<p class="first" style="text-align:center">${xmlEsc(p.author.trim())}</p>` : ''}</div>`)]);
+      man.push('<item id="titlepage" href="title.xhtml" media-type="application/xhtml+xml"/>'); spine.push('<itemref idref="titlepage"/>');
+    }
+    const navList = chs.map((c, i) => `<li><a href="ch${i + 1}.xhtml">${xmlEsc(chName(c) ? `${chLabel(p, c)}: ${chName(c)}` : chLabel(p, c))}</a></li>`).join('');
+    files.push(['OEBPS/nav.xhtml', page('Sumário', `<nav epub:type="toc" id="toc"><h1>Sumário</h1><ol>${navList}</ol></nav>`)]);
+    man.push('<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>');
+    if (L.toc) spine.push('<itemref idref="nav"/>');
+    chs.forEach((c, i) => {
+      files.push([`OEBPS/ch${i + 1}.xhtml`, page(chName(c) || chLabel(p, c), `<section epub:type="chapter"><div class="ch-head"><small>${xmlEsc(chLabel(p, c))}</small>${chName(c) ? `<h1>${xmlEsc(chName(c))}</h1>` : ''}</div>${bookHtml(c.text, L.black, true)}</section>`)]);
+      man.push(`<item id="ch${i + 1}" href="ch${i + 1}.xhtml" media-type="application/xhtml+xml"/>`); spine.push(`<itemref idref="ch${i + 1}"/>`);
+    });
+    files.push(['OEBPS/toc.ncx', `<?xml version="1.0" encoding="UTF-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="${id}"/></head><docTitle><text>${xmlEsc(title)}</text></docTitle><navMap>` +
+      chs.map((c, i) => `<navPoint id="np${i + 1}" playOrder="${i + 1}"><navLabel><text>${xmlEsc(chName(c) ? `${chLabel(p, c)}: ${chName(c)}` : chLabel(p, c))}</text></navLabel><content src="ch${i + 1}.xhtml"/></navPoint>`).join('') + '</navMap></ncx>']);
+    man.push('<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>', '<item id="css" href="style.css" media-type="text/css"/>');
+    files.push(['OEBPS/content.opf', `<?xml version="1.0" encoding="UTF-8"?>\n<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="${lang}"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">` +
+      `<dc:identifier id="bookid">${id}</dc:identifier><dc:title>${xmlEsc(title)}</dc:title><dc:creator>${xmlEsc(author)}</dc:creator><dc:language>${lang}</dc:language>` +
+      ((p.blurb ?? '').trim() || (p.premise || '').trim() ? `<dc:description>${xmlEsc(((p.blurb ?? '').trim() || p.premise.trim()).slice(0, 1500))}</dc:description>` : '') +
+      `<meta property="dcterms:modified">${modified}</meta>${cover ? '<meta name="cover" content="cover-img"/>' : ''}</metadata><manifest>${man.join('')}</manifest><spine toc="ncx">${spine.join('')}</spine></package>`]);
+    saveProject(p);
+    return makeZip(files, 'application/epub+zip');
+  }
+  // ---------- Word (.docx) ----------
+  function buildDocx(p, L) {
+    const sz = PAGE_SIZES.find(x => x[0] === L.size) || PAGE_SIZES[0], m = pageMargins(sz), tw = (mm) => Math.round(mm * 56.6929);
+    const title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim(), font = L.font, half = Math.round(Number(L.pt) * 2);
+    const run = (x) => {
+      const pr = (x.b ? '<w:b/>' : '') + (x.i ? '<w:i/>' : '') + (x.s ? '<w:strike/>' : '') + (x.c && !L.black ? `<w:color w:val="${x.c.replace('#', '').slice(0, 6).toUpperCase()}"/>` : '');
+      return x.t.split('\n').map((t, k) => (k ? '<w:r><w:br/></w:r>' : '') + `<w:r>${pr ? `<w:rPr>${pr}</w:rPr>` : ''}<w:t xml:space="preserve">${xmlEsc(t)}</w:t></w:r>`).join('');
+    };
+    const para = (style, inner, extra = '') => `<w:p><w:pPr>${style ? `<w:pStyle w:val="${style}"/>` : ''}${extra}</w:pPr>${inner}</w:p>`;
+    const textRun = (t) => `<w:r><w:t xml:space="preserve">${xmlEsc(t)}</w:t></w:r>`;
+    let body = '';
+    if (L.titlePage) body += para('Title', textRun(title), '<w:spacing w:before="3000"/>') + (author ? para('Subtitle', textRun(author)) : '');
+    if (L.toc) body += para('TOCHeading', textRun('Sumário'), L.titlePage ? '<w:pageBreakBefore/>' : '') +
+      `<w:p><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r><w:r><w:instrText xml:space="preserve"> TOC \\o "1-1" \\h \\z \\u </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>Abra no Word e atualize o sumário (botão direito, Atualizar campo).</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`;
+    bookChapters(p).forEach((c, i) => {
+      body += para('Heading1', textRun(chName(c) ? `${chLabel(p, c)}: ${chName(c)}` : chLabel(p, c)), i || L.titlePage || L.toc ? '' : '<w:pageBreakBefore w:val="false"/>');
+      let first = true;
+      mdParas(c.text).forEach(t => {
+        if (isSceneBreak(t)) { body += para('SceneBreak', textRun('* * *')); first = true; return; }
+        body += para(first ? 'FirstPara' : '', parseMd(t).map(run).join('')); first = false;
+      });
+    });
+    const footer = L.nums ? '<w:footerReference w:type="default" r:id="rIdFooter"/>' : '';
+    const header = L.head ? '<w:headerReference w:type="default" r:id="rIdHeader"/>' : '';
+    const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${body}` +
+      `<w:sectPr>${header}${footer}<w:pgSz w:w="${tw(sz[2])}" w:h="${tw(sz[3])}"/><w:pgMar w:top="${tw(m.top)}" w:right="${tw(m.outer)}" w:bottom="${tw(m.bottom)}" w:left="${tw(m.inner)}" w:header="${tw(9)}" w:footer="${tw(9)}" w:gutter="0"/><w:titlePg/></w:sectPr></w:body></w:document>`;
+    const lineTw = Math.round(240 * Number(L.lead) / 1.15);
+    const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
+      `<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="${xmlEsc(font)}" w:hAnsi="${xmlEsc(font)}" w:cs="${xmlEsc(font)}"/><w:sz w:val="${half}"/><w:szCs w:val="${half}"/><w:lang w:val="${langCode(p)}"/></w:rPr></w:rPrDefault>` +
+      `<w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="${lineTw}" w:lineRule="auto"/><w:jc w:val="both"/></w:pPr></w:pPrDefault></w:docDefaults>` +
+      `<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:pPr><w:ind w:firstLine="${tw(7)}"/></w:pPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="FirstPara"><w:name w:val="Primeiro parágrafo"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:firstLine="0"/></w:pPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="SceneBreak"><w:name w:val="Quebra de cena"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="200"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="400"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${half * 3}"/></w:rPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.3)}"/></w:rPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="FirstPara"/><w:pPr><w:keepNext/><w:pageBreakBefore/><w:spacing w:before="2400" w:after="720"/><w:ind w:firstLine="0"/><w:jc w:val="center"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.6)}"/></w:rPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="TOCHeading"><w:name w:val="TOC Heading"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="1200" w:after="480"/><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:sz w:val="${Math.round(half * 1.4)}"/></w:rPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="TOC1"><w:name w:val="toc 1"/><w:basedOn w:val="Normal"/><w:pPr><w:tabs><w:tab w:val="right" w:leader="dot" w:pos="${tw(sz[2] - m.inner - m.outer)}"/></w:tabs><w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>` +
+      `<w:style w:type="paragraph" w:styleId="HeaderFooter"><w:name w:val="header"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:firstLine="0"/><w:jc w:val="center"/></w:pPr><w:rPr><w:color w:val="666666"/><w:sz w:val="${half - 4}"/></w:rPr></w:style></w:styles>`;
+    const files = [
+      ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
+        '<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' +
+        '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>'],
+      ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>'],
+      ['docProps/core.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${xmlEsc(title)}</dc:title><dc:creator>${xmlEsc(author)}</dc:creator><dc:language>${langCode(p)}</dc:language></cp:coreProperties>`],
+      ['word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rIdHeader" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>'],
+      ['word/settings.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:defaultTabStop w:val="708"/>' + (L.toc ? '<w:updateFields w:val="true"/>' : '') + '</w:settings>'],
+      ['word/header1.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="HeaderFooter"/></w:pPr><w:r><w:t xml:space="preserve">${xmlEsc(author ? `${author}  ·  ${title}` : title)}</w:t></w:r></w:p></w:hdr>`],
+      ['word/footer1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="HeaderFooter"/></w:pPr><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>'],
+      ['word/styles.xml', styles],
+      ['word/document.xml', doc]];
+    return makeZip(files, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  }
+
+
+  // =====================================================================
+  // Linha do tempo (sem IA): acontecimentos em ordem, ligados a capítulos e personagens
+  // =====================================================================
+  function timelineOf(p) { const w = worldOf(p); return w.timeline = w.timeline || []; }
+  function timelineText(p) {
+    const t = p.world && p.world.timeline; if (!t || !t.length) return '';
+    const chars = (p.world.e && p.world.e.personagens) || [];
+    return t.map(ev => {
+      const who = (ev.chars || []).map(id => (chars.find(e => e.id === id) || {}).title).filter(Boolean);
+      const ch = ev.chId ? p.chapters.findIndex(c => c.id === ev.chId) : -1;
+      return `- ${ev.when ? ev.when + ': ' : ''}${ev.title || ''}${ch >= 0 ? ` (capítulo ${ch + 1})` : ''}${who.length ? ` [${who.join(', ')}]` : ''}${(ev.text || '').trim() ? ` — ${ev.text.trim().slice(0, 240)}` : ''}`;
+    }).join('\n');
+  }
+  var tlFilter = '', tlEdit = null;
+  function timelineView(p) {
+    const w = worldOf(p), t = timelineOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
+    w.e.personagens.forEach(e => { if (!e.id) e.id = uid(); });
+    if (tlFilter && !chars.some(e => e.id === tlFilter)) tlFilter = '';
+    const card = el('div', { class: 'card' });
+    const filter = el('select', { 'aria-label': 'Filtrar por personagem' }, el('option', { value: '', text: 'Todos os personagens' }), chars.map(e => el('option', { value: e.id, text: e.title })));
+    filter.value = tlFilter; filter.addEventListener('change', () => { tlFilter = filter.value; renderWorld(); });
+    const linked = new Set(t.map(ev => ev.chId).filter(Boolean)), missing = p.chapters.filter(c => (c.text || '').trim() && !linked.has(c.id));
+    const hist = (w.e.historia || []).filter(e => (e.title || '').trim() && !t.some(ev => ev.from === e.id));
+    card.append(el('div', { class: 'tl-tools' },
+      el('button', { class: 'primary', icon: 'plus', text: 'Acontecimento', onclick: () => openTimelineEvent(p, null) }),
+      missing.length ? el('button', { icon: 'book-open', text: `Trazer os capítulos (${missing.length})`, title: 'Cria um acontecimento para cada capítulo, com o resumo dele (sem IA)', onclick: () => {
+        missing.forEach(c => t.push({ id: uid(), when: `Capítulo ${p.chapters.indexOf(c) + 1}`, title: chTitle(p, c), text: c.recap && c.recap.text ? c.recap.text : '', chId: c.id, chars: chars.filter(e => new RegExp(`(^|[^\\p{L}])${charKey(e.title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'iu').test(c.text)).map(e => e.id) }));
+        saveProject(p, true); renderWorld(); toast(`${missing.length} acontecimento(s) criado(s) ✓`);
+      } }) : null,
+      hist.length ? el('button', { icon: 'history', text: `Trazer da pasta História (${hist.length})`, onclick: () => {
+        hist.forEach(e => t.unshift({ id: uid(), when: 'Antes da história', title: e.title, text: e.text || '', chars: [], from: e.id }));
+        saveProject(p, true); renderWorld(); toast(`${hist.length} acontecimento(s) criado(s) ✓`);
+      } }) : null,
+      el('span', { class: 'grow' }), chars.length ? filter : null));
+    const list = el('div', { class: 'tl' });
+    const shown = t.filter(ev => !tlFilter || (ev.chars || []).includes(tlFilter));
+    shown.forEach(ev => {
+      const i = t.indexOf(ev), ch = ev.chId ? p.chapters.find(c => c.id === ev.chId) : null;
+      const move = (d) => { const j = i + d; if (j < 0 || j >= t.length) return; t.splice(i, 1); t.splice(j, 0, ev); saveProject(p, true); renderWorld(); };
+      list.append(el('div', { class: 'tl-ev', style: ev.color ? `--tc:${ev.color}` : null },
+        el('div', { class: 'acts' },
+          el('button', { icon: 'arrow-up', 'aria-label': 'Mover para antes', title: 'Antes', disabled: i === 0 || !!tlFilter, onclick: () => move(-1) }),
+          el('button', { icon: 'arrow-down', 'aria-label': 'Mover para depois', title: 'Depois', disabled: i === t.length - 1 || !!tlFilter, onclick: () => move(1) }),
+          el('button', { icon: 'pencil', 'aria-label': 'Editar', title: 'Editar', onclick: () => openTimelineEvent(p, ev) })),
+        ev.when ? el('div', { class: 'when', text: ev.when }) : null,
+        el('h3', { text: ev.title || 'Sem título' }),
+        (ev.text || '').trim() ? el('p', { class: 'txt', text: ev.text.trim() }) : null,
+        (ch || (ev.chars || []).length) ? el('div', { class: 'chips' },
+          ch ? el('button', { type: 'button', class: 'tc', icon: 'book-open', text: chTitle(p, ch), title: 'Abrir o capítulo', onclick: () => { view.tab = 'capitulos'; view.chapterId = ch.id; view.mode = 'ler'; renderTab(); scrollTo(0, 0); } }) : null,
+          (ev.chars || []).map(id => chars.find(e => e.id === id)).filter(Boolean).map(e => el('span', { class: 'tc', text: charKey(e.title) || e.title }))) : null));
+    });
+    if (!t.length) list.append(el('p', { class: 'muted', text: 'Nenhum acontecimento ainda. Crie o primeiro ou traga os capítulos para começar.' }));
+    else if (!shown.length) list.append(el('p', { class: 'muted', text: 'Esse personagem ainda não aparece em nenhum acontecimento.' }));
+    card.append(list, el('p', { class: 'hint', text: 'A ordem é a da história (não a dos capítulos): use as setas para ajustar, por exemplo, um flashback. A IA lê esta linha do tempo ao escrever.' }));
+    return card;
+  }
+  function openTimelineEvent(p, ev) {
+    const w = worldOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
+    tlEdit = { p, ev };
+    $('tlTitle').lastChild.textContent = ev ? 'Editar acontecimento' : 'Novo acontecimento';
+    $('tlWhen').value = ev ? ev.when || '' : ''; $('tlName').value = ev ? ev.title || '' : ''; $('tlText').value = ev ? ev.text || '' : '';
+    $('tlCh').replaceChildren(el('option', { value: '', text: 'Nenhum' }), ...p.chapters.map((c, i) => el('option', { value: c.id, text: `${i + 1}. ${chTitle(p, c)}` })));
+    $('tlCh').value = ev ? ev.chId || '' : '';
+    const sel = new Set(ev ? ev.chars || [] : (tlFilter ? [tlFilter] : []));
+    $('tlChars').replaceChildren(...(chars.length ? chars.map(e => {
+      const cb = el('input', { type: 'checkbox', value: e.id }); cb.checked = sel.has(e.id);
+      return el('label', { class: 'check chip' }, cb, el('span', { text: charKey(e.title) || e.title }));
+    }) : [el('span', { class: 'muted', text: 'Crie personagens no Mundo para marcar quem participa.' })]));
+    $('tlDel').hidden = !ev; $('tlStatus').textContent = '';
+    $('tlDlg').showModal(); $(ev ? 'tlName' : 'tlWhen').focus();
+  }
+  $('tlSave').addEventListener('click', () => {
+    const c = tlEdit; if (!c) return;
+    const title = $('tlName').value.trim();
+    if (!title) { $('tlStatus').textContent = 'Diga o que acontece.'; $('tlName').focus(); return; }
+    const data = { when: $('tlWhen').value.trim(), title, text: $('tlText').value.trim(), chId: $('tlCh').value || '', chars: [...$('tlChars').querySelectorAll('input:checked')].map(x => x.value) };
+    if (c.ev) Object.assign(c.ev, data); else timelineOf(c.p).push(Object.assign({ id: uid() }, data));
+    saveProject(c.p, true); $('tlDlg').close(); renderWorld(); toast('Acontecimento salvo ✓');
+  });
+  $('tlDel').addEventListener('click', () => {
+    const c = tlEdit; if (!c || !c.ev || !confirm('Apagar este acontecimento?')) return;
+    const t = timelineOf(c.p); t.splice(t.indexOf(c.ev), 1); saveProject(c.p, true); $('tlDlg').close(); renderWorld();
+  });
+
+  // =====================================================================
+  // Mapa de personagens (sem IA): personagens do Mundo ligados por relações
+  // =====================================================================
+  var REL_TYPES = [['amor', 'Amor', '#e0508a'], ['amizade', 'Amizade', '#2f9e55'], ['familia', 'Família', '#d4a017'], ['rivalidade', 'Rivalidade', '#e07a1f'],
+    ['inimigo', 'Inimigos', '#d93a3a'], ['trabalho', 'Trabalho', '#2f74d0'], ['outro', 'Outra', '#8a8a8a']];
+  function relType(k) { return REL_TYPES.find(t => t[0] === k) || REL_TYPES[REL_TYPES.length - 1]; }
+  function mapOf(p) {
+    const w = worldOf(p);
+    const m = w.map = w.map || {};
+    m.pos = m.pos || {}; m.links = m.links || [];
+    w.e.personagens.forEach(e => { if (!e.id) e.id = uid(); });
+    const ids = new Set(w.e.personagens.map(e => e.id));
+    m.links = m.links.filter(l => ids.has(l.a) && ids.has(l.b));
+    return m;
+  }
+  function mapRelations(p) {
+    if (!p.world || !p.world.map || !(p.world.map.links || []).length) return '';
+    const chars = (p.world.e && p.world.e.personagens) || [], name = (id) => (chars.find(e => e.id === id) || {}).title;
+    return p.world.map.links.filter(l => name(l.a) && name(l.b))
+      .map(l => `- ${name(l.a)} — ${relType(l.type)[1].toLowerCase()} — ${name(l.b)}${(l.label || '').trim() ? ` (${l.label.trim()})` : ''}`).join('\n');
+  }
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function sv(tag, attrs = {}, ...kids) {
+    const n = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) if (v != null) n.setAttribute(k, v);
+    kids.flat().forEach(k => k != null && n.append(k));
+    return n;
+  }
+  const charPortrait = (p, e) => {
+    const n = normTitle(e.title).split(' ')[0];
+    const r = (refsCache[p.id] || []).find(r => r.kind === 'image' && (r.imgKind || 'personagem') === 'personagem' && r.subject && (normTitle(r.subject) === normTitle(e.title) || normTitle(r.subject).split(' ')[0] === n));
+    return r ? r.data : '';
+  };
+  // nome curto para procurar no texto ("Theo Albuquerque (30 anos)" -> "Theo")
+  const charKey = (t) => (t || '').replace(/\(.*?\)/g, '').split(/[,:–—-]/)[0].trim().split(/\s+/)[0] || '';
+  let cmap = null; // { p, sel: {node|link}, view: {x,y,k} }
+  function charMap(p) {
+    const w = worldOf(p), m = mapOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
+    if (!cmap || cmap.p !== p) cmap = { p, sel: null, view: null };
+    // posições iniciais em círculo para quem ainda não tem
+    const R = Math.max(160, chars.length * 34);
+    chars.forEach((e, i) => { if (!m.pos[e.id]) { const a = (i / Math.max(1, chars.length)) * Math.PI * 2 - Math.PI / 2; m.pos[e.id] = { x: Math.round(Math.cos(a) * R), y: Math.round(Math.sin(a) * R) }; } });
+    const card = el('div', { class: 'card cmap-card' }), counts = el('span', { class: 'muted' });
+    const stage = el('div', { class: 'cmap-stage', role: 'application', 'aria-label': 'Mapa de personagens. Arraste os personagens; toque em um para ver e criar ligações.' });
+    const vp = sv('g'), linkG = sv('g'), nodeG = sv('g');
+    vp.append(linkG, nodeG);
+    const svgEl = sv('svg', {}, sv('defs', {}, chars.map(e => sv('clipPath', { id: 'cm-clip-' + e.id }, sv('circle', { r: 26 })))), vp);
+    stage.append(svgEl);
+    if (!chars.length) stage.append(el('div', { class: 'cmap-empty', text: 'Ainda não há personagens no Mundo. Crie-os na pasta Personagens (ou gere o Mundo a partir dos capítulos) e eles aparecem aqui.' }));
+    const panel = el('div', { class: 'cmap-panel', hidden: true });
+    const apply = () => { const v = cmap.view; vp.setAttribute('transform', `translate(${v.x},${v.y}) scale(${v.k})`); };
+    const save = () => { clearTimeout(cmap.saveT); cmap.saveT = setTimeout(() => saveProject(p), 400); };
+    const nodeEls = {};
+    function drawLinks() {
+      linkG.replaceChildren();
+      // ligações paralelas entre o mesmo par ficam curvas lado a lado
+      const pairN = {};
+      m.links.forEach(l => {
+        const A = m.pos[l.a], B = m.pos[l.b]; if (!A || !B) return;
+        const key = [l.a, l.b].sort().join('|'), idx = pairN[key] = (pairN[key] || 0) + 1;
+        const [, label, color] = relType(l.type);
+        const off = (idx - 1) * 18 * (idx % 2 ? 1 : -1);
+        const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len * off, ny = dx / len * off;
+        const ax = A.x + nx, ay = A.y + ny, bx = B.x + nx, by = B.y + ny;
+        const isSel = cmap.sel && cmap.sel.link === l.id;
+        const pick = (ev) => { ev.stopPropagation(); cmap.sel = { link: l.id }; drawAll(); };
+        const g = sv('g', { class: 'cmap-link' + (isSel ? ' sel' : '') },
+          sv('line', { x1: ax, y1: ay, x2: bx, y2: by, stroke: color, 'stroke-dasharray': l.type === 'outro' ? '6 5' : null, 'stroke-linecap': 'round' }),
+          sv('line', { class: 'hit', x1: ax, y1: ay, x2: bx, y2: by }),
+          sv('text', { x: (ax + bx) / 2, y: (ay + by) / 2, fill: color }, (l.label || '').trim() || label));
+        g.addEventListener('pointerdown', (ev) => ev.stopPropagation());
+        g.addEventListener('click', pick);
+        linkG.append(g);
+      });
+    }
+    function drawNodes() {
+      nodeG.replaceChildren();
+      chars.forEach(e => {
+        const P = m.pos[e.id], img = charPortrait(p, e), isSel = cmap.sel && cmap.sel.node === e.id;
+        const name = charKey(e.title) || e.title;
+        const g = sv('g', { class: 'cmap-node' + (isSel ? ' sel' : ''), transform: `translate(${P.x},${P.y})`, tabindex: 0, role: 'button', 'aria-label': e.title },
+          sv('circle', { class: 'ring', r: 30 }),
+          img ? sv('image', { href: img, x: -26, y: -26, width: 52, height: 52, 'clip-path': `url(#cm-clip-${e.id})`, preserveAspectRatio: 'xMidYMid slice' })
+            : sv('text', { class: 'ini', y: 0 }, name.slice(0, 2).toUpperCase()),
+          sv('text', { y: 48 }, name.length > 18 ? name.slice(0, 17) + '…' : name));
+        g.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); cmap.sel = { node: e.id }; drawAll(); } });
+        // arrastar o personagem (ou tocar para selecionar)
+        g.addEventListener('pointerdown', (ev) => {
+          ev.stopPropagation(); g.setPointerCapture(ev.pointerId);
+          const st = { x: ev.clientX, y: ev.clientY, px: P.x, py: P.y, moved: false };
+          const move = (mv) => {
+            const dx = (mv.clientX - st.x) / cmap.view.k, dy = (mv.clientY - st.y) / cmap.view.k;
+            if (!st.moved && Math.hypot(dx, dy) < 4) return;
+            st.moved = true; P.x = Math.round(st.px + dx); P.y = Math.round(st.py + dy);
+            g.setAttribute('transform', `translate(${P.x},${P.y})`); drawLinks();
+          };
+          const up = () => {
+            g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', up);
+            if (st.moved) save(); else { cmap.sel = cmap.sel && cmap.sel.node === e.id ? null : { node: e.id }; drawAll(); }
+          };
+          g.addEventListener('pointermove', move); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+        });
+        nodeEls[e.id] = g; nodeG.append(g);
+      });
+    }
+    function drawPanel() {
+      const sel = cmap.sel;
+      panel.hidden = !sel; panel.replaceChildren();
+      if (!sel) return;
+      const nameOf = (id) => (chars.find(e => e.id === id) || {}).title || '?';
+      const typeSel = (val) => el('select', { 'aria-label': 'Tipo de relação' }, REL_TYPES.map(([k, t]) => el('option', { value: k, text: t, selected: k === val ? '' : null })));
+      if (sel.link) {
+        const l = m.links.find(x => x.id === sel.link); if (!l) { cmap.sel = null; return drawPanel(); }
+        const ts = typeSel(l.type), lb = el('input', { type: 'text', value: l.label || '', placeholder: 'Legenda (opcional). Ex.: ex-namorados', 'aria-label': 'Legenda' });
+        ts.addEventListener('change', () => { l.type = ts.value; save(); drawLinks(); });
+        lb.addEventListener('input', () => { l.label = lb.value; save(); drawLinks(); });
+        panel.append(el('h3', { icon: 'share-2', text: `${nameOf(l.a)} e ${nameOf(l.b)}` }),
+          el('div', { class: 'cmap-form' }, el('div', {}, el('label', { text: 'Tipo', style: 'margin-top:0' }), ts), el('div', {}, el('label', { text: 'Legenda', style: 'margin-top:0' }), lb)),
+          el('div', { class: 'row end', style: 'margin-top:10px' },
+            el('button', { class: 'link', icon: 'trash-2', text: 'Apagar ligação', onclick: () => { m.links = m.links.filter(x => x !== l); cmap.sel = null; save(); drawAll(); } }),
+            el('button', { text: 'Fechar', onclick: () => { cmap.sel = null; drawAll(); } })));
+        return;
+      }
+      const e = chars.find(x => x.id === sel.node); if (!e) { cmap.sel = null; return drawPanel(); }
+      const mine = m.links.filter(l => l.a === e.id || l.b === e.id);
+      const others = chars.filter(x => x.id !== e.id);
+      const to = el('select', { 'aria-label': 'Ligar a' }, el('option', { value: '', text: 'Escolha o personagem…' }), others.map(x => el('option', { value: x.id, text: x.title })));
+      const ts = typeSel('amor'), lb = el('input', { type: 'text', placeholder: 'Legenda (opcional). Ex.: melhores amigos de infância', 'aria-label': 'Legenda' });
+      panel.append(el('h3', { icon: 'user', text: e.title }),
+        (e.text || '').trim() ? el('p', { class: 'muted', style: 'margin:0', text: e.text.trim().slice(0, 220) + (e.text.trim().length > 220 ? '…' : '') }) : null,
+        mine.length ? el('div', { class: 'links' }, mine.map(l => {
+          const [, t, c] = relType(l.type), other = l.a === e.id ? l.b : l.a;
+          return el('div', { class: 'lk' }, el('span', { class: 'dot', style: `background:${c}` }),
+            el('span', { class: 't' }, el('b', { text: nameOf(other) }), ` · ${(l.label || '').trim() || t}`),
+            el('button', { class: 'link plain', text: 'Editar', onclick: () => { cmap.sel = { link: l.id }; drawAll(); } }));
+        })) : el('p', { class: 'hint', text: 'Ainda sem ligações. Crie a primeira abaixo.' }),
+        el('div', { class: 'cmap-form' },
+          el('div', {}, el('label', { text: 'Ligar a', style: 'margin-top:0' }), to),
+          el('div', {}, el('label', { text: 'Tipo', style: 'margin-top:0' }), ts),
+          el('div', { class: 'full' }, el('label', { text: 'Legenda', style: 'margin-top:0' }), lb)),
+        el('div', { class: 'row end', style: 'margin-top:10px' },
+          el('button', { class: 'link plain', icon: 'pencil', text: 'Abrir ficha', onclick: () => openEntry(p, w.e.personagens, e, { label: 'Personagens', key: 'personagens' }) }),
+          el('button', { text: 'Fechar', onclick: () => { cmap.sel = null; drawAll(); } }),
+          el('button', { class: 'primary', icon: 'plus', text: 'Criar ligação', onclick: () => {
+            if (!to.value) { to.focus(); toast('Escolha com quem ligar.'); return; }
+            m.links.push({ id: uid(), a: e.id, b: to.value, type: ts.value, label: lb.value.trim() }); save(); drawAll(); toast('Ligação criada ✓');
+          } })));
+    }
+    function drawAll() { drawLinks(); drawNodes(); drawPanel(); counts.textContent = `${chars.length} personagem(ns) · ${m.links.length} ligação(ões)`; }
+    function fit() {
+      const r = stage.getBoundingClientRect(), pts = chars.map(e => m.pos[e.id]);
+      if (!r.width) return;
+      if (!pts.length) { cmap.view = { x: r.width / 2, y: r.height / 2, k: 1 }; return apply(); }
+      const xs = pts.map(q => q.x), ys = pts.map(q => q.y), pad = 70;
+      const minX = Math.min(...xs) - pad, maxX = Math.max(...xs) + pad, minY = Math.min(...ys) - pad, maxY = Math.max(...ys) + pad + 20;
+      const k = Math.min(1.4, r.width / (maxX - minX), r.height / (maxY - minY));
+      cmap.view = { k, x: r.width / 2 - (minX + maxX) / 2 * k, y: r.height / 2 - (minY + maxY) / 2 * k }; apply();
+    }
+    const zoomAt = (f, cx, cy) => {
+      const v = cmap.view, k = Math.max(.25, Math.min(3, v.k * f)), r = stage.getBoundingClientRect();
+      cx = cx ?? r.left + r.width / 2; cy = cy ?? r.top + r.height / 2;
+      const wx = (cx - r.left - v.x) / v.k, wy = (cy - r.top - v.y) / v.k;
+      cmap.view = { k, x: cx - r.left - wx * k, y: cy - r.top - wy * k }; apply();
+    };
+    // arrastar o fundo move o mapa; dois dedos dão zoom; roda do mouse também
+    const ptrs = new Map(); let pan = null, pinch = null;
+    stage.addEventListener('pointerdown', (ev) => {
+      ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY }); stage.setPointerCapture(ev.pointerId);
+      if (ptrs.size === 1) { pan = { x: ev.clientX, y: ev.clientY, vx: cmap.view.x, vy: cmap.view.y, moved: false }; stage.classList.add('panning'); }
+      else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: cmap.view.k }; pan = null; }
+    });
+    stage.addEventListener('pointermove', (ev) => {
+      if (!ptrs.has(ev.pointerId)) return;
+      ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (pinch && ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); zoomAt(pinch.k * d / pinch.d / cmap.view.k, (a.x + b.x) / 2, (a.y + b.y) / 2); }
+      else if (pan) { const dx = ev.clientX - pan.x, dy = ev.clientY - pan.y; if (Math.hypot(dx, dy) > 3) pan.moved = true; cmap.view.x = pan.vx + dx; cmap.view.y = pan.vy + dy; apply(); }
+    });
+    const endPtr = (ev) => {
+      ptrs.delete(ev.pointerId); if (ptrs.size < 2) pinch = null;
+      if (!ptrs.size) { if (pan && !pan.moved && cmap.sel) { cmap.sel = null; drawAll(); } pan = null; stage.classList.remove('panning'); }
+    };
+    stage.addEventListener('pointerup', endPtr); stage.addEventListener('pointercancel', endPtr);
+    stage.addEventListener('wheel', (ev) => { ev.preventDefault(); zoomAt(ev.deltaY < 0 ? 1.12 : 1 / 1.12, ev.clientX, ev.clientY); }, { passive: false });
+
+    const exitFull = el('button', { class: 'cmap-exit', icon: 'x', text: 'Sair da tela cheia', hidden: true, onclick: () => toggleFull(false) });
+    const toggleFull = (on) => { stage.classList.toggle('full', on); exitFull.hidden = !on; requestAnimationFrame(fit); };
+    card.append(
+      el('div', { class: 'cmap-tools' },
+        el('button', { icon: 'sparkles', text: 'Sugerir ligações', title: 'Procura quem aparece junto nos capítulos e nas Relações do Mundo (sem IA, de graça)', disabled: chars.length < 2, onclick: () => suggestLinks(p, () => renderWorld()) }),
+        el('button', { icon: 'plus', text: 'Personagem', onclick: () => openEntry(p, w.e.personagens, null, { label: 'Personagens', key: 'personagens' }) }),
+        el('span', { class: 'grow' }),
+        el('button', { class: 'icon-btn', icon: 'zoom-out', 'aria-label': 'Diminuir', title: 'Diminuir', onclick: () => zoomAt(1 / 1.25) }),
+        el('button', { class: 'icon-btn', icon: 'zoom-in', 'aria-label': 'Aumentar', title: 'Aumentar', onclick: () => zoomAt(1.25) }),
+        el('button', { class: 'icon-btn', icon: 'maximize', 'aria-label': 'Tela cheia', title: 'Tela cheia', onclick: () => toggleFull(!stage.classList.contains('full')) }),
+        el('button', { class: 'link plain', text: 'Organizar', title: 'Volta todos para um círculo', onclick: () => { if (!confirm('Reorganizar todos os personagens em círculo?')) return; m.pos = {}; saveProject(p); renderWorld(); } })),
+      stage, exitFull,
+      el('div', { class: 'cmap-legend' }, REL_TYPES.map(([, t, c]) => el('span', {}, el('i', { style: `background:${c}` }), t)), counts),
+      panel,
+      el('p', { class: 'hint', text: 'Arraste os personagens para organizar. Toque em um para criar ligações; toque numa linha para mudar o tipo ou a legenda. As fotos vêm das Referências (imagem de personagem com o mesmo nome). A IA lê este mapa ao escrever.' }));
+    stage.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && stage.classList.contains('full')) toggleFull(false); });
+    drawAll();
+    requestAnimationFrame(() => { if (cmap.view) apply(); else fit(); });
+    return card;
+  }
+  // sugestões sem IA: quem aparece no mesmo parágrafo nos capítulos + quem aparece junto num item de Relações
+  function suggestLinks(p, done) {
+    const w = worldOf(p), m = mapOf(p), chars = w.e.personagens.filter(e => (e.title || '').trim());
+    const keys = chars.map(e => ({ e, re: new RegExp(`(^|[^\\p{L}])${charKey(e.title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'iu') })).filter(k => charKey(k.e.title).length > 1);
+    const has = (a, b) => m.links.some(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
+    const found = new Map();
+    const add = (a, b, why, n = 1) => {
+      if (a === b || has(a, b)) return;
+      const key = [a, b].sort().join('|'), f = found.get(key) || { a, b, n: 0, rel: '' };
+      if (why === 'rel') f.rel = f.rel || n; else f.n += n;
+      found.set(key, f);
+    };
+    p.chapters.forEach(c => mdParas(c.text).forEach(par => {
+      const inPar = keys.filter(k => k.re.test(par)).map(k => k.e.id);
+      for (let i = 0; i < inPar.length; i++) for (let j = i + 1; j < inPar.length; j++) add(inPar[i], inPar[j], 'cap');
+    }));
+    (w.e.relacoes || []).forEach(r => {
+      const txt = `${r.title || ''}\n${r.text || ''}`, inR = keys.filter(k => k.re.test(txt)).map(k => k.e.id);
+      for (let i = 0; i < inR.length; i++) for (let j = i + 1; j < inR.length; j++) add(inR[i], inR[j], 'rel', (r.title || '').trim().slice(0, 60));
+    });
+    const list = [...found.values()].filter(f => f.rel || f.n >= 2).sort((x, y) => (!!y.rel - !!x.rel) || y.n - x.n).slice(0, 30);
+    const name = (id) => chars.find(e => e.id === id).title;
+    const dlg = $('cmapSugDlg'), box = $('cmapSugList');
+    if (!list.length) { toast('Não achei novas ligações: os personagens quase não aparecem juntos nos capítulos.'); return; }
+    box.replaceChildren(...list.map((f, i) => {
+      const cb = el('input', { type: 'checkbox', 'data-i': i }); cb.checked = i < 12;
+      const why = [f.rel ? `nas Relações: "${f.rel}"` : '', f.n ? `juntos em ${f.n} parágrafo(s)` : ''].filter(Boolean).join(' · ');
+      return el('label', {}, cb, el('span', {}, el('b', { text: `${name(f.a)} e ${name(f.b)}` }), el('br'), el('span', { class: 'muted', text: why })));
+    }));
+    $('cmapSugGo').onclick = () => {
+      let n = 0;
+      box.querySelectorAll('input:checked').forEach(cb => { const f = list[cb.dataset.i]; m.links.push({ id: uid(), a: f.a, b: f.b, type: 'outro', label: f.rel || '' }); n++; });
+      dlg.close(); saveProject(p, true); done && done();
+      toast(n ? `${n} ligação(ões) criada(s) ✓ Toque em cada linha para escolher o tipo.` : 'Nada foi criado.');
+    };
+    dlg.showModal();
+  }
+
+  // =====================================================================
+  // Livro em 3D (sem IA): frente com a capa, lombada, contracapa e páginas
+  // =====================================================================
+  let b3 = null;
+  const bookWords = (p) => p.chapters.reduce((n, c) => n + countWords(c.text), 0);
+  const bookPages = (p) => Math.max(24, Math.ceil(bookWords(p) / 250));
+  // cor média de uma faixa da capa, para a lombada e a contracapa combinarem
+  function coverTone(data) {
+    return new Promise(res => {
+      if (!data) return res(null);
+      const im = new Image();
+      im.onload = () => {
+        try {
+          const c = document.createElement('canvas'); c.width = 8; c.height = 32;
+          const g = c.getContext('2d'); g.drawImage(im, 0, 0, im.naturalWidth * .12, im.naturalHeight, 0, 0, 8, 32);
+          const d = g.getImageData(0, 0, 8, 32).data; let r = 0, gg = 0, b = 0;
+          for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; }
+          const n = d.length / 4; res([r / n, gg / n, b / n].map(x => Math.round(x * .7)));
+        } catch { res(null); }
+      };
+      im.onerror = () => res(null); im.src = data;
+    });
+  }
+  function b3Apply(anim = true) {
+    const bk = $('book3d'); bk.classList.toggle('live', !anim);
+    bk.style.transform = `rotateX(${b3.rx}deg) rotateY(${b3.ry}deg)`;
+  }
+  function b3Render() {
+    const p = b3.p, title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim();
+    const pages = bookPages(p), d = Math.round(Math.min(70, Math.max(12, pages * .11)));
+    const bk = $('book3d');
+    bk.style.setProperty('--w', '230px'); bk.style.setProperty('--h', '345px'); bk.style.setProperty('--d', d + 'px');
+    const [r, g, b] = b3.tone || [74, 38, 52], light = (r * .3 + g * .59 + b * .11) > 150;
+    bk.style.setProperty('--spine', `rgb(${r},${g},${b})`); bk.style.setProperty('--spine-ink', light ? '#1b1214' : '#f6eef0');
+    const front = b3.cover ? el('img', { src: b3.cover, alt: '' }) : el('div', { class: 'b3-ph' }, el('b', { text: title }), author ? el('span', { text: author }) : null);
+    bk.replaceChildren(
+      el('div', { class: 'b3-face b3-front' }, front),
+      el('div', { class: 'b3-face b3-back' }, el('div', { class: 'b3-btitle', text: title }), el('div', { class: 'b3-blurb', text: (p.blurb ?? '').trim() || (p.premise || '').trim() }), author ? el('div', { text: author }) : null, el('div', { class: 'b3-bar', 'aria-hidden': 'true' })),
+      el('div', { class: 'b3-face b3-spine' }, el('span', { text: author ? `${title}  ·  ${author}` : title })),
+      el('div', { class: 'b3-face b3-pages' }), el('div', { class: 'b3-face b3-top' }), el('div', { class: 'b3-face b3-bottom' }));
+    $('b3Pages').textContent = `${fmtNum(bookWords(p))} palavras, cerca de ${fmtNum(pages)} páginas`;
+    b3Apply();
+  }
+  async function openBook3d(p) {
+    const cover = p.coverRefId && (refsCache[p.id] || []).find(r => r.id === p.coverRefId);
+    b3 = { p, cover: cover ? cover.data : '', tone: null, rx: 8, ry: -28, spin: null };
+    $('b3Author').value = p.author || '';
+    $('b3Blurb').value = p.blurb ?? '';
+    $('b3Blurb').placeholder = (p.premise || '').trim() ? 'Se ficar vazio, usa a ideia da história' : 'A sinopse que fica atrás do livro';
+    b3Render();
+    $('book3dDlg').showModal();
+    b3.tone = await coverTone(b3.cover);
+    if (b3.tone) b3Render();
+  }
+  function b3StopSpin() { if (b3 && b3.spin) { cancelAnimationFrame(b3.spin); b3.spin = null; } }
+  $('book3dDlg').addEventListener('close', b3StopSpin);
+  document.querySelectorAll('[data-b3]').forEach(btn => btn.addEventListener('click', () => {
+    b3StopSpin(); const [y, x] = btn.dataset.b3.split(',').map(Number); b3.ry = y; b3.rx = x; b3Apply();
+  }));
+  $('b3Spin').addEventListener('click', () => {
+    if (b3.spin) return b3StopSpin();
+    let last = performance.now();
+    const step = (t) => { b3.ry += (t - last) * .045; last = t; b3Apply(false); b3.spin = requestAnimationFrame(step); };
+    b3.spin = requestAnimationFrame(step);
+  });
+  (() => {
+    const st = $('b3Stage'); let drag = null;
+    st.addEventListener('pointerdown', (e) => { b3StopSpin(); drag = { x: e.clientX, y: e.clientY, ry: b3.ry, rx: b3.rx }; st.setPointerCapture(e.pointerId); st.classList.add('dragging'); });
+    st.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      b3.ry = drag.ry + (e.clientX - drag.x) * .5; b3.rx = Math.max(-35, Math.min(35, drag.rx - (e.clientY - drag.y) * .3)); b3Apply(false);
+    });
+    const end = () => { drag = null; st.classList.remove('dragging'); };
+    st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
+  })();
+  $('b3Author').addEventListener('input', () => { b3.p.author = $('b3Author').value; saveProject(b3.p); b3Render(); });
+  $('b3Blurb').addEventListener('input', () => { b3.p.blurb = $('b3Blurb').value; saveProject(b3.p); b3Render(); });
+  // imagem para divulgar: frente + lombada em perspectiva, sombra e fundo
+  $('b3Mock').addEventListener('click', async () => {
+    const p = b3.p, title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim();
+    const W = 1200, H = 1500, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2a1d22'); bg.addColorStop(1, '#120c0f'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    const glow = g.createRadialGradient(W / 2, H * .82, 10, W / 2, H * .82, W * .6); glow.addColorStop(0, 'rgba(155,77,99,.35)'); glow.addColorStop(1, 'rgba(155,77,99,0)'); g.fillStyle = glow; g.fillRect(0, 0, W, H);
+    const bw = 640, bh = 960, depth = Math.round(Math.min(120, Math.max(30, bookPages(p) * .2))), skew = depth * .35;
+    const x0 = (W - bw) / 2 + depth / 2, y0 = (H - bh) / 2 + 20;
+    // sombra no chão
+    g.save(); g.filter = 'blur(28px)'; g.fillStyle = 'rgba(0,0,0,.65)'; g.beginPath(); g.ellipse(W / 2 + 20, y0 + bh + 18, bw * .58, 34, 0, 0, Math.PI * 2); g.fill(); g.restore();
+    const [r, gg, b] = b3.tone || [74, 38, 52];
+    // lombada (paralelogramo à esquerda)
+    g.save(); g.setTransform(1, skew / depth, 0, 1, x0 - depth, y0 - skew);
+    const sp = g.createLinearGradient(0, 0, depth, 0); sp.addColorStop(0, `rgb(${r * .6},${gg * .6},${b * .6})`); sp.addColorStop(.5, `rgb(${r},${gg},${b})`); sp.addColorStop(1, `rgb(${r * .7},${gg * .7},${b * .7})`);
+    g.fillStyle = sp; g.fillRect(0, 0, depth, bh);
+    const light = (r * .3 + gg * .59 + b * .11) > 150; g.fillStyle = light ? '#1b1214' : '#f6eef0';
+    g.translate(depth / 2, bh / 2); g.rotate(Math.PI / 2); g.font = `bold ${Math.round(Math.min(depth * .45, 30))}px Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(author ? `${title}  ·  ${author}` : title, 0, 0, bh * .9); g.restore();
+    // páginas no topo
+    g.save(); g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + bw - 4, y0 + 3); g.lineTo(x0 + bw - 4 - depth, y0 + 3 - skew); g.lineTo(x0 - depth, y0 - skew); g.closePath();
+    const pg = g.createLinearGradient(0, y0 - skew, 0, y0); pg.addColorStop(0, '#cfc6b6'); pg.addColorStop(1, '#f3eee4'); g.fillStyle = pg; g.fill(); g.restore();
+    // frente
+    g.save();
+    if (b3.cover) {
+      const im = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = b3.cover; });
+      if (im) {
+        const s = Math.max(bw / im.naturalWidth, bh / im.naturalHeight), sw = bw / s, sh = bh / s;
+        g.drawImage(im, (im.naturalWidth - sw) / 2, (im.naturalHeight - sh) / 2, sw, sh, x0, y0, bw, bh);
+      }
+    } else {
+      const fg = g.createLinearGradient(x0, y0, x0 + bw, y0 + bh); fg.addColorStop(0, '#9b4d63'); fg.addColorStop(1, '#3a2530'); g.fillStyle = fg; g.fillRect(x0, y0, bw, bh);
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = 'bold 64px Georgia, serif'; g.fillText(title, x0 + bw / 2, y0 + bh / 2, bw * .85);
+      if (author) { g.font = '34px Georgia, serif'; g.fillText(author, x0 + bw / 2, y0 + bh / 2 + 70, bw * .85); }
+    }
+    const sh = g.createLinearGradient(x0, 0, x0 + bw, 0); sh.addColorStop(0, 'rgba(0,0,0,.35)'); sh.addColorStop(.03, 'rgba(255,255,255,.14)'); sh.addColorStop(.08, 'rgba(255,255,255,0)'); sh.addColorStop(.85, 'rgba(255,255,255,0)'); sh.addColorStop(1, 'rgba(255,255,255,.08)');
+    g.fillStyle = sh; g.fillRect(x0, y0, bw, bh); g.restore();
+    downloadData(c.toDataURL('image/png'), `${title.replace(/[\\/:*?"<>|]+/g, '')} - livro 3D.png`);
+    toast('Imagem do livro baixada ✓');
   });
 
   // =====================================================================

@@ -33,7 +33,7 @@
     --ai-soft: #eeeaf5;
     --ai-border: #dcd5ea;
     --radius: 14px;
-    --side: 290px;
+    --side: 330px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -162,7 +162,9 @@
   }
 
   /* ---------- projetos ---------- */
-  .proj-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .proj-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: nowrap; }
+  .proj-head h2 { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #newProjectBtn { white-space: nowrap; padding-left: 12px; padding-right: 10px; }
   .proj-head h2 { margin: 0; }
   .proj-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
   .proj-item { width: 100%; text-align: left; display: block; padding: 12px 14px; }
@@ -1025,6 +1027,19 @@
   .learn-item .row { margin-top: 4px; } .learn-item .row button, .learn-item label { min-height: 0; font-size: .84rem; margin: 0; }
   .learn-think { margin-top: 14px; }
   .learn-think li { margin: 4px 0; font-size: .9rem; }
+  .story-head { display: grid; gap: 6px; margin-bottom: 14px; }
+  input[type=text].story-title { font-family: Georgia, serif; font-size: 1.6rem; font-weight: 700; background: transparent; border: 0; border-bottom: 1px dashed var(--border); border-radius: 0; padding: 4px 0; }
+  .story-list { display: grid; gap: 8px; }
+  .story-ch { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); text-align: left; min-height: 0; font-weight: 400; width: 100%; }
+  .story-ch:hover { border-color: var(--accent); }
+  .story-ch .ln { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font-weight: 700; flex: none; }
+  .story-ch.done .ln { background: var(--accent); color: var(--accent-text); }
+  .story-ch .lt { flex: 1; min-width: 0; display: grid; gap: 2px; } .story-ch .lt span:last-child { color: var(--muted); font-size: .84rem; }
+  .story-ch .sk { font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .story-ch .sr { color: var(--muted); font-size: .84rem; white-space: nowrap; }
+  .story-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .lt-line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .lt-line .chip { font-size: .8rem; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -2183,7 +2198,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // =====================================================================
   // Projetos
   // =====================================================================
-  let projFilter = local.get('fanfic.filter', 'todos'); // 'todos' | 'favoritos' | 'cat:Nome'
+  let projFilter = 'todos'; // sempre começa sem filtro: 'todos' | 'favoritos' | 'cat:Nome'
   const categories = () => [...new Set(projects.map(p => (p.category || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 
   // miniatura da capa na lista (feita na hora, a partir da imagem guardada nas Referências)
@@ -2513,7 +2528,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let cryptoKey = null, syncing = false, syncAgain = false, syncTimer = null;
 
   // configuração da IA que viaja junto com as histórias (no mesmo arquivo cifrado)
-  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy', 'freeFirst', 'freeModel', 'goals', 'challenges'];
+  const AI_FIELDS = ['endpoint', 'key', 'model', 'modelName', 'temperature', 'maxTokens', 'system', 'cheapModel', 'cheapModelName', 'economy', 'freeFirst', 'freeModel', 'goals', 'challenges', 'lt'];
   function aiForSync() {
     if (!settings.key) return null;
     const o = { updatedAt: settings.updatedAt || 0 };
@@ -3214,6 +3229,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (hubOpen) { renderHub(); return; }
     $('hub').hidden = true; $('projHeading').hidden = false;
     const p = cur();
+    if (p && p.desafio) {
+      // história de desafio: sem as abas de projeto; a lista é a tela própria, o capítulo abre como sempre
+      view.tab = 'capitulos';
+      if (!p.chapters.some(c => c.id === view.chapterId)) { renderStoryView(p); return; }
+      $('tabs').hidden = true; $('projHeading').hidden = true;
+      ['ideia', 'mundo', 'biblia', 'arquivos'].forEach(t => { $('tab-' + t).hidden = true; });
+      $('tab-capitulos').hidden = false; renderChapters(); renderBar(); return;
+    }
     if (p.draft) { view.tab = 'ideia'; infoEditing = true; }
     $('tabs').hidden = !!p.draft;
     $('deleteProjectBtn').closest('.row').hidden = !!p.draft;
@@ -3586,6 +3609,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const ch = p.chapters.find(c => c.id === view.chapterId);
     setFocus(!!ch);
     if (ch) return renderChapterView(sec, p, ch);
+    if (p.desafio) { renderStoryView(p); return; }
     view.chapterId = null;
 
     if (!p.chapters.length) {
@@ -6937,13 +6961,26 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const key = (x) => `${x.kind}:${v.slice(x.s, x.e)}:${x.msg}`;
     let sp = []; try { sp = isPtBr(r.p) ? spellIssues(v, r.p) : []; } catch (e) { console.error(e); }
     let gr = []; try { gr = isPtBr(r.p) ? gramIssues(v) : []; } catch (e) { console.error(e); }
-    r.issues = dedupeIssues([...reviewText(v, isPtBr(r.p)), ...gr, ...sp])
+    const lt = (r.lt && r.lt.text === v) ? r.lt.issues : [];
+    r.issues = dedupeIssues([...lt, ...reviewText(v, isPtBr(r.p)), ...gr, ...sp])
       .filter(x => !r.ignore.has(key(x)) && (!r.range || (x.s >= r.range.s && x.e <= r.range.e)))
       .sort((a, b) => a.s - b.s);
     r.key = key;
     const bd = r.ta.parentElement.querySelector('.edit-backdrop');
     if (bd) { bd._issues = r.issues.map(x => [x.s, x.e]); bd._repaint && bd._repaint(); }
     renderReview();
+    if (ltCfg().on && isPtBr(r.p) && !(r.lt && r.lt.text === v)) {
+      clearTimeout(r.ltT);
+      r.ltT = setTimeout(async () => {
+        if (!review || review !== r || r.ta.value !== v) return;
+        r.ltBusy = true; r.ltErr = ''; renderReview();
+        try {
+          const a = r.range ? r.range.s : 0, b = r.range ? r.range.e : v.length, found = await ltCheck(v.slice(a, b));
+          r.lt = { text: v, issues: found.map(x => Object.assign({}, x, { s: x.s + a, e: x.e + a })) };
+        } catch (e) { r.ltErr = e.message; r.lt = { text: v, issues: [] }; }
+        r.ltBusy = false; if (review === r) runReview();
+      }, r.lt ? 2500 : 300);
+    }
   }
   function renderReview() {
     const r = review; if (!r) return;
@@ -6979,6 +7016,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('div', { class: 'rv-head' }, el('h3', { icon: 'list-checks', text: `Revisor · ${r.issues.length}${r.range ? ' no trecho' : ''}` }), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar o revisor', onclick: closeReview })),
       r.range ? el('div', { class: 'rv-scope' }, 'Revisando só o trecho selecionado. ', el('button', { class: 'link plain', text: 'Revisar o capítulo todo', onclick: () => { r.range = null; runReview(); } })) : null,
       el('div', { class: 'rv-scope' }, el('button', { class: 'link plain', icon: 'graduation-cap', text: 'Ver a versão corrigida e aprender', onclick: () => { const ta = r.ta, a = r.range ? r.range.s : 0, b = r.range ? r.range.e : ta.value.length; openLearn(r.p, ta.value.slice(a, b), (fixed) => { ta.focus(); ta.setRangeText(fixed, a, b, 'select'); ta.dispatchEvent(new Event('input')); }); } })),
+      isPtBr(r.p) ? el('div', { class: 'rv-scope lt-line' }, el('button', { class: 'chip', 'aria-pressed': String(ltCfg().on), icon: 'spell-check', text: ltCfg().on ? 'LanguageTool ligado' : 'Ligar o LanguageTool', title: 'Revisão gramatical avançada (online, não é IA)', onclick: () => ltToggle(() => { r.lt = null; runReview(); }) }),
+        ltCfg().on ? el('span', { class: 'muted', text: r.ltBusy ? ' conferindo…' : r.ltErr ? ' ' + r.ltErr : '' }) : null,
+        ltCfg().on ? el('button', { class: 'link plain', text: 'Servidor', onclick: () => ltServer(() => { r.lt = null; runReview(); }) }) : null) : null,
       !speller && isPtBr(r.p) ? el('div', { class: 'rv-scope', text: r.dictErr ? 'Não consegui baixar o dicionário (sem internet?). A ortografia fica de fora por enquanto.' : 'Carregando o dicionário de português (só na primeira vez)…' }) : null,
       counts.length > 1 ? el('div', { class: 'rv-tabs' }, el('button', { class: 'chip', 'aria-pressed': String(!r.filter), text: 'Tudo', onclick: () => { r.filter = ''; renderReview(); } }),
         counts.map(([k, n]) => el('button', { class: 'chip', 'aria-pressed': String(r.filter === k), text: `${RV_KINDS[k]} ${n}`, onclick: () => { r.filter = k; renderReview(); } }))) : null,
@@ -7853,9 +7893,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('learnDlg').showModal();
     try { await loadSpeller(); } catch {}
     const pt = isPtBr(p);
-    let issues = dedupeIssues([...reviewText(text, pt), ...(pt ? gramIssues(text) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
+    let lt = [], ltErr = '';
+    if (pt && ltCfg().on) { $('learnBody').replaceChildren(el('p', { class: 'muted', text: 'Conferindo também no LanguageTool…' })); try { lt = await ltCheck(text); } catch (e) { ltErr = e.message; } }
+    let issues = dedupeIssues([...lt, ...reviewText(text, pt), ...(pt ? gramIssues(text) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
     const fixes = issues.filter(x => x.fix != null && x.kind !== 'rep' && x.kind !== 'estilo'), think = issues.filter(x => x.fix == null || x.kind === 'rep' || x.kind === 'estilo');
-    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((_, i) => i)) };
+    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((_, i) => i)), ltErr };
     renderLearn(think);
   }
   function learnFixed() {
@@ -7883,7 +7925,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const cb = el('input', { type: 'checkbox' }); cb.checked = c.on.has(i);
       cb.addEventListener('change', () => { cb.checked ? c.on.add(i) : c.on.delete(i); renderLearn(think); });
       return el('div', { class: 'learn-item' }, el('span', { class: 'li-n', text: String(k + 1) }),
-        el('div', {}, el('div', { class: 'li-k', text: KIND[x.kind] || 'Correção' }),
+        el('div', {}, el('div', { class: 'li-k', text: (KIND[x.kind] || 'Correção') + (x.lt ? ' · LanguageTool' : '') }),
           (() => {
             const was = c.text.slice(x.s, x.e);
             if (was.trim() && (x.fix || '').trim()) return el('div', { class: 'li-ch' }, el('del', { text: was.trim() }), ' → ', el('ins', { text: x.fix.trim() }));
@@ -7896,6 +7938,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
             x.lesson && LESSON(x.lesson) ? el('button', { class: 'link plain', icon: 'graduation-cap', text: `Treinar: ${LESSON(x.lesson)}`, onclick: () => openLessonQuiz(x.lesson) }) : null)));
     });
     body.replaceChildren(...[
+      isPtBr(c.p) ? el('div', { class: 'lt-line', style: 'margin:0 0 8px' }, el('button', { class: 'chip', 'aria-pressed': String(ltCfg().on), icon: 'spell-check', text: ltCfg().on ? 'LanguageTool ligado' : 'Ligar o LanguageTool (mais correções)', onclick: () => ltToggle(() => openLearn(c.p, c.text, c.apply)) }),
+        c.ltErr ? el('span', { class: 'muted', text: ' ' + c.ltErr }) : null) : null,
       c.fixes.length ? el('p', { class: 'muted', style: 'margin-top:0', text: `${c.fixes.length} correção(ões) encontrada(s). Em vermelho o que sai, em verde o que entra. Leia o porquê de cada uma embaixo.` })
         : el('p', { style: 'margin-top:0', text: 'Não achei nada para corrigir neste trecho ✓' }),
       c.fixes.length ? el('div', { class: 'learn-cols' }, el('div', { class: 'learn-col' }, el('h3', { text: 'Seu texto' }), orig), el('div', { class: 'learn-col' }, el('h3', { text: 'Versão corrigida' }), fixed)) : null,
@@ -7911,6 +7955,98 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const ta = view.mode === 'editar' && edit && edit.chId === ch.id ? $('chBody') : null;
     if (ta) openLearn(p, ta.value, (f) => { ta.focus(); ta.setRangeText(f, 0, ta.value.length, 'select'); ta.dispatchEvent(new Event('input')); });
     else openLearn(p, ch.text, (f) => { pushHistory(ch, 'Correções da aula de português'); ch.text = f; ch.editedAt = Date.now(); saveProject(p, true); renderChapters(); });
+  }
+
+
+  // ---------- tela própria de uma história de desafio ----------
+  function renderStoryView(p) {
+    const hub = $('hub'); hub.hidden = false;
+    ['ideia', 'capitulos', 'mundo', 'biblia', 'arquivos'].forEach(t => { $('tab-' + t).hidden = true; });
+    $('tabs').hidden = true; $('projHeading').hidden = true; setFocus(false);
+    $('menuTitle').textContent = p.title || 'História de desafio';
+    const chs = p.chapters, done = chs.filter(c => c.challenge && c.challenge.done), words = chs.reduce((n, c) => n + countWords(c.text), 0);
+    const avg = done.length ? Math.round(done.reduce((n, c) => n + c.challenge.done.score, 0) / done.length) : null;
+    const used = new Set(chs.map(c => c.challenge && c.challenge.id)), next = DESAFIOS.follow.filter(f => !used.has(f.id)).slice(0, 3);
+    const title = el('input', { type: 'text', class: 'story-title', value: p.title || '', placeholder: 'Título da história', 'aria-label': 'Título da história' });
+    title.addEventListener('input', () => { p.title = title.value; saveProject(p); clearTimeout(title._t); title._t = setTimeout(renderProjects, 400); });
+    const KIND = { lesson: 'Aula', follow: 'Complementar', daily: 'Desafio do dia', d30: '30 dias' };
+    hub.replaceChildren(
+      el('button', { class: 'link plain hub-back', icon: 'arrow-left', text: 'Painel de desafios', onclick: () => openHub() }),
+      el('div', { class: 'story-head' }, title,
+        el('div', { class: 'hub-stats' }, el('span', { text: `${chs.length} desafio(s)` }), el('span', { text: `${fmtNum(words)} palavras` }), avg != null ? el('span', { text: `nota média ${avg}` }) : null)),
+      el('div', { class: 'story-list' }, chs.map((c, i) => {
+        const cg = c.challenge || {}, d = cg.done;
+        return el('button', { class: 'story-ch' + (d ? ' done' : ''), onclick: () => { view = { tab: 'capitulos', chapterId: c.id, mode: d ? 'ler' : 'editar' }; renderTab(); scrollTo(0, 0); } },
+          el('span', { class: 'ln' }, d ? svgIcon('check') : String(i + 1)),
+          el('span', { class: 'lt' }, el('span', { class: 'sk', text: KIND[cg.kind] || 'Capítulo' }), el('b', { text: cg.n || chTitle(p, c) }),
+            el('span', { text: (c.text || '').trim() ? storyPlain(c.text.slice(0, 300)).replace(/\s+/g, ' ').slice(0, 150) + '…' : (cg.task || 'Ainda sem texto') })),
+          el('span', { class: 'sr', text: d ? `nota ${d.score}` : 'em andamento' }));
+      })),
+      next.length ? el('h3', { class: 'hub-sec', icon: 'sparkles', text: 'Evoluir a história com outro desafio' }) : null,
+      next.length ? el('div', { class: 'hub-grid' }, next.map(f => el('button', { class: 'hub-card', onclick: () => startChallenge(p, { id: f.id, kind: 'follow', n: f.n, task: f.task, rules: f.rules }) },
+        el('h3', { text: f.n }), el('p', { text: f.task })))) : null,
+      el('div', { class: 'story-actions' },
+        el('button', { icon: 'book-open', text: 'Transformar em projeto', title: 'Leva a história para Projetos, com Infos, Mundo, Bíblia e tudo mais', onclick: () => toProject(p) }),
+        el('button', { icon: 'graduation-cap', text: 'Aula de português com a história', disabled: !words, onclick: () => openLearn(p, chs.map(c => c.text).join('\n\n'), null) }),
+        el('button', { class: 'link danger', icon: 'trash-2', text: 'Excluir história', onclick: async () => { if (!confirm(`Excluir "${p.title || 'esta história'}" com todos os desafios? Não dá para desfazer.`)) return; await deleteProjects([p.id]); openHub(); } })));
+  }
+  function toProject(p) {
+    let t = (p.title || '').replace(/^Desafio:\s*/i, '').trim();
+    const name = prompt('Nome do projeto:', t || 'Minha história');
+    if (name == null) return;
+    p.desafio = false; delete p.d30; p.title = name.trim() || t || 'Minha história';
+    p.chapters.forEach(c => { if (c.challenge && !(c.plan || '').trim()) c.plan = c.challenge.task; });
+    saveProject(p, true);
+    appMode = 'projetos'; local.set('fanfic.mode', 'projetos'); hubOpen = false;
+    openProject(p.id); view = { tab: 'ideia', chapterId: null, mode: 'ler' }; renderTab(); renderProjects();
+    toast('Agora é um projeto ✓ Está em Projetos, com Infos, Mundo e Bíblia.');
+  }
+
+  // =====================================================================
+  // LanguageTool (revisão gramatical aberta, regras e não IA): opcional, envia o texto ao servidor escolhido
+  // =====================================================================
+  function ltCfg() { return Object.assign({ on: false, url: 'https://api.languagetool.org', picky: true }, settings.lt || {}); }
+  function setLt(c) { settings.lt = c; saveSettings(); }
+  const ltCache = new Map();
+  const LT_KIND = { TYPOS: 'orto', CASING: 'orto', GRAMMAR: 'gram', CONFUSED_WORDS: 'gram', PUNCTUATION: 'pont', TYPOGRAPHY: 'pont', STYLE: 'estilo', REDUNDANCY: 'estilo', REPETITIONS: 'rep', REPETITIONS_STYLE: 'rep', COLLOCATIONS: 'gram', SEMANTICS: 'gram' };
+  async function ltCheck(text) {
+    const c = ltCfg(); if (!c.on || !text.trim()) return [];
+    const key = hashText(text) + (c.picky ? 'p' : '');
+    if (ltCache.has(key)) return ltCache.get(key);
+    // pedaços de até ~15 mil caracteres, cortados entre parágrafos (o servidor gratuito aceita 20 KB por vez)
+    const parts = []; let start = 0;
+    while (start < text.length) {
+      let end = Math.min(text.length, start + 15000);
+      if (end < text.length) { const k = text.lastIndexOf('\n\n', end); if (k > start + 2000) end = k + 2; }
+      parts.push([start, text.slice(start, end)]); start = end;
+    }
+    const out = [];
+    for (const [off, chunk] of parts) {
+      const body = new URLSearchParams({ text: chunk, language: 'pt-BR', level: c.picky ? 'picky' : 'default' });
+      let r;
+      try { r = await fetch(c.url.replace(/\/+$/, '') + '/v2/check', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }); }
+      catch { throw new Error('Não consegui falar com o LanguageTool (sem internet?).'); }
+      if (r.status === 429) throw new Error('O LanguageTool pediu uma pausa (limite do servidor gratuito). Tente de novo em um minuto.');
+      if (!r.ok) throw new Error(`O LanguageTool respondeu com erro (${r.status}).`);
+      const j = await r.json();
+      (j.matches || []).forEach(m => {
+        const cat = (m.rule && m.rule.category && m.rule.category.id) || '', reps = (m.replacements || []).map(x => x.value).filter(v => v != null).slice(0, 4);
+        const kind = LT_KIND[cat] || (m.rule && m.rule.issueType === 'misspelling' ? 'orto' : 'gram');
+        out.push({ s: off + m.offset, e: off + m.offset + m.length, kind, msg: `${m.message} (LanguageTool)`, fix: reps.length ? reps[0] : null, sugs: kind === 'orto' ? reps : undefined, lt: true, ltRule: m.rule && m.rule.id });
+      });
+    }
+    ltCache.set(key, out);
+    return out;
+  }
+  function ltToggle(after) {
+    const c = ltCfg();
+    if (!c.on && !confirm('Ligar a revisão avançada do LanguageTool?\n\nÉ um revisor aberto de português (regras, não é IA) que pega mais erros de concordância, crase, pontuação e estilo.\n\nO texto revisado é enviado ao servidor do LanguageTool (languagetool.org, gratuito, com limite de uso). Se você tiver um servidor próprio, dá para trocar o endereço depois.')) return;
+    c.on = !c.on; setLt(c); after && after();
+    toast(c.on ? 'LanguageTool ligado ✓' : 'LanguageTool desligado.');
+  }
+  function ltServer(after) {
+    const c = ltCfg(), u = prompt('Endereço do servidor do LanguageTool (deixe o padrão para usar o gratuito):', c.url);
+    if (u == null) return; c.url = (u.trim() || 'https://api.languagetool.org').replace(/\/+$/, ''); setLt(c); ltCache.clear(); after && after();
   }
 
   // =====================================================================

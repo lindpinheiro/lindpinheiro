@@ -419,6 +419,11 @@
   .gen-ctx { display: grid; gap: 10px; }
   .gen-ctx .gc-g b { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
   .gen-ctx .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .gc-vis { display: grid; gap: 6px; margin-top: 4px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; }
+  .gc-vis .gv-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  .gc-vis .gv-row b { grid-column: 1 / -1; font-size: .85rem; }
+  .gc-vis input { min-width: 0; }
+  .gp-models { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .gen-adult { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font-weight: 400; }
   .gen-adult input { margin-top: 4px; accent-color: var(--accent); }
   .gen-prov, .gen-prompt { margin-top: 12px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
@@ -1641,6 +1646,8 @@
   <div class="chips" id="genStyles"></div>
   <label for="genExtra" id="genExtraLabel">Algo mais? <span class="muted">(opcional)</span></label>
   <textarea id="genExtra" rows="2" placeholder="Ex.: pôr do sol, tons quentes, os dois de costas olhando o mar"></textarea>
+  <label for="genNeg">O que evitar <span class="muted">(opcional)</span></label>
+  <input type="text" id="genNeg" placeholder="Ex.: rosto deformado, mãos erradas, cabelo loiro, texto na imagem">
   <div id="genAspectWrap"><label>Formato</label><div class="chips" id="genAspect"></div></div>
   <label>O que mandar junto no pedido</label>
   <p class="hint" style="margin-top:0">Fichas e contextos prontos do seu projeto. Os nomes que aparecem no pedido já vêm marcados.</p>
@@ -1664,11 +1671,11 @@
     <details class="gp-adv" id="gpAdv"><summary>Endereço, modelo e parâmetros (já vêm preenchidos)</summary>
     <label for="gpBase">Endereço da API</label><input type="text" inputmode="url" id="gpBase" placeholder="Endereço da API, começando com https://">
     <label for="gpModel">Modelo</label><input type="text" id="gpModel" list="gpModels" placeholder="Nome do modelo de imagem"><datalist id="gpModels"></datalist>
-    <label class="check"><input type="checkbox" id="gpEn" checked><span>Traduzir o pedido para inglês antes (esses modelos entendem melhor; usa um pouquinho do modelo de texto)</span></label>
     <label for="gpExtra">Parâmetros extras (JSON, opcional)</label><input type="text" id="gpExtra" placeholder='Ex.: {"chave": "valor"}'>
     </details>
     <div class="row" style="margin-top:10px"><button type="button" class="primary" id="gpSave">Salvar e usar</button><button type="button" id="gpTest">Testar a chave</button><button type="button" id="gpList">Ver modelos do serviço</button><button type="button" class="link plain" id="gpOff">Remover</button></div>
     <p class="hint" id="gpMsg"></p>
+    <div class="gp-models" id="gpModelChips"></div>
   </details>
   <details class="gen-prompt" id="genPromptBox">
     <summary>Ver e editar o pedido antes de gerar</summary>
@@ -6033,7 +6040,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!isConfigured()) { openSetup(1, () => openImageGen(p, opts)); return; }
     genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null, sel: new Set(), canSee: true, base: null, adult: !!settings.imageAdult, promptDirty: false,
       inc: { infos: true, facts: false, chapter: false, refText: true, chars: new Set(), places: new Set(), manual: new Set() } };
-    $('genAdult').checked = genCtx.adult; $('genPromptBox').open = false; gpFill(); $('genProvBox').open = false;
+    $('genAdult').checked = genCtx.adult; $('genNeg').value = settings.imageNeg || ''; $('genPromptBox').open = false; gpFill(); $('genProvBox').open = false;
     const chs = p.chapters.filter(c => c.text.trim());
     $('genCh').replaceChildren(...chs.map(c => el('option', { value: c.id, text: `${p.chapters.indexOf(c) + 1}. ${chTitle(p, c)}` })));
     $('genCh').value = opts.chId || (chs.at(-1) || {}).id || '';
@@ -6070,7 +6077,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       genCtx.canSee = !m || !m.architecture || ins.includes('image');
       renderGenRefs();
     };
-    sel.onchange = () => { settings.imageModel = sel.value; local.set('fanfic.settings', settings); costLine(); };
+    sel.onchange = () => { settings.imageModel = sel.value; local.set('fanfic.settings', settings); costLine(); genPromptFill(); };
     costLineRefresh = costLine;
     costLine();
   }
@@ -6081,6 +6088,24 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     let changed = false;
     [['personagens', c.inc.chars], ['lugares', c.inc.places]].forEach(([k, set]) => (w.e[k] || []).forEach(e => { const t = (e.title || '').trim(); if (t && has(t) && !c.inc.manual.has(k + ':' + t) && !set.has(t)) { set.add(t); changed = true; } }));
     if (changed) renderGenCtx();
+  }
+  // aparência curta de um personagem: os traços visuais, ou as linhas de aparência da ficha
+  function charLook(p, name, n) {
+    const w = p.world ? worldOf(p) : null, e = w && (w.e.personagens || []).find(x => (x.title || '').trim() === name); if (!e) return '';
+    if ((e.visual || '').trim()) return e.visual.trim();
+    const lines = (e.text || '').replace(/\*\*/g, '').split('\n').filter(l => /idade|apar|cabel|olho|corpo|pele|altur|tatu|barb|marca|roupa|rosto|físic/i.test(l)).join('; ');
+    const t = (lines || e.text || '').replace(/\s+/g, ' ').trim(); return t.length > (n || 350) ? t.slice(0, n || 350) + '…' : t;
+  }
+  // retrato do personagem criado no app só a partir do texto (nunca de foto enviada)
+  const textPortrait = (p, name) => (refsCache[p.id] || []).filter(r => r.kind === 'image' && r.fromText && r.imgKind === 'personagem' && normTitle(r.subject || '') === normTitle(name)).sort((a, b) => b.addedAt - a.addedAt)[0];
+  async function lookFromPortrait(p, e, r, input, btn) {
+    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Lendo o retrato…';
+    try {
+      const res = await callAI(`Descreva a aparência física do personagem ${e.title} neste retrato, para um gerador de imagens repetir o mesmo visual. Em português, só uma lista curta separada por vírgulas (até 45 palavras): idade aparente, altura e tipo de corpo, tom de pele, formato do rosto, cabelo (cor, corte, comprimento), olhos, barba, tatuagens e marcas, roupa. Sem frases e sem introdução.`,
+        { images: [{ url: r.data }], force: true, label: 'Traços visuais do retrato' });
+      e.visual = (res.text || '').replace(/\s+/g, ' ').trim().slice(0, 400); input.value = e.visual; saveProject(p); genPromptFill(); toast('Traços visuais tirados do retrato ✓ Eles ficam guardados na ficha.');
+    } catch (err) { handleAIError(err, null); }
+    finally { btn.disabled = false; btn.textContent = old; }
   }
   function renderGenCtx() {
     const c = genCtx; if (!c || !c.inc) return;
@@ -6096,6 +6121,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         c.kind !== 'cena' && chs.length ? chip(inc.chapter, 'Trecho de um capítulo', () => { inc.chapter = !inc.chapter; $('genChWrap').hidden = !(c.kind === 'cena' || inc.chapter); }) : null,
         chip(inc.refText, 'Descrição das referências', () => { inc.refText = !inc.refText; }, 'Manda também o texto que descreve cada imagem de referência escolhida (útil para modelos que não enxergam imagens)')].filter(Boolean)),
       group('Fichas de personagens', chars.map(t => chip(inc.chars.has(t), t, tog(inc.chars, 'personagens', t)))),
+      inc.chars.size ? el('div', { class: 'gc-vis' }, el('p', { class: 'hint', style: 'margin:0', text: 'Traços visuais: a aparência curta que vai no começo do pedido, sempre igual, para o personagem sair parecido em toda imagem. Ficam guardados na ficha do Mundo.' }),
+        ...[...inc.chars].map(t => { const e = (w.e.personagens || []).find(x => (x.title || '').trim() === t); if (!e) return '';
+          const inp = el('input', { type: 'text', value: e.visual || '', placeholder: 'Ex.: 24 anos, moreno, cabelo castanho bagunçado, olhos verdes, ombros largos, tatuagem no abdômen', 'aria-label': `Traços visuais de ${t}` });
+          inp.addEventListener('change', () => { e.visual = inp.value.trim(); saveProject(c.p); genPromptFill(); });
+          const pr = textPortrait(c.p, t);
+          const btn = el('button', { type: 'button', icon: 'image', text: 'Tirar do retrato', disabled: !pr, title: pr ? 'Lê o retrato deste personagem (criado no app) e escreve os traços' : 'Gere primeiro um retrato deste personagem aqui (tipo "Personagem"); fotos enviadas não servem' });
+          if (pr) btn.onclick = () => lookFromPortrait(c.p, e, pr, inp, btn);
+          return el('div', { class: 'gv-row' }, el('b', { text: t }), inp, btn); })) : null,
       group('Fichas de lugares', places.map(t => chip(inc.places.has(t), t, tog(inc.places, 'lugares', t)))),
       !w || (!chars.length && !places.length) ? el('p', { class: 'muted', style: 'margin:0', text: 'Crie fichas de personagens e lugares no Mundo para poder mandá-las aqui.' }) : null].filter(Boolean));
     $('genAspect').replaceChildren(...GEN_ASPECTS.map(([a, n]) => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(c.aspect === a), text: n, onclick: () => { c.aspect = a; renderGenCtx(); } })));
@@ -6109,11 +6142,35 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function genBuildPrompt() {
     const c = genCtx, p = c.p, base = c.base, kind = base ? (base.imgKind || 'outro') : c.kind, sub = base ? (base.subject || '') : $('genSub').value.trim();
     const ch = (kind === 'cena' || c.inc.chapter) && !base ? p.chapters.find(x => x.id === $('genCh').value) : null;
+    if (!base && $('genModel').value === '__prov') return buildProvPrompt(p, kind, sub, ch, c.style, $('genExtra').value.trim(), c);
     return base ? buildEditPrompt(p, base, $('genExtra').value.trim(), c.style, c) : buildImagePrompt(p, kind, sub, ch, c.style, $('genExtra').value.trim(), c);
+  }
+  // modelos do tipo Stable Diffusion/FLUX: pedido curto, com a aparência dos personagens primeiro
+  function buildProvPrompt(p, kind, sub, ch, style, extra, c) {
+    const cut = (t, n) => { t = (t || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
+    const names = [...new Set([...(kind === 'personagem' && sub ? [sub] : []), ...c.inc.chars])];
+    const looks = names.map(n => { const l = charLook(p, n, 300); return l ? `${n}: ${l}` : ''; }).filter(Boolean);
+    const w = p.world ? worldOf(p) : null, places = [...c.inc.places].map(t => { const e = w && (w.e.lugares || []).find(x => (x.title || '').trim() === t); return e ? `${t}: ${cut(e.text.replace(/\*\*/g, ''), 220)}` : ''; }).filter(Boolean);
+    const what = kind === 'capa' ? `Capa de livro vertical, título "${(p.title || '').trim()}"` : kind === 'personagem' ? `Retrato de ${sub}` : kind === 'lugar' ? `Ilustração do lugar ${sub}` : 'Cena';
+    const scene = extra || (ch ? cut(ch.text, 500) : '');
+    return [`${style}, alta qualidade, detalhado. ${what}.`, looks.length ? `PERSONAGENS: ${looks.join(' | ')}` : '', scene ? `CENA: ${scene}` : '', places.length ? `LUGAR: ${places.join(' | ')}` : '',
+      c.adult ? 'Todos são homens adultos (maiores de 18 anos, com corpo e rosto de adulto), cena consensual.' : 'Todos adultos. Sem nudez.'].filter(Boolean).join('\n').slice(0, 1800);
+  }
+  // o que evitar: o da pessoa + o que nunca pode aparecer no modo adulto
+  const genNegative = (c) => [$('genNeg').value.trim(), c && c.adult ? 'child, minor, teen, underage, childlike, young-looking, school uniform, non-consensual, restrained, tied up, bondage, violence, blood, crying, fear' : ''].filter(Boolean).join(', ');
+  // no modo adulto: só adultos e só consentimento
+  function genSafety(text) {
+    const t = (text || '').toLocaleLowerCase('pt-BR');
+    const m1 = t.match(/(?<![\p{L}])(for[çc]and\w*|for[çc]ou|for[çc]ar|for[çc]ad[oa]s?|à for[çc]a|a for[çc]a|estupr\w*|abus\w*|contra a (sua )?vontade|sem consentimento|sem consentir|sem querer|obrigando|coagi\w*|coer\w*|drogad[oa]s?|dopad[oa]s?|inconsciente|desmaiad[oa]|dormindo|amarrad[oa]s?|algemad[oa]s?|rendid[oa]s?|implorando para parar|chorando)(?![\p{L}])/u);
+    if (m1) return `No modo +18 só dá para gerar cenas consensuais entre adultos. Tire do pedido: "${m1[0]}".`;
+    const m2 = t.match(/(?<![\p{L}])(menor de idade|menores|criança\w*|adolescente\w*|colegial|infantil|novinh[oa]s?|menin[oa]s?|garot[oa]s?|garotinh[oa]s?|1[0-7] anos|teen\w*)(?![\p{L}])/u);
+    if (m2) return `No modo +18 todos os personagens precisam ser adultos. Tire do pedido: "${m2[0]}" (use "homem", "rapaz adulto").`;
+    return '';
   }
   ['genSub', 'genExtra'].forEach(id => $(id).addEventListener('input', () => { clearTimeout(genAutoNames.t); genAutoNames.t = setTimeout(() => { genAutoNames(); genPromptFill(); }, 350); }));
   $('genCh').addEventListener('change', () => genPromptFill());
-  $('genAdult').addEventListener('change', () => { if (genCtx) { genCtx.adult = $('genAdult').checked; settings.imageAdult = genCtx.adult; local.set('fanfic.settings', settings); genPromptFill(); costLineRefresh(); } });
+  $('genNeg').addEventListener('change', () => { settings.imageNeg = $('genNeg').value.trim(); local.set('fanfic.settings', settings); });
+  $('genAdult').addEventListener('change', () => { if (genCtx) { genCtx.adult = $('genAdult').checked; settings.imageAdult = genCtx.adult; local.set('fanfic.settings', settings); genPromptFill(); costLineRefresh(); renderGenRefs(); } });
   $('genPrompt').addEventListener('input', () => { if (genCtx) genCtx.promptDirty = true; });
   $('genPromptReset').addEventListener('click', () => genPromptFill(true));
   $('genPromptBox').addEventListener('toggle', () => { if ($('genPromptBox').open) genPromptFill(); });
@@ -6135,7 +6192,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function gpFill() {
     const g = gpCfg() || {}, pre = g.preset || 'venice', P = GP_PRESETS[pre];
     $('gpPreset').value = pre; $('gpBase').value = g.base || P.base; $('gpKey').value = g.key || ''; $('gpModel').value = g.model || P.model;
-    $('gpExtra').value = g.extra ?? P.extra; $('gpEn').checked = g.en !== false; $('gpOff').hidden = !g.key; gpMsg('');
+    $('gpExtra').value = g.extra ?? P.extra; $('gpOff').hidden = !g.key; gpMsg('');
     $('gpNow').textContent = g.key ? `Em uso: ${GP_HELP[g.preset] && GP_HELP[g.preset][0] || g.base} · modelo ${g.model} · chave terminando em …${g.key.slice(-4)}` : '';
     gpHelp();
   }
@@ -6161,7 +6218,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!model) { gpMsg('Falta o nome do modelo (em "Endereço, modelo e parâmetros").', 'err'); $('gpAdv').open = true; $('gpModel').focus(); return; }
     if (/^sk-or-/.test(key)) { gpMsg('Essa é uma chave do OpenRouter. Aqui precisa da chave do próprio serviço de imagens.', 'err'); return; }
     if (extra) { try { JSON.parse(extra); } catch { gpMsg('Os parâmetros extras precisam ser um JSON válido, como {"safe_mode": false}.', 'err'); $('gpAdv').open = true; return; } }
-    settings.imgProv = { preset: pre, base, key, model, extra, en: $('gpEn').checked, style: GP_PRESETS[pre].style };
+    settings.imgProv = { preset: pre, base, key, model, extra, style: GP_PRESETS[pre].style };
     settings.imageModel = '__prov'; saveSettings();
     if (genCtx) genFillModels();
     gpFill(); gpMsg('Salvo ✓ O modelo de imagem agora é o do seu provedor.', 'ok');
@@ -6175,14 +6232,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       if (!res.ok) throw new Error('o serviço respondeu ' + res.status);
       const j = await res.json(), list = (Array.isArray(j) ? j : j.data || []).filter(m => m && m.id && (!m.type || /image/i.test(m.type)));
       $('gpModels').replaceChildren(...list.map(m => el('option', { value: m.id, text: [m.display_name || (m.model_spec && m.model_spec.name) || '', (m.model_spec && (m.model_spec.traits || []).join(', ')) || ''].filter(Boolean).join(' · ') })));
-      gpMsg(list.length ? `${list.length} modelo(s). Toque no campo Modelo para escolher.` : 'O serviço não listou modelos de imagem.', list.length ? 'ok' : '');
+      gpMsg(list.length ? `${list.length} modelo(s). Toque em um para usar.` : 'O serviço não listou modelos de imagem.', list.length ? 'ok' : '');
+      $('gpModelChips').replaceChildren(...list.slice(0, 40).map(m => { const tr = (m.model_spec && (m.model_spec.traits || []).join(', ')) || ''; return el('button', { type: 'button', class: 'chip', 'aria-pressed': String($('gpModel').value === m.id), text: m.id + (tr ? ` · ${tr}` : ''),
+        title: (m.model_spec && m.model_spec.name) || m.display_name || m.id, onclick: () => { $('gpModel').value = m.id; $('gpModelChips').querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x.textContent.startsWith(m.id + ' ') || x.textContent === m.id))); gpMsg(`Modelo "${m.id}" escolhido. Toque em "Salvar e usar".`, 'ok'); } }); }));
     } catch (e) { gpMsg(`Não consegui listar (${e.message === 'Failed to fetch' ? 'o serviço pode não aceitar chamadas direto do navegador' : e.message}). Digite o nome do modelo.`, 'err'); }
   });
-  async function requestProvImage(prompt, aspect, signal) {
+  async function requestProvImage(prompt, aspect, signal, negative) {
     const g = gpCfg(); if (!g) throw new Error('Configure o provedor sem censura primeiro.');
     const [W, H] = GEN_SIZE[aspect] || GEN_SIZE['2:3'], extra = g.extra ? JSON.parse(g.extra) : {};
     let url, body;
-    if (g.style === 'venice') { url = g.base + '/image/generate'; body = Object.assign({ model: g.model, prompt, width: W, height: H, format: 'png' }, extra); }
+    if (g.style === 'venice') { url = g.base + '/image/generate'; body = Object.assign({ model: g.model, prompt, width: W, height: H, format: 'png' }, negative ? { negative_prompt: negative } : {}, extra); }
+    else if (negative) prompt += `\nEvitar: ${negative}`;
     else if (g.style === 'wh') { url = g.base + '/images/generations'; body = Object.assign({ model: g.model, prompt, width: W, height: H, n: 1, response_format: 'b64_json' }, extra); }
     else { url = g.base + '/images/generations'; body = Object.assign({ model: g.model, prompt, n: 1, size: `${W}x${H}`, response_format: 'b64_json' }, extra); }
     let res;
@@ -6206,23 +6266,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (d && d.url) return { url: d.url };
     throw new Error('O provedor não devolveu imagem. Tente de novo ou mude o pedido.');
   }
-  // modelos de imagem desse tipo entendem melhor um pedido curto em inglês
-  async function toEnglishPrompt(prompt, signal) {
-    const r = await callAI(`Turn the following image request into ONE concise English prompt for an image generation model (Stable Diffusion / FLUX style): describe subjects, appearance, pose, action, setting, lighting, mood, composition and art style in comma-separated phrases. Keep every important visual detail, character appearance and any adult content exactly as requested; all characters are adults (18+). Maximum 900 characters. Answer only with the prompt.\n\nREQUEST:\n${prompt.slice(0, 9000)}`,
-      { support: true, signal, label: 'Pedido de imagem em inglês' });
-    const t = (r.text || '').trim().replace(/^["'`]+|["'`]+$/g, '');
-    if (t.length < 20) throw new Error('vazio');
-    return t;
-  }
   // imagens de referência para a geração: as das Referências do projeto + novas enviadas aqui
   function renderGenRefs() {
     const c = genCtx; if (!c) return;
-    const imgs = (refsCache[c.p.id] || []).filter(r => r.kind === 'image');
+    const imgs = (refsCache[c.p.id] || []).filter(r => r.kind === 'image' && (!c.adult || r.fromText));
     for (const id of [...c.sel]) if (!imgs.some(r => r.id === id)) c.sel.delete(id);
     $('genRefsHint').textContent = c.canSee
       ? `${c.base ? 'Se quiser, escolha mais imagens para a IA seguir' : 'Escolha até 4 imagens para a IA seguir'}: rosto, cabelo, roupa, lugar ou estilo.${c.sel.size ? ` (${c.sel.size} escolhida${c.sel.size > 1 ? 's' : ''})` : ''}`
       : c.base ? 'Este modelo não aceita imagens, então não consegue melhorar uma imagem. Escolha outro modelo de imagem (por exemplo, o Gemini Image).'
       : 'Este modelo não enxerga imagens: das referências escolhidas vai só a descrição escrita de cada uma (imagens sem descrição ficam de fora).';
+    if (c.adult) $('genRefsHint').textContent = 'Modo +18: só servem de referência os retratos criados aqui no app a partir das fichas (fotos enviadas ficam de fora, porque podem ser de pessoas reais). Para o personagem sair parecido, use "Tirar do retrato" nos traços visuais.';
     $('genRefs').replaceChildren(
       ...imgs.filter(r => !c.base || r.id !== c.base.id).map(r => {
         const on = c.sel.has(r.id);
@@ -6231,7 +6284,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           onclick: () => { on ? c.sel.delete(r.id) : c.sel.add(r.id); renderGenRefs(); } },
           el('img', { src: r.data, alt: '' }), el('span', { class: 'gen-check' }, svgIcon('check')), el('span', { class: 'gen-cap', text: r.subject || IMG_LABEL[r.imgKind] || '' }));
       }),
-      el('button', { type: 'button', class: 'gen-ref add', disabled: !c.canSee || c.sel.size >= 4, onclick: () => $('genRefFile').click() }, svgIcon('plus'), el('span', { text: 'Adicionar' })));
+      c.adult ? '' : el('button', { type: 'button', class: 'gen-ref add', disabled: !c.canSee || c.sel.size >= 4, onclick: () => $('genRefFile').click() }, svgIcon('plus'), el('span', { text: 'Adicionar' })));
   }
   $('genRefFile').addEventListener('change', async () => {
     const c = genCtx, files = [...$('genRefFile').files]; $('genRefFile').value = '';
@@ -6280,7 +6333,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     else task = `Crie esta imagem: ${extra || '(descreva a imagem)'}. Sem texto na imagem.` + (ch ? `\nCena do capítulo "${chTitle(p, ch)}" (use como base):\n${cut(ch.text, 4000)}` : '');
     if (kind !== 'cena' && kind !== 'livre' && ch) task += `\nTrecho do capítulo "${chTitle(p, ch)}" para dar contexto:\n${cut(ch.text, 3000)}`;
     const more = genCtxText(p, c, kind === 'personagem' || kind === 'lugar' ? sub : null);
-    return `${task}\n\nEstilo visual: ${style}.` + (extra && kind !== 'livre' ? `\nPedido do autor: ${extra}` : '') +
+    const looks = c && c.inc ? [...new Set([...(kind === 'personagem' && sub ? [sub] : []), ...c.inc.chars])].map(n => { const l = charLook(p, n, 400); return l ? `- ${n}: ${l}` : ''; }).filter(Boolean) : [];
+    const neg = genNegative(c);
+    return (looks.length ? `APARÊNCIA DOS PERSONAGENS (siga à risca em todos os detalhes):\n${looks.join('\n')}\n\n` : '') + `${task}` + (neg ? `\nEvite: ${neg}.` : '') + `\n\nEstilo visual: ${style}.` + (extra && kind !== 'livre' ? `\nPedido do autor: ${extra}` : '') +
       (useInfos ? `\n\nCONTEXTO DA HISTÓRIA:\n${ctx}` : '') + (more ? `\n\n${more}` : '') + `\n\n${genRules(c)}`;
   }
   async function requestImage(model, content, aspect, signal) {
@@ -6332,6 +6387,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const what = base ? (isCover ? 'uma versão melhorada da capa' : `uma versão melhorada de ${sub || 'imagem'}`) : kind === 'capa' ? 'a capa' : kind === 'cena' ? `uma imagem da cena de "${chTitle(p, ch)}"` : kind === 'livre' ? 'a imagem que você descreveu' : `uma imagem de ${sub}`;
     if (!prov && !(await confirmAI(`Gerar ${what} com ${name}.`))) return;
     const prompt = (c.promptDirty && $('genPrompt').value.trim()) || genBuildPrompt();
+    if (c.adult) { const lookTxt = [...c.inc.chars].map(n => charLook(p, n, 400)).join(' '); const bad = genSafety(`${$('genExtra').value} ${$('genSub').value} ${lookTxt} ${prompt}`); if (bad) { genStatus(bad, 'err'); return; } }
     // referências visuais escolhidas pela pessoa
     const chosen = c.canSee && !prov ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.sel.has(r.id)).slice(0, 4) : [];
     const content = base ? [
@@ -6353,19 +6409,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const aspect = base ? await imageAspect(base.data) : (c.aspect || GEN_KIND[kind].aspect);
       let r;
       if (prov) {
-        let ptxt = prompt;
-        if ((gpCfg() || {}).en !== false) { genStatus('Preparando o pedido em inglês…'); try { ptxt = await toEnglishPrompt(prompt, c.ctrl.signal); } catch (e) { if (e.name === 'AbortError') throw e; ptxt = prompt.slice(0, 1500); } }
         genStatus('Gerando a imagem no seu provedor… pode levar até um minuto.');
-        r = await requestProvImage(ptxt, aspect, c.ctrl.signal);
+        r = await requestProvImage(prompt, aspect, c.ctrl.signal, genNegative(c));
       } else r = await requestImage(model, content, aspect, c.ctrl.signal);
       if (!prov) recordSpend({ op: uid(), action: base ? `Melhorar imagem · ${isCover ? 'capa' : sub || 'imagem'}` : `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
       const data = await shrinkImage(r.blob || await (await fetch(r.url)).blob());
-      const kindSaved = kind === 'livre' ? 'cena' : kind;
+      const kindSaved = kind === 'livre' ? 'cena' : kind, fromText = (!base || !!base.fromText) && chosen.every(x => x.fromText);
       const ref = base
         ? { id: uid(), projectId: p.id, kind: 'image', name: isCover ? 'Capa melhorada' : `${(base.name || 'Imagem').replace(/\s*\((gerada|melhorada)\)$/, '')} (melhorada)`, type: 'img', text: '', data, chars: 0,
-            imgKind: base.imgKind || 'outro', subject: base.subject || '', note: base.note || '', enabled: false, generated: true, from: base.id, addedAt: Date.now(), updatedAt: Date.now() }
+            imgKind: base.imgKind || 'outro', subject: base.subject || '', note: base.note || '', enabled: false, generated: true, fromText, from: base.id, addedAt: Date.now(), updatedAt: Date.now() }
         : { id: uid(), projectId: p.id, kind: 'image', name: kind === 'capa' ? 'Capa gerada' : kind === 'cena' ? `Cena · ${chTitle(p, ch)}` : kind === 'livre' ? 'Imagem gerada' : `${sub} (gerada)`, type: 'img', text: '', data, chars: 0,
-            imgKind: kindSaved, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : kind === 'livre' ? $('genExtra').value.trim().slice(0, 60) : sub, adult: !!c.adult, note: '', enabled: false, generated: true, addedAt: Date.now(), updatedAt: Date.now() };
+            imgKind: kindSaved, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : kind === 'livre' ? $('genExtra').value.trim().slice(0, 60) : sub, adult: !!c.adult, note: '', enabled: false, generated: true, fromText, addedAt: Date.now(), updatedAt: Date.now() };
       await db.put('refs', ref);
       (refsCache[p.id] = refsCache[p.id] || []).push(ref);
       markDirty('refs');

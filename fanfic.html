@@ -1072,6 +1072,12 @@
   @media (max-width: 560px) { .hide-sm-text span { display: none; } }
   /* ---------- aula com o texto ---------- */
   dialog.learn-dlg { width: min(980px, calc(100vw - 16px)); }
+  .rv-struct { display: flex; flex-direction: column; gap: 8px; margin: 4px 12px 10px; padding: 10px 12px; border: 1px solid var(--ai-border); border-radius: 12px; background: color-mix(in srgb, var(--ai) 8%, transparent); font-size: .9rem; }
+  .rv-struct button { align-self: flex-start; }
+  .st-sum { margin: 0 0 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); }
+  .st-tipo { display: inline-block; padding: 1px 8px; border-radius: 99px; background: var(--ai-soft); color: var(--ai); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .st-edit { width: 100%; min-height: 30vh; font-family: Georgia, serif; font-size: 1rem; line-height: 1.6; }
+  .st-level { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; }
   .learn-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 720px) { .learn-cols { grid-template-columns: 1fr; } }
   .learn-col { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; max-height: 38vh; overflow: auto; }
@@ -1776,6 +1782,11 @@
 <dialog id="learnDlg" class="learn-dlg" aria-labelledby="learnTitle">
   <div class="dlg-head"><h2 id="learnTitle"><svg class="icon" aria-hidden="true"><use href="#i-graduation-cap"/></svg>Aprender com o seu texto</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <div id="learnBody"></div>
+</dialog>
+
+<dialog id="structDlg" class="learn-dlg" aria-labelledby="structTitle">
+  <div class="dlg-head"><h2 id="structTitle"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Reestruturar o trecho</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div id="structBody"></div>
 </dialog>
 
 <section id="b3Page" class="b3-page" hidden aria-labelledby="b3PageTitle">
@@ -6818,7 +6829,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Revisor automático (sem IA): aponta e sugere, você decide
   // =====================================================================
   var review = null, reviewWanted = null;
-  const RV_KINDS = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', trad: 'Cara de tradução', rep: 'Repetição', estilo: 'Estilo' };
+  const RV_KINDS = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', estr: 'Estrutura', trad: 'Cara de tradução', rep: 'Repetição', estilo: 'Estilo' };
   const BODY = 'cabelo|cabelos|olho|olhos|mão|mãos|boca|lábio|lábios|rosto|cabeça|braço|braços|perna|pernas|ombro|ombros|peito|nariz|testa|queixo|pescoço|dedo|dedos|coração|costas|cintura|pele|bochecha|bochechas|nuca|língua|joelho|joelhos|pé|pés|barriga|orelha|orelhas|sobrancelha|sobrancelhas';
   const RV_STOP = new Set('a o as os um uma uns umas de do da dos das em no na nos nas por pelo pela pelos pelas para pra com sem sob sobre entre até que se não mais mas como quando onde porque pois já ainda também muito muita muitos muitas pouco tudo nada todo toda todos todas isso isto aquilo esse essa esses essas este esta estes estas aquele aquela ele ela eles elas eu tu você vocês nós me te se lhe nos vos seu sua seus suas meu minha meus minhas teu tua dele dela deles delas era foi ser estar estava está estão tinha tem ter havia há fazer fez faz disse ou e é sim só bem então depois antes agora sempre nunca outra outro outras outros mesmo mesma cada qual quem'.split(' '));
   const CLICHES = [
@@ -6833,6 +6844,69 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   ];
   const INTERJ = [[/\bOh meu Deus\b/g, 'Meu Deus'], [/\bAh meu Deus\b/g, 'Meu Deus'], [/\bOh,? (?=[a-záéíóú])/g, ''], [/\bUau\b/g, 'Nossa'], [/\bOkay\b/gi, 'Tá'], [/\b[Oo]k\b(?=[,.!?…\s])/g, 'Tá'], [/\bDroga\b/g, 'Que saco']];
   const POSS = { seu: 'o', sua: 'a', seus: 'os', suas: 'as' }, CONTR = { em: { o: 'no', a: 'na', os: 'nos', as: 'nas' }, de: { o: 'do', a: 'da', os: 'dos', as: 'das' }, por: { o: 'pelo', a: 'pela', os: 'pelos', as: 'pelas' } };
+  // ---------- estrutura (sem IA): frases longas, vírgulas no lugar de ponto, começos repetidos, ritmo, parágrafos ----------
+  const ST_DET = new Set('o a os as um uma uns umas este esta estes estas esse essa esses essas aquele aquela aqueles aquelas meu minha meus minhas seu sua seus suas nosso nossa do da dos das no na nos nas ao à pelo pela num numa dum duma cada todo toda'.split(' '));
+  const ST_NOTSUBJ = new Set('que e mas como quando onde se porque pois enquanto embora mesmo até sem com para pra por de em ou nem já ainda só também quase depois antes então talvez apenas sempre nunca mais menos muito pouco tão'.split(' '));
+  const ST_VERBS = new Set('é era foi são eram foram está estava estão estavam esteve ficou ficava fica tem tinha tinham tiveram há havia houve faz fazia fez parecia parece pareceu disse diz dizia sabia sabe soube podia pode pôde queria quer quis vai ia vão iam veio vinha vem viu via vê deu dava dá sentia sente sentiu olhou olhava riu sorriu'.split(' '));
+  const ST_NOUN_IA = new Set('dia dias tia tias via vias guia guias pia fria frio cria mania ironia família história memória energia alegria magia academia companhia padaria sabedoria harmonia agonia melancolia poesia fantasia filosofia teoria categoria maioria minoria galeria livraria bateria loteria porcaria baia praia praias saia saias meia meias areia ideia ideias aldeia cadeia veia teia boia joia correia geleia plateia assembleia estreia europeia maria sofia lúcia júlia cecília amélia'.split(' '));
+  const stVerb = (w, prev) => { const k = w.toLowerCase(); if (prev && ST_DET.has(prev.toLowerCase())) return false; if (ST_VERBS.has(k)) return true; if (ST_NOUN_IA.has(k) || /(ência|ância|ória|ícia|ária|ônia|ênia|ília|ívia|ção|ções|mente)$/.test(k)) return false;
+    return (k.length >= 4 && /(ou|eu|iu)$/.test(k)) || (k.length >= 5 && /(ava|avam|ia|iam|aram|eram|iram|ará|erá|irá|ariam|eriam|iriam|ou-se|ava-se)$/.test(k)); };
+  const stWords = (x) => x.match(/\p{L}+(?:-\p{L}+)*/gu) || [];
+  const stHasVerb = (seg) => { const w = stWords(seg); return w.some((x, i) => stVerb(x, w[i - 1])); };
+  function structIssues(t, pt) {
+    const out = [], add = (s, e, msg, fix, extra) => { if (e > s && !out.some(x => s < x.e && e > x.s)) out.push(Object.assign({ s, e, kind: 'estr', msg, fix }, extra || {})); };
+    const cap = (c) => c.toLocaleUpperCase('pt-BR');
+    let pm; const paraRe = /[^\n]+/g;
+    while ((pm = paraRe.exec(t))) {
+      const par = pm[0], p0 = pm.index, dialog = /^\s*[—–-]/.test(par);
+      const sens = []; let sm; const senRe = /[^.!?…]+(?:[.!?…]+["”»’)]*|$)/g;
+      while ((sm = senRe.exec(par))) { if (!sm[0].trim()) { senRe.lastIndex++; continue; } const lead = sm[0].match(/^\s*/)[0].length; sens.push({ s: p0 + sm.index + lead, txt: sm[0].slice(lead) }); }
+      const lens = sens.map(x => stWords(x.txt).length);
+      sens.forEach((x, k) => {
+        const n = lens[k], commas = (x.txt.match(/,/g) || []).length;
+        // vírgula juntando duas frases completas ("..., chuva ali era ...")
+        if (pt) {
+          let cm; const cre = /,\s+(\p{L}+)(?:\s+(\p{L}+))?(?:\s+(\p{L}+))?/gu;
+          while ((cm = cre.exec(x.txt))) {
+            const [a, b, c] = [cm[1], cm[2], cm[3]];
+            if (ST_NOTSUBJ.has(a.toLowerCase()) || stVerb(a) || /(ndo|ado|ada|ido|ida)$/i.test(a) || /^\p{Lu}/u.test(a) && k === 0 && cm.index < 3) continue;
+            const verbAt = (b && stVerb(b, a)) ? 2 : (c && stVerb(c, b) && !ST_NOTSUBJ.has((b || '').toLowerCase())) ? 3 : 0;
+            if (!verbAt) continue;
+            const before = x.txt.slice(0, cm.index), lastSeg = before.split(/[,;:]/).pop();
+            if (stWords(lastSeg).length < 4 || !stHasVerb(lastSeg) || stWords(x.txt.slice(cm.index)).length < 4) continue;
+            if (/^\s*(?:quando|depois que|antes que|assim que|logo que|enquanto|se|como|porque|embora|mesmo que|já que|apesar|ao|onde|que|caso|conforme|à medida que|sempre que|desde que|para que|até que|sem que|e|mas|ou)(?![\p{L}])/iu.test(lastSeg)) continue;
+            const at = x.s + cm.index, letter = at + cm[0].indexOf(a);
+            add(at, letter + 1, 'Parece que aqui duas frases completas estão grudadas só por vírgula. Troque por ponto (ou ponto e vírgula, ou ligue com "e", "mas", "porque").', '. ' + cap(t[letter]), { split: true });
+          }
+        }
+        // frase longa: sugere onde dividir
+        if (n > 35 || (n > 25 && commas >= 4)) {
+          const cands = []; let jm; const jre = /(,\s+(e|mas|porém|então|só que)|;)\s+(\p{L})/gu;
+          while ((jm = jre.exec(x.txt))) { const left = stWords(x.txt.slice(0, jm.index)).length, right = n - left; if (left >= 8 && right >= 8) cands.push({ i: jm.index, m: jm, d: Math.abs(left - n / 2) }); }
+          cands.sort((a, b) => a.d - b.d);
+          const c = cands[0], why = `Frase longa (${n} palavras${commas ? `, ${commas} vírgula${commas > 1 ? 's' : ''}` : ''}): ela junta ideias demais e o leitor perde o fio.`;
+          if (c) { const conj = c.m[2], at = x.s + c.i, letter = at + c.m[0].length - 1, word = conj && conj !== 'e' ? cap(conj[0]) + conj.slice(1) + ' ' + t[letter] : cap(t[letter]);
+            add(at, letter + 1, why + ' Um bom lugar para dividir é aqui.', '. ' + word, { split: true }); }
+          else add(x.s, x.s + x.txt.length, why + ' Procure onde muda o assunto e ponha um ponto.', null);
+        }
+        // "que" demais
+        const ques = [...x.txt.matchAll(/(?<![\p{L}])que(?![\p{L}])/giu)];
+        if (ques.length >= 4) add(x.s + ques[3].index, x.s + ques[3].index + 3, `${ques.length} "que" na mesma frase deixam a leitura pesada. Divida a frase ou troque alguns por outra construção.`, null);
+        // três frases seguidas começando igual
+        const first = (y) => (stWords(y.txt)[0] || '').toLowerCase();
+        if (k >= 2 && !dialog && first(x) && first(x) === first(sens[k - 1]) && first(x) === first(sens[k - 2])) { const w = stWords(x.txt)[0], at = x.s + x.txt.indexOf(w); add(at, at + w.length, `Três frases seguidas começam com "${w}". Varie o começo para o texto não ficar repetitivo.`, null); }
+      });
+      // ritmo: frases todas do mesmo tamanho
+      if (!dialog && sens.length >= 4) {
+        const avg = lens.reduce((a, b) => a + b, 0) / lens.length, sd = Math.sqrt(lens.reduce((a, b) => a + (b - avg) ** 2, 0) / lens.length);
+        if (avg >= 10 && sd < 3.5) add(sens[0].s, sens[0].s + sens[0].txt.length, `Ritmo igual: as ${sens.length} frases deste parágrafo têm quase o mesmo tamanho (cerca de ${Math.round(avg)} palavras). Misture uma frase curta para dar impacto.`, null);
+      }
+      // parágrafo muito longo
+      const pw = stWords(par).length;
+      if (!dialog && pw > 170) add(p0, p0 + Math.min(par.length, 80), `Parágrafo longo (${pw} palavras). Quebre onde muda a ação, o lugar ou o foco: o leitor respira e a cena ganha ritmo.`, null);
+    }
+    return out;
+  }
   function reviewText(t, pt) {
     const out = [], add = (s, e, kind, msg, fix) => { if (e > s && !out.some(x => s < x.e && e > x.s && x.kind === kind)) out.push({ s, e, kind, msg, fix }); };
     const each = (re, fn) => { re.lastIndex = 0; let m; while ((m = re.exec(t))) { if (!m[0]) { re.lastIndex++; continue; } fn(m); } };
@@ -6866,7 +6940,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     // frases: muito longas, -mente demais, gerúndios em sequência
     each(/[^.!?…\n]+[.!?…]*/g, m => {
       const sen = m[0], words = sen.match(/\p{L}+/gu) || [];
-      if (words.length > 45) add(m.index, m.index + sen.length, 'estilo', `Frase longa (${words.length} palavras). Dividir ajuda a leitura.`, null);
       const mente = [...sen.matchAll(/(?<![\p{L}])\p{L}{3,}mente(?![\p{L}])/gu)];
       if (pt && mente.length >= 2) mente.slice(1).forEach(x => add(m.index + x.index, m.index + x.index + x[0].length, 'estilo', 'Muitos advérbios em -mente na mesma frase.', null));
       const ger = [...sen.matchAll(/(?<![\p{L}])\p{L}{3,}(ando|endo|indo)(?![\p{L}])/gu)];
@@ -7104,7 +7177,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     let gr = []; try { gr = isPtBr(r.p) ? gramIssues(v) : []; } catch (e) { console.error(e); }
     const lt = (r.lt && r.lt.text === v) ? notNames(r.lt.issues, v, r.p) : [];
     if (r.lt && r.lt.text === v && !r.ltErr) gr = gr.filter(x => x.heur !== 'concord');
-    r.issues = dedupeIssues([...lt, ...reviewText(v, isPtBr(r.p)), ...gr, ...sp])
+    let st = []; try { st = structIssues(v, isPtBr(r.p)); } catch (e) { console.error(e); }
+    r.issues = dedupeIssues([...lt, ...reviewText(v, isPtBr(r.p)), ...gr, ...sp, ...st])
       .filter(x => !r.ignore.has(key(x)) && (!r.range || (x.s >= r.range.s && x.e <= r.range.e)))
       .sort((a, b) => a.s - b.s);
     r.key = key;
@@ -7157,7 +7231,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const parts = [
       el('div', { class: 'rv-head' }, el('h3', { icon: 'list-checks', text: `Revisor · ${r.issues.length}${r.range ? ' no trecho' : ''}` }), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar o revisor', onclick: closeReview })),
       r.range ? el('div', { class: 'rv-scope' }, 'Revisando só o trecho selecionado. ', el('button', { class: 'link plain', text: 'Revisar o capítulo todo', onclick: () => { r.range = null; runReview(); } })) : null,
-      el('div', { class: 'rv-scope' }, el('button', { class: 'link plain', icon: 'graduation-cap', text: 'Ver a versão corrigida e aprender', onclick: () => { const ta = r.ta, a = r.range ? r.range.s : 0, b = r.range ? r.range.e : ta.value.length; openLearn(r.p, ta.value.slice(a, b), (fixed) => { ta.focus(); ta.setRangeText(fixed, a, b, 'select'); ta.dispatchEvent(new Event('input')); }); } })),
+      el('div', { class: 'rv-struct' }, el('div', {}, el('b', { text: 'Estrutura do trecho' }), el('span', { class: 'muted', text: r.range ? ' Ordem das ideias, frases longas, vírgulas no lugar de ponto, ritmo.' : ' Selecione um trecho no texto para reestruturar.' })),
+        el('button', { class: 'ai-btn', icon: 'wand-sparkles', ai: true, text: 'Reestruturar o trecho', disabled: !r.range, title: 'A IA propõe o trecho inteiro com a estrutura arrumada e explica cada mudança', onclick: () => { const ta = r.ta, a = r.range.s, b = r.range.e, orig = ta.value.slice(a, b); openStruct(r.p, orig, (fixed) => rvReplace(ta, orig, a, fixed)); } })),
+      el('div', { class: 'rv-scope' }, el('button', { class: 'link plain', icon: 'graduation-cap', text: 'Ver a versão corrigida e aprender', onclick: () => { const ta = r.ta, a = r.range ? r.range.s : 0, b = r.range ? r.range.e : ta.value.length; const orig = ta.value.slice(a, b); openLearn(r.p, orig, (fixed) => rvReplace(ta, orig, a, fixed)); } })),
       isPtBr(r.p) ? el('div', { class: 'rv-scope lt-line' }, el('button', { class: 'chip', 'aria-pressed': String(ltCfg().on), icon: 'spell-check', text: ltCfg().on ? 'LanguageTool ligado' : 'Ligar o LanguageTool', title: 'Revisão gramatical avançada (online, não é IA)', onclick: () => ltToggle(() => { r.lt = null; runReview(); }) }),
         ltCfg().on ? el('span', { class: 'muted', text: r.ltBusy ? ' conferindo…' : r.ltErr ? ' ' + r.ltErr : '' }) : null,
         ltCfg().on ? el('button', { class: 'link plain', text: 'Servidor', onclick: () => ltServer(() => { r.lt = null; runReview(); }) }) : null) : null,
@@ -7167,6 +7243,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       fixable.length ? el('div', { class: 'rv-actions' }, el('button', { class: 'primary', icon: 'check', text: `Corrigir a pontuação (${fixable.length})`, onclick: () => rvApply(fixable) })) : null,
       list];
     panel.replaceChildren(...parts.filter(Boolean));
+  }
+  // troca um trecho no Editar mesmo se a caixa de texto foi refeita enquanto a janela estava aberta
+  function rvReplace(ta, orig, a, fixed) {
+    const cur = (review && review.ta && review.ta.isConnected) ? review.ta : (ta && ta.isConnected ? ta : $('chBody'));
+    if (!cur) { toast('Abra o capítulo no Editar para aplicar.'); return false; }
+    let at = cur.value.slice(a, a + orig.length) === orig ? a : cur.value.indexOf(orig);
+    if (at < 0) { toast('O trecho mudou enquanto a janela estava aberta. Selecione de novo e tente outra vez.'); return false; }
+    cur.focus(); cur.setRangeText(fixed, at, at + orig.length, 'select'); cur.dispatchEvent(new Event('input'));
+    if (review && review.range && review.range.s === at) { review.range.e = at + fixed.length; review.len = cur.value.length; }
+    return true;
   }
   function rvApply(xs) {
     const r = review, ta = r.ta; if (!xs.length) return;
@@ -8043,12 +8129,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     let lt = [], ltErr = '';
     if (pt && ltCfg().on) { $('learnBody').replaceChildren(el('p', { class: 'muted', text: 'Conferindo também no LanguageTool…' })); try { lt = await ltCheck(text); } catch (e) { ltErr = e.message; } }
     const ltOk = pt && ltCfg().on && !ltErr;
-    let issues = dedupeIssues([...notNames(lt, text, p), ...reviewText(text, pt), ...(pt ? gramIssues(text).filter(x => !(ltOk && x.heur === 'concord')) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
+    let issues = dedupeIssues([...notNames(lt, text, p), ...structIssues(text, pt), ...reviewText(text, pt), ...(pt ? gramIssues(text).filter(x => !(ltOk && x.heur === 'concord')) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
     const isFix = (x) => x.fix != null && (x.lt || (x.kind !== 'rep' && x.kind !== 'estilo'));
     const fixes = issues.filter(isFix), think = issues.filter(x => !isFix(x));
     // grafia de palavra com maiúscula (pode ser nome) vem desmarcada
     const capWord = (x) => { const w = text.slice(x.s, x.e); return x.kind === 'orto' && w && w[0] !== w[0].toLocaleLowerCase('pt-BR'); };
-    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((x, i) => (capWord(x) || x.ltStyle) ? -1 : i).filter(i => i >= 0)), ltErr, more: new Set(), think, cyc: {} };
+    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((x, i) => (capWord(x) || x.ltStyle || x.kind === 'estr') ? -1 : i).filter(i => i >= 0)), ltErr, more: new Set(), think, cyc: {} };
     learnGroup();
     renderLearn();
   }
@@ -8112,7 +8198,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     learnGroup(); renderLearn();
   }
   function renderLearn() {
-    const c = learnCtx, think = c.think || [], body = $('learnBody'), KIND = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', trad: 'Cara de tradução', estilo: 'Estilo' };
+    const c = learnCtx, think = c.think || [], body = $('learnBody'), KIND = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', estr: 'Estrutura', trad: 'Cara de tradução', estilo: 'Estilo' };
     const dlg = $('learnDlg'), keep = { dlg: dlg.scrollTop, cols: [...body.querySelectorAll('.learn-col')].map(x => x.scrollTop) };
     const LESSON = (id) => (DESAFIOS.gram.find(l => l.id === id) || {}).n;
     // texto original com o que sai riscado, e o corrigido com o que entra em verde
@@ -8171,13 +8257,83 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('ul', {}, think.slice(0, 12).map(x => el('li', {}, el('b', { text: `"${c.text.slice(x.s, x.e).slice(0, 40)}": ` }), x.msg)))) : null,
       el('div', { class: 'row end learn-foot' },
         el('button', { 'data-close': '', text: 'Fechar' }),
-        c.apply && c.fixes.length ? el('button', { class: 'primary', icon: 'check', text: `Aplicar ${c.on.size} correção(ões)`, disabled: !c.on.size, onclick: () => { const f = learnFixed(); $('learnDlg').close(); c.apply(f); toast(`${c.on.size} correção(ões) aplicada(s) ✓`); } })
+        c.apply && c.fixes.length ? el('button', { class: 'primary', icon: 'check', text: `Aplicar ${c.on.size} correção(ões)`, disabled: !c.on.size, onclick: () => { const f = learnFixed(); $('learnDlg').close(); if (c.apply(f) !== false) toast(`${c.on.size} correção(ões) aplicada(s) ✓`); } })
           : !c.apply ? el('span', { class: 'hint', text: 'Para aplicar, abra o capítulo no Editar e use "Aprender" lá.' }) : null)].filter(Boolean));
     dlg.scrollTop = keep.dlg; body.querySelectorAll('.learn-col').forEach((x, i) => { if (keep.cols[i] != null) x.scrollTop = keep.cols[i]; });
   }
+
+  // ---------- reestruturar um trecho com IA: versão inteira + o porquê de cada mudança ----------
+  // diferença palavra a palavra (para mostrar o que saiu e o que entrou)
+  function wordDiff(a, b) {
+    const A = a.match(/\s+|[^\s]+/g) || [], B = b.match(/\s+|[^\s]+/g) || [];
+    if (A.length * B.length > 4e6) return null;
+    const n = A.length, m = B.length, L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const out = []; let i = 0, j = 0;
+    const push = (t, x) => { const l = out[out.length - 1]; if (l && l[0] === t) l[1] += x; else out.push([t, x]); };
+    while (i < n && j < m) { if (A[i] === B[j]) { push('=', A[i]); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) push('-', A[i++]); else push('+', B[j++]); }
+    while (i < n) push('-', A[i++]); while (j < m) push('+', B[j++]);
+    return out;
+  }
+  let stCtx = null;
+  async function openStruct(p, text, apply, level = 'leve') {
+    text = text || '';
+    if (countWords(text) < 15) { toast('Selecione um trecho maior (pelo menos uma ou duas frases).'); return; }
+    if (countWords(text) > 1500) { toast('Trecho grande demais para reestruturar de uma vez. Selecione até uns 1.500 palavras.'); return; }
+    if (!stCtx || stCtx.text !== text) { if (!(await confirmAI('Mandar o trecho selecionado para a IA arrumar a estrutura (ordem das ideias, frases, pontuação, repetições), sem mudar a sua história nem a sua voz. Você vê tudo antes de aplicar.'))) return; }
+    const hints = (() => { try { return structIssues(text, isPtBr(p)).map(x => `- ${x.msg} [trecho: "${text.slice(x.s, Math.min(x.e, x.s + 60))}"]`).slice(0, 12).join('\n'); } catch { return ''; } })();
+    stCtx = { p, text, apply, level, busy: true }; renderStruct(); $('structDlg').open || $('structDlg').showModal();
+    const LV = { leve: 'Mexa só no necessário: divida frases longas, troque vírgulas que juntam duas frases por ponto, corrija pontuação, ortografia e concordância, tire repetições e ajuste a ordem quando uma ideia estiver fora do lugar. Mantenha o máximo possível das palavras do autor.',
+      forte: 'Pode reorganizar mais: mude a ordem das frases e das informações para a cena fluir melhor (o que o personagem percebe primeiro, depois o que sente e pensa), una ou separe frases e parágrafos, varie o ritmo (misture frases curtas e longas) e corte o que estiver redundante. Continue usando as palavras e imagens do autor sempre que der.' };
+    const prompt = withLang(p, `Você é um editor de ficção ajudando um autor brasileiro que escreve rápido, sem se preocupar com a estrutura, e quer aprender com a revisão.\n\n` +
+      `TRECHO DO AUTOR:\n"""\n${text}\n"""\n\n` + (hints ? `O revisor automático apontou (pode estar certo ou não):\n${hints}\n\n` : '') +
+      `TAREFA: reescreva o trecho inteiro com a ESTRUTURA arrumada. ${LV[level]}\n` +
+      `Regras: não invente fatos, falas, ações nem detalhes novos; não mude nomes, ponto de vista, tempo verbal nem o tom; não enfeite nem deixe mais rebuscado; mantenha o tamanho parecido; mantenha as quebras de parágrafo (linha em branco) e só crie novas quando ajudar; falas continuam com travessão.\n` +
+      `Responda SOMENTE com um objeto JSON:\n{"texto": "o trecho reescrito, completo",\n "resumo": "1 ou 2 frases simples sobre o principal problema de estrutura do trecho e o que foi feito",\n` +
+      ` "mudancas": [{"tipo": "frase longa|vírgula no lugar de ponto|ordem das ideias|repetição|conexão|ritmo|pontuação|ortografia|concordância|clareza", "antes": "pedaço curto do original, copiado letra por letra", "depois": "como ficou", "porque": "explicação curta e didática, em português simples, ensinando a regra ou o motivo"}]}\n` +
+      `Liste as mudanças mais importantes (até 12), na ordem em que aparecem no texto.`, false);
+    const b = startBusy('struct', 'Reestruturando o trecho', null); stCtx.job = b;
+    try {
+      const r = await callAI(prompt, { signal: b.ctrl.signal, onThinking: () => b.update({ thinking: true }), onText: (t) => b.update({ words: countWords(t) }) });
+      let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = null; }
+      if (!data || typeof data.texto !== 'string' || !data.texto.trim()) throw Object.assign(new Error('A IA não devolveu o trecho no formato certo. Tente de novo ou escolha outro modelo.'), { action: 'model' });
+      if (stCtx && stCtx.text === text) { Object.assign(stCtx, { busy: false, out: data.texto.trim(), resumo: String(data.resumo || ''), changes: Array.isArray(data.mudancas) ? data.mudancas.filter(x => x && (x.antes || x.depois)) : [], editing: false }); renderStruct(); }
+    } catch (e) {
+      if (stCtx) { stCtx.busy = false; stCtx.err = e.name === 'AbortError' ? 'Parado.' : e.message; renderStruct(); }
+      if (e.name !== 'AbortError') handleAIError(e, () => openStruct(p, text, apply, level));
+    } finally { b.stop(); }
+  }
+  $('structDlg').addEventListener('close', () => { if (stCtx && stCtx.busy && stCtx.job) stCtx.job.ctrl.abort(); stCtx = null; });
+  function renderStruct() {
+    const c = stCtx, body = $('structBody'); if (!c) return;
+    if (c.busy) { body.replaceChildren(el('p', { class: 'muted', text: `A IA está lendo o trecho e arrumando a estrutura${c.level === 'forte' ? ' (reorganizando mais)' : ''}…` }), el('div', { class: 'row end learn-foot' }, el('button', { text: 'Parar', onclick: () => c.job && c.job.ctrl.abort() }))); return; }
+    if (!c.out) { body.replaceChildren(el('p', { text: c.err || 'Não deu certo desta vez.' }), el('div', { class: 'row end learn-foot' }, el('button', { 'data-close': '', text: 'Fechar' }), el('button', { class: 'primary ai-btn', icon: 'refresh-cw', ai: true, text: 'Tentar de novo', onclick: () => openStruct(c.p, c.text, c.apply, c.level) }))); return; }
+    const d = wordDiff(c.text, c.out), orig = el('p', { class: 'learn-txt' }), neu = el('p', { class: 'learn-txt' });
+    if (d) d.forEach(([t, x]) => { if (t === '=') { orig.append(x); neu.append(x); } else if (t === '-') orig.append(/^\s+$/.test(x) ? x : el('del', { text: x })); else neu.append(/^\s+$/.test(x) ? x : el('ins', { text: x })); });
+    else { orig.textContent = c.text; neu.textContent = c.out; }
+    const ed = el('textarea', { class: 'st-edit', 'aria-label': 'Nova versão (pode editar)' }); ed.value = c.out;
+    ed.addEventListener('input', () => { c.out = ed.value; });
+    const changes = c.changes.slice(0, 15).map((x, k) => el('div', { class: 'learn-item' }, el('span', { class: 'li-n', text: String(k + 1) }),
+      el('div', {}, x.tipo ? el('span', { class: 'st-tipo', text: String(x.tipo) }) : '',
+        el('div', { class: 'li-ch' }, x.antes ? el('del', { text: String(x.antes) }) : '', x.antes && x.depois ? ' → ' : '', x.depois ? el('ins', { text: String(x.depois) }) : ''),
+        x.porque ? el('div', { class: 'li-why', text: String(x.porque) }) : '')));
+    const scrolls = [...body.querySelectorAll('.learn-col')].map(x => x.scrollTop);
+    body.replaceChildren(...[
+      c.resumo ? el('p', { class: 'st-sum' }, el('b', { text: 'O que a IA viu: ' }), c.resumo) : null,
+      el('p', { class: 'muted', style: 'margin-top:0', text: 'Em vermelho o que saiu, em verde o que entrou. Leia as explicações embaixo: é ali que está o aprendizado.' }),
+      el('div', { class: 'learn-cols' }, el('div', { class: 'learn-col' }, el('h3', { text: 'Seu texto' }), orig),
+        el('div', { class: 'learn-col' }, el('h3', {}, 'Nova estrutura ', el('button', { class: 'link plain', icon: 'pencil', text: c.editing ? 'Ver as diferenças' : 'Editar', onclick: () => { c.editing = !c.editing; renderStruct(); } })), c.editing ? ed : neu)),
+      changes.length ? el('h3', { style: 'margin:14px 0 0', text: 'O que mudou e por quê' }) : null,
+      changes.length ? el('div', { class: 'learn-list' }, changes) : null,
+      el('div', { class: 'row end learn-foot' },
+        el('button', { 'data-close': '', text: 'Fechar' }),
+        el('button', { class: 'ai-btn', icon: 'refresh-cw', ai: true, text: c.level === 'forte' ? 'Outra versão' : 'Reorganizar mais', title: c.level === 'forte' ? 'Pedir outra versão' : 'Mexer mais na ordem das ideias e no ritmo', onclick: () => openStruct(c.p, c.text, c.apply, 'forte') }),
+        c.apply ? el('button', { class: 'primary', icon: 'check', text: 'Aplicar a nova versão', onclick: () => { const f = c.out; $('structDlg').close(); if (c.apply(f) !== false) toast('Nova estrutura aplicada ✓ Dá para desfazer com Ctrl+Z.'); } }) : null)].filter(Boolean));
+    body.querySelectorAll('.learn-col').forEach((x, i) => { if (scrolls[i] != null) x.scrollTop = scrolls[i]; });
+  }
   function learnChapter(p, ch) {
     const ta = view.mode === 'editar' && edit && edit.chId === ch.id ? $('chBody') : null;
-    if (ta) openLearn(p, ta.value, (f) => { ta.focus(); ta.setRangeText(f, 0, ta.value.length, 'select'); ta.dispatchEvent(new Event('input')); });
+    if (ta) { const orig = ta.value; openLearn(p, orig, (f) => rvReplace(ta, orig, 0, f)); }
     else openLearn(p, ch.text, (f) => { pushHistory(ch, 'Correções da aula de português'); ch.text = f; ch.editedAt = Date.now(); saveProject(p, true); renderChapters(); });
   }
 

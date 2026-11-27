@@ -6916,12 +6916,14 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const mine = new Set((p.dict || []).map(x => x.toLocaleLowerCase('pt-BR'))), known = knownNames(p), out = [];
     // não confere o que está dentro das marcas de cor
     const masked = text.replace(/\[cor=[^\]]*\]|\[\/cor\]/g, m => ' '.repeat(m.length));
+    // palavra com maiúscula que se repete no texto é nome (Tyr, Rex), mesmo no começo da frase
+    const capCount = new Map(); (masked.match(/(?<![\p{L}])\p{Lu}\p{Ll}+(?![\p{L}])/gu) || []).forEach(w => capCount.set(w, (capCount.get(w) || 0) + 1));
     const re = /\p{L}+(?:[-'’]\p{L}+)*/gu; let m;
     while ((m = re.exec(masked))) {
       const w = m[0];
       if (w.length < 2 || mine.has(w.toLocaleLowerCase('pt-BR')) || known.has(nNorm(w))) continue;
       const capital = w[0] !== w[0].toLocaleLowerCase('pt-BR');
-      if (capital) { const before = masked.slice(Math.max(0, m.index - 3), m.index); if (!/(^|[.!?…—"“]\s*|\n\s*)$/.test(m.index ? before : '')) continue; } // nome próprio no meio da frase
+      if (capital) { const before = masked.slice(Math.max(0, m.index - 3), m.index); if (!/(^|[.!?…—"“]\s*|\n\s*)$/.test(m.index ? before : '')) continue; if ((capCount.get(w) || 0) > 1) continue; } // nome próprio
       if (speller.check(w)) continue;
       if (!sugCache.has(w)) sugCache.set(w, speller.suggest(w, 4));
       const sugs = sugCache.get(w);
@@ -6962,6 +6964,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     let sp = []; try { sp = isPtBr(r.p) ? spellIssues(v, r.p) : []; } catch (e) { console.error(e); }
     let gr = []; try { gr = isPtBr(r.p) ? gramIssues(v) : []; } catch (e) { console.error(e); }
     const lt = (r.lt && r.lt.text === v) ? r.lt.issues : [];
+    if (r.lt && r.lt.text === v && !r.ltErr) gr = gr.filter(x => x.heur !== 'concord');
     r.issues = dedupeIssues([...lt, ...reviewText(v, isPtBr(r.p)), ...gr, ...sp])
       .filter(x => !r.ignore.has(key(x)) && (!r.range || (x.s >= r.range.s && x.e <= r.range.e)))
       .sort((a, b) => a.s - b.s);
@@ -7802,6 +7805,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     'agüentar': 'aguentar', 'agüenta': 'aguenta', 'agüentou': 'aguentou', 'tranqüilo': 'tranquilo', 'tranqüila': 'tranquila', 'cinqüenta': 'cinquenta', 'seqüestro': 'sequestro', 'lingüiça': 'linguiça', 'bilíngüe': 'bilíngue' };
   const A_GENTE = { vamos: 'vai', fomos: 'foi', estamos: 'está', estávamos: 'estava', somos: 'é', éramos: 'era', temos: 'tem', tínhamos: 'tinha', podemos: 'pode', podíamos: 'podia',
     fazemos: 'faz', fizemos: 'fez', queremos: 'quer', precisamos: 'precisa', íamos: 'ia', ficamos: 'fica', sabemos: 'sabe', sabíamos: 'sabia', conseguimos: 'consegue', voltamos: 'volta' };
+  const QUANT = new Set('poucos poucas muitos muitas vários várias alguns algumas tantos tantas todos todas outros outras uns umas dois duas três quatro cinco seis sete oito nove dez quantos quantas demais ambos ambas menos mais'.split(' '));
   const INVAR = new Set('deus mês gás país ônibus lápis vírus tênis pires atlas cais pus bônus ônus campus três português inglês francês freguês burguês marquês japonês chinês holandês escocês através após mais menos simples óculos parabéns férias pêsames costas arredores'.split(' '));
   function gramIssues(t) {
     const out = [], add = (s, e, msg, fix, lesson, kind = 'gram') => { if (e > s) out.push({ s, e, kind, msg, fix, lesson }); };
@@ -7866,12 +7870,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     // reforma ortográfica
     each(W(`(?<![\\p{L}])(${Object.keys(REFORMA).join('|')})(?![\\p{L}])`), m => add(m.index, m.index + m[0].length, 'Pela reforma ortográfica, essa palavra perdeu o acento ou o trema.', capLike(m[0], REFORMA[m[0].toLowerCase()]), 'g-acentos', 'orto'));
     // concordância simples: palavra no singular + substantivo no plural
-    if (speller) each(W(`(?<![\\p{L}])(o|a|do|da|no|na|ao|um|uma|pelo|pela|mesmo|mesma|este|esta|esse|essa|aquele|aquela|seu|sua|meu|minha|nosso|nossa|outro|outra)\\s+(\\p{Ll}{3,}s)(?![\\p{L}])`), m => {
-      const w = m[2], lw = w.toLowerCase(); if (INVAR.has(lw) || /(ês|ás|ós|ís|ús|is|us)$/.test(lw)) return;
+    if (speller) each(W(`(?<![\\p{L}])(o|do|da|no|na|ao|um|uma|pelo|pela|mesmo|mesma|este|esta|esse|essa|aquele|aquela|seu|sua|meu|minha|nosso|nossa|outro|outra)\\s+(\\p{Ll}{3,}s)(?![\\p{L}])`), m => {
+      const w = m[2], lw = w.toLowerCase(); if (INVAR.has(lw) || QUANT.has(lw) || /(ês|ás|ós|ís|ús|is|us)$/.test(lw)) return;
+      // "da/na/pela" + palavra no plural masculino quase sempre é outra construção; só confere quando o gênero bate
+      if (/^(da|na|pela|uma|mesma|esta|essa|aquela|sua|minha|nossa|outra)$/i.test(m[1]) && !/as$/.test(lw)) return;
+      if (/^(o|do|no|ao|pelo|um|mesmo|este|esse|aquele|seu|meu|nosso|outro)$/i.test(m[1]) && /as$/.test(lw)) return;
       const sing = lw.endsWith('ões') ? lw.slice(0, -3) + 'ão' : lw.endsWith('ães') ? lw.slice(0, -3) + 'ão' : lw.endsWith('res') || lw.endsWith('zes') ? lw.slice(0, -2) : lw.slice(0, -1);
       if (!speller.check(sing) || !speller.check(lw)) return;
       const at = m.index + m[0].length - w.length;
       add(at, at + w.length, `"${m[1]}" está no singular e "${w}" no plural. Combine os dois: "${m[1]} ${sing}" ou tudo no plural.`, sing, 'g-pronomes');
+      out[out.length - 1].heur = 'concord';
     });
     return out;
   }
@@ -7895,9 +7903,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const pt = isPtBr(p);
     let lt = [], ltErr = '';
     if (pt && ltCfg().on) { $('learnBody').replaceChildren(el('p', { class: 'muted', text: 'Conferindo também no LanguageTool…' })); try { lt = await ltCheck(text); } catch (e) { ltErr = e.message; } }
-    let issues = dedupeIssues([...lt, ...reviewText(text, pt), ...(pt ? gramIssues(text) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
+    const ltOk = pt && ltCfg().on && !ltErr;
+    let issues = dedupeIssues([...lt, ...reviewText(text, pt), ...(pt ? gramIssues(text).filter(x => !(ltOk && x.heur === 'concord')) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
     const fixes = issues.filter(x => x.fix != null && x.kind !== 'rep' && x.kind !== 'estilo'), think = issues.filter(x => x.fix == null || x.kind === 'rep' || x.kind === 'estilo');
-    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((_, i) => i)), ltErr };
+    // grafia de palavra com maiúscula (pode ser nome) vem desmarcada
+    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((x, i) => (x.kind === 'orto' && x.word && x.word[0] !== x.word[0].toLocaleLowerCase('pt-BR')) ? -1 : i).filter(i => i >= 0)), ltErr };
     renderLearn(think);
   }
   function learnFixed() {

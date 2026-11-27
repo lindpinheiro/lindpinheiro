@@ -939,6 +939,63 @@
   .sprint-pill .sp-w { color: var(--muted); font-weight: 600; }
   .sprint-pill button { min-height: 32px; padding: 2px 10px; font-size: .82rem; }
   .sprint-pill.done { border-color: #2f9e55; }
+  /* ---------- desafios ---------- */
+  .mode-seg { display: flex; margin: 0 0 12px; }
+  .mode-seg button { flex: 1; }
+  .hub-thumb { background: var(--accent-soft) !important; border: 0 !important; color: var(--accent) !important; }
+  #hub { padding-bottom: 40px; }
+  .hub-hero { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 16px; border-radius: 16px; border: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--accent-soft), transparent 70%); margin-bottom: 14px; }
+  .hub-lvl { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; text-align: center; background: var(--surface); border: 3px solid var(--accent); }
+  .hub-lvl b { font-size: 1.7rem; line-height: 1; display: block; } .hub-lvl small { font-size: .7rem; color: var(--muted); }
+  .hub-hero h2 { margin: 0 0 4px; }
+  .xpbar { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; margin: 6px 0 4px; }
+  .xpbar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+  .hub-stats { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .86rem; color: var(--muted); }
+  .hub-sec { margin: 22px 0 8px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+  .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .hub-card { border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--surface); }
+  button.hub-card { text-align: left; font-weight: 400; min-height: 0; justify-items: start; align-items: stretch; cursor: pointer; }
+  button.hub-card:hover { border-color: var(--accent); }
+  .hub-card h3 { margin: 0; font-size: 1rem; display: flex; gap: 8px; align-items: center; }
+  .hub-card p { margin: 0; color: var(--muted); font-size: .88rem; }
+  .hub-card .of-big { color: var(--text); }
+  .prog { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .prog i { display: block; height: 100%; background: var(--accent); }
+  .lesson-list { display: grid; gap: 8px; }
+  .lesson { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); text-align: left; min-height: 0; font-weight: 400; width: 100%; }
+  .lesson:hover { border-color: var(--accent); }
+  .lesson .ln { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font-weight: 700; flex: none; }
+  .lesson.done .ln { background: var(--accent); color: var(--accent-text); }
+  .lesson .lt { flex: 1; min-width: 0; } .lesson .lt b { display: block; } .lesson .lt span { color: var(--muted); font-size: .84rem; }
+  .hub-back { margin-bottom: 10px; }
+  .quiz-q { font-family: Georgia, serif; font-size: 1.2rem; margin: 10px 0 14px; }
+  .quiz-opts { display: grid; gap: 8px; }
+  .quiz-opts button { text-align: left; justify-content: flex-start; font-family: Georgia, serif; font-size: 1.05rem; font-weight: 400; padding: 12px 14px; }
+  .quiz-opts button.right { border-color: #2f9e55; background: color-mix(in srgb, #2f9e55 18%, transparent); }
+  .quiz-opts button.wrong { border-color: #d93a3a; background: color-mix(in srgb, #d93a3a 16%, transparent); }
+  .quiz-why { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); }
+  .rules { list-style: none; padding: 0; margin: 4px 0; display: grid; gap: 4px; }
+  .rules li { display: flex; gap: 8px; align-items: flex-start; font-size: .92rem; }
+  .rules li .icon { width: 18px; height: 18px; flex: none; margin-top: 1px; }
+  .rules li.ok .icon { color: #2f9e55; } .rules li.no .icon { color: var(--muted); }
+  .rules li .rd { color: var(--muted); font-size: .82rem; }
+  .chal-card { margin: 0 0 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent-soft); }
+  .chal-card .ck { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .chal-card h3 { margin: 2px 0 4px; font-size: 1.02rem; }
+  .chal-card p { margin: 0 0 6px; }
+  .guide-card { margin: 0 0 12px; padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--accent); }
+  .guide-card ol { margin: 6px 0; padding-left: 4px; list-style: none; display: grid; gap: 4px; }
+  .guide-card label { margin: 0; font-weight: 400; }
+  .guide-card label.done span { text-decoration: line-through; color: var(--muted); }
+  .tip-card { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+  .tip-card .icon { color: #d4a017; flex: none; margin-top: 2px; }
+  .tip-card .tc-body { flex: 1; min-width: 0; } .tip-card .tc-body p { margin: 0 0 6px; }
+  .tip-card .tc-body .row button { min-height: 30px; padding: 2px 10px; font-size: .82rem; }
+  .tip-card > .close { min-height: 30px; width: 30px; padding: 0; border: 0; background: transparent; }
+  .result-score { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; margin: 4px auto 10px; border: 4px solid var(--accent); font-size: 1.8rem; font-weight: 800; }
+  .result-fb { display: grid; gap: 4px; margin: 8px 0; }
+  .story-pick { display: grid; gap: 8px; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -1079,6 +1136,7 @@
 <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /> <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /> <path d="M4 22h16" /> <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /> <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /> <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></symbol>
 <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="m18 14 4 4-4 4" /> <path d="m18 2 4 4-4 4" /> <path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-7.6a4 4 0 0 1 3.3-1.7H22" /> <path d="M2 6h1.972a4 4 0 0 1 3.6 2.2" /> <path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45" /></symbol>
 <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M8 2v4" /> <path d="M16 2v4" /> <rect width="18" height="18" x="3" y="4" rx="2" /> <path d="M3 10h18" /></symbol>
+<symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1145,8 +1203,12 @@
 
 <div class="layout">
   <aside id="projects" aria-label="Projetos">
+    <div class="seg mode-seg" role="group" aria-label="Área">
+      <button type="button" data-mode="projetos"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg>Projetos</button>
+      <button type="button" data-mode="desafios"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg>Desafios</button>
+    </div>
     <div class="proj-head">
-      <h2>Projetos</h2>
+      <h2 id="sideTitle">Projetos</h2>
       <button id="selectBtn" class="icon-btn" aria-pressed="false" aria-label="Selecionar vários projetos" title="Selecionar vários"><svg class="icon" aria-hidden="true"><use href="#i-list-checks"/></svg></button>
       <div class="new-wrap">
         <button id="newProjectBtn" class="primary" aria-haspopup="menu" aria-expanded="false" aria-controls="newMenu"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Novo<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
@@ -1168,6 +1230,7 @@
         <p>Este navegador não deixou salvar dados. Seus textos vão sumir ao fechar a página; baixe a história antes de sair.</p>
       </div>
 
+      <section id="hub" hidden aria-label="Desafios"></section>
       <h1 class="proj-heading" id="projHeading"></h1>
       <nav class="tabs" role="tablist" id="tabs">
         <button role="tab" data-tab="ideia"><svg class="icon ico" aria-hidden="true"><use href="#i-info"/></svg>Infos da Obra</button>
@@ -1554,11 +1617,26 @@
   <div class="dlg-head"><h2 id="oficinaTitle"><svg class="icon" aria-hidden="true"><use href="#i-lightbulb"/></svg>Oficina de escrita</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   <div class="seg of-tabs" role="tablist" aria-label="Oficina">
     <button type="button" role="tab" data-of="destravar">Destravar</button>
-    <button type="button" role="tab" data-of="cenas">Cenas</button>
-    <button type="button" role="tab" data-of="desafios">Desafios</button>
     <button type="button" role="tab" data-of="expressoes">Expressões</button>
   </div>
   <div id="oficinaBody"></div>
+</dialog>
+
+<dialog id="scenePickDlg" aria-labelledby="scenePickTitle">
+  <div class="dlg-head"><h2 id="scenePickTitle"><svg class="icon" aria-hidden="true"><use href="#i-layout-grid"/></svg>Novo capítulo com um modelo de cena</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">O capítulo abre com um guia passo a passo do lado do texto. Você escreve seguindo o método e vai marcando cada passo.</p>
+  <div class="of-list" id="scenePickList"></div>
+</dialog>
+
+<dialog id="chalResultDlg" aria-labelledby="chalResultTitle">
+  <div class="dlg-head"><h2 id="chalResultTitle"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg>Desafio entregue</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div id="chalResultBody"></div>
+</dialog>
+
+<dialog id="storyPickDlg" aria-labelledby="storyPickTitle">
+  <div class="dlg-head"><h2 id="storyPickTitle"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg>Onde escrever este desafio?</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <p class="muted" style="margin-top:0">Comece uma história nova ou continue uma história de desafio que você já tem. O desafio vira o próximo capítulo dela.</p>
+  <div class="story-pick" id="storyPickList"></div>
 </dialog>
 
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
@@ -2112,16 +2190,27 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     // datalist de categorias no formulário da ideia
     const dl = $('catList'); dl.innerHTML = ''; cats.forEach(c => dl.append(el('option', { value: c })));
 
+    const chal_ = appMode === 'desafios';
+    $('sideTitle').textContent = chal_ ? 'Desafios' : 'Projetos';
+    $('selectBtn').hidden = chal_; $('newProjectBtn').closest('.new-wrap').hidden = chal_;
+    document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === appMode)));
+    if (chal_) {
+      chips.hidden = true;
+      list.append(el('li', { class: 'proj-row' }, el('button', { class: 'proj-item hub-item' + (hubOpen ? ' active' : ''), onclick: () => leaveDraft(() => guardEdit(() => openHub())) },
+        el('span', { class: 'proj-thumb hub-thumb', 'aria-hidden': 'true' }, svgIcon('trophy')),
+        el('span', { class: 'proj-text' }, el('span', { class: 'proj-name', text: 'Painel de desafios' }), el('span', { class: 'meta', text: `Nível ${chLevel().n} · ${fmtNum(chal().xp || 0)} XP` })))));
+    }
     projects.slice()
       .filter(p => !p.draft)
-      .filter(p => projFilter === 'todos' || (projFilter === 'favoritos' ? p.pinned : (p.category || '').trim() === projFilter.slice(4)))
+      .filter(p => chal_ ? p.desafio : !p.desafio)
+      .filter(p => chal_ || projFilter === 'todos' || (projFilter === 'favoritos' ? p.pinned : (p.category || '').trim() === projFilter.slice(4)))
       .sort((a, b) => (!!b.pinned - !!a.pinned) || (b.updatedAt - a.updatedAt))
       .forEach(p => {
         const words = p.chapters.reduce((n, c) => n + countWords(c.text), 0);
         const picked = selecting && selected.has(p.id);
         let pressT = null, longPressed = false;
         const item = el('button', {
-            class: 'proj-item' + (p.id === currentId && !selecting ? ' active' : ''),
+            class: 'proj-item' + (p.id === currentId && !selecting && !hubOpen ? ' active' : ''),
             'aria-current': p.id === currentId ? 'true' : null,
             'aria-pressed': selecting ? String(picked) : null,
             onclick: () => {
@@ -2149,6 +2238,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           }, svgIcon('star'))));
       });
     if (!list.children.length) list.append(el('li', { class: 'muted', style: 'padding:8px 4px', text: 'Nenhum projeto neste filtro.' }));
+    else if (chal_ && list.children.length === 1) list.append(el('li', { class: 'muted', style: 'padding:8px 4px', text: 'Suas histórias de desafio aparecem aqui.' }));
     renderSelFloat();
     const t = cur()?.title.trim() || (cur()?.draft ? 'Novo projeto' : 'Sem título');
     $('projHeading').textContent = t;
@@ -2156,6 +2246,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   function openProject(id) {
+    hubOpen = false; $('hub').hidden = true;
     infoEditing = null;
     flushSaves();
     projects = projects.filter(x => !x.draft || x.id === id);
@@ -3029,6 +3120,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   })));
 
   function renderTab() {
+    if (hubOpen) { renderHub(); return; }
+    $('hub').hidden = true; $('projHeading').hidden = false;
     const p = cur();
     if (p.draft) { view.tab = 'ideia'; infoEditing = true; }
     $('tabs').hidden = !!p.draft;
@@ -3409,7 +3502,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('div', { class: 'row', style: 'justify-content:center' },
           el('button', { class: 'primary', icon: 'pen-line', ai: true, text: 'Escrever com IA', onclick: openWriteDialog }),
           el('button', { icon: 'pencil', text: 'Escrever sem IA', onclick: () => blankChapter(p) })),
-        el('button', { class: 'link plain', icon: 'lightbulb', text: 'Sem ideia? Abra a Oficina: primeiras frases, modelos de cena e desafios', onclick: () => openOficina(p) })));
+        el('button', { class: 'link plain', icon: 'lightbulb', text: 'Sem ideia? Veja dicas e primeiras frases', onclick: () => openOficina(p) })));
       return;
     }
 
@@ -3421,7 +3514,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('div', { class: 'row' },
         el('button', { icon: 'search', text: 'Buscar', title: 'Buscar e substituir em todos os capítulos (Ctrl+Shift+F)', onclick: () => openFind(p) }),
         el('button', { icon: 'bar-chart', text: 'Estatísticas', onclick: () => openStats(p) }),
-        el('button', { icon: 'lightbulb', text: 'Oficina', title: 'Ideias, modelos de cena e desafios (sem IA)', onclick: () => openOficina(p) }),
         el('button', { icon: 'copy', text: 'Copiar tudo', onclick: () => copyWholeStory(p) }),
         el('button', { icon: 'book-open', text: 'Baixar / diagramar', onclick: () => openLayout(p) }),
         writeButton(p))));
@@ -3509,6 +3601,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const menu = el('div', { class: 'menu add-menu', role: 'menu', hidden: true },
       el('button', { role: 'menuitem', class: 'menu-item', onclick: () => { closeAddMenus(); guardEdit(() => blankChapter(p)); } },
         el('span', { class: 'mi-ico' }, svgIcon('pencil')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Em branco (sem IA)' }), el('span', { class: 'mi-sub', text: 'Você escreve o capítulo do zero' }))),
+      el('button', { role: 'menuitem', class: 'menu-item', onclick: () => { closeAddMenus(); guardEdit(() => openScenePick(p)); } },
+        el('span', { class: 'mi-ico' }, svgIcon('layout-grid')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Com um modelo de cena' }), el('span', { class: 'mi-sub', text: 'Primeiro beijo, ciúme, confissão… com um guia passo a passo' }))),
+      el('button', { role: 'menuitem', class: 'menu-item', onclick: () => { closeAddMenus(); guardEdit(() => openTemplates(p)); } },
+        el('span', { class: 'mi-ico' }, svgIcon('milestone')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Seguir uma estrutura' }), el('span', { class: 'mi-sub', text: 'Cria os capítulos da história com o método escolhido' }))),
       el('button', { role: 'menuitem', class: 'menu-item', onclick: () => { closeAddMenus(); guardEdit(openWriteDialog); } },
         el('span', { class: 'mi-ico' }, svgIcon('sparkles')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Escrever com IA' }), el('span', { class: 'mi-sub', text: 'A IA escreve a partir do que você pedir' }))));
     const btn = el('button', { class: primary ? 'primary' : '', icon: 'plus', iconEnd: 'chevron-down', 'aria-label': `Novo capítulo (capítulo ${n})`, 'aria-haspopup': 'menu', 'aria-expanded': 'false',
@@ -3574,7 +3670,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('button', { class: 'primary', icon: 'languages', ai: true, text: `Reescrever em ${langLower(p)}`, onclick: () => guardEdit(() => runAdjust({ ch, start: 0, end: ch.text.length, partial: false },
         `Reescreva o capítulo inteiro em ${langOf(p)}, mantendo exatamente a mesma história, as mesmas cenas e os mesmos diálogos. É uma tradução cuidadosa e natural, não um resumo.`)) })));
 
-    if (!writingThis && (ch.plan || '').trim()) sec.append(planBox(p, ch, editing));
+    if (!writingThis && ch.challenge) sec.append(challengeCard(p, ch, editing));
+    else if (!writingThis && (ch.plan || '').trim()) sec.append(planBox(p, ch, editing));
+    if (!writingThis && ch.guide && ch.guide.b) sec.append(guideCard(p, ch));
+    if (editing && !writingThis) { const tc = tipCard(p, ch); if (tc) sec.append(tc); }
     const card = el('div', { class: 'card' });
     const words = el('span', { class: 'muted', id: 'chWords' });
 
@@ -3582,7 +3681,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const d = startEdit(p, ch);
       const title = el('input', { type: 'text', class: 'doc-title', 'aria-label': 'Título do capítulo', placeholder: `Capítulo ${i + 1}` });
       title.value = d.title;
-      const ta = el('textarea', { class: 'doc-edit', id: 'chBody', 'aria-label': 'Texto do capítulo', placeholder: 'Comece a escrever…', spellcheck: 'true' });
+      const ta = el('textarea', { class: 'doc-edit', id: 'chBody', 'aria-label': 'Texto do capítulo', placeholder: ch.guide && ch.guide.b ? `Passo 1: ${ch.guide.b[0]}` : ch.challenge ? `Desafio: ${ch.challenge.task}` : 'Comece a escrever…', spellcheck: 'true' });
       ta.value = d.text;
       // o texto cresce junto com o conteúdo: a página rola, não a caixa
       const grow = () => { const y = scrollY; ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; if (scrollY !== y) scrollTo(scrollX, y); };
@@ -3604,7 +3703,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         const b = $('saveEditBtn'); if (b) b.disabled = !dirty;
       };
       title.addEventListener('input', () => { d.title = title.value; keepDraft(); refresh(); });
-      ta.addEventListener('input', () => { d.text = ta.value; keepDraft(); refresh(); });
+      ta.addEventListener('input', () => { d.text = ta.value; keepDraft(); refresh(); if (ch.challenge) liveChallenge(ch, ta.value); });
       const backdrop = el('div', { class: 'edit-backdrop', 'aria-hidden': 'true' });
       const paintMarks = () => { paintEditMarks(backdrop, ta.value, (ch.highlights || []).filter(h => !h.resolved)); };
       backdrop._repaint = paintMarks;
@@ -7070,6 +7169,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     ofCtx = { p, ta: opts.ta || null, ch: opts.ch || (view.chapterId ? p.chapters.find(c => c.id === view.chapterId) : null) };
     if (!ofOpen) { ofOpen = Math.floor(Math.random() * OFICINA.openings.length); ofQ = Math.floor(Math.random() * OFICINA.questions.length); }
     if (opts.tab) ofTab = opts.tab;
+    if (!['destravar', 'expressoes'].includes(ofTab)) ofTab = 'destravar';
     renderOficina(); $('oficinaDlg').showModal();
   }
   const ofHasEditor = () => ofCtx && ofCtx.ta && ofCtx.ta.isConnected;
@@ -7168,11 +7268,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   // sprint: cronômetro no canto contando as palavras novas do projeto (inclusive o que está no Editar)
   var sprint = null;
-  function projectWordsNow(p) { return p.chapters.reduce((n, c) => n + countWords(edit && edit.chId === c.id ? edit.text : c.text), 0); }
+  function projectWordsNow() { return projects.reduce((t, p) => t + p.chapters.reduce((n, c) => n + countWords(edit && edit.chId === c.id ? edit.text : c.text), 0), 0); }
   function startSprint(min, goal) {
     if (sprint) stopSprint(false);
-    const p = ofCtx ? ofCtx.p : cur();
-    sprint = { p, min, goal, end: Date.now() + min * 60000, start: projectWordsNow(p) };
+    const p = cur();
+    sprint = { p, min, goal, end: Date.now() + min * 60000, start: projectWordsNow() };
     if ($('oficinaDlg').open) $('oficinaDlg').close();
     const pill = el('div', { class: 'sprint-pill', id: 'sprintPill', role: 'status' }, svgIcon('timer'), el('span', { class: 'sp-t' }), el('span', { class: 'sp-w' }),
       el('button', { text: 'Parar', onclick: () => stopSprint(true) }));
@@ -7182,7 +7282,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function tickSprint() {
     const s = sprint; if (!s) return;
-    const left = Math.max(0, s.end - Date.now()), words = Math.max(0, projectWordsNow(s.p) - s.start), pill = $('sprintPill');
+    const left = Math.max(0, s.end - Date.now()), words = Math.max(0, projectWordsNow() - s.start), pill = $('sprintPill');
     if (pill) { pill.querySelector('.sp-t').textContent = `${String(Math.floor(left / 60000)).padStart(2, '0')}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')}`; pill.querySelector('.sp-w').textContent = `+${fmtNum(words)} / ${fmtNum(s.goal)}`; }
     s.words = words;
     if (!left) stopSprint(true, true);
@@ -7192,13 +7292,346 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     clearInterval(s.timer); sprint = null;
     const pill = $('sprintPill');
     if (record && (s.words || finished)) {
-      const c = chal(); c.sprints = [...c.sprints, { at: Date.now(), min: s.min, words: s.words || 0, goal: s.goal, done: (s.words || 0) >= s.goal }].slice(-200); saveChal(c);
+      const c = chal(); c.sprints = [...c.sprints, { at: Date.now(), min: s.min, words: s.words || 0, goal: s.goal, done: (s.words || 0) >= s.goal }].slice(-200);
+      if (finished) { gainXP(c, (s.words || 0) >= s.goal ? 30 : 15, `Sprint de ${s.min} min`); } saveChal(c); if (hubOpen) renderHub();
     }
     if (pill) {
       if (finished) { pill.classList.add('done'); pill.querySelector('.sp-t').textContent = (s.words || 0) >= s.goal ? 'Meta batida!' : 'Tempo!'; pill.querySelector('button').textContent = 'Fechar'; pill.querySelector('button').onclick = () => pill.remove(); setTimeout(() => pill.remove(), 15000); }
       else pill.remove();
     }
     if (finished) toast(`Sprint terminado: ${fmtNum(s.words || 0)} palavras${(s.words || 0) >= s.goal ? ', meta batida ✓' : ''}.`);
+  }
+
+
+  // =====================================================================
+  // Desafios: área própria, trilhas (gramática, escrita, romance MM), histórias que evoluem
+  // =====================================================================
+  var DESAFIOS = {"gram": [{"id": "g-dialogo", "n": "Pontuação do diálogo", "intro": "No Brasil, as falas começam com travessão (—). Quando depois da fala vem um verbo de fala (disse, perguntou, gritou), não se usa ponto antes do travessão, e o verbo vem com letra minúscula.", "qs": [{"q": "Qual está certa?", "o": ["— Oi. — disse ele.", "— Oi — disse ele.", "— Oi, disse ele."], "a": 1, "why": "Antes de \"— disse\" a fala não leva ponto; o ponto final vai depois do verbo de fala."}, {"q": "Com pergunta, qual está certa?", "o": ["— Você vem? — perguntou Rafael.", "— Você vem. — perguntou Rafael?", "— Você vem — Perguntou Rafael?"], "a": 0, "why": "O ponto de interrogação fica na fala, e o verbo de fala depois do travessão vem com minúscula."}, {"q": "Como começar uma fala?", "o": ["- Oi, tudo bem?", "— Oi, tudo bem?", "–Oi, tudo bem?"], "a": 1, "why": "Use o travessão (—), não o hífen (-), seguido de espaço."}, {"q": "A narração depois da fala não é um verbo de fala. Qual está certa?", "o": ["— Tudo bem — ele sorriu.", "— Tudo bem. — Ele sorriu.", "— Tudo bem, ele sorriu."], "a": 1, "why": "Sorrir não é verbo de fala: a fala termina com ponto e a narração começa com maiúscula."}, {"q": "Com exclamação, qual está certa?", "o": ["— Sai daqui! — gritou Lucas.", "— Sai daqui! — Gritou Lucas.", "— Sai daqui — gritou Lucas!"], "a": 0, "why": "A exclamação fica na fala; o verbo de fala segue com minúscula."}, {"q": "A fala continua com uma frase nova depois da narração. Qual está certa?", "o": ["— Não sei — disse ele. — Talvez amanhã.", "— Não sei — disse ele — talvez amanhã.", "— Não sei. — disse ele. — Talvez amanhã."], "a": 0, "why": "Depois de \"disse ele\" vem ponto, e a fala nova abre com outro travessão e maiúscula."}]}, {"id": "g-virgula", "n": "Vírgula sem medo", "intro": "A vírgula separa quem é chamado (vocativo), explicações no meio da frase e orações com \"mas\". Ela nunca separa o sujeito do verbo.", "qs": [{"q": "Qual está certa?", "o": ["Rafael vem cá!", "Rafael, vem cá!"], "a": 1, "why": "Quem é chamado (vocativo) sempre fica separado por vírgula."}, {"q": "Qual está certa?", "o": ["O garoto da oficina, sorriu.", "O garoto da oficina sorriu."], "a": 1, "why": "Não se separa o sujeito (o garoto da oficina) do verbo (sorriu)."}, {"q": "Qual separa a explicação do jeito certo?", "o": ["Theo, o vizinho do 302, tocava violino.", "Theo o vizinho do 302, tocava violino.", "Theo, o vizinho do 302 tocava violino."], "a": 0, "why": "A explicação (o vizinho do 302) fica entre duas vírgulas."}, {"q": "Qual está certa?", "o": ["Ele queria ficar, mas precisava ir.", "Ele queria ficar mas, precisava ir."], "a": 0, "why": "A vírgula vem antes do \"mas\", não depois."}, {"q": "Qual está certa?", "o": ["Ele trouxe café, pão e um bilhete.", "Ele trouxe café, pão, e um bilhete."], "a": 0, "why": "Numa lista simples, não se usa vírgula antes do último \"e\"."}, {"q": "Qual está certa?", "o": ["Sim eu vou com você.", "Sim, eu vou com você."], "a": 1, "why": "Sim e não no começo da resposta são separados por vírgula."}]}, {"id": "g-crase", "n": "Crase", "intro": "A crase (à) é a junção da preposição \"a\" com o artigo \"a\". Dica: troque por uma palavra masculina; se virar \"ao\", tem crase.", "qs": [{"q": "Ele foi ___ praia.", "o": ["a", "à"], "a": 1, "why": "Ir ao mar / ir à praia: vira \"ao\" no masculino, então tem crase."}, {"q": "Chegou ___ casa cedo (a casa dele, o lar).", "o": ["a", "à"], "a": 0, "why": "\"Casa\" no sentido de lar, sem especificar, não leva crase."}, {"q": "Voltaram ___ duas da manhã.", "o": ["as", "às"], "a": 1, "why": "Hora exata leva crase: às duas."}, {"q": "Ficaram frente ___ frente.", "o": ["a", "à"], "a": 0, "why": "Entre palavras repetidas não há crase: frente a frente, cara a cara."}, {"q": "Entregou o bilhete ___ ele.", "o": ["a", "à"], "a": 0, "why": "Não há crase antes de pronome pessoal (ele, você) nem de palavra masculina."}, {"q": "Andava ___ procura de respostas.", "o": ["a", "à"], "a": 1, "why": "Locuções com palavra feminina levam crase: à procura de, à noite, às pressas."}]}, {"id": "g-porques", "n": "Os quatro porquês", "intro": "Por que (pergunta ou \"por qual motivo\"), porque (resposta, \"pois\"), por quê (no fim da frase) e porquê (substantivo, \"o motivo\").", "qs": [{"q": "___ você foi embora?", "o": ["Por que", "Porque", "Porquê"], "a": 0, "why": "Pergunta no começo da frase: por que."}, {"q": "Fui embora ___ estava com medo.", "o": ["por que", "porque", "por quê"], "a": 1, "why": "Explicação, resposta (= pois): porque."}, {"q": "Você foi embora ___?", "o": ["por que", "porque", "por quê"], "a": 2, "why": "No fim da frase, antes da pontuação: por quê."}, {"q": "Ele nunca entendeu o ___ daquela despedida.", "o": ["por que", "porquê", "porque"], "a": 1, "why": "Com artigo (o porquê = o motivo), é substantivo: porquê."}, {"q": "Não sei ___ ele voltou.", "o": ["por que", "porque", "porquê"], "a": 0, "why": "= por qual motivo: por que."}, {"q": "Ele sorriu, ___ sabia a verdade.", "o": ["por que", "porque", "por quê"], "a": 1, "why": "= pois: porque."}]}, {"id": "g-confusoes", "n": "Palavras que confundem", "intro": "Há (tempo passado) e a (futuro ou distância); mal (oposto de bem) e mau (oposto de bom); mas (porém) e mais (quantidade); onde (lugar parado) e aonde (com movimento, ir a).", "qs": [{"q": "Eles se conheceram ___ três anos.", "o": ["a", "há"], "a": 1, "why": "Tempo que já passou: há (= faz)."}, {"q": "Daqui ___ pouco ele chega.", "o": ["a", "há"], "a": 0, "why": "Tempo que ainda vai acontecer: a."}, {"q": "Ele não é um cara ___.", "o": ["mal", "mau"], "a": 1, "why": "Oposto de bom: mau."}, {"q": "Dormiu ___ aquela noite.", "o": ["mal", "mau"], "a": 0, "why": "Oposto de bem: mal."}, {"q": "Queria ficar, ___ não podia.", "o": ["mas", "mais"], "a": 0, "why": "Ideia de oposição (porém): mas."}, {"q": "___ você vai com tanta pressa?", "o": ["Onde", "Aonde"], "a": 1, "why": "Com verbo de movimento (ir a algum lugar): aonde."}]}, {"id": "g-pronomes", "n": "Pronomes e concordância", "intro": "Antes de verbo no infinitivo, use \"eu\" (para eu fazer); depois de preposição, \"mim\" (para mim). Verbos como \"fazer\" e \"haver\" indicando tempo não vão para o plural.", "qs": [{"q": "Isso é para ___ fazer?", "o": ["mim", "eu"], "a": 1, "why": "Antes de verbo no infinitivo, quem faz a ação é \"eu\": para eu fazer."}, {"q": "Ele trouxe um café para ___.", "o": ["mim", "eu"], "a": 0, "why": "Depois de preposição e sem verbo: para mim."}, {"q": "Na norma culta, qual está certa?", "o": ["Eu lhe amo.", "Eu o amo."], "a": 1, "why": "Amar pede objeto direto: eu o amo (na fala do dia a dia, \"eu te amo\")."}, {"q": "Ela ___ contou o segredo (contou a ele).", "o": ["o", "lhe"], "a": 1, "why": "Contar algo a alguém: lhe contou."}, {"q": "Entre ___ e você não há segredos.", "o": ["eu", "mim"], "a": 1, "why": "Depois de \"entre\": entre mim e você."}, {"q": "___ dois anos que eles não se falam.", "o": ["Fazem", "Faz"], "a": 1, "why": "Indicando tempo, \"fazer\" fica no singular: faz dois anos."}]}, {"id": "g-acentos", "n": "Acentos que mudam o sentido", "intro": "Pôde (passado) e pode (presente); têm e vêm (eles) e tem e vem (ele); pôr (verbo) e por (preposição). Depois da reforma, \"veem\" e \"leem\" perderam o acento.", "qs": [{"q": "Ontem ele não ___ vir.", "o": ["pode", "pôde"], "a": 1, "why": "No passado: pôde."}, {"q": "Eles ___ medo do escuro.", "o": ["tem", "têm"], "a": 1, "why": "Plural (eles): têm."}, {"q": "Vou ___ a mesa para o jantar.", "o": ["por", "pôr"], "a": 1, "why": "Verbo (colocar): pôr."}, {"q": "Ele ___ dois irmãos.", "o": ["tem", "têm"], "a": 0, "why": "Singular (ele): tem."}, {"q": "Eles ___ de longe para a festa.", "o": ["vem", "vêm"], "a": 1, "why": "Plural do verbo vir: vêm."}, {"q": "Eles ___ tudo de longe.", "o": ["vêem", "veem", "vêm"], "a": 1, "why": "Depois da reforma ortográfica: veem, sem acento."}]}], "escrita": [{"id": "e-mostrar", "n": "Mostrar, não contar", "intro": "Em vez de dizer a emoção (\"ele estava nervoso\"), mostre o que o corpo faz: mãos, voz, respiração, gestos.", "task": "Escreva uma cena em que um dos dois está muito nervoso antes de falar com o outro, sem dizer o nome da emoção.", "rules": [{"t": "min", "n": 120}, {"t": "forbid", "w": ["nervoso", "nervosa", "ansioso", "ansiosa", "ansiedade", "nervosismo", "medo"], "label": "Sem dizer a emoção (nervoso, ansioso, medo)"}], "ex": "As mãos dele não sabiam onde ficar. Conferiu o celular três vezes sem ler nada."}, {"id": "e-sentidos", "n": "Os cinco sentidos", "intro": "Cenas vivas acontecem no corpo do leitor. Use palavras de cheiro, som, gosto, toque e visão.", "task": "Descreva o primeiro encontro dos dois num lugar movimentado (feira, festa, estação) usando pelo menos quatro sentidos.", "rules": [{"t": "min", "n": 150}, {"t": "sentidos", "n": 4}], "ex": null}, {"id": "e-dialogo", "n": "Diálogo que revela", "intro": "Um bom diálogo mostra quem os personagens são e o que escondem, sem explicar tudo.", "task": "Escreva uma conversa em que os dois discutem por um motivo bobo, mas o motivo real é outro.", "rules": [{"t": "falas", "n": 8}, {"t": "semDisse"}], "ex": "Use verbos como retrucou, provocou, admitiu, ou nenhum verbo: só a fala."}, {"id": "e-ritmo", "n": "Ritmo das frases", "intro": "Frases curtas aceleram (ação, susto). Frases longas desaceleram (carinho, lembrança). Misture as duas.", "task": "Escreva uma cena de perigo que termina num momento calmo entre os dois.", "rules": [{"t": "min", "n": 150}, {"t": "ritmo"}], "ex": null}, {"id": "e-verbos", "n": "Verbos fortes", "intro": "Em vez de \"andou rapidamente\", use \"correu\". Em vez de \"muito bonito\", procure a palavra exata.", "task": "Escreva uma cena de reencontro sem advérbios terminados em -mente e sem a palavra \"muito\".", "rules": [{"t": "min", "n": 120}, {"t": "semMente"}, {"t": "forbid", "w": ["muito", "muita", "muitos", "muitas"], "label": "Sem \"muito\""}], "ex": null}, {"id": "e-pov", "n": "Primeira pessoa", "intro": "Na primeira pessoa, o leitor só sabe o que o narrador vê e sente. Use isso para criar dúvida sobre o que o outro pensa.", "task": "Conte, em primeira pessoa, o momento em que o narrador percebe que está apaixonado.", "rules": [{"t": "min", "n": 150}, {"t": "primeira"}], "ex": null}, {"id": "e-drabble", "n": "Drabble", "intro": "Um drabble é uma história completa em exatamente 100 palavras. Cada palavra precisa trabalhar.", "task": "Escreva uma história completa (começo, meio e fim) sobre um guarda-chuva dividido.", "rules": [{"t": "exact", "n": 100}], "ex": null}, {"id": "e-subtexto", "n": "Subtexto", "intro": "O mais forte é o que não é dito. Os personagens falam de uma coisa e o leitor entende outra.", "task": "Escreva uma despedida em que nenhum dos dois diz o que sente.", "rules": [{"t": "min", "n": 150}, {"t": "falas", "n": 4}, {"t": "forbid", "w": ["te amo", "amo você", "gosto de você", "apaixonado", "apaixonada", "amor"], "label": "Ninguém diz o que sente (sem \"amo\", \"amor\", \"gosto de você\")"}], "ex": null}], "mm": [{"id": "m-encontro", "n": "Primeiro encontro com faísca", "intro": "O leitor precisa querer o próximo encontro. Termine com um gancho.", "task": "Escreva o primeiro encontro de dois homens que começam com o pé esquerdo.", "rules": [{"t": "min", "n": 200}, {"t": "falas", "n": 3}], "ex": null}, {"id": "m-tensao", "n": "Tensão sem toque", "intro": "A tensão está no quase: o olhar, a distância, a respiração.", "task": "Os dois ficam presos num lugar pequeno. Escreva a cena sem que eles se beijem.", "rules": [{"t": "min", "n": 180}, {"t": "forbid", "w": ["beijo", "beijou", "beijaram", "beijar"], "label": "Sem beijo"}], "ex": null}, {"id": "m-ciume", "n": "Ciúme pelo corpo", "intro": "Ninguém precisa dizer \"ciúme\": o leitor percebe pelos gestos e respostas atravessadas.", "task": "Alguém de fora flerta com um deles na frente do outro.", "rules": [{"t": "min", "n": 180}, {"t": "forbid", "w": ["ciúme", "ciúmes", "ciumento", "ciumenta"], "label": "Sem a palavra ciúme"}, {"t": "falas", "n": 3}], "ex": null}, {"id": "m-beijo", "n": "Primeiro beijo em 300 palavras", "intro": "Frases curtas antes, uma frase longa durante, e o silêncio depois.", "task": "Escreva o primeiro beijo dos dois.", "rules": [{"t": "min", "n": 150}, {"t": "max", "n": 300}], "ex": null}, {"id": "m-confissao", "n": "Confissão específica", "intro": "A confissão boa cita algo que só ele sabe do outro: um hábito, um detalhe, uma lembrança.", "task": "Um deles confessa o que sente. Use pelo menos um detalhe muito específico do outro.", "rules": [{"t": "min", "n": 180}, {"t": "falas", "n": 4}], "ex": null}, {"id": "m-manha", "n": "A manhã seguinte", "intro": "Fade to black: o carinho do dia seguinte diz o que a noite foi, sem mostrar a noite.", "task": "Escreva a manhã depois da primeira noite juntos.", "rules": [{"t": "min", "n": 200}, {"t": "sentidos", "n": 3}], "ex": null}], "follow": [{"id": "f-pov", "n": "Pelo olhar do outro", "task": "Reescreva a última cena pelo ponto de vista do outro personagem. O que ele percebeu que o primeiro não viu?", "rules": [{"t": "min", "n": 200}]}, {"id": "f-semana", "n": "Uma semana depois", "task": "Continue a história uma semana depois. O que mudou entre os dois?", "rules": [{"t": "min", "n": 250}]}, {"id": "f-obstaculo", "n": "O obstáculo", "task": "Coloque alguém ou algo entre os dois: família, trabalho, um ex, um segredo.", "rules": [{"t": "min", "n": 250}, {"t": "falas", "n": 3}]}, {"id": "f-conversa", "n": "A conversa que faltou", "task": "Escreva só com diálogo a conversa que eles evitaram até agora.", "rules": [{"t": "soDialogo"}, {"t": "falas", "n": 8}]}, {"id": "f-flashback", "n": "Flashback", "task": "Mostre uma lembrança do passado de um deles que explica quem ele é hoje.", "rules": [{"t": "min", "n": 200}]}, {"id": "f-mentira", "n": "A mentira", "task": "Um deles mente para o outro. O leitor precisa perceber.", "rules": [{"t": "min", "n": 200}, {"t": "falas", "n": 4}]}, {"id": "f-toque", "n": "Só um toque", "task": "Uma cena inteira construída em torno de um toque de mãos.", "rules": [{"t": "max", "n": 400}, {"t": "require", "w": ["mão", "mãos", "dedos"], "label": "Um toque de mãos"}, {"t": "forbid", "w": ["beijo", "beijou", "beijaram"], "label": "Sem beijo"}]}, {"id": "f-sentidos", "n": "Pelos sentidos", "task": "Continue a história num lugar novo, usando pelo menos quatro sentidos.", "rules": [{"t": "min", "n": 200}, {"t": "sentidos", "n": 4}]}, {"id": "f-crise", "n": "A crise", "task": "Tudo dá errado entre eles. Escreva a briga ou a separação.", "rules": [{"t": "min", "n": 250}, {"t": "falas", "n": 5}]}, {"id": "f-final", "n": "O final", "task": "Escreva o fim da história deles: feliz, aberto ou agridoce.", "rules": [{"t": "min", "n": 300}]}], "dailyRules": [{"txt": "Só diálogo, sem narração.", "rule": {"t": "soDialogo"}}, {"txt": "Em exatamente 100 palavras (um drabble).", "rule": {"t": "exact", "n": 100}}, {"txt": "Sem usar a palavra “olhar” (nem olhou, olhos).", "rule": {"t": "forbid", "w": ["olhar", "olhou", "olhava", "olharam", "olhando", "olhos"], "label": "Sem olhar, olhou, olhos"}}, {"txt": "Do ponto de vista do outro personagem.", "rule": null}, {"txt": "Tudo num único lugar fechado.", "rule": null}, {"txt": "Comece pelo fim da cena.", "rule": null}, {"txt": "Use os cinco sentidos.", "rule": {"t": "sentidos", "n": 5}}, {"txt": "Em menos de 500 palavras.", "rule": {"t": "max", "n": 499}}, {"txt": "Sem usar a palavra “amor”.", "rule": {"t": "forbid", "w": ["amor", "amo", "amar"], "label": "Sem amor, amo, amar"}}, {"txt": "O clímax é um toque de mãos.", "rule": {"t": "require", "w": ["mão", "mãos", "dedos"], "label": "Um toque de mãos"}}, {"txt": "Com uma música tocando ao fundo.", "rule": {"t": "require", "w": ["música", "canção", "melodia", "tocava", "cantava"], "label": "Uma música na cena"}}, {"txt": "Sem advérbios terminados em -mente.", "rule": {"t": "semMente"}}, {"txt": "Com pelo menos seis falas.", "rule": {"t": "falas", "n": 6}}, {"txt": "Nenhum dos dois pode dizer o que sente.", "rule": {"t": "forbid", "w": ["te amo", "amo você", "gosto de você", "apaixonado"], "label": "Ninguém diz o que sente"}}, {"txt": "Termine com uma pergunta.", "rule": {"t": "fimPergunta"}}], "tipsStart": ["Comece no meio da ação: o leitor descobre o resto no caminho.", "A primeira frase pode ser uma fala que deixa uma pergunta no ar.", "Escreva primeiro, corrija depois. O rascunho pode ser ruim.", "Que cheiro, som e temperatura tem o lugar onde a cena começa?", "O que ele quer nesta cena? O que impede?", "Comece um pouco depois do que você acha: corte a preparação."], "tipsWriting": ["Travou? Pule para a parte que você mais quer escrever e volte depois.", "Leia em voz alta o último parágrafo: o ouvido acha o que o olho perde.", "Troque um \"disse\" por uma ação: \"— Tá bom.\" Ele largou a xícara.", "Termine a cena num gancho: uma pergunta, uma porta, uma decisão.", "Mostre a emoção pelo corpo em vez de dizer o nome dela.", "Corte o que o leitor já sabe. Confie nele.", "Uma frase curta depois de várias longas dá impacto.", "Se a cena está morna, dê a um dos dois um segredo."]};
+  var appMode = local.get('fanfic.mode', 'projetos'), hubOpen = false, hubView = { page: 'home' };
+  const LEVELS = [[0, 'Iniciante'], [100, 'Aprendiz'], [250, 'Rascunhador'], [500, 'Contador de histórias'], [900, 'Escritor'], [1400, 'Escritor dedicado'], [2000, 'Autor'], [2800, 'Autor experiente'], [3800, 'Mestre das palavras'], [5000, 'Lenda']];
+  function chLevel(xp = chal().xp || 0) {
+    let i = 0; while (i + 1 < LEVELS.length && xp >= LEVELS[i + 1][0]) i++;
+    const next = LEVELS[i + 1];
+    return { n: i + 1, name: LEVELS[i][1], from: LEVELS[i][0], to: next ? next[0] : null };
+  }
+  function gainXP(c, n, why) {
+    const before = chLevel(c.xp || 0).n;
+    c.xp = (c.xp || 0) + n; c.log = [...(c.log || []), { at: Date.now(), xp: n, why }].slice(-500);
+    const after = chLevel(c.xp).n;
+    if (after > before) setTimeout(() => toast(`Subiu para o nível ${after}: ${chLevel(c.xp).name}! 🎉`, { ms: 6000 }), 600);
+    return n;
+  }
+  function chalStreak(c = chal()) {
+    const days = new Set((c.log || []).map(x => dayKey(new Date(x.at))));
+    const d = new Date(); let n = 0;
+    if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1);
+    while (days.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function setAppMode(m) {
+    if (m === appMode && (m !== 'desafios' || hubOpen)) return;
+    appMode = m; local.set('fanfic.mode', m);
+    if (m === 'desafios') openHub();
+    else {
+      hubOpen = false;
+      const p = cur();
+      if (!p || p.desafio) { const n = projects.filter(x => !x.desafio && !x.draft).sort((a, b) => b.updatedAt - a.updatedAt)[0]; if (n) openProject(n.id); else startDraft(); }
+      else { renderProjects(); renderTab(); }
+    }
+  }
+  document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => leaveDraft(() => guardEdit(() => setAppMode(b.dataset.mode)))));
+  function openHub(view) {
+    if (appMode !== 'desafios') { appMode = 'desafios'; local.set('fanfic.mode', 'desafios'); }
+    hubOpen = true; hubView = view || { page: 'home' };
+    setFocus(false); closeDrawer();
+    renderProjects(); renderTab(); scrollTo(0, 0);
+  }
+  const allLessons = () => [...DESAFIOS.gram.map(l => Object.assign({ track: 'gram' }, l)), ...DESAFIOS.escrita.map(l => Object.assign({ track: 'escrita' }, l)), ...DESAFIOS.mm.map(l => Object.assign({ track: 'mm' }, l))];
+  const TRACKS = [['gram', 'Gramática e pontuação', 'Exercícios rápidos com explicação: diálogo, vírgula, crase, porquês…', 'spell-check'],
+    ['escrita', 'Técnicas de escrita', 'Mostrar não contar, sentidos, diálogo, ritmo, ponto de vista…', 'pen-line'],
+    ['mm', 'Romance MM', 'As cenas que todo romance MM precisa, com regras para treinar.', 'heart']];
+  function renderHub() {
+    const hub = $('hub'); hub.hidden = false;
+    ['ideia', 'capitulos', 'mundo', 'biblia', 'arquivos'].forEach(t => { $('tab-' + t).hidden = true; });
+    $('tabs').hidden = true; $('projHeading').hidden = true; $('menuTitle').textContent = 'Desafios';
+    const c = chal(), L = chLevel(c.xp || 0), v = hubView, out = [];
+    const back = (to) => el('button', { class: 'link plain hub-back', icon: 'arrow-left', text: 'Voltar', onclick: () => { hubView = to || { page: 'home' }; renderHub(); scrollTo(0, 0); } });
+    if (v.page === 'track') {
+      const [id, name, desc] = TRACKS.find(t => t[0] === v.id), list = allLessons().filter(l => l.track === id);
+      out.push(back(), el('h2', { text: name, style: 'margin:0 0 4px' }), el('p', { class: 'muted', style: 'margin:0 0 12px', text: desc }),
+        el('div', { class: 'lesson-list' }, list.map((l, i) => {
+          const st = (c.lessons || {})[l.id];
+          return el('button', { class: 'lesson' + (st && st.done ? ' done' : ''), onclick: () => { hubView = { page: id === 'gram' ? 'quiz' : 'lesson', id: l.id, qi: 0, ok: 0, picked: null }; renderHub(); scrollTo(0, 0); } },
+            el('span', { class: 'ln' }, st && st.done ? svgIcon('check') : String(i + 1)),
+            el('span', { class: 'lt' }, el('b', { text: l.n }), el('span', { text: st ? (id === 'gram' ? `Melhor resultado: ${st.best}/${l.qs.length}` : `Nota ${st.best}`) : (id === 'gram' ? `${l.qs.length} exercícios` : l.task) })),
+            svgIcon('chevron-right'));
+        })));
+    } else if (v.page === 'quiz') {
+      const l = DESAFIOS.gram.find(x => x.id === v.id);
+      out.push(back({ page: 'track', id: 'gram' }));
+      if (v.qi >= l.qs.length) {
+        const total = l.qs.length, ok = v.ok;
+        if (!v.saved) {
+          v.saved = true; const cc = chal(), lessons = cc.lessons = cc.lessons || {}, prev = lessons[l.id] || { best: 0 };
+          const xp = gainXP(cc, ok * 5 + (ok === total ? 10 : 0), `Gramática: ${l.n}`);
+          lessons[l.id] = { best: Math.max(prev.best, ok), done: prev.done || ok >= total - 2 }; saveChal(cc); v.xp = xp;
+        }
+        out.push(el('div', { class: 'hub-card', style: 'align-items:center;text-align:center' },
+          el('div', { class: 'result-score', text: `${ok}/${total}` }), el('h3', { text: ok === total ? 'Perfeito!' : ok >= total - 2 ? 'Muito bem!' : 'Quase lá' }),
+          el('p', { text: `+${v.xp} XP. ${ok >= total - 2 ? 'Aula concluída.' : 'Acerte pelo menos ' + (total - 2) + ' para concluir a aula.'}` }),
+          el('div', { class: 'row', style: 'justify-content:center' },
+            el('button', { text: 'Refazer', onclick: () => { hubView = { page: 'quiz', id: l.id, qi: 0, ok: 0, picked: null }; renderHub(); } }),
+            el('button', { class: 'primary', text: 'Próxima aula', onclick: () => { const i = DESAFIOS.gram.indexOf(l), nx = DESAFIOS.gram[i + 1]; hubView = nx ? { page: 'quiz', id: nx.id, qi: 0, ok: 0, picked: null } : { page: 'track', id: 'gram' }; renderHub(); scrollTo(0, 0); } }))));
+      } else {
+        const q = l.qs[v.qi], answered = v.picked != null;
+        if (v.qi === 0 && !answered) out.push(el('div', { class: 'hub-card' }, el('h3', { icon: 'lightbulb', text: l.n }), el('p', { style: 'color:var(--text)', text: l.intro })));
+        out.push(el('p', { class: 'muted', style: 'margin:12px 0 0', text: `Exercício ${v.qi + 1} de ${l.qs.length} · ${v.ok} acerto(s)` }),
+          el('div', { class: 'quiz-q', text: q.q }),
+          el('div', { class: 'quiz-opts' }, q.o.map((o, i) => el('button', { class: answered ? (i === q.a ? 'right' : i === v.picked ? 'wrong' : '') : '', disabled: answered, text: o,
+            onclick: () => { v.picked = i; if (i === q.a) v.ok++; renderHub(); } }))),
+          answered ? el('div', { class: 'quiz-why' }, el('b', { text: v.picked === q.a ? 'Certo! ' : 'Não foi dessa vez. ' }), q.why) : null,
+          answered ? el('div', { class: 'row end', style: 'margin-top:12px' }, el('button', { class: 'primary', iconEnd: 'arrow-right', text: v.qi + 1 < l.qs.length ? 'Próximo' : 'Ver resultado', onclick: () => { v.qi++; v.picked = null; renderHub(); } })) : null);
+      }
+    } else if (v.page === 'lesson') {
+      const l = allLessons().find(x => x.id === v.id);
+      out.push(back({ page: 'track', id: l.track }), el('div', { class: 'hub-card' },
+        el('h3', { icon: l.track === 'mm' ? 'heart' : 'pen-line', text: l.n }), el('p', { style: 'color:var(--text)', text: l.intro }),
+        l.ex ? el('p', { class: 'of-big', text: 'Exemplo: ' + l.ex }) : null,
+        el('h3', { text: 'Desafio', style: 'margin-top:6px' }), el('p', { class: 'of-big', text: l.task }),
+        el('b', { text: 'Regras (o app confere sozinho):' }), rulesList(checkRules('', l.rules)),
+        el('div', { class: 'row' }, el('button', { class: 'primary', icon: 'pen-line', text: 'Escrever este desafio', onclick: () => pickStory({ id: l.id, kind: 'lesson', n: l.n, task: l.task, rules: l.rules }) }))));
+    } else {
+      // painel
+      const pct = L.to ? Math.round(((c.xp || 0) - L.from) / (L.to - L.from) * 100) : 100;
+      const done = Object.values(c.lessons || {}).filter(x => x.done).length, total = allLessons().length, streak = chalStreak(c);
+      out.push(el('div', { class: 'hub-hero' },
+        el('div', { class: 'hub-lvl' }, el('div', {}, el('small', { text: 'NÍVEL' }), el('b', { text: String(L.n) }))),
+        el('div', {}, el('h2', { text: L.name }), el('div', { class: 'xpbar' }, el('i', { style: `width:${pct}%` })),
+          el('div', { class: 'hub-stats' }, el('span', { text: `${fmtNum(c.xp || 0)} XP${L.to ? ` · faltam ${fmtNum(L.to - (c.xp || 0))} para o nível ${L.n + 1}` : ''}` }),
+            el('span', { text: `${done}/${total} aulas` }), streak ? el('span', { class: 'streak' }, svgIcon('flame'), `${streak} dia(s) seguidos`) : null))));
+      // histórias de desafio
+      const stories = projects.filter(p => p.desafio).sort((a, b) => b.updatedAt - a.updatedAt);
+      if (stories.length) {
+        out.push(el('h3', { class: 'hub-sec', icon: 'book-open', text: 'Suas histórias de desafio' }),
+          el('div', { class: 'hub-grid' }, stories.slice(0, 6).map(p => {
+            const chs = p.chapters.filter(x => x.challenge), last = chs[chs.length - 1], pend = chs.find(x => !x.challenge.done);
+            return el('button', { class: 'hub-card', onclick: () => { if (pend) { openProject(p.id); view = { tab: 'capitulos', chapterId: pend.id, mode: 'editar' }; renderTab(); } else openProject(p.id); } },
+              el('h3', { text: p.title || 'Sem título' }), el('p', { text: `${chs.length} desafio(s) · ${fmtNum(p.chapters.reduce((n, x) => n + countWords(x.text), 0))} palavras` }),
+              el('p', { style: 'color:var(--text)', text: pend ? `Em andamento: ${pend.challenge.n}` : last ? `Último: ${last.challenge.n}. Toque para evoluir a história.` : '' }));
+          })));
+      }
+      // desafio do dia
+      const now = new Date(), day = Math.floor((now - new Date(2024, 0, 1)) / 864e5) + (v.dayOff || 0), key = dayKey(now);
+      const prompt = pick(OFICINA.daily, day), rule = pick(DESAFIOS.dailyRules, day * 7 + 3), doneToday = !!(c.daily || {})[key];
+      out.push(el('h3', { class: 'hub-sec', icon: 'sparkles', text: 'Desafio do dia' }),
+        el('div', { class: 'hub-card' }, el('p', { class: 'of-big', text: prompt }), el('p', {}, el('b', { text: 'Regra: ' }), rule.txt),
+          el('div', { class: 'row' },
+            doneToday ? el('span', { class: 'tag', text: 'Feito hoje ✓' }) : null,
+            el('button', { class: 'primary', icon: 'pen-line', text: 'Aceitar e escrever', onclick: () => pickStory({ id: 'daily-' + key, kind: 'daily', n: 'Desafio do dia', task: `${prompt} Regra: ${rule.txt}`, rules: [{ t: 'min', n: rule.rule && rule.rule.t === 'exact' ? 0 : 100 }, ...(rule.rule ? [rule.rule] : [])].filter(r => r.n !== 0) }) }),
+            el('button', { class: 'link plain', icon: 'shuffle', text: 'Outro', onclick: () => { hubView = { page: 'home', dayOff: (v.dayOff || 0) + 1 }; renderHub(); } }))));
+      // trilhas
+      out.push(el('h3', { class: 'hub-sec', icon: 'milestone', text: 'Trilhas' }),
+        el('div', { class: 'hub-grid' }, TRACKS.map(([id, name, desc, ic]) => {
+          const list = allLessons().filter(l => l.track === id), d = list.filter(l => ((c.lessons || {})[l.id] || {}).done).length;
+          return el('button', { class: 'hub-card', onclick: () => { hubView = { page: 'track', id }; renderHub(); scrollTo(0, 0); } },
+            el('h3', { icon: ic, text: name }), el('p', { text: desc }), el('div', { class: 'prog' }, el('i', { style: `width:${d / list.length * 100}%` })), el('p', { text: `${d}/${list.length} concluídas` }));
+        })));
+      // sprint e 30 dias
+      const d30 = c.d30 || [];
+      out.push(el('div', { class: 'hub-grid', style: 'margin-top:12px' },
+        el('div', { class: 'hub-card' }, el('h3', { icon: 'timer', text: 'Sprint de escrita' }),
+          el('p', { text: 'Cronômetro no canto da tela que conta as palavras que você escreve em qualquer história.' }),
+          el('div', { class: 'row' }, [[10, 200], [15, 300], [25, 500]].map(([m, w]) => el('button', { text: `${m} min · ${w}`, onclick: () => startSprint(m, w) })))),
+        el('div', { class: 'hub-card' }, el('h3', { icon: 'calendar', text: `30 dias de MM · ${d30.length}/30` }),
+          el('p', { text: 'Um tema por dia, todos na mesma história. No fim, você tem 30 cenas do casal.' }),
+          el('div', { class: 'd30' }, OFICINA.d30.map(([t, sub], i) => el('button', { class: d30.includes(i + 1) ? 'done' : '', title: `Dia ${i + 1}: ${t}`, text: String(i + 1),
+            onclick: () => startD30(i) }))))));
+      // conquistas
+      const total2 = projects.reduce((n, p) => n + p.chapters.reduce((k, x) => k + countWords(x.text), 0), 0), delivered = projects.flatMap(p => p.chapters).filter(x => x.challenge && x.challenge.done);
+      const gramDone = DESAFIOS.gram.every(l => ((c.lessons || {})[l.id] || {}).done);
+      const badges = [
+        ['Primeiro desafio', 'Entregue um desafio', delivered.length >= 1], ['Dez desafios', 'Entregue 10 desafios', delivered.length >= 10],
+        ['Nota 100', 'Tire 100 num desafio', delivered.some(x => x.challenge.done.score >= 100)], ['Gramática em dia', 'Conclua todas as aulas de gramática', gramDone],
+        ['História que cresce', 'Uma história com 5 desafios', projects.some(p => p.chapters.filter(x => x.challenge && x.challenge.done).length >= 5)],
+        ['Primeiro sprint', 'Termine um sprint', (c.sprints || []).length >= 1], ['Na meta', 'Bata a meta de um sprint', (c.sprints || []).some(x => x.done)],
+        ['Semana criativa', '7 dias seguidos com desafio', streak >= 7], ['30 dias de MM', 'Complete os 30 dias', d30.length >= 30],
+        ['10 mil palavras', 'Somando todas as histórias', total2 >= 1e4], ['50 mil palavras', 'Um livro inteiro', total2 >= 5e4]];
+      out.push(el('h3', { class: 'hub-sec', icon: 'trophy', text: `Conquistas · ${badges.filter(b => b[2]).length}/${badges.length}` }),
+        el('div', { class: 'badges' }, badges.map(([n, d, ok]) => el('div', { class: 'badge' + (ok ? '' : ' locked') }, svgIcon('trophy'), el('span', {}, el('b', { text: n }), d)))));
+    }
+    hub.replaceChildren(el('h1', { class: 'proj-heading', text: 'Desafios' }), ...out);
+  }
+
+  // ---------- regras conferidas no texto ----------
+  const SENSES = [['visão', /(?<![\p{L}])(luz|luzes|cor|cores|brilh\p{L}*|escur\p{L}*|sombra\p{L}*|viu|vi|enxerg\p{L}*|dourad\p{L}*|vermelh\p{L}*|azul|cinza|reluz\p{L}*|pálid\p{L}*)(?![\p{L}])/iu],
+    ['som', /(?<![\p{L}])(som|sons|ouv\p{L}*|ouviu|barulh\p{L}*|voz|vozes|silêncio|música|rugid\p{L}*|sussurr\p{L}*|estal\p{L}*|grit\p{L}*|ecoou|eco|zumbid\p{L}*|batid\p{L}*)(?![\p{L}])/iu],
+    ['cheiro', /(?<![\p{L}])(cheir\p{L}*|perfume\p{L}*|aroma\p{L}*|fedor|odor\p{L}*|fragrânci\p{L}*|exal\p{L}*)(?![\p{L}])/iu],
+    ['gosto', /(?<![\p{L}])(gosto|sabor\p{L}*|doce|amarg\p{L}*|salgad\p{L}*|azed\p{L}*|prov\p{L}*u|língua|paladar|mordeu)(?![\p{L}])/iu],
+    ['toque', /(?<![\p{L}])(toque|toc\p{L}*|pele|quente|frio|fria|áspero|áspera|macio|macia|calor|arrepi\p{L}*|úmid\p{L}*|gelad\p{L}*|textura)(?![\p{L}])/iu]];
+  function checkRules(text, rules) {
+    const plain = storyPlain(text || ''), words = countWords(plain), paras = mdParas(plain).filter(t => !isSceneBreak(t));
+    const isFala = (t) => /^\s*[—–-]/.test(t), falas = paras.filter(isFala).length, low = plain.toLocaleLowerCase('pt-BR');
+    const has = (w) => new RegExp(`(?<![\\p{L}])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')}(?![\\p{L}])`, 'iu').test(low);
+    return (rules || []).map(r => {
+      switch (r.t) {
+        case 'min': return { ok: words >= r.n, label: `Pelo menos ${fmtNum(r.n)} palavras`, d: `agora: ${fmtNum(words)}` };
+        case 'max': return { ok: words <= r.n && words > 0, label: `No máximo ${fmtNum(r.n)} palavras`, d: `agora: ${fmtNum(words)}` };
+        case 'exact': return { ok: words === r.n, label: `Exatamente ${fmtNum(r.n)} palavras`, d: `agora: ${fmtNum(words)}` };
+        case 'forbid': { const f = r.w.filter(has); return { ok: !f.length && words > 0, label: r.label, d: f.length ? `apareceu: ${f.join(', ')}` : '' }; }
+        case 'require': { const f = r.w.filter(has); return { ok: f.length > 0, label: r.label, d: '' }; }
+        case 'falas': return { ok: falas >= r.n, label: `Pelo menos ${r.n} falas (com travessão)`, d: `agora: ${falas}` };
+        case 'soDialogo': return { ok: paras.length >= 2 && paras.every(isFala), label: 'Só diálogo: todo parágrafo começa com travessão', d: paras.length ? `${paras.length - paras.filter(isFala).length} parágrafo(s) de narração` : '' };
+        case 'semDisse': { const n = (low.match(/(?<![\p{L}])diss(e|eram|era|este)(?![\p{L}])/gu) || []).length; return { ok: !n && falas > 0, label: 'Sem o verbo "disse" (use outros ou nenhum)', d: n ? `${n}× disse` : '' }; }
+        case 'semMente': { const n = (plain.match(/(?<![\p{L}])\p{L}{3,}mente(?![\p{L}])/gu) || []).length; return { ok: !n && words > 0, label: 'Sem advérbios terminados em -mente', d: n ? `${n} encontrado(s)` : '' }; }
+        case 'sentidos': { const f = SENSES.filter(([, re]) => re.test(plain)).map(x => x[0]); return { ok: f.length >= r.n, label: `Pelo menos ${r.n} sentidos (visão, som, cheiro, gosto, toque)`, d: f.length ? `encontrei: ${f.join(', ')}` : '' }; }
+        case 'ritmo': { const sens = plain.split(/[.!?…]+/).map(x => countWords(x)).filter(Boolean), sh = sens.filter(n => n <= 6).length, lg = sens.filter(n => n >= 20).length; return { ok: sh >= 3 && lg >= 2, label: 'Ritmo: 3 frases curtas (até 6 palavras) e 2 longas (20 ou mais)', d: `curtas: ${sh} · longas: ${lg}` }; }
+        case 'primeira': { const narr = paras.filter(t => !isFala(t)).join(' ').toLocaleLowerCase('pt-BR'), n = (narr.match(/(?<![\p{L}])(eu|me|meu|minha|meus|minhas|comigo)(?![\p{L}])/gu) || []).length; return { ok: n >= 3, label: 'Narração em primeira pessoa (eu, me, meu…)', d: `${n} marca(s) de primeira pessoa na narração` }; }
+        case 'fimPergunta': return { ok: /\?\s*$/.test(plain.trim()), label: 'Termina com uma pergunta', d: '' };
+        default: return { ok: true, label: '', d: '' };
+      }
+    });
+  }
+  function rulesList(results) {
+    return el('ul', { class: 'rules' }, results.filter(r => r.label).map(r => el('li', { class: r.ok ? 'ok' : 'no' }, svgIcon(r.ok ? 'circle-check' : 'circle'), el('span', {}, r.label, r.d ? el('span', { class: 'rd', text: ` (${r.d})` }) : null))));
+  }
+  // ---------- histórias de desafio ----------
+  let pickCtx = null;
+  function pickStory(chg) {
+    pickCtx = chg;
+    const stories = projects.filter(p => p.desafio).sort((a, b) => b.updatedAt - a.updatedAt);
+    $('storyPickList').replaceChildren(
+      el('button', { class: 'hub-card', onclick: () => { $('storyPickDlg').close(); startChallenge(null, chg); } }, el('h3', { icon: 'plus', text: 'Começar uma história nova' }), el('p', { text: 'Dê um título depois, quando quiser.' })),
+      ...stories.map(p => el('button', { class: 'hub-card', onclick: () => { $('storyPickDlg').close(); startChallenge(p, chg); } },
+        el('h3', { text: p.title || 'Sem título' }), el('p', { text: `${p.chapters.length} capítulo(s). O desafio vira o próximo capítulo.` }))));
+    if (!stories.length) { startChallenge(null, chg); return; }
+    $('storyPickDlg').showModal();
+  }
+  function startChallenge(story, chg) {
+    if (!story) {
+      story = newProject(); story.desafio = true; story.title = chg.kind === 'd30' ? '30 dias de MM' : `Desafio: ${chg.n}`; story.premise = chg.task; story.adults = true; story.heat = 'leve';
+      if (chg.kind === 'd30') story.d30 = true;
+      projects.push(story);
+    }
+    const ch = { id: uid(), title: chg.n, text: '', status: 'ideia', challenge: { id: chg.id, kind: chg.kind, n: chg.n, task: chg.task, rules: chg.rules, day: chg.day, at: Date.now() } };
+    story.chapters.push(ch); saveProject(story, true);
+    openProject(story.id);
+    view = { tab: 'capitulos', chapterId: ch.id, mode: 'editar' }; renderTab(); renderProjects(); scrollTo(0, 0);
+    toast('Desafio aberto. As regras são conferidas enquanto você escreve ✓');
+  }
+  function startD30(i) {
+    const [t, sub] = OFICINA.d30[i], story = projects.find(p => p.desafio && p.d30);
+    startChallenge(story || null, { id: 'd30-' + (i + 1), kind: 'd30', day: i + 1, n: `Dia ${i + 1}: ${t}`, task: sub, rules: [{ t: 'min', n: 150 }] });
+  }
+  function challengeCard(p, ch, editing) {
+    const c = ch.challenge, text = editing && edit && edit.chId === ch.id ? edit.text : ch.text, res = checkRules(text, c.rules), allOk = res.every(r => r.ok);
+    const box = el('div', { class: 'chal-card', id: 'chalCard' },
+      el('div', { class: 'ck', text: c.kind === 'follow' ? 'Desafio complementar' : c.kind === 'daily' ? 'Desafio do dia' : c.kind === 'd30' ? '30 dias de MM' : 'Desafio' }),
+      el('h3', { text: c.n }), el('p', { text: c.task }), el('div', { id: 'chalRules' }, rulesList(res)),
+      c.done ? el('div', { class: 'row' }, el('span', { class: 'tag', text: `Entregue · nota ${c.done.score} · +${c.done.xp} XP` }),
+          el('button', { class: 'primary', icon: 'sparkles', text: 'Próximo desafio para esta história', onclick: () => guardEdit(() => showResult(p, ch)) }))
+        : el('div', { class: 'row' }, el('button', { class: 'primary', id: 'chalDeliver', icon: 'check', text: 'Entregar desafio', disabled: !allOk, title: allOk ? '' : 'Cumpra as regras para entregar', onclick: () => deliverChallenge(p, ch) }),
+          !allOk ? el('span', { class: 'hint', style: 'margin:0', text: 'Cumpra as regras para entregar.' }) : null));
+    return box;
+  }
+  let liveT = null;
+  function liveChallenge(ch, text) {
+    clearTimeout(liveT);
+    liveT = setTimeout(() => {
+      const box = $('chalRules'); if (!box || !ch.challenge) return;
+      const res = checkRules(text, ch.challenge.rules); box.replaceChildren(rulesList(res));
+      const b = $('chalDeliver'); if (b) b.disabled = !res.every(r => r.ok);
+    }, 250);
+  }
+  async function deliverChallenge(p, ch) {
+    if (edit && edit.chId === ch.id && editDirty()) saveEdit();
+    const text = ch.text, res = checkRules(text, ch.challenge.rules);
+    if (!res.every(r => r.ok)) { toast('Ainda falta cumprir alguma regra.'); return; }
+    try { await loadSpeller(); } catch {}
+    const issues = [...reviewText(text, isPtBr(p)), ...spellIssues(text, p)], count = (k) => issues.filter(x => x.kind === k).length;
+    const words = countWords(storyPlain(text)), per = Math.max(1, words / 100);
+    // nota: pontos perdidos a cada 100 palavras (grafia pesa mais que estilo)
+    const pen = (count('orto') * 4 + count('pont') * 3 + count('trad') * 2 + count('rep') * .7 + count('estilo') * .7) / per;
+    const score = Math.max(40, Math.min(100, Math.round(100 - pen * 3)));
+    const cc = chal(), xp = gainXP(cc, 40 + Math.round(score / 2) + (ch.challenge.kind === 'daily' ? 20 : 0), `Desafio: ${ch.challenge.n}`);
+    ch.challenge.done = { at: Date.now(), score, xp, counts: { orto: count('orto'), pont: count('pont'), trad: count('trad'), rep: count('rep'), estilo: count('estilo') } };
+    ch.status = 'pronto';
+    if (ch.challenge.kind === 'lesson') { const L = cc.lessons = cc.lessons || {}, prev = L[ch.challenge.id] || { best: 0 }; L[ch.challenge.id] = { best: Math.max(prev.best, score), done: true }; }
+    if (ch.challenge.kind === 'daily') { cc.daily = cc.daily || {}; cc.daily[dayKey()] = true; }
+    if (ch.challenge.kind === 'd30') { cc.d30 = [...new Set([...(cc.d30 || []), ch.challenge.day])].sort((a, b) => a - b); }
+    saveChal(cc); saveProject(p, true);
+    view.mode = 'ler'; renderChapters(); renderProjects();
+    showResult(p, ch);
+  }
+  function showResult(p, ch) {
+    const d = ch.challenge.done, k = d.counts || {}, used = new Set(p.chapters.map(x => x.challenge && x.challenge.id));
+    const fb = [];
+    if (k.orto) fb.push(`${k.orto} palavra(s) fora do dicionário (confira a grafia).`);
+    if (k.pont) fb.push(`${k.pont} ajuste(s) de pontuação.`);
+    if (k.trad) fb.push(`${k.trad} trecho(s) com cara de tradução.`);
+    if (k.rep) fb.push(`${k.rep} repetição(ões) de palavra próxima.`);
+    if (k.estilo) fb.push(`${k.estilo} ponto(s) de estilo (clichês, frases longas, -mente).`);
+    const next = DESAFIOS.follow.filter(f => !used.has(f.id)).slice(0, 3);
+    $('chalResultBody').replaceChildren(
+      el('div', { class: 'result-score', text: String(d.score) }),
+      el('p', { style: 'text-align:center;margin:0 0 8px', text: `${d.score >= 90 ? 'Excelente!' : d.score >= 70 ? 'Muito bom!' : 'Bom começo!'} +${d.xp} XP` }),
+      rulesList(checkRules(ch.text, ch.challenge.rules)),
+      el('div', { class: 'result-fb' }, fb.length ? fb.map(x => el('div', { text: '• ' + x })) : el('div', { text: '• Texto limpo: nada a apontar na revisão automática ✓' })),
+      fb.length ? el('button', { class: 'link plain', icon: 'list-checks', text: 'Abrir o Revisor neste capítulo', onclick: () => { $('chalResultDlg').close(); reviewWanted = ch.id; view.mode = 'editar'; renderChapters(); } }) : null,
+      next.length ? el('h3', { style: 'margin:14px 0 6px', text: 'Evolua esta história com outro desafio' }) : null,
+      el('div', { class: 'story-pick' }, next.map(f => el('button', { class: 'hub-card', onclick: () => { $('chalResultDlg').close(); startChallenge(p, { id: f.id, kind: 'follow', n: f.n, task: f.task, rules: f.rules }); } },
+        el('h3', { text: f.n }), el('p', { text: f.task })))),
+      el('div', { class: 'row end', style: 'margin-top:12px' }, el('button', { text: 'Voltar ao painel', onclick: () => { $('chalResultDlg').close(); openHub(); } })));
+    $('chalResultDlg').showModal();
+  }
+
+  // ---------- novo capítulo com modelo de cena (guia passo a passo) ----------
+  function openScenePick(p) {
+    $('scenePickList').replaceChildren(...OFICINA.scenes.map(sc => el('button', { class: 'hub-card', onclick: () => {
+      $('scenePickDlg').close();
+      const ch = { id: uid(), title: sc.n, text: '', status: 'ideia', guide: { n: sc.n, b: sc.b, t: sc.t, done: [] } };
+      p.chapters.push(ch); saveProject(p, true);
+      view = { tab: 'capitulos', chapterId: ch.id, mode: 'editar' }; renderTab(); renderProjects(); scrollTo(0, 0);
+    } }, el('h3', { text: sc.n }), el('p', { text: sc.d }))));
+    $('scenePickDlg').showModal();
+  }
+  function guideCard(p, ch) {
+    const g = ch.guide, done = new Set(g.done || []);
+    if (g.hidden) return el('div', { class: 'row', style: 'margin:0 0 8px' }, el('button', { class: 'link plain', icon: 'layout-grid', text: `Mostrar o guia: ${g.n}`, onclick: () => { g.hidden = false; saveProject(p); renderChapters(); } }));
+    const head = el('b', { text: `Guia: ${g.n} · ${done.size}/${g.b.length}` });
+    return el('div', { class: 'guide-card' },
+      el('div', { class: 'row', style: 'justify-content:space-between' }, head,
+        el('button', { class: 'link plain', text: 'Esconder', onclick: () => { g.hidden = true; saveProject(p); renderChapters(); } })),
+      el('ol', {}, g.b.map((step, i) => {
+        const cb = el('input', { type: 'checkbox' }); cb.checked = done.has(i);
+        cb.addEventListener('change', () => { g.done = cb.checked ? [...new Set([...(g.done || []), i])] : (g.done || []).filter(x => x !== i); saveProject(p); cb.closest('label').classList.toggle('done', cb.checked); head.textContent = `Guia: ${g.n} · ${(g.done || []).length}/${g.b.length}`; if ((g.done || []).length === g.b.length) toast('Guia completo! Cena pronta para revisar ✓'); });
+        return el('li', {}, el('label', { class: 'check' + (done.has(i) ? ' done' : '') }, cb, el('span', { text: `${i + 1}. ${step}` })));
+      })),
+      el('p', { class: 'of-tip', text: 'Dica: ' + g.t }));
+  }
+  // ---------- dicas no Editar (destravar), fecháveis ----------
+  const tipsClosed = new Set(); let tipN = Math.floor(Math.random() * 50);
+  function tipCard(p, ch) {
+    if (local.get('fanfic.tipsOff', false) || tipsClosed.has(ch.id)) return null;
+    const empty = !((edit && edit.chId === ch.id ? edit.text : ch.text) || '').trim();
+    const box = el('div', { class: 'tip-card', role: 'note' });
+    const paint = () => {
+      let body;
+      if (empty && tipN % 3 === 0) {
+        const f = pick(OFICINA.openings, tipN);
+        body = [el('p', {}, el('b', { text: 'Primeira frase? ' }), el('i', { text: f })), el('div', { class: 'row' },
+          el('button', { text: 'Usar esta frase', onclick: () => { const ta = $('chBody'); if (ta) { fmtInsert(ta, f + '\n\n'); tipsClosed.add(ch.id); box.remove(); } } }),
+          el('button', { class: 'link plain', icon: 'shuffle', text: 'Outra dica', onclick: () => { tipN++; paint(); } }))];
+      } else {
+        const list = empty ? [...DESAFIOS.tipsStart, ...OFICINA.questions] : [...DESAFIOS.tipsWriting, ...OFICINA.questions];
+        body = [el('p', { text: pick(list, tipN) }), el('div', { class: 'row' },
+          el('button', { class: 'link plain', icon: 'shuffle', text: 'Outra dica', onclick: () => { tipN++; paint(); } }),
+          el('button', { class: 'link plain', text: 'Expressões e mais ideias', onclick: () => openOficina(p, { ta: $('chBody'), ch }) }),
+          el('button', { class: 'link plain', text: 'Não mostrar dicas', onclick: () => { local.set('fanfic.tipsOff', true); box.remove(); toast('Dicas desligadas. Dá para religar no botão Ideias.'); } }))];
+      }
+      box.replaceChildren(svgIcon('lightbulb'), el('div', { class: 'tc-body' }, ...body), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar a dica', onclick: () => { tipsClosed.add(ch.id); box.remove(); } }));
+    };
+    paint();
+    return box;
   }
 
   // =====================================================================
@@ -9256,6 +9689,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     syncStarted = true;
     if (!projects.length) startDraft();
     else { if (!cur()) currentId = projects.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0].id; openProject(currentId); }
+    if (appMode === 'desafios') openHub(); else renderProjects();
     await finishDropboxLogin();
     renderSyncLine();
     if (syncReady()) syncNow();

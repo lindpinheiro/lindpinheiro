@@ -423,6 +423,12 @@
   .gen-adult input { margin-top: 4px; accent-color: var(--accent); }
   .gen-prov, .gen-prompt { margin-top: 12px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
   .gen-prov summary, .gen-prompt summary { cursor: pointer; font-weight: 600; }
+  .gp-help { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: .92rem; }
+  .gp-help ol { margin: 6px 0 0; padding-left: 20px; } .gp-help li { margin: 3px 0; }
+  .gp-adv { margin-top: 12px; } .gp-adv summary { font-weight: 600; cursor: pointer; color: var(--muted); }
+  .gp-now { margin: 8px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--ok-soft); color: var(--ok); font-weight: 600; }
+  .gp-now:empty { display: none; }
+  #gpMsg.err { color: var(--danger); font-weight: 600; } #gpMsg.ok { color: var(--ok); font-weight: 600; }
   .gen-prompt textarea { width: 100%; margin-top: 8px; font-size: .9rem; }
   .gen-refs { display: flex; flex-wrap: wrap; gap: 8px; }
   .gen-ref { position: relative; width: 76px; height: 76px; min-height: 0; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid var(--border); background: var(--surface-2); }
@@ -1649,15 +1655,19 @@
   <p class="hint" id="genCost"></p>
   <details class="gen-prov" id="genProvBox">
     <summary>Provedor de imagens sem censura (para cenas adultas)</summary>
-    <p class="hint">Use a sua conta em um serviço que gera imagens adultas e aceita chamadas pela API, como o Venice.ai ou o Together.ai. A chave fica guardada só neste aparelho.</p>
+    <p class="gp-now" id="gpNow"></p>
+    <p class="hint">Use a sua conta em um serviço que gera imagens adultas e aceita chamadas pela API. A chave fica guardada só neste aparelho. A chave do OpenRouter <b>não</b> funciona aqui: cada serviço tem a sua.</p>
     <label for="gpPreset">Serviço</label>
-    <select id="gpPreset"><option value="venice">Venice.ai</option><option value="together">Together.ai (FLUX)</option><option value="openai">Outro compatível com a API da OpenAI</option></select>
-    <label for="gpBase">Endereço da API</label><input type="text" inputmode="url" id="gpBase" placeholder="https://api.venice.ai/api/v1">
-    <label for="gpKey">Chave da API</label><input type="password" id="gpKey" autocomplete="off" placeholder="Cole aqui a chave do serviço">
-    <label for="gpModel">Modelo</label><input type="text" id="gpModel" list="gpModels" placeholder="Ex.: lustify-sdxl"><datalist id="gpModels"></datalist>
+    <select id="gpPreset"><option value="venice">Venice.ai</option><option value="together">Together.ai (FLUX)</option><option value="openai">Outro compatível com a API da OpenAI (avançado)</option></select>
+    <div class="gp-help" id="gpHelp"></div>
+    <label for="gpKey">Chave da API</label><input type="password" id="gpKey" autocomplete="off" placeholder="Cole aqui a chave de API do serviço escolhido">
+    <details class="gp-adv" id="gpAdv"><summary>Endereço, modelo e parâmetros (já vêm preenchidos)</summary>
+    <label for="gpBase">Endereço da API</label><input type="text" inputmode="url" id="gpBase" placeholder="Endereço da API, começando com https://">
+    <label for="gpModel">Modelo</label><input type="text" id="gpModel" list="gpModels" placeholder="Nome do modelo de imagem"><datalist id="gpModels"></datalist>
     <label class="check"><input type="checkbox" id="gpEn" checked><span>Traduzir o pedido para inglês antes (esses modelos entendem melhor; usa um pouquinho do modelo de texto)</span></label>
-    <label for="gpExtra">Parâmetros extras (JSON, opcional)</label><input type="text" id="gpExtra" placeholder='{"safe_mode": false}'>
-    <div class="row" style="margin-top:10px"><button type="button" class="primary" id="gpSave">Salvar e usar</button><button type="button" id="gpList">Ver modelos do serviço</button><button type="button" class="link plain" id="gpOff">Remover</button></div>
+    <label for="gpExtra">Parâmetros extras (JSON, opcional)</label><input type="text" id="gpExtra" placeholder='Ex.: {"chave": "valor"}'>
+    </details>
+    <div class="row" style="margin-top:10px"><button type="button" class="primary" id="gpSave">Salvar e usar</button><button type="button" id="gpTest">Testar a chave</button><button type="button" id="gpList">Ver modelos do serviço</button><button type="button" class="link plain" id="gpOff">Remover</button></div>
     <p class="hint" id="gpMsg"></p>
   </details>
   <details class="gen-prompt" id="genPromptBox">
@@ -6109,33 +6119,64 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('genPromptBox').addEventListener('toggle', () => { if ($('genPromptBox').open) genPromptFill(); });
   let costLineRefresh = () => {};
   // provedor sem censura (API de imagens compatível)
+  const GP_NAME = { venice: 'Venice.ai', together: 'Together.ai', openai: 'o serviço' };
+  const GP_HELP = {
+    venice: ['Venice.ai', 'https://venice.ai/settings/api', ['Entre na sua conta do Venice.ai.', 'Abra Configurações → API (botão abaixo) e crie uma chave de API.', 'A conta precisa ter acesso à API (plano ou crédito de API).', 'Copie a chave inteira e cole aqui embaixo. Endereço e modelo já vêm prontos.']],
+    together: ['Together.ai', 'https://api.together.ai/settings/api-keys', ['Entre na sua conta do Together.ai.', 'Abra Settings → API Keys (botão abaixo) e copie a chave.', 'A conta precisa ter crédito.', 'Cole a chave aqui embaixo. Endereço e modelo já vêm prontos.']],
+    openai: ['', '', ['Para outro serviço, abra "Endereço, modelo e parâmetros" e preencha o endereço da API (termina em /v1), o nome do modelo e a chave, conforme a documentação do serviço.']] };
+  // tira "Bearer", aspas e espaços que vêm junto quando a pessoa copia a chave
+  const gpCleanKey = (k) => (k || '').trim().replace(/^["'`]+|["'`]+$/g, '').trim().replace(/^bearer\s+/i, '').replace(/\s+/g, '');
+  function gpHelp() {
+    const pre = $('gpPreset').value, [name, link, steps] = GP_HELP[pre];
+    $('gpHelp').replaceChildren(el('b', { text: name ? `Como pegar a chave no ${name}:` : 'Outro serviço:' }), el('ol', {}, steps.map(t => el('li', { text: t }))),
+      link ? el('a', { class: 'btn link plain', href: link, target: '_blank', rel: 'noopener', iconEnd: 'external-link', text: `Abrir a página de chaves do ${name}` }) : '');
+    $('gpAdv').open = pre === 'openai';
+  }
   function gpFill() {
     const g = gpCfg() || {}, pre = g.preset || 'venice', P = GP_PRESETS[pre];
     $('gpPreset').value = pre; $('gpBase').value = g.base || P.base; $('gpKey').value = g.key || ''; $('gpModel').value = g.model || P.model;
-    $('gpExtra').value = g.extra ?? P.extra; $('gpEn').checked = g.en !== false; $('gpOff').hidden = !g.key; $('gpMsg').textContent = '';
+    $('gpExtra').value = g.extra ?? P.extra; $('gpEn').checked = g.en !== false; $('gpOff').hidden = !g.key; gpMsg('');
+    $('gpNow').textContent = g.key ? `Em uso: ${GP_HELP[g.preset] && GP_HELP[g.preset][0] || g.base} · modelo ${g.model} · chave terminando em …${g.key.slice(-4)}` : '';
+    gpHelp();
   }
-  $('gpPreset').addEventListener('change', () => { const P = GP_PRESETS[$('gpPreset').value]; $('gpBase').value = P.base; $('gpModel').value = P.model; $('gpExtra').value = P.extra; });
+  const gpMsg = (t, kind) => { $('gpMsg').textContent = t; $('gpMsg').className = 'hint' + (kind ? ' ' + kind : ''); };
+  $('gpPreset').addEventListener('change', () => { const P = GP_PRESETS[$('gpPreset').value]; $('gpBase').value = P.base; $('gpModel').value = P.model; $('gpExtra').value = P.extra; gpMsg(''); gpHelp(); });
+  // confere a chave sem gerar imagem (quando o serviço permite)
+  $('gpTest').addEventListener('click', async () => {
+    const pre = $('gpPreset').value, base = $('gpBase').value.trim().replace(/\/+$/, ''), key = gpCleanKey($('gpKey').value);
+    if (!key) { gpMsg('Cole a chave primeiro.', 'err'); return; }
+    if (!/^https:\/\//.test(base)) { gpMsg('Falta o endereço da API (em "Endereço, modelo e parâmetros").', 'err'); $('gpAdv').open = true; return; }
+    gpMsg('Conferindo a chave…');
+    try {
+      const res = await fetch(base + (pre === 'venice' ? '/api_keys/rate_limits' : '/models'), { headers: { Authorization: 'Bearer ' + key } });
+      if (res.status === 401 || res.status === 403) gpMsg(`O ${GP_NAME[pre]} recusou esta chave (${res.status}). Confira se é a chave de API desse serviço, copiada inteira, e se a conta tem acesso à API.`, 'err');
+      else if (res.ok) gpMsg('Chave aceita ✓ Toque em "Salvar e usar".', 'ok');
+      else gpMsg(`Não deu para conferir a chave sem gerar uma imagem (o serviço respondeu ${res.status}). Salve e tente gerar.`);
+    } catch (e) { gpMsg('Não consegui falar com o serviço daqui (internet, endereço errado, ou o serviço não aceita chamadas direto do navegador).', 'err'); }
+  });
   $('gpSave').addEventListener('click', () => {
-    const pre = $('gpPreset').value, base = $('gpBase').value.trim().replace(/\/+$/, ''), key = $('gpKey').value.trim(), model = $('gpModel').value.trim(), extra = $('gpExtra').value.trim();
-    if (!/^https:\/\//.test(base)) { $('gpMsg').textContent = 'Coloque o endereço da API (começa com https://).'; return; }
-    if (!key || !model) { $('gpMsg').textContent = 'Falta a chave ou o modelo.'; return; }
-    if (extra) { try { JSON.parse(extra); } catch { $('gpMsg').textContent = 'Os parâmetros extras precisam ser um JSON válido, como {"safe_mode": false}.'; return; } }
+    const pre = $('gpPreset').value, base = $('gpBase').value.trim().replace(/\/+$/, ''), key = gpCleanKey($('gpKey').value), model = $('gpModel').value.trim(), extra = $('gpExtra').value.trim();
+    if (!key) { gpMsg('Cole a chave de API do serviço.', 'err'); $('gpKey').focus(); return; }
+    if (!/^https:\/\//.test(base)) { gpMsg('Falta o endereço da API (começa com https://). Ele fica em "Endereço, modelo e parâmetros".', 'err'); $('gpAdv').open = true; $('gpBase').focus(); return; }
+    if (!model) { gpMsg('Falta o nome do modelo (em "Endereço, modelo e parâmetros").', 'err'); $('gpAdv').open = true; $('gpModel').focus(); return; }
+    if (/^sk-or-/.test(key)) { gpMsg('Essa é uma chave do OpenRouter. Aqui precisa da chave do próprio serviço de imagens.', 'err'); return; }
+    if (extra) { try { JSON.parse(extra); } catch { gpMsg('Os parâmetros extras precisam ser um JSON válido, como {"safe_mode": false}.', 'err'); $('gpAdv').open = true; return; } }
     settings.imgProv = { preset: pre, base, key, model, extra, en: $('gpEn').checked, style: GP_PRESETS[pre].style };
     settings.imageModel = '__prov'; saveSettings();
     if (genCtx) genFillModels();
-    $('gpMsg').textContent = 'Salvo ✓ O modelo de imagem agora é o do seu provedor.'; $('gpOff').hidden = false;
+    gpFill(); gpMsg('Salvo ✓ O modelo de imagem agora é o do seu provedor.', 'ok');
   });
   $('gpOff').addEventListener('click', () => { delete settings.imgProv; if (settings.imageModel === '__prov') settings.imageModel = ''; saveSettings(); gpFill(); if (genCtx) genFillModels(); });
   $('gpList').addEventListener('click', async () => {
-    const base = $('gpBase').value.trim().replace(/\/+$/, ''), key = $('gpKey').value.trim();
-    $('gpMsg').textContent = 'Buscando os modelos…';
+    const base = $('gpBase').value.trim().replace(/\/+$/, ''), key = gpCleanKey($('gpKey').value);
+    gpMsg('Buscando os modelos…'); $('gpAdv').open = true;
     try {
       const res = await fetch(base + '/models' + ($('gpPreset').value === 'venice' ? '?type=image' : ''), { headers: key ? { Authorization: 'Bearer ' + key } : {} });
       if (!res.ok) throw new Error('o serviço respondeu ' + res.status);
       const j = await res.json(), list = (Array.isArray(j) ? j : j.data || []).filter(m => m && m.id && (!m.type || /image/i.test(m.type)));
       $('gpModels').replaceChildren(...list.map(m => el('option', { value: m.id, text: [m.display_name || (m.model_spec && m.model_spec.name) || '', (m.model_spec && (m.model_spec.traits || []).join(', ')) || ''].filter(Boolean).join(' · ') })));
-      $('gpMsg').textContent = list.length ? `${list.length} modelo(s). Toque no campo Modelo para escolher.` : 'O serviço não listou modelos de imagem.';
-    } catch (e) { $('gpMsg').textContent = `Não consegui listar (${e.message === 'Failed to fetch' ? 'o serviço pode não aceitar chamadas direto do navegador' : e.message}). Digite o nome do modelo.`; }
+      gpMsg(list.length ? `${list.length} modelo(s). Toque no campo Modelo para escolher.` : 'O serviço não listou modelos de imagem.', list.length ? 'ok' : '');
+    } catch (e) { gpMsg(`Não consegui listar (${e.message === 'Failed to fetch' ? 'o serviço pode não aceitar chamadas direto do navegador' : e.message}). Digite o nome do modelo.`, 'err'); }
   });
   async function requestProvImage(prompt, aspect, signal) {
     const g = gpCfg(); if (!g) throw new Error('Configure o provedor sem censura primeiro.');
@@ -6147,7 +6188,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     let res;
     try { res = await fetch(url, { method: 'POST', signal, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + g.key }, body: JSON.stringify(body) }); }
     catch (e) { if (e.name === 'AbortError') throw e; throw Object.assign(new Error('Não consegui falar com o provedor de imagens. Confira a internet e o endereço da API (alguns serviços não aceitam chamadas direto do navegador).'), { charged: false }); }
-    if (!res.ok) { let msg = await res.text(); try { const j = JSON.parse(msg); msg = (j.error && (j.error.message || j.error)) || j.message || j.details || msg; } catch {} throw Object.assign(new Error(`O provedor de imagens respondeu com erro (${res.status}): ${String(typeof msg === 'string' ? msg : JSON.stringify(msg)).slice(0, 220)}`), { action: res.status === 401 ? null : 'model' }); }
+    if (!res.ok) {
+      let msg = await res.text(); try { const j = JSON.parse(msg); msg = (j.error && (j.error.message || j.error)) || j.message || j.details || msg; } catch {}
+      msg = String(typeof msg === 'string' ? msg : JSON.stringify(msg)).slice(0, 220);
+      const who = GP_NAME[g.preset] || 'O provedor', st = res.status;
+      const why = st === 401 || st === 403 ? `${who === 'o serviço' ? 'O serviço' : 'O ' + who} recusou a chave (${st}: ${msg}). Confira no quadro "Provedor de imagens sem censura": a chave tem que ser a chave de API desse serviço (não a do OpenRouter), copiada inteira, e a conta precisa ter acesso à API. Use "Testar a chave".`
+        : st === 402 || /credit|balance|insufficient|payment/i.test(msg) ? `Sem crédito no ${who} (${st}: ${msg}). Adicione crédito de API na conta de lá.`
+        : st === 404 ? `Endereço ou modelo não encontrado (${st}: ${msg}). Confira o endereço da API e o nome do modelo ("Ver modelos do serviço" ajuda).`
+        : st === 429 ? `Limite de uso do ${who} atingido agora (${msg}). Espere um pouco e tente de novo.`
+        : `O provedor de imagens respondeu com erro (${st}): ${msg}`;
+      throw Object.assign(new Error(why), { action: null });
+    }
     const ct = res.headers.get('content-type') || '';
     if (/^image\//.test(ct)) { const blob = await res.blob(); return { url: URL.createObjectURL(blob), blob }; }
     const j = await res.json(), d = (j.data && j.data[0]) || null, b64 = (j.images && j.images[0]) || (d && d.b64_json);
@@ -6332,7 +6383,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         : 'Pronto! A imagem ficou guardada nas Referências. Toque em Gerar imagem para fazer outra.', 'ok');
     } catch (e) {
       if (e.name === 'AbortError') genStatus('Parado.');
-      else { genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ` Toque em "${base ? 'Gerar versão melhorada' : 'Gerar imagem'}" para tentar de novo.`, 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
+      else { if (prov && /chave|crédito|Endereço/.test(e.message || '')) { $('genProvBox').open = true; gpMsg(e.message, 'err'); }
+        genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ` Toque em "${base ? 'Gerar versão melhorada' : 'Gerar imagem'}" para tentar de novo.`, 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
     } finally {
       job.stop(); c.ctrl = null; genGoLabel(false);
       if (currentId === p.id) renderTab();

@@ -698,11 +698,32 @@
   .b3-stage:fullscreen .b3-float, .b3-stage.full .b3-float { display: flex; }
   .b3-stage.idle .b3-float, .b3-stage.idle .b3-expand { opacity: 0; pointer-events: none; }
   .b3-hint { text-align: center; margin: 8px 0 0; }
+  .b3-hot { display: grid; gap: 6px; margin-top: 8px; max-height: 260px; overflow: auto; }
+  .b3-hot label { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; font-weight: 400; font-size: .88rem; cursor: pointer; }
+  .b3-hot label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .b3-hot input { margin-top: 3px; accent-color: var(--accent); }
+  .b3-hot b { display: block; font-size: .78rem; color: var(--muted); }
   .book3d { position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d; transition: transform .9s cubic-bezier(.2,.8,.2,1); }
   .book3d.live { transition: none; }
   .b3-face { position: absolute; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
   .b3-cover { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: left center; transform: translateZ(calc(var(--d) / 2)); transition: transform 1.3s cubic-bezier(.45,.05,.2,1); }
   .book3d.open .b3-cover { transform: translateZ(calc(var(--d) / 2)) rotateY(-162deg); }
+  .book3d.leaves.open .b3-cover { transform: translateZ(calc(var(--d) / 2)) rotateY(-179deg); }
+  .book3d.leaves:not(.open) .b3-cover { transition-delay: .35s; }
+  /* folhas que passam rápido ao abrir */
+  .b3-leaf { position: absolute; width: calc(var(--w) - 4px); height: calc(var(--h) - 6px); top: 3px; left: 0; transform-style: preserve-3d; transform-origin: left center;
+    transform: translateZ(calc(var(--d) / 2 - .4px - var(--i) * .1px)); transition: transform .32s cubic-bezier(.4,0,.6,1) calc((var(--n) - var(--i)) * 18ms); }
+  .book3d.flip .b3-leaf { transform: translateZ(calc(var(--d) / 2 - .4px - var(--i) * .1px)) rotateY(calc(-177deg + var(--i) * .55deg)); transition: transform .5s cubic-bezier(.3,.1,.25,1) calc(.6s + var(--i) * 75ms); }
+  .b3-leaf > .b3-face { inset: 0; }
+  .b3-leaf .lf-b { transform: rotateY(180deg); }
+  .b3-pg { background: linear-gradient(90deg, #d8d0c2, #f6f1e7 6%, #fbf8f1); color: #2a2124; font-family: Georgia, serif; padding: 16px 20px 16px 24px; display: flex; flex-direction: column; }
+  .b3-pg.lft { background: linear-gradient(270deg, #d8d0c2, #f6f1e7 6%, #fbf8f1); padding: 16px 24px 16px 20px; }
+  .b3-pg .ph { font-size: 7.5px; letter-spacing: .16em; text-transform: uppercase; text-align: center; color: #8a6d75; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .b3-pg .fx { font-size: 9.5px; line-height: 1.6; text-align: justify; hyphens: auto; overflow: hidden; flex: 1; white-space: pre-line; }
+  .b3-pg .fn { font-size: 9px; text-align: center; color: #8a6d75; margin-top: 6px; }
+  .b3-hl { color: inherit; padding: 0 1px; border-radius: 2px; background: linear-gradient(100deg, rgba(255,92,150,.0), rgba(255,92,150,.5) 4%, rgba(255,120,170,.45) 96%, rgba(255,92,150,0)) no-repeat 0 0 / 0% 100%; }
+  .book3d.flip .b3-hl { background-size: 100% 100%; transition: background-size 1.1s ease-in-out 1.9s; }
+  .b3-hl-tag { display: inline-block; margin-left: 4px; font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: #c2185b; font-weight: 700; }
   .b3-front, .b3-back { inset: 0; border-radius: 2px 5px 5px 2px; }
   .b3-front { background: #3a2530; }
   .b3-front img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; user-select: none; }
@@ -714,13 +735,13 @@
     display: flex; align-items: center; justify-content: center; color: var(--spine-ink); font-family: Georgia, serif; }
   .b3-inside div { border: 1px solid currentColor; padding: 14px 18px; text-align: center; font-size: 11px; line-height: 1.5; opacity: .85; max-width: 72%; }
   .b3-inside b { display: block; font-size: 14px; font-style: italic; }
-  .b3-first { width: calc(var(--w) - 4px); height: calc(var(--h) - 6px); top: 3px; left: 0; transform: translateZ(calc(var(--d) / 2 - 1px)); background: linear-gradient(90deg, #d8d0c2, #f6f1e7 6%, #fbf8f1);
+  .b3-first { width: calc(var(--w) - 4px); height: calc(var(--h) - 6px); top: 3px; left: 0; transform: translateZ(calc(var(--d) / 2 - 2.2px)); background: linear-gradient(90deg, #d8d0c2, #f6f1e7 6%, #fbf8f1);
     color: #2a2124; font-family: Georgia, serif; padding: 26px 20px 20px 24px; display: flex; flex-direction: column; }
-  .b3-first .fk { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; text-align: center; color: #8a6d75; }
-  .b3-first .ft { font-size: 15px; font-weight: 700; text-align: center; margin: 4px 0 14px; line-height: 1.25; }
+  .b3-first .fk, .b3-pg .fk { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; text-align: center; color: #8a6d75; }
+  .b3-first .ft, .b3-pg .ft { font-size: 15px; font-weight: 700; text-align: center; margin: 4px 0 14px; line-height: 1.25; }
   .b3-first .fx { font-size: 9.5px; line-height: 1.6; text-align: justify; hyphens: auto; overflow: hidden; flex: 1; white-space: pre-line;
     -webkit-mask-image: linear-gradient(#000 80%, transparent); mask-image: linear-gradient(#000 80%, transparent); }
-  .b3-first .fx::first-letter { float: left; font-size: 34px; line-height: .9; padding: 3px 4px 0 0; color: #9b4d63; font-weight: 700; }
+  .b3-first.drop .fx::first-letter, .b3-pg.drop .fx::first-letter { float: left; font-size: 34px; line-height: .9; padding: 3px 4px 0 0; color: #9b4d63; font-weight: 700; }
   .b3-first .fn { font-size: 9px; text-align: center; color: #8a6d75; margin-top: 6px; }
   .b3-back { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); background: var(--spine); color: var(--spine-ink); font-family: Georgia, serif; }
   .book3d.fb .b3-back, .book3d.bb .b3-cover { visibility: hidden; }
@@ -1801,6 +1822,8 @@
         <div class="b3-float" id="b3Float">
           <button type="button" data-b3act="open"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg><span>Abrir</span></button>
           <button type="button" data-b3act="motion"><svg class="icon" aria-hidden="true"><use href="#i-rotate-3d"/></svg><span>Movimento</span></button>
+          <button type="button" data-b3act="far" aria-label="Mais longe" title="Mais longe (ou role o mouse)"><svg class="icon" aria-hidden="true"><use href="#i-zoom-out"/></svg></button>
+          <button type="button" data-b3act="near" aria-label="Mais perto" title="Mais perto (ou role o mouse)"><svg class="icon" aria-hidden="true"><use href="#i-zoom-in"/></svg></button>
           <button type="button" data-b3act="exit"><svg class="icon" aria-hidden="true"><use href="#i-minimize-2"/></svg>Sair</button>
         </div>
       </div>
@@ -1808,7 +1831,7 @@
         <button type="button" data-b3="-28,8">Frente</button><button type="button" data-b3="-70,6">Lombada</button><button type="button" data-b3="160,6">Contracapa</button>
         <button type="button" id="b3Open"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg><span>Abrir o livro</span></button>
       </div>
-      <p class="hint b3-hint">Arraste para girar. Toque no livro para abrir e fechar.</p>
+      <p class="hint b3-hint">Arraste para girar. Toque no livro para abrir e fechar. Role o mouse para aproximar ou afastar.</p>
     </div>
     <div class="b3-side">
       <div class="card">
@@ -1816,10 +1839,22 @@
         <div class="seg" role="group" aria-label="Movimento do livro" id="b3Motion">
           <button type="button" data-v="parado">Parado</button><button type="button" data-v="girar">Girar sozinho</button><button type="button" data-v="balancar">Balançar</button>
         </div>
+        <label for="b3Zoom">Distância do livro</label>
+        <div class="b3-range"><span class="muted">longe</span><input type="range" id="b3Zoom" min="0.4" max="1.8" step="0.05"><span class="muted">perto</span></div>
         <label for="b3Speed">Velocidade</label>
         <div class="b3-range"><input type="range" id="b3Speed" min="0.2" max="3" step="0.1"><output id="b3SpeedOut"></output></div>
         <label>Fundo</label>
         <div class="b3-sw" id="b3Bg" role="group" aria-label="Fundo"></div>
+      </div>
+      <div class="card">
+        <h3><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg>Ao abrir o livro</h3>
+        <div class="seg" role="group" aria-label="O que aparece ao abrir" id="b3OpenMode">
+          <button type="button" data-v="hot">Folhear até uma cena quente</button><button type="button" data-v="first">Primeira página</button>
+        </div>
+        <div id="b3HotBox">
+          <p class="hint" style="margin:8px 0 0">As páginas passam rápido e o livro para numa cena quente, com a frase grifada. O app escolhe sozinho (sem IA), ou você escolhe:</p>
+          <div class="b3-hot" id="b3HotList" role="radiogroup" aria-label="Cena para mostrar"></div>
+        </div>
       </div>
       <div class="card">
         <h3><svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg>Cor do livro</h3>
@@ -8810,7 +8845,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let b3 = null;
   const bookWords = (p) => p.chapters.reduce((n, c) => n + countWords(c.text), 0);
   const bookPages = (p) => Math.max(24, Math.ceil(bookWords(p) / 250));
-  const B3_DEF = { color: '', pos: 'top', align: 'left', size: 12.5, backRefId: '', blur: 10, veil: 45, motion: 'parado', speed: 1, bg: 'vinho' };
+  const B3_DEF = { color: '', pos: 'top', align: 'left', size: 12.5, backRefId: '', blur: 10, veil: 45, motion: 'parado', speed: 1, bg: 'vinho', zoom: 1, openMode: 'hot', hotKey: '' };
   const B3_BG = { vinho: ['Vinho', 'radial-gradient(ellipse at 50% 85%, rgba(155,77,99,.38), transparent 60%), #241a1e', '#5a2f3c'], noite: ['Noite', 'radial-gradient(ellipse at 50% 80%, #2a2a33, #08080b 70%)', '#101015'],
     papel: ['Papel', 'radial-gradient(ellipse at 50% 80%, #fffaf2, #e7ddcf 75%)', '#efe6d8'], rosa: ['Rosa', 'linear-gradient(160deg, #f8dbe3, #e9b4c3)', '#efc3cf'], lilas: ['Lilás', 'linear-gradient(160deg, #d9d0f2, #9c8bd0)', '#b9acdf'],
     verde: ['Verde (chroma key, para recortar no editor de vídeo)', '#00b140', '#00b140'] };
@@ -8838,7 +8873,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // tamanho do livro na tela: ocupa bem o palco, em qualquer tamanho (e na tela cheia)
   function b3Scale() {
     const st = $('b3Stage'), w = st.clientWidth, h = st.clientHeight; if (!w || !h) return 1;
-    return Math.max(.5, Math.min(h * .74 / 345, w * (b3.open ? .4 : .6) / 230, 3));
+    return Math.max(.2, Math.min(h * .74 / 345, w * (b3.open ? .4 : .6) / 230, 3) * (b3cfg().zoom || 1));
   }
   function b3Apply(anim = true) {
     const bk = $('book3d'); bk.classList.toggle('live', !anim);
@@ -8846,6 +8881,58 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     bk.style.transform = `translateX(${tx}px) scale(${s}) rotateX(${b3.rx}deg) rotateY(${b3.ry}deg)`;
     // o Chrome às vezes deixa as imagens da contracapa vazarem pela frente: some com a face que está de costas
     const cy = Math.cos(b3.ry * Math.PI / 180); bk.classList.toggle('fb', cy > .05); bk.classList.toggle('bb', cy < -.05);
+  }
+  // ---------- a cena quente (sem IA): o trecho com mais palavras de pele, beijo e desejo ----------
+  const HOT_W = (() => { const m = new Map();
+    'gemeu gemido gemidos gemia gemendo tesão excitado excitados ereção nu nus nua despiu despiram despindo despir transar transaram transando sexo gozou gozar orgasmo lambeu lambia lambendo chupou mamilo mamilos virilha ofegante ofegantes arfou arfava arfando sussurrou-lhe gemeram pau membro'.split(' ').forEach(w => m.set(w, 3));
+    'beijo beijos beijou beijava beijaram beijando beijar língua lábios boca pescoço peito pele mordeu mordiscou mordia suor suado suados desejo corpo corpos cama lençol lençóis coxa coxas quadril quadris cintura nuca camisa cinto calça colados colado arrepio arrepiou arrepiado calor quente respiração tocar tremeu tremia apertou'.split(' ').forEach(w => m.set(w, 2));
+    'mão mãos dedos toque tocou tocava abraço abraçou encostou puxou olhar perto devagar'.split(' ').forEach(w => m.set(w, 1));
+    return m; })();
+  const hotScore = (t) => { let n = 0, strong = 0; (t.toLocaleLowerCase('pt-BR').match(/\p{L}+(?:-\p{L}+)*/gu) || []).forEach(w => { const v = HOT_W.get(w) || 0; n += v; if (v >= 2) strong++; }); return { n, strong }; };
+  // o livro inteiro como um texto só, com o começo de cada capítulo
+  function b3Stream(p) {
+    const key = p.chapters.map(c => c.id + ':' + (c.text || '').length).join('|');
+    if (b3.stream && b3.stream.key === key) return b3.stream;
+    let txt = '', chs = [];
+    p.chapters.forEach((c, i) => { const t = storyPlain(c.text || '').trim(); if (!t) return; if (txt) txt += '\n\n'; chs.push({ c, n: i + 1, s: txt.length }); txt += t; chs[chs.length - 1].e = txt.length; });
+    // candidatas: parágrafos com mais "calor" por palavra
+    const cands = []; let m; const re = /[^\n]+/g;
+    while ((m = re.exec(txt))) {
+      const par = m[0], words = (par.match(/\p{L}+/gu) || []).length; if (words < 12) continue;
+      const sc = hotScore(par); if (sc.strong < 2) continue;
+      cands.push({ s: m.index, e: m.index + par.length, score: sc.n / Math.sqrt(words + 15) + sc.strong * .15 });
+    }
+    cands.sort((a, b) => b.score - a.score);
+    const top = []; cands.forEach(c => { if (top.length < 6 && !top.some(x => Math.abs(x.s - c.s) < 1500)) top.push(c); });
+    top.forEach(c => {
+      // a frase mais quente do parágrafo é a que fica grifada
+      let best = null, sm; const sre = /[^.!?…]+[.!?…]*["”»]?/g, par = txt.slice(c.s, c.e);
+      while ((sm = sre.exec(par))) { const tx = sm[0].trim(); if (!tx) continue; const w = (tx.match(/\p{L}+/gu) || []).length, sc = hotScore(tx).n / Math.sqrt(w + 6); if (w >= 4 && (!best || sc > best.sc)) best = { s: c.s + sm.index + sm[0].indexOf(tx), e: c.s + sm.index + sm[0].indexOf(tx) + tx.length, sc }; }
+      c.hl = best || { s: c.s, e: Math.min(c.e, c.s + 160) };
+      const ch = chs.filter(x => x.s <= c.s).pop(); c.ch = ch; c.key = `${ch ? ch.c.id : ''}:${c.s - (ch ? ch.s : 0)}`;
+    });
+    b3.stream = { key, txt, chs, hot: top };
+    return b3.stream;
+  }
+  function b3HotPick() {
+    const st = b3Stream(b3.p), k = b3cfg().hotKey;
+    return st.hot.find(h => h.key === k) || st.hot[0] || null;
+  }
+  // uma página do livro aberto
+  function b3Page(st, from, opt = {}) {
+    const len = opt.len || 640; let a = Math.max(0, from), b;
+    if (opt.to != null) { b = opt.to; a = Math.max(0, b - len); }
+    if (a > 0) { const sp = st.txt.lastIndexOf(' ', a); const nl = st.txt.lastIndexOf('\n', a); a = Math.max(sp, nl) + 1; }
+    if (opt.to == null) { b = Math.min(st.txt.length, a + len); if (b < st.txt.length) { const sp = st.txt.lastIndexOf(' ', b); if (sp > a) b = sp; } }
+    const ch = st.chs.filter(x => x.s <= a).pop();
+    const fx = el('div', { class: 'fx' }), seg = (x, y) => st.txt.slice(x, y).replace(/\n{2,}/g, '\n');
+    if (opt.hl && opt.hl.s < b && opt.hl.e > a) {
+      const hs = Math.max(a, opt.hl.s), he = Math.min(b, opt.hl.e);
+      fx.append(seg(a, hs), el('mark', { class: 'b3-hl', text: seg(hs, he) }), seg(he, b));
+    } else fx.append(seg(a, b));
+    const num = opt.num || Math.max(2, Math.round(a / 1500) + 2);
+    return el('div', { class: 'b3-face b3-pg' + (opt.left ? ' lft' : '') + (opt.cls ? ' ' + opt.cls : '') },
+      el('div', { class: 'ph', text: opt.left ? ((b3.p.title || '').trim() || 'Sem título') : (ch ? (ch.c.title || '').trim() || `Capítulo ${ch.n}` : '') }), fx, el('div', { class: 'fn', text: String(num) }));
   }
   function b3Render() {
     const p = b3.p, cfg = b3cfg(), title = (p.title || '').trim() || 'Sem título', author = (p.author || '').trim();
@@ -8863,9 +8950,24 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const bin = el('div', { class: 'b3-bin' + (back ? ' img' : ''), 'data-pos': cfg.pos },
       el('div', { class: 'b3-btext' }, el('div', { class: 'b3-btitle', text: title }), el('div', { class: 'b3-blurb', text: (p.blurb ?? '').trim() || (p.premise || '').trim() })),
       el('div', { class: 'b3-bfoot' }, el('span', { text: author }), el('div', { class: 'b3-bar', 'aria-hidden': 'true' })));
+    // folhear: a 1ª página, folhas que passam rápido e, no fim, a cena quente grifada
+    const firstPage = (cls) => el('div', { class: cls ? 'b3-face b3-pg drop ' + cls : 'b3-face b3-first drop' }, el('div', { class: 'fk', text: first ? 'Capítulo 1' : '' }), el('div', { class: 'ft', text: first ? (first.title || '').trim() || title : title }),
+      el('div', { class: 'fx', text: firstTxt || 'Era uma vez…' }), el('div', { class: 'fn', text: '1' }));
+    const st = cfg.openMode === 'hot' ? b3Stream(p) : null, hot = st ? b3HotPick() : null, leaves = [];
+    let under = firstPage();
+    if (hot) {
+      const N = 12, start = Math.max(0, st.txt.lastIndexOf('.', Math.max(0, hot.hl.s - 220)) + 1), prevStart = Math.max(0, start - 600), span = Math.max(1, prevStart - 900);
+      const rnum = Math.max(N * 2 + 2, Math.round(start / 1500) + 2);
+      under = b3Page(st, start, { hl: hot.hl, cls: 'b3-first', num: rnum });
+      for (let i = 0; i < N; i++) {
+        const fo = 900 + span * (2 * i - 1) / (2 * N - 1), bo = 900 + span * (2 * i) / (2 * N - 1), pn = (k) => Math.max(k + 1, Math.round((rnum - 2) * k / (2 * N - 1)) + 1);
+        leaves.push(el('div', { class: 'b3-leaf', style: `--i:${i};--n:${N}` }, i === 0 ? firstPage('lf-a') : b3Page(st, fo, { cls: 'lf-a', num: pn(2 * i) }),
+          i === N - 1 ? b3Page(st, 0, { left: true, cls: 'lf-b', to: start, len: 600, num: rnum - 1 }) : b3Page(st, bo, { left: true, cls: 'lf-b', num: pn(2 * i + 1) })));
+      }
+    }
+    bk.classList.toggle('leaves', !!leaves.length); bk.classList.toggle('flip', !!(b3.open && leaves.length));
     bk.replaceChildren(
-      el('div', { class: 'b3-face b3-first' }, el('div', { class: 'fk', text: first ? 'Capítulo 1' : '' }), el('div', { class: 'ft', text: first ? (first.title || '').trim() || title : title }),
-        el('div', { class: 'fx', text: firstTxt || 'Era uma vez…' }), el('div', { class: 'fn', text: '1' })),
+      under, ...leaves,
       el('div', { class: 'b3-cover' },
         el('div', { class: 'b3-face b3-front' }, front),
         el('div', { class: 'b3-face b3-inside' }, el('div', {}, el('b', { text: title }), author ? 'de ' + author : ''))),
@@ -8889,7 +8991,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function b3Controls() {
     const cfg = b3cfg(), seg = (id, v) => $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === v)));
     seg('b3Motion', cfg.motion); seg('b3Pos', cfg.pos); seg('b3Align', cfg.align);
-    $('b3Speed').value = cfg.speed; $('b3SpeedOut').textContent = cfg.speed.toFixed(1) + '×';
+    $('b3Speed').value = cfg.speed; $('b3SpeedOut').textContent = cfg.speed.toFixed(1) + '×'; $('b3Zoom').value = cfg.zoom;
+    seg('b3OpenMode', cfg.openMode); $('b3HotBox').hidden = cfg.openMode !== 'hot';
+    { const stx = b3Stream(b3.p), cur = b3HotPick();
+      $('b3HotList').replaceChildren(...(stx.hot.length ? stx.hot.map((h, i) => {
+        const r = el('input', { type: 'radio', name: 'b3hot' }); r.checked = cur === h;
+        r.addEventListener('change', () => { cfg.hotKey = h.key; b3Save(); b3Render(); if (!b3.open) b3SetOpen(true); });
+        const sen = stx.txt.slice(h.hl.s, h.hl.e).replace(/\s+/g, ' ');
+        return el('label', {}, r, el('span', {}, el('b', { text: `${h.ch ? (h.ch.c.title || '').trim() || 'Capítulo ' + h.ch.n : ''}${i === 0 ? ' · a mais quente' : ''}` }), sen.length > 110 ? sen.slice(0, 110) + '…' : sen));
+      }) : [el('p', { class: 'muted', style: 'margin:0', text: 'Ainda não achei uma cena quente nos capítulos. Enquanto isso, o livro abre na primeira página.' })])); }
     $('b3Size').value = cfg.size; $('b3SizeOut').textContent = cfg.size + ' pt';
     $('b3Blur').value = cfg.blur; $('b3BlurOut').textContent = cfg.blur + ' px';
     $('b3Veil').value = cfg.veil; $('b3VeilOut').textContent = cfg.veil + '%';
@@ -8909,7 +9019,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function b3Stage() { $('b3Stage').style.setProperty('--b3bg', (B3_BG[b3cfg().bg] || B3_BG.vinho)[1]); }
   function b3SetOpen(on) {
-    b3.open = on; $('book3d').classList.toggle('open', on);
+    b3.open = on; $('book3d').classList.toggle('open', on); $('book3d').classList.toggle('flip', on && $('book3d').classList.contains('leaves'));
     if (on) { b3.saved = { rx: b3.rx, ry: b3.ry }; b3.ry = 0; b3.rx = 14; } else if (b3.saved) { b3.rx = b3.saved.rx; b3.ry = b3.saved.ry; }
     if (on && b3cfg().motion === 'girar') b3.ry = 0;
     b3Apply(); b3Controls();
@@ -8963,20 +9073,26 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   function b3Idle() {
     const st = $('b3Stage'); st.classList.remove('idle'); clearTimeout(b3Idle.t);
-    if (document.fullscreenElement === st || st.classList.contains('full')) b3Idle.t = setTimeout(() => st.classList.add('idle'), 2200);
+    if (document.fullscreenElement === st || st.classList.contains('full')) b3Idle.t = setTimeout(() => st.classList.add('idle'), 1800);
   }
   document.addEventListener('fullscreenchange', () => { const st = $('b3Stage'); if (document.fullscreenElement !== st) st.classList.remove('idle'); if (b3) b3Apply(false); b3Idle();
     $('b3Full').querySelector('span').textContent = document.fullscreenElement === st ? 'Sair' : 'Tela cheia'; });
   $('b3Full').addEventListener('click', () => b3Full(!(document.fullscreenElement === $('b3Stage') || $('b3Stage').classList.contains('full'))));
-  $('b3Stage').addEventListener('pointermove', b3Idle);
+  $('b3Stage').addEventListener('pointermove', (e) => { const l = b3Idle.at; if (l && Math.abs(l[0] - e.screenX) < 2 && Math.abs(l[1] - e.screenY) < 2) return; b3Idle.at = [e.screenX, e.screenY]; b3Idle(); });
+  $('b3Stage').addEventListener('pointerdown', () => b3Idle());
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('b3Stage').classList.contains('full')) b3Full(false); });
   $('b3Float').addEventListener('click', (e) => {
     const a = e.target.closest('[data-b3act]'); if (!a) return; e.stopPropagation();
     if (a.dataset.b3act === 'open') b3SetOpen(!b3.open);
     if (a.dataset.b3act === 'motion') { const cfg = b3cfg(), o = ['parado', 'girar', 'balancar']; cfg.motion = o[(o.indexOf(cfg.motion) + 1) % 3]; b3Save(); b3Controls(); b3Motion(); toast({ parado: 'Parado', girar: 'Girando sozinho', balancar: 'Balançando' }[cfg.motion]); }
     if (a.dataset.b3act === 'exit') b3Full(false);
+    if (a.dataset.b3act === 'far') b3Zoom(1 / 1.12);
+    if (a.dataset.b3act === 'near') b3Zoom(1.12);
   });
   $('b3Float').addEventListener('pointerdown', (e) => e.stopPropagation());
+  function b3Zoom(f) { const cfg = b3cfg(); cfg.zoom = Math.max(.4, Math.min(1.8, Math.round(cfg.zoom * f * 100) / 100)); $('b3Zoom').value = cfg.zoom; b3Apply(false); clearTimeout(b3Zoom.t); b3Zoom.t = setTimeout(b3Save, 400); }
+  $('b3Stage').addEventListener('wheel', (e) => { if (!b3) return; e.preventDefault(); b3Zoom(Math.exp(-e.deltaY * .0012)); }, { passive: false });
+  addEventListener('keydown', (e) => { if (!b3 || $('b3Page').hidden || /INPUT|TEXTAREA|SELECT/.test((e.target.tagName || ''))) return; if (e.key === '+' || e.key === '=') b3Zoom(1.08); if (e.key === '-' || e.key === '_') b3Zoom(1 / 1.08); });
   new ResizeObserver(() => { if (b3 && !$('b3Page').hidden) b3Apply(false); }).observe($('b3Stage'));
   document.querySelectorAll('[data-b3]').forEach(btn => btn.addEventListener('click', () => {
     if (b3.open) b3SetOpen(false);
@@ -8988,8 +9104,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   b3Seg('b3Motion', 'motion', () => { b3Controls(); b3Motion(); });
   b3Seg('b3Pos', 'pos', () => { b3Render(); b3.ry = 180; b3.rx = 4; b3Apply(); });
   b3Seg('b3Align', 'align', () => { b3Render(); b3.ry = 180; b3.rx = 4; b3Apply(); });
-  const b3Range = (id, key, num, show) => $(id).addEventListener('input', () => { b3cfg()[key] = Number($(id).value); b3Save(); b3Render(); if (show) { if (b3.open) b3SetOpen(false); b3.ry = 180; b3.rx = 4; b3Apply(false); } });
-  b3Range('b3Speed', 'speed'); b3Range('b3Size', 'size', 1, true); b3Range('b3Blur', 'blur', 1, true); b3Range('b3Veil', 'veil', 1, true);
+  const b3Range = (id, key, num, show) => $(id).addEventListener('input', () => { b3cfg()[key] = Number($(id).value); b3Save(); if (key === 'zoom') return b3Apply(false); b3Render(); if (show) { if (b3.open) b3SetOpen(false); b3.ry = 180; b3.rx = 4; b3Apply(false); } });
+  b3Range('b3Speed', 'speed'); b3Range('b3Zoom', 'zoom');
+  b3Seg('b3OpenMode', 'openMode', () => { b3Render(); if (b3.open) { b3SetOpen(false); setTimeout(() => b3SetOpen(true), 900); } }); b3Range('b3Size', 'size', 1, true); b3Range('b3Blur', 'blur', 1, true); b3Range('b3Veil', 'veil', 1, true);
   $('b3Speed').addEventListener('input', () => b3Motion());
   $('b3BackNone').addEventListener('click', () => { b3cfg().backRefId = ''; b3Save(); b3Render(); });
   $('b3BackUp').addEventListener('click', () => {

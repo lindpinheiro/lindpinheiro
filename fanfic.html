@@ -1031,6 +1031,8 @@
   @keyframes learnFlash { 0%, 35% { outline: 3px solid var(--accent); outline-offset: 2px; background: var(--accent-soft); } 100% { outline-color: transparent; } }
   .learn-item { cursor: pointer; }
   .learn-item.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .li-cnt { display: inline-block; white-space: nowrap; margin-left: 8px; padding: 1px 8px; border-radius: 99px; background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--text); font-size: .95em; letter-spacing: 0; text-transform: none; }
+  .li-pos { font-size: .9em; align-self: center; }
   .li-more { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: .9rem; }
   .li-more p { margin: 0 0 6px; }
   .li-more ul { margin: 4px 0 6px; padding-left: 18px; }
@@ -6942,6 +6944,19 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
     return out;
   }
+  // grafia "errada" que na verdade é nome: no dicionário do projeto, no Mundo, ou com maiúscula repetida / no meio da frase
+  function notNames(issues, text, p) {
+    const mine = new Set((p.dict || []).map(x => x.toLocaleLowerCase('pt-BR'))), known = knownNames(p), capCount = new Map();
+    (text.match(/(?<![\p{L}])\p{Lu}\p{Ll}+(?![\p{L}])/gu) || []).forEach(w => capCount.set(w, (capCount.get(w) || 0) + 1));
+    return issues.filter(x => {
+      if (x.kind !== 'orto') return true;
+      const w = text.slice(x.s, x.e); if (!/^\p{L}+(?:[-'’]\p{L}+)*$/u.test(w)) return true;
+      if (mine.has(w.toLocaleLowerCase('pt-BR')) || known.has(nNorm(w))) return false;
+      if (w[0] === w[0].toLocaleLowerCase('pt-BR')) return true;
+      const before = text.slice(Math.max(0, x.s - 3), x.s);
+      return !((x.s && !/(^|[.!?…—"“]\s*|\n\s*)$/.test(before)) || (capCount.get(w) || 0) > 1);
+    });
+  }
   function openReview(p, ch, ta, whole) {
     if (review) clearInterval(review.watch);
     const a = whole ? 0 : ta.selectionStart, b = whole ? 0 : ta.selectionEnd;
@@ -6974,7 +6989,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const key = (x) => `${x.kind}:${v.slice(x.s, x.e)}:${x.msg}`;
     let sp = []; try { sp = isPtBr(r.p) ? spellIssues(v, r.p) : []; } catch (e) { console.error(e); }
     let gr = []; try { gr = isPtBr(r.p) ? gramIssues(v) : []; } catch (e) { console.error(e); }
-    const lt = (r.lt && r.lt.text === v) ? r.lt.issues : [];
+    const lt = (r.lt && r.lt.text === v) ? notNames(r.lt.issues, v, r.p) : [];
     if (r.lt && r.lt.text === v && !r.ltErr) gr = gr.filter(x => x.heur !== 'concord');
     r.issues = dedupeIssues([...lt, ...reviewText(v, isPtBr(r.p)), ...gr, ...sp])
       .filter(x => !r.ignore.has(key(x)) && (!r.range || (x.s >= r.range.s && x.e <= r.range.e)))
@@ -7874,7 +7889,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       if (/não só|nem/i.test(t.slice(Math.max(0, m.index - 40), m.index))) return;
       const at = m.index + 1; add(at, at + m[2].length, 'Antes de "mas" vai vírgula: "queria ficar, mas precisava ir".', ', ', 'g-virgula', 'pont');
     });
-    each(W(`(?<![\\p{L}])(Oi|Olá|Tchau|Obrigado|Obrigada|Valeu|Ei|Bom dia|Boa tarde|Boa noite|Desculpa|Desculpe|Calma|Vem|Para)(\\s+)(\\p{Lu}\\p{Ll}+)(?![\\p{L}])`), m => {
+    each(W(`(?<![\\p{L}])(Oi|Olá|Tchau|Obrigado|Obrigada|Valeu|Ei|Bom dia|Boa tarde|Boa noite|Desculpa|Desculpe|Calma|Vem)([ \\t]+)(\\p{Lu}\\p{Ll}+)(?![\\p{L}])`, 'gu'), m => {
       const at = m.index + m[1].length; add(at, at + m[2].length, 'Quem é chamado (vocativo) fica separado por vírgula: "Oi, Rafael".', ', ', 'g-virgula', 'pont');
     });
     each(W(`(^|[.!?…—]\\s*|\\n)(Sim)(\\s+)(?=(?:eu|ele|ela|nós|eles|elas|você|vocês|claro|senhor|senhora|com certeza)(?![\\p{L}]))`, 'gmu'), m => { const at = m.index + m[1].length + 3; add(at, at + m[3].length, '"Sim" no começo da resposta é separado por vírgula: "Sim, eu vou".', ', ', 'g-virgula', 'pont'); });
@@ -7915,13 +7930,27 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     let lt = [], ltErr = '';
     if (pt && ltCfg().on) { $('learnBody').replaceChildren(el('p', { class: 'muted', text: 'Conferindo também no LanguageTool…' })); try { lt = await ltCheck(text); } catch (e) { ltErr = e.message; } }
     const ltOk = pt && ltCfg().on && !ltErr;
-    let issues = dedupeIssues([...lt, ...reviewText(text, pt), ...(pt ? gramIssues(text).filter(x => !(ltOk && x.heur === 'concord')) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
+    let issues = dedupeIssues([...notNames(lt, text, p), ...reviewText(text, pt), ...(pt ? gramIssues(text).filter(x => !(ltOk && x.heur === 'concord')) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
     const isFix = (x) => x.fix != null && (x.lt || (x.kind !== 'rep' && x.kind !== 'estilo'));
     const fixes = issues.filter(isFix), think = issues.filter(x => !isFix(x));
     // grafia de palavra com maiúscula (pode ser nome) vem desmarcada
     const capWord = (x) => { const w = text.slice(x.s, x.e); return x.kind === 'orto' && w && w[0] !== w[0].toLocaleLowerCase('pt-BR'); };
-    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((x, i) => (capWord(x) || x.ltStyle) ? -1 : i).filter(i => i >= 0)), ltErr, more: new Set(), think };
+    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((x, i) => (capWord(x) || x.ltStyle) ? -1 : i).filter(i => i >= 0)), ltErr, more: new Set(), think, cyc: {} };
+    learnGroup();
     renderLearn();
+  }
+  // a mesma troca de palavra em vários lugares vira um item só, que vale para todos
+  function learnGroup() {
+    const c = learnCtx, by = new Map(), groups = [];
+    c.fixes.map((x, i) => [x, i]).sort((a, b) => a[0].s - b[0].s).forEach(([x, i]) => {
+      const was = c.text.slice(x.s, x.e);
+      const key = was.trim() && (x.fix || '').trim() ? `${x.kind}|${was}|${x.fix}` : `#${i}`;
+      if (!by.has(key)) { const g = { idx: [], x }; by.set(key, g); groups.push(g); }
+      by.get(key).idx.push(i);
+    });
+    // grupo fica marcado só se todos estiverem marcados
+    groups.forEach(g => { const all = g.idx.every(i => c.on.has(i)); g.idx.forEach(i => all ? c.on.add(i) : c.on.delete(i)); });
+    c.groups = groups; c.gOf = new Map(); groups.forEach((g, k) => g.idx.forEach(i => c.gOf.set(i, k + 1)));
   }
   function learnFixed() {
     const c = learnCtx; let t = c.text;
@@ -7950,15 +7979,24 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return el('div', { class: 'li-more' }, parts);
   }
   // mostra a correção nos dois textos (rolando cada um até ela) e pisca
-  function learnFocus(n) {
-    const c = learnCtx; c.sel = n;
+  function learnFocus(n, next) {
+    const c = learnCtx, g = c.groups[n - 1], cnt = g ? g.idx.length : 1;
+    if (next && c.sel === n && cnt > 1) c.cyc[n] = ((c.cyc[n] || 0) + 1) % cnt;
+    else if (c.sel !== n) c.cyc[n] = 0;
+    c.sel = n; const k = c.cyc[n] || 0;
+    const pos = document.querySelector(`.learn-item[data-n="${n}"] .li-pos`); if (pos) pos.textContent = cnt > 1 ? `${k + 1} de ${cnt}` : '';
     ['lo', 'lf'].forEach(pre => {
-      const t = document.getElementById(`${pre}-${n}`); if (!t) return;
+      const t = document.getElementById(`${pre}-${n}-${k}`); if (!t) return;
       const col = t.closest('.learn-col'), r = t.getBoundingClientRect(), cr = col.getBoundingClientRect();
       col.scrollTo({ top: col.scrollTop + (r.top - cr.top) - cr.height / 2 + r.height / 2, behavior: 'smooth' });
       t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash');
     });
     document.querySelectorAll('.learn-item').forEach(it => it.classList.toggle('on', it.dataset.n === String(n)));
+  }
+  // depois de tirar correções da lista, refaz as marcas e os grupos
+  function learnRebuild() {
+    const c = learnCtx; c.more.clear(); c.sel = null; c.cyc = {};
+    learnGroup(); renderLearn();
   }
   function renderLearn() {
     const c = learnCtx, think = c.think || [], body = $('learnBody'), KIND = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', trad: 'Cara de tradução', estilo: 'Estilo' };
@@ -7967,27 +8005,28 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     // texto original com o que sai riscado, e o corrigido com o que entra em verde
     const orig = el('p', { class: 'learn-txt' }), fixed = el('p', { class: 'learn-txt' });
     let pos = 0;
-    const order = c.fixes.map((x, i) => [x, i]).sort((a, b) => a[0].s - b[0].s);
-    const jump = (n) => { const it = body.querySelector(`.learn-item[data-n="${n}"]`); if (it) { it.scrollIntoView({ block: 'center', behavior: 'smooth' }); learnFocus(n); } };
-    order.forEach(([x, i], k) => {
+    const order = c.fixes.map((x, i) => [x, i]).sort((a, b) => a[0].s - b[0].s), seen = {};
+    const jump = (n, k) => { const it = body.querySelector(`.learn-item[data-n="${n}"]`); if (it) { it.scrollIntoView({ block: 'center', behavior: 'smooth' }); c.cyc[n] = k; c.sel = n; learnFocus(n); } };
+    order.forEach(([x, i]) => {
       if (x.s < pos) return;
       orig.append(c.text.slice(pos, x.s)); fixed.append(c.text.slice(pos, x.s));
-      const n = k + 1, on = c.on.has(i);
-      orig.append(el('del', { id: `lo-${n}`, text: c.text.slice(x.s, x.e) || ' ', title: 'Ver a explicação', onclick: () => jump(n) }), el('sup', { text: String(n) }));
-      if (on) fixed.append(el('ins', { id: `lf-${n}`, text: x.fix || '', title: 'Ver a explicação', onclick: () => jump(n) }), el('sup', { text: String(n) }));
-      else fixed.append(el('span', { id: `lf-${n}`, class: 'kept', text: c.text.slice(x.s, x.e) }));
+      const n = c.gOf.get(i), k = seen[n] = (seen[n] ?? -1) + 1, on = c.on.has(i);
+      orig.append(el('del', { id: `lo-${n}-${k}`, text: c.text.slice(x.s, x.e) || ' ', title: 'Ver a explicação', onclick: () => jump(n, k) }), el('sup', { text: String(n) }));
+      if (on) fixed.append(el('ins', { id: `lf-${n}-${k}`, text: x.fix || '', title: 'Ver a explicação', onclick: () => jump(n, k) }), el('sup', { text: String(n) }));
+      else fixed.append(el('span', { id: `lf-${n}-${k}`, class: 'kept', text: c.text.slice(x.s, x.e) }));
       pos = x.e;
     });
     orig.append(c.text.slice(pos)); fixed.append(c.text.slice(pos));
-    const items = order.map(([x, i], k) => {
-      const n = k + 1, was = c.text.slice(x.s, x.e);
+    const items = c.groups.map((g, k) => {
+      const x = g.x, i = g.idx[0], n = k + 1, was = c.text.slice(x.s, x.e), cnt = g.idx.length;
       const cb = el('input', { type: 'checkbox' }); cb.checked = c.on.has(i);
-      cb.addEventListener('change', () => { cb.checked ? c.on.add(i) : c.on.delete(i); c.sel = n; renderLearn(); });
+      cb.addEventListener('change', () => { g.idx.forEach(j => cb.checked ? c.on.add(j) : c.on.delete(j)); c.sel = n; renderLearn(); });
       const more = c.more.has(n);
-      return el('div', { class: 'learn-item' + (c.sel === n ? ' on' : ''), 'data-n': String(n), title: 'Toque para ver no texto',
-          onclick: (e) => { if (e.target.closest('button, a, label, input')) return; learnFocus(n); } },
+      return el('div', { class: 'learn-item' + (c.sel === n ? ' on' : ''), 'data-n': String(n), title: cnt > 1 ? 'Toque para ir de um lugar ao outro no texto' : 'Toque para ver no texto',
+          onclick: (e) => { if (e.target.closest('button, a, label, input')) return; learnFocus(n, true); } },
         el('span', { class: 'li-n', text: String(n) }),
-        el('div', {}, el('div', { class: 'li-k', text: (KIND[x.kind] || 'Correção') + (x.lt ? ' · LanguageTool' : '') + (x.ltStyle ? ' · sugestão de estilo' : '') }),
+        el('div', {}, el('div', { class: 'li-k' }, (KIND[x.kind] || 'Correção') + (x.lt ? ' · LanguageTool' : '') + (x.ltStyle ? ' · sugestão de estilo' : ''),
+            cnt > 1 ? el('span', { class: 'li-cnt', text: `${cnt}× no texto` }) : ''),
           (() => {
             if (was.trim() && (x.fix || '').trim()) return el('div', { class: 'li-ch' }, el('del', { text: was.trim() }), ' → ', el('ins', { text: x.fix.trim() }));
             // vírgula ou espaço: mostra com as palavras do lado
@@ -7995,8 +8034,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
             return el('div', { class: 'li-ch' }, el('del', { text: `${pre}${was}${post}` }), ' → ', el('ins', { text: `${pre}${x.fix}${post}` }));
           })(),
           el('div', { class: 'li-why', text: x.kind === 'orto' && x.sugs ? `Palavra fora do dicionário. Sugestão mais provável: "${x.fix}"${x.sugs.length > 1 ? ` (outras: ${x.sugs.slice(1, 4).join(', ')})` : ''}. Se for nome ou gíria, desmarque.` : x.msg }),
-          el('div', { class: 'row' }, el('label', { class: 'check' }, cb, el('span', { text: 'Aplicar' })),
-            el('button', { class: 'link plain', icon: 'search', text: 'Ver no texto', onclick: () => learnFocus(n) }),
+          el('div', { class: 'row' }, el('label', { class: 'check' }, cb, el('span', { text: cnt > 1 ? `Aplicar nos ${cnt} lugares` : 'Aplicar' })),
+            el('button', { class: 'link plain', icon: 'search', text: cnt > 1 ? 'Próximo no texto' : 'Ver no texto', onclick: () => learnFocus(n, true) }),
+            cnt > 1 ? el('span', { class: 'li-pos muted', text: c.sel === n ? `${(c.cyc[n] || 0) + 1} de ${cnt}` : '' }) : '',
+            x.kind === 'orto' && /^\p{L}+(?:[-'’]\p{L}+)*$/u.test(was) ? el('button', { class: 'link plain', icon: 'book-a', text: 'É nome / está certa', title: 'Adiciona ao dicionário do projeto e tira das correções', onclick: () => {
+              c.p.dict = [...new Set([...(c.p.dict || []), was])]; saveProject(c.p);
+              const drop = new Set(g.idx), on = new Set(), keep = [];
+              c.fixes.forEach((f, j) => { if (drop.has(j)) return; if (c.on.has(j)) on.add(keep.length); keep.push(f); });
+              c.fixes = keep; c.on = on;
+              toast(`"${was}" adicionada ao dicionário deste projeto ✓`); learnRebuild(); } }) : '',
             el('button', { class: 'link plain', icon: 'lightbulb', text: more ? 'Fechar explicação' : 'Explicar melhor', 'aria-expanded': String(more), onclick: () => { more ? c.more.delete(n) : c.more.add(n); c.sel = n; renderLearn(); } }),
             !more && x.lesson && LESSON(x.lesson) ? el('button', { class: 'link plain', icon: 'graduation-cap', text: `Treinar: ${LESSON(x.lesson)}`, onclick: () => openLessonQuiz(x.lesson) }) : null),
           more ? learnMore(x, was) : null));
@@ -8004,7 +8050,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     body.replaceChildren(...[
       isPtBr(c.p) ? el('div', { class: 'lt-line', style: 'margin:0 0 8px' }, el('button', { class: 'chip', 'aria-pressed': String(ltCfg().on), icon: 'spell-check', text: ltCfg().on ? 'LanguageTool ligado' : 'Ligar o LanguageTool (mais correções)', onclick: () => ltToggle(() => openLearn(c.p, c.text, c.apply)) }),
         c.ltErr ? el('span', { class: 'muted', text: ' ' + c.ltErr }) : null) : null,
-      c.fixes.length ? el('p', { class: 'muted', style: 'margin-top:0', text: `${c.fixes.length} correção(ões) encontrada(s). Em vermelho o que sai, em verde o que entra. Toque numa correção para ver onde ela está no texto.` })
+      c.fixes.length ? el('p', { class: 'muted', style: 'margin-top:0', text: `${c.groups.length} correção(ões) encontrada(s)${c.groups.length < c.fixes.length ? ` (${c.fixes.length} lugares no texto; as repetidas viraram um item só)` : ''}. Em vermelho o que sai, em verde o que entra. Toque numa correção para ver onde ela está no texto.` })
         : el('p', { style: 'margin-top:0', text: 'Não achei nada para corrigir neste trecho ✓' }),
       c.fixes.length ? el('div', { class: 'learn-cols' }, el('div', { class: 'learn-col' }, el('h3', { text: 'Seu texto' }), orig), el('div', { class: 'learn-col' }, el('h3', { text: 'Versão corrigida' }), fixed)) : null,
       c.fixes.length ? el('div', { class: 'learn-list' }, items) : null,

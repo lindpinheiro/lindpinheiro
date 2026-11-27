@@ -1026,6 +1026,17 @@
   .learn-item .li-why { color: var(--text); font-size: .9rem; }
   .learn-item .row { margin-top: 4px; } .learn-item .row button, .learn-item label { min-height: 0; font-size: .84rem; margin: 0; }
   .learn-think { margin-top: 14px; }
+  .learn-txt del, .learn-txt ins, .learn-txt .kept { cursor: pointer; scroll-margin: 40px; }
+  .learn-txt .flash { animation: learnFlash 1.6s ease-out; }
+  @keyframes learnFlash { 0%, 35% { outline: 3px solid var(--accent); outline-offset: 2px; background: var(--accent-soft); } 100% { outline-color: transparent; } }
+  .learn-item { cursor: pointer; }
+  .learn-item.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .li-more { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: .9rem; }
+  .li-more p { margin: 0 0 6px; }
+  .li-more ul { margin: 4px 0 6px; padding-left: 18px; }
+  .li-more li { margin: 3px 0; }
+  .li-more a.btn { min-height: 0; padding: 2px 0; }
+  .learn-foot { position: sticky; bottom: -20px; background: var(--surface); padding: 10px 0 4px; margin-top: 14px; }
   .learn-think li { margin: 4px 0; font-size: .9rem; }
   .story-head { display: grid; gap: 6px; margin-bottom: 14px; }
   input[type=text].story-title { font-family: Georgia, serif; font-size: 1.6rem; font-weight: 700; background: transparent; border: 0; border-bottom: 1px dashed var(--border); border-radius: 0; padding: 4px 0; }
@@ -7905,39 +7916,79 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (pt && ltCfg().on) { $('learnBody').replaceChildren(el('p', { class: 'muted', text: 'Conferindo também no LanguageTool…' })); try { lt = await ltCheck(text); } catch (e) { ltErr = e.message; } }
     const ltOk = pt && ltCfg().on && !ltErr;
     let issues = dedupeIssues([...lt, ...reviewText(text, pt), ...(pt ? gramIssues(text).filter(x => !(ltOk && x.heur === 'concord')) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
-    const fixes = issues.filter(x => x.fix != null && x.kind !== 'rep' && x.kind !== 'estilo'), think = issues.filter(x => x.fix == null || x.kind === 'rep' || x.kind === 'estilo');
+    const isFix = (x) => x.fix != null && (x.lt || (x.kind !== 'rep' && x.kind !== 'estilo'));
+    const fixes = issues.filter(isFix), think = issues.filter(x => !isFix(x));
     // grafia de palavra com maiúscula (pode ser nome) vem desmarcada
-    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((x, i) => (x.kind === 'orto' && x.word && x.word[0] !== x.word[0].toLocaleLowerCase('pt-BR')) ? -1 : i).filter(i => i >= 0)), ltErr };
-    renderLearn(think);
+    const capWord = (x) => { const w = text.slice(x.s, x.e); return x.kind === 'orto' && w && w[0] !== w[0].toLocaleLowerCase('pt-BR'); };
+    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((x, i) => (capWord(x) || x.ltStyle) ? -1 : i).filter(i => i >= 0)), ltErr, more: new Set(), think };
+    renderLearn();
   }
   function learnFixed() {
     const c = learnCtx; let t = c.text;
     c.fixes.map((x, i) => [x, i]).filter(([, i]) => c.on.has(i)).sort((a, b) => b[0].s - a[0].s).forEach(([x]) => { t = t.slice(0, x.s) + x.fix + t.slice(x.e); });
     return t;
   }
-  function renderLearn(think) {
-    const c = learnCtx, body = $('learnBody'), KIND = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', trad: 'Cara de tradução' };
+  // busca e explicação de cada regra
+  const LESSON_Q = { 'g-dialogo': 'pontuação de diálogo com travessão regras', 'g-virgula': 'uso da vírgula regras gramática', 'g-crase': 'quando usar crase regras',
+    'g-porques': 'uso dos porquês por que porque por quê porquê', 'g-confusoes': 'há ou a, mal ou mau, mas ou mais, onde ou aonde', 'g-pronomes': 'para mim ou para eu, verbo fazer e haver impessoal, concordância',
+    'g-acentos': 'acentuação têm vêm pôr pôde reforma ortográfica' };
+  const webSearch = (q) => 'https://www.google.com/search?q=' + encodeURIComponent(q);
+  function learnMore(x, was) {
+    const L = x.lesson && DESAFIOS.gram.find(l => l.id === x.lesson), parts = [];
+    if (L) {
+      parts.push(el('p', {}, el('b', { text: L.n + ': ' }), L.intro));
+      const ex = L.qs.slice(0, 3);
+      parts.push(el('div', { class: 'li-ex' }, el('b', { text: 'Exemplos' }), el('ul', {}, ex.map(q => el('li', {}, q.q.replace('___', `[${q.o[q.a]}]`), el('span', { class: 'muted', text: ' ' + q.why }))))));
+    }
+    if (x.lt) parts.push(el('p', {}, el('b', { text: 'Regra do LanguageTool: ' }), x.ltDesc || x.ltRule || '', x.ltCat ? el('span', { class: 'muted', text: ` (${x.ltCat})` }) : null));
+    if (x.kind === 'orto') parts.push(el('p', { text: `"${was.trim()}" não está no dicionário de português. Confira se a grafia está certa ou se é um nome, gíria ou palavra estrangeira.` }));
+    if (x.kind === 'trad') parts.push(el('p', { text: 'Construções assim aparecem muito em textos traduzidos do inglês. Em português, costuma soar mais natural de outro jeito.' }));
+    const q = x.ltUrl ? null : L ? LESSON_Q[x.lesson] : x.kind === 'orto' ? `como se escreve ${was.trim()} significado` : x.lt ? `${x.ltDesc || x.msg.replace(/\s*\(LanguageTool\)$/, '')} regra gramatical português` : `${x.msg} regra gramatical`;
+    parts.push(el('div', { class: 'row' },
+      el('a', { class: 'btn link plain', href: x.ltUrl || webSearch(q), target: '_blank', rel: 'noopener', iconEnd: 'external-link', text: x.ltUrl ? 'Ler a explicação completa (LanguageTool)' : 'Pesquisar mais sobre isso' }),
+      L ? el('button', { class: 'link plain', icon: 'graduation-cap', text: `Treinar: ${L.n}`, onclick: () => openLessonQuiz(x.lesson) }) : null));
+    return el('div', { class: 'li-more' }, parts);
+  }
+  // mostra a correção nos dois textos (rolando cada um até ela) e pisca
+  function learnFocus(n) {
+    const c = learnCtx; c.sel = n;
+    ['lo', 'lf'].forEach(pre => {
+      const t = document.getElementById(`${pre}-${n}`); if (!t) return;
+      const col = t.closest('.learn-col'), r = t.getBoundingClientRect(), cr = col.getBoundingClientRect();
+      col.scrollTo({ top: col.scrollTop + (r.top - cr.top) - cr.height / 2 + r.height / 2, behavior: 'smooth' });
+      t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash');
+    });
+    document.querySelectorAll('.learn-item').forEach(it => it.classList.toggle('on', it.dataset.n === String(n)));
+  }
+  function renderLearn() {
+    const c = learnCtx, think = c.think || [], body = $('learnBody'), KIND = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', trad: 'Cara de tradução', estilo: 'Estilo' };
+    const dlg = $('learnDlg'), keep = { dlg: dlg.scrollTop, cols: [...body.querySelectorAll('.learn-col')].map(x => x.scrollTop) };
     const LESSON = (id) => (DESAFIOS.gram.find(l => l.id === id) || {}).n;
     // texto original com o que sai riscado, e o corrigido com o que entra em verde
     const orig = el('p', { class: 'learn-txt' }), fixed = el('p', { class: 'learn-txt' });
     let pos = 0;
     const order = c.fixes.map((x, i) => [x, i]).sort((a, b) => a[0].s - b[0].s);
-    order.forEach(([x, i]) => {
+    const jump = (n) => { const it = body.querySelector(`.learn-item[data-n="${n}"]`); if (it) { it.scrollIntoView({ block: 'center', behavior: 'smooth' }); learnFocus(n); } };
+    order.forEach(([x, i], k) => {
       if (x.s < pos) return;
       orig.append(c.text.slice(pos, x.s)); fixed.append(c.text.slice(pos, x.s));
-      const n = String(order.findIndex(o => o[1] === i) + 1), on = c.on.has(i);
-      orig.append(el('del', { text: c.text.slice(x.s, x.e) || ' ' }), el('sup', { text: n }));
-      if (on) fixed.append(el('ins', { text: x.fix || '' }), el('sup', { text: n })); else fixed.append(c.text.slice(x.s, x.e));
+      const n = k + 1, on = c.on.has(i);
+      orig.append(el('del', { id: `lo-${n}`, text: c.text.slice(x.s, x.e) || ' ', title: 'Ver a explicação', onclick: () => jump(n) }), el('sup', { text: String(n) }));
+      if (on) fixed.append(el('ins', { id: `lf-${n}`, text: x.fix || '', title: 'Ver a explicação', onclick: () => jump(n) }), el('sup', { text: String(n) }));
+      else fixed.append(el('span', { id: `lf-${n}`, class: 'kept', text: c.text.slice(x.s, x.e) }));
       pos = x.e;
     });
     orig.append(c.text.slice(pos)); fixed.append(c.text.slice(pos));
     const items = order.map(([x, i], k) => {
+      const n = k + 1, was = c.text.slice(x.s, x.e);
       const cb = el('input', { type: 'checkbox' }); cb.checked = c.on.has(i);
-      cb.addEventListener('change', () => { cb.checked ? c.on.add(i) : c.on.delete(i); renderLearn(think); });
-      return el('div', { class: 'learn-item' }, el('span', { class: 'li-n', text: String(k + 1) }),
-        el('div', {}, el('div', { class: 'li-k', text: (KIND[x.kind] || 'Correção') + (x.lt ? ' · LanguageTool' : '') }),
+      cb.addEventListener('change', () => { cb.checked ? c.on.add(i) : c.on.delete(i); c.sel = n; renderLearn(); });
+      const more = c.more.has(n);
+      return el('div', { class: 'learn-item' + (c.sel === n ? ' on' : ''), 'data-n': String(n), title: 'Toque para ver no texto',
+          onclick: (e) => { if (e.target.closest('button, a, label, input')) return; learnFocus(n); } },
+        el('span', { class: 'li-n', text: String(n) }),
+        el('div', {}, el('div', { class: 'li-k', text: (KIND[x.kind] || 'Correção') + (x.lt ? ' · LanguageTool' : '') + (x.ltStyle ? ' · sugestão de estilo' : '') }),
           (() => {
-            const was = c.text.slice(x.s, x.e);
             if (was.trim() && (x.fix || '').trim()) return el('div', { class: 'li-ch' }, el('del', { text: was.trim() }), ' → ', el('ins', { text: x.fix.trim() }));
             // vírgula ou espaço: mostra com as palavras do lado
             const pre = (c.text.slice(Math.max(0, x.s - 30), x.s).match(/(\S+)\s*$/) || [, ''])[1], post = (c.text.slice(x.e, x.e + 30).match(/^\s*(\S+)/) || [, ''])[1];
@@ -7945,21 +7996,25 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           })(),
           el('div', { class: 'li-why', text: x.kind === 'orto' && x.sugs ? `Palavra fora do dicionário. Sugestão mais provável: "${x.fix}"${x.sugs.length > 1 ? ` (outras: ${x.sugs.slice(1, 4).join(', ')})` : ''}. Se for nome ou gíria, desmarque.` : x.msg }),
           el('div', { class: 'row' }, el('label', { class: 'check' }, cb, el('span', { text: 'Aplicar' })),
-            x.lesson && LESSON(x.lesson) ? el('button', { class: 'link plain', icon: 'graduation-cap', text: `Treinar: ${LESSON(x.lesson)}`, onclick: () => openLessonQuiz(x.lesson) }) : null)));
+            el('button', { class: 'link plain', icon: 'search', text: 'Ver no texto', onclick: () => learnFocus(n) }),
+            el('button', { class: 'link plain', icon: 'lightbulb', text: more ? 'Fechar explicação' : 'Explicar melhor', 'aria-expanded': String(more), onclick: () => { more ? c.more.delete(n) : c.more.add(n); c.sel = n; renderLearn(); } }),
+            !more && x.lesson && LESSON(x.lesson) ? el('button', { class: 'link plain', icon: 'graduation-cap', text: `Treinar: ${LESSON(x.lesson)}`, onclick: () => openLessonQuiz(x.lesson) }) : null),
+          more ? learnMore(x, was) : null));
     });
     body.replaceChildren(...[
       isPtBr(c.p) ? el('div', { class: 'lt-line', style: 'margin:0 0 8px' }, el('button', { class: 'chip', 'aria-pressed': String(ltCfg().on), icon: 'spell-check', text: ltCfg().on ? 'LanguageTool ligado' : 'Ligar o LanguageTool (mais correções)', onclick: () => ltToggle(() => openLearn(c.p, c.text, c.apply)) }),
         c.ltErr ? el('span', { class: 'muted', text: ' ' + c.ltErr }) : null) : null,
-      c.fixes.length ? el('p', { class: 'muted', style: 'margin-top:0', text: `${c.fixes.length} correção(ões) encontrada(s). Em vermelho o que sai, em verde o que entra. Leia o porquê de cada uma embaixo.` })
+      c.fixes.length ? el('p', { class: 'muted', style: 'margin-top:0', text: `${c.fixes.length} correção(ões) encontrada(s). Em vermelho o que sai, em verde o que entra. Toque numa correção para ver onde ela está no texto.` })
         : el('p', { style: 'margin-top:0', text: 'Não achei nada para corrigir neste trecho ✓' }),
       c.fixes.length ? el('div', { class: 'learn-cols' }, el('div', { class: 'learn-col' }, el('h3', { text: 'Seu texto' }), orig), el('div', { class: 'learn-col' }, el('h3', { text: 'Versão corrigida' }), fixed)) : null,
       c.fixes.length ? el('div', { class: 'learn-list' }, items) : null,
       think.length ? el('div', { class: 'learn-think' }, el('b', { text: 'Para pensar (o app não troca sozinho):' }),
         el('ul', {}, think.slice(0, 12).map(x => el('li', {}, el('b', { text: `"${c.text.slice(x.s, x.e).slice(0, 40)}": ` }), x.msg)))) : null,
-      el('div', { class: 'row end', style: 'margin-top:14px' },
+      el('div', { class: 'row end learn-foot' },
         el('button', { 'data-close': '', text: 'Fechar' }),
         c.apply && c.fixes.length ? el('button', { class: 'primary', icon: 'check', text: `Aplicar ${c.on.size} correção(ões)`, disabled: !c.on.size, onclick: () => { const f = learnFixed(); $('learnDlg').close(); c.apply(f); toast(`${c.on.size} correção(ões) aplicada(s) ✓`); } })
           : !c.apply ? el('span', { class: 'hint', text: 'Para aplicar, abra o capítulo no Editar e use "Aprender" lá.' }) : null)].filter(Boolean));
+    dlg.scrollTop = keep.dlg; body.querySelectorAll('.learn-col').forEach((x, i) => { if (keep.cols[i] != null) x.scrollTop = keep.cols[i]; });
   }
   function learnChapter(p, ch) {
     const ta = view.mode === 'editar' && edit && edit.chId === ch.id ? $('chBody') : null;
@@ -8042,7 +8097,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       (j.matches || []).forEach(m => {
         const cat = (m.rule && m.rule.category && m.rule.category.id) || '', reps = (m.replacements || []).map(x => x.value).filter(v => v != null).slice(0, 4);
         const kind = LT_KIND[cat] || (m.rule && m.rule.issueType === 'misspelling' ? 'orto' : 'gram');
-        out.push({ s: off + m.offset, e: off + m.offset + m.length, kind, msg: `${m.message} (LanguageTool)`, fix: reps.length ? reps[0] : null, sugs: kind === 'orto' ? reps : undefined, lt: true, ltRule: m.rule && m.rule.id });
+        const rule = m.rule || {}, style = rule.issueType === 'style' || /^(STYLE|REDUNDANCY|REPETITIONS_STYLE|COLLOQUIALISMS)$/.test(cat);
+        out.push({ s: off + m.offset, e: off + m.offset + m.length, kind, msg: `${m.message} (LanguageTool)`, fix: reps.length ? reps[0] : null, sugs: kind === 'orto' ? reps : undefined,
+          lt: true, ltRule: rule.id, ltDesc: rule.description || '', ltCat: (rule.category && rule.category.name) || '', ltUrl: ((rule.urls || [])[0] || {}).value || '', ltStyle: style });
       });
     }
     ltCache.set(key, out);

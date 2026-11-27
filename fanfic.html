@@ -721,16 +721,16 @@
   .b3-face { position: absolute; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
   .b3-cover { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: left center; transform: translateZ(calc(var(--d) / 2)); transition: transform 1.3s cubic-bezier(.45,.05,.2,1); }
   .book3d.open .b3-cover { transform: translateZ(calc(var(--d) / 2)) rotateY(-162deg); }
-  .book3d.leaves.open .b3-cover { transform: translateZ(calc(var(--d) / 2)) rotateY(-179deg); }
+  .book3d.leaves.open .b3-cover { transform: translateZ(calc(var(--d) / 2 - 3px)) rotateY(-179.6deg); }
   .book3d.leaves:not(.open) .b3-cover { transition-delay: .35s; }
   /* folhas que passam rápido ao abrir */
   .b3-leaf { position: absolute; width: calc(var(--w) - 4px); height: calc(var(--h) - 6px); top: 3px; left: 0; transform-style: preserve-3d; transform-origin: left center;
     transform: translateZ(calc(var(--d) / 2 - .4px - var(--i) * .1px)); transition: transform .32s cubic-bezier(.4,0,.6,1) calc((var(--n) - var(--i)) * 18ms); }
-  .book3d.flip .b3-leaf { transform: translateZ(calc(var(--d) / 2 - .4px - var(--i) * .1px)) rotateY(calc(-177deg + var(--i) * .55deg)); transition: transform .5s cubic-bezier(.3,.1,.25,1) calc(.6s + var(--i) * 75ms); }
+  .book3d.flip .b3-leaf { transform: translateZ(calc(var(--d) / 2 - 1.6px + var(--i) * .12px)) rotateY(calc(-179.3deg + var(--i) * .07deg)); transition: transform .5s cubic-bezier(.3,.1,.25,1) calc(.6s + var(--i) * 75ms); }
   .b3-leaf > .b3-face { inset: 0; }
   .b3-leaf .lf-b { transform: rotateY(180deg); }
-  .b3-pg { background: linear-gradient(90deg, #d8d0c2, #f6f1e7 6%, #fbf8f1); color: #2a2124; font-family: Georgia, serif; padding: 16px 20px 16px 24px; display: flex; flex-direction: column; }
-  .b3-pg.lft { background: linear-gradient(270deg, #d8d0c2, #f6f1e7 6%, #fbf8f1); padding: 16px 24px 16px 20px; }
+  .b3-pg { background: linear-gradient(90deg, rgba(70,48,32,.38) 0, rgba(70,48,32,.14) 3.5%, rgba(255,255,255,.32) 9%, rgba(255,255,255,0) 17%), linear-gradient(90deg, #e2d8c8, #f8f3e9 9%, #fbf8f1 70%, #f1eadf); color: #2a2124; font-family: Georgia, serif; padding: 16px 20px 16px 24px; display: flex; flex-direction: column; }
+  .b3-pg.lft { background: linear-gradient(270deg, rgba(70,48,32,.38) 0, rgba(70,48,32,.14) 3.5%, rgba(255,255,255,.32) 9%, rgba(255,255,255,0) 17%), linear-gradient(270deg, #e2d8c8, #f8f3e9 9%, #fbf8f1 70%, #f1eadf); padding: 16px 24px 16px 20px; }
   .b3-pg .ph { font-size: 7.5px; letter-spacing: .16em; text-transform: uppercase; text-align: center; color: #8a6d75; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .b3-pg .fx { font-size: 9.5px; line-height: 1.6; text-align: justify; hyphens: auto; overflow: hidden; flex: 1; white-space: pre-line; }
   .b3-pg .fn { font-size: 9px; text-align: center; color: #8a6d75; margin-top: 6px; }
@@ -748,12 +748,22 @@
     display: flex; align-items: center; justify-content: center; color: var(--spine-ink); font-family: Georgia, serif; }
   .b3-inside div { border: 1px solid currentColor; padding: 14px 18px; text-align: center; font-size: 11px; line-height: 1.5; opacity: .85; max-width: 72%; }
   .b3-inside b { display: block; font-size: 14px; font-style: italic; }
-  .b3-first { width: calc(var(--w) - 4px); height: calc(var(--h) - 6px); top: 3px; left: 0; transform: translateZ(calc(var(--d) / 2 - 2.2px)); background: linear-gradient(90deg, #d8d0c2, #f6f1e7 6%, #fbf8f1);
+  .b3-first { width: calc(var(--w) - 4px); height: calc(var(--h) - 6px); top: 3px; left: 0; transform: translateZ(calc(var(--d) / 2 - 2.2px)); background: linear-gradient(90deg, rgba(70,48,32,.38) 0, rgba(70,48,32,.14) 3.5%, rgba(255,255,255,.32) 9%, rgba(255,255,255,0) 17%), linear-gradient(90deg, #e2d8c8, #f8f3e9 9%, #fbf8f1 70%, #f1eadf);
     color: #2a2124; font-family: Georgia, serif; padding: 26px 20px 20px 24px; display: flex; flex-direction: column; }
   .b3-first .fk, .b3-pg .fk { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; text-align: center; color: #8a6d75; }
   .b3-first .ft, .b3-pg .ft { font-size: 15px; font-weight: 700; text-align: center; margin: 4px 0 14px; line-height: 1.25; }
-  .b3-first .fx { font-size: 9.5px; line-height: 1.6; text-align: justify; hyphens: auto; overflow: hidden; flex: 1; white-space: pre-line;
-    -webkit-mask-image: linear-gradient(#000 80%, transparent); mask-image: linear-gradient(#000 80%, transparent); }
+  .b3-first .fx { font-size: 9.5px; line-height: 1.6; text-align: justify; hyphens: auto; overflow: hidden; flex: 1; white-space: pre-line; }
+  /* a dobra do meio do livro aberto */
+  .b3-gutter { width: 22px; height: calc(var(--h) - 6px); top: 3px; left: -11px; transform: translateZ(calc(var(--d) / 2 + .3px)); opacity: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(251,248,241,0), rgba(214,203,186,.9) 30%, #9c8f7b 47%, #6f6455 50%, #9c8f7b 53%, rgba(214,203,186,.9) 70%, rgba(251,248,241,0)); }
+  .book3d.flip .b3-gutter { opacity: 1; transition: opacity .3s ease 1.3s; }
+  /* palavrão riscado com lápis de cor vermelho */
+  .b3-cens { position: relative; }
+  .b3-cens::after { content: ""; position: absolute; left: -3px; right: -3px; top: -6%; bottom: -10%; pointer-events: none; mix-blend-mode: multiply; clip-path: inset(0 100% 0 0);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23d11a2a' stroke-linecap='round' stroke-linejoin='round' opacity='.78'%3E%3Cpath stroke-width='4.2' stroke-dasharray='34 3 20 4' d='M1 25 L9 4 L16 25 L24 4 L31 25 L39 4 L46 25 L54 4 L61 25 L69 4 L76 25 L84 4 L91 25 L99 4'/%3E%3Cpath stroke-width='3.6' stroke-dasharray='26 5' d='M2 6 L8 27 L15 6 L21 27 L28 6 L34 27 L40 6 L47 27 L53 6 L60 27 L66 6 L72 27 L79 6 L85 27 L92 6 L98 27'/%3E%3Cpath stroke-width='3' stroke-dasharray='18 3 30 4' d='M0 20 L5 8 L11 20 L16 8 L21 20 L26 8 L32 20 L37 8 L42 20 L47 8 L53 20 L58 8 L63 20 L68 8 L74 20 L79 8 L84 20 L89 8 L95 20 L100 8'/%3E%3Cpath stroke-width='2.2' d='M0 16 C18 10 36 22 54 14 S86 19 100 13'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+  .book3d.flip .b3-cens::after { clip-path: inset(0 0 0 0); transition: clip-path .45s ease-out 2.9s; }
+  .b3-bgimg { position: absolute; inset: -60px; background: center / cover no-repeat; filter: blur(var(--bgb, 0px)) brightness(var(--bgd, 1)); pointer-events: none; }
+  .b3-bgimg[hidden] { display: none; }
   .b3-first.drop .fx::first-letter, .b3-pg.drop .fx::first-letter { float: left; font-size: 34px; line-height: .9; padding: 3px 4px 0 0; color: #9b4d63; font-weight: 700; }
   .b3-first .fn { font-size: 9px; text-align: center; color: #8a6d75; margin-top: 6px; }
   .b3-back { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); background: var(--spine); color: var(--spine-ink); font-family: Georgia, serif; }
@@ -1854,7 +1864,7 @@
   </header>
   <div class="b3-wrap">
     <div class="b3-main">
-      <div class="b3-stage" id="b3Stage" aria-label="Livro em 3D. Arraste para girar, toque para abrir."><div class="book3d" id="book3d"></div>
+      <div class="b3-stage" id="b3Stage" aria-label="Livro em 3D. Arraste para girar, toque para abrir."><div class="b3-bgimg" id="b3BgImg" hidden></div><div class="book3d" id="book3d"></div>
         <button type="button" class="b3-expand" id="b3Full" title="Tela cheia (bom para gravar vídeos)"><svg class="icon" aria-hidden="true"><use href="#i-maximize-2"/></svg><span>Tela cheia</span></button>
         <div class="b3-float" id="b3Float">
           <button type="button" data-b3act="open"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg><span>Abrir</span></button>
@@ -1882,6 +1892,15 @@
         <div class="b3-range"><input type="range" id="b3Speed" min="0.2" max="3" step="0.1"><output id="b3SpeedOut"></output></div>
         <label>Fundo</label>
         <div class="b3-sw" id="b3Bg" role="group" aria-label="Fundo"></div>
+        <label>Imagem de fundo</label>
+        <div class="b3-thumbs" id="b3BgThumbs"></div>
+        <div class="row"><button type="button" id="b3BgUp"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Enviar imagem</button><button type="button" id="b3BgNone" class="link plain">Sem imagem</button></div>
+        <div id="b3BgBox">
+          <label for="b3BgBlur">Desfoque do fundo</label>
+          <div class="b3-range"><input type="range" id="b3BgBlur" min="0" max="30" step="1"><output id="b3BgBlurOut"></output></div>
+          <label for="b3BgDim">Escurecer o fundo</label>
+          <div class="b3-range"><input type="range" id="b3BgDim" min="0" max="80" step="5"><output id="b3BgDimOut"></output></div>
+        </div>
       </div>
       <div class="card">
         <h3><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg>Ao abrir o livro</h3>
@@ -1891,6 +1910,7 @@
         <div id="b3HotBox">
           <p class="hint" style="margin:8px 0 0">As páginas passam rápido e o livro para numa cena quente, com a frase grifada. O app escolhe sozinho (sem IA), ou você escolhe:</p>
           <div class="b3-hot" id="b3HotList" role="radiogroup" aria-label="Cena para mostrar"></div>
+          <label class="check" style="margin-top:10px"><input type="checkbox" id="b3Censor"><span>Riscar os palavrões com lápis vermelho (pau, bunda, porra…), deixando a palavra aparecer um pouco</span></label>
         </div>
       </div>
       <div class="card">
@@ -9083,7 +9103,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let b3 = null;
   const bookWords = (p) => p.chapters.reduce((n, c) => n + countWords(c.text), 0);
   const bookPages = (p) => Math.max(24, Math.ceil(bookWords(p) / 250));
-  const B3_DEF = { color: '', pos: 'top', align: 'left', size: 12.5, backRefId: '', blur: 10, veil: 45, motion: 'parado', speed: 1, bg: 'vinho', zoom: 1, openMode: 'hot', hotKey: '' };
+  const B3_DEF = { color: '', pos: 'top', align: 'left', size: 12.5, backRefId: '', blur: 10, veil: 45, motion: 'parado', speed: 1, bg: 'vinho', zoom: 1, openMode: 'hot', hotKey: '', censor: true, bgRefId: '', bgBlur: 8, bgDim: 25 };
   const B3_BG = { vinho: ['Vinho', 'radial-gradient(ellipse at 50% 85%, rgba(155,77,99,.38), transparent 60%), #241a1e', '#5a2f3c'], noite: ['Noite', 'radial-gradient(ellipse at 50% 80%, #2a2a33, #08080b 70%)', '#101015'],
     papel: ['Papel', 'radial-gradient(ellipse at 50% 80%, #fffaf2, #e7ddcf 75%)', '#efe6d8'], rosa: ['Rosa', 'linear-gradient(160deg, #f8dbe3, #e9b4c3)', '#efc3cf'], lilas: ['Lilás', 'linear-gradient(160deg, #d9d0f2, #9c8bd0)', '#b9acdf'],
     verde: ['Verde (chroma key, para recortar no editor de vídeo)', '#00b140', '#00b140'] };
@@ -9157,17 +9177,34 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return st.hot.find(h => h.key === k) || st.hot[0] || null;
   }
   // uma página do livro aberto
+  // palavrões viram <span> riscado (quando a opção está ligada)
+  const B3_CENS = /(?<![\p{L}])(pau|paus|pica|picas|piroca|pirocas|rola|rolas|caralho|caralhos|porra|porras|foda|fodas|foder|fodendo|fodeu|fodi|fodia|fodido|fodida|cu|cuzinho|bunda|bundas|bundinha|buceta|xoxota|puta|putas|puto|putaria|merda|bosta|cacete|punheta|punhetas|gozar|gozei|gozou|gozo|gozando|gozada|pinto|tesuda|tesudo|safada|safado|vadia|vagabunda)(?![\p{L}])/giu;
+  function b3Cens(t) {
+    if (!b3 || !b3cfg().censor) return [t];
+    const out = []; let last = 0; t.replace(B3_CENS, (m, w, i) => { out.push(t.slice(last, i), el('span', { class: 'b3-cens', text: m })); last = i + m.length; return m; });
+    out.push(t.slice(last)); return out.filter(x => x !== '');
+  }
+  // cada página termina numa linha inteira (sem texto cortado ao meio nem sumindo)
+  function b3Fit(bk) {
+    bk.querySelectorAll('.fx').forEach(fx => {
+      fx.style.flex = ''; fx.style.height = '';
+      const lh = parseFloat(getComputedStyle(fx).lineHeight) || 15.2, h = fx.clientHeight; if (!h) return;
+      fx.style.flex = 'none'; fx.style.height = Math.max(lh, Math.floor((h + 1) / lh) * lh) + 'px';
+      // a página da esquerda tem que terminar onde a da direita começa: corta o começo até caber
+      if (fx.closest('.lastleft')) { let n = 0; while (fx.scrollHeight > fx.clientHeight + 1 && n++ < 400) { const tn = [...fx.childNodes].find(x => x.textContent.trim()); if (!tn) break; if (tn.nodeType === 3) tn.textContent = tn.textContent.replace(/^\s*\S+\s*/, ''); else tn.remove(); } }
+    });
+  }
   function b3Page(st, from, opt = {}) {
     const len = opt.len || 640; let a = Math.max(0, from), b;
     if (opt.to != null) { b = opt.to; a = Math.max(0, b - len); }
     if (a > 0) { const sp = st.txt.lastIndexOf(' ', a); const nl = st.txt.lastIndexOf('\n', a); a = Math.max(sp, nl) + 1; }
     if (opt.to == null) { b = Math.min(st.txt.length, a + len); if (b < st.txt.length) { const sp = st.txt.lastIndexOf(' ', b); if (sp > a) b = sp; } }
     const ch = st.chs.filter(x => x.s <= a).pop();
-    const fx = el('div', { class: 'fx' }), seg = (x, y) => st.txt.slice(x, y).replace(/\n{2,}/g, '\n');
+    const fx = el('div', { class: 'fx' }), seg = (x, y) => b3Cens(st.txt.slice(x, y).replace(/\n{2,}/g, '\n'));
     if (opt.hl && opt.hl.s < b && opt.hl.e > a) {
       const hs = Math.max(a, opt.hl.s), he = Math.min(b, opt.hl.e);
-      fx.append(seg(a, hs), el('mark', { class: 'b3-hl', text: seg(hs, he) }), seg(he, b));
-    } else fx.append(seg(a, b));
+      fx.append(...seg(a, hs), el('mark', { class: 'b3-hl' }, ...seg(hs, he)), ...seg(he, b));
+    } else fx.append(...seg(a, b));
     const num = opt.num || Math.max(2, Math.round(a / 1500) + 2);
     return el('div', { class: 'b3-face b3-pg' + (opt.left ? ' lft' : '') + (opt.cls ? ' ' + opt.cls : '') },
       el('div', { class: 'ph', text: opt.left ? ((b3.p.title || '').trim() || 'Sem título') : (ch ? (ch.c.title || '').trim() || `Capítulo ${ch.n}` : '') }), fx, el('div', { class: 'fn', text: String(num) }));
@@ -9200,12 +9237,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       for (let i = 0; i < N; i++) {
         const fo = 900 + span * (2 * i - 1) / (2 * N - 1), bo = 900 + span * (2 * i) / (2 * N - 1), pn = (k) => Math.max(k + 1, Math.round((rnum - 2) * k / (2 * N - 1)) + 1);
         leaves.push(el('div', { class: 'b3-leaf', style: `--i:${i};--n:${N}` }, i === 0 ? firstPage('lf-a') : b3Page(st, fo, { cls: 'lf-a', num: pn(2 * i) }),
-          i === N - 1 ? b3Page(st, 0, { left: true, cls: 'lf-b', to: start, len: 600, num: rnum - 1 }) : b3Page(st, bo, { left: true, cls: 'lf-b', num: pn(2 * i + 1) })));
+          i === N - 1 ? b3Page(st, 0, { left: true, cls: 'lf-b lastleft', to: start, len: 760, num: rnum - 1 }) : b3Page(st, bo, { left: true, cls: 'lf-b', num: pn(2 * i + 1) })));
       }
     }
     bk.classList.toggle('leaves', !!leaves.length); bk.classList.toggle('flip', !!(b3.open && leaves.length));
     bk.replaceChildren(
-      under, ...leaves,
+      under, ...leaves, leaves.length ? el('div', { class: 'b3-face b3-gutter' }) : '',
       el('div', { class: 'b3-cover' },
         el('div', { class: 'b3-face b3-front' }, front),
         el('div', { class: 'b3-face b3-inside' }, el('div', {}, el('b', { text: title }), author ? 'de ' + author : ''))),
@@ -9218,6 +9255,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const m1 = Math.max(0, (t.offsetTop - 14) / H * 100), m2 = Math.min(100, (t.offsetTop + t.offsetHeight + 14) / H * 100);
       const face = bk.querySelector('.b3-back'); face.style.setProperty('--m1', m1.toFixed(1) + '%'); face.style.setProperty('--m2', m2.toFixed(1) + '%'); face.style.setProperty('--mf', '14%');
     });
+    requestAnimationFrame(() => b3Fit(bk));
     $('b3Pages').textContent = `${fmtNum(bookWords(p))} palavras, cerca de ${fmtNum(pages)} páginas`;
     $('b3PageName').textContent = title;
     b3Controls();
@@ -9252,10 +9290,35 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('b3Thumbs').replaceChildren(...imgs.map(r => el('button', { type: 'button', title: r.subject || r.name || 'Imagem', 'aria-pressed': String(cfg.backRefId === r.id),
       onclick: () => { cfg.backRefId = cfg.backRefId === r.id ? '' : r.id; b3Save(); b3Render(); } }, el('img', { src: r.data, alt: r.subject || r.name || 'Imagem das referências' }))));
     $('b3Thumbs').hidden = !imgs.length;
+    $('b3BgThumbs').replaceChildren(...imgs.map(r => el('button', { type: 'button', title: r.subject || r.name || 'Imagem', 'aria-pressed': String(cfg.bgRefId === r.id),
+      onclick: () => { cfg.bgRefId = cfg.bgRefId === r.id ? '' : r.id; b3Save(); b3Stage(); b3Controls(); } }, el('img', { src: r.data, alt: r.subject || r.name || 'Imagem das referências' }))));
+    $('b3BgThumbs').hidden = !imgs.length; $('b3BgNone').hidden = !cfg.bgRefId; $('b3BgBox').hidden = !cfg.bgRefId;
+    $('b3BgBlur').value = cfg.bgBlur; $('b3BgBlurOut').textContent = cfg.bgBlur + ' px'; $('b3BgDim').value = cfg.bgDim; $('b3BgDimOut').textContent = cfg.bgDim + '%';
+    $('b3Censor').checked = !!cfg.censor;
     $('b3Open').querySelector('span').textContent = b3.open ? 'Fechar o livro' : 'Abrir o livro';
     $('b3Float').querySelector('[data-b3act=open] span').textContent = b3.open ? 'Fechar' : 'Abrir';
   }
-  function b3Stage() { $('b3Stage').style.setProperty('--b3bg', (B3_BG[b3cfg().bg] || B3_BG.vinho)[1]); }
+  function b3Stage() {
+    const cfg = b3cfg(), st = $('b3Stage'), bg = $('b3BgImg'), r = cfg.bgRefId && (refsCache[b3.p.id] || []).find(x => x.id === cfg.bgRefId);
+    st.style.setProperty('--b3bg', (B3_BG[cfg.bg] || B3_BG.vinho)[1]);
+    bg.hidden = !r; bg.style.backgroundImage = r ? `url("${r.data}")` : '';
+    bg.style.setProperty('--bgb', cfg.bgBlur + 'px'); bg.style.setProperty('--bgd', String(1 - cfg.bgDim / 100));
+  }
+  // enviar uma imagem (fica nas Referências) e usar no livro 3D
+  function b3Upload(subject, done) {
+    const p = b3.p, inp = el('input', { type: 'file', accept: 'image/*', hidden: true });
+    inp.addEventListener('change', async () => {
+      const f = inp.files[0]; inp.remove(); if (!f) return;
+      try {
+        const data = await shrinkImage(f, 1600);
+        const r = { id: uid(), projectId: p.id, kind: 'image', name: f.name, type: 'img', text: '', data, chars: 0,
+          imgKind: 'outro', subject: `${subject} de ${(p.title || '').trim() || 'Sem título'}`, note: '', enabled: false, addedAt: Date.now(), updatedAt: Date.now() };
+        await db.put('refs', r); (refsCache[p.id] = refsCache[p.id] || []).push(r); markDirty('refs');
+        done(r);
+      } catch (e) { toast(`Não consegui abrir essa imagem: ${e.message}.`); }
+    });
+    document.body.append(inp); inp.click();
+  }
   function b3SetOpen(on) {
     b3.open = on; $('book3d').classList.toggle('open', on); $('book3d').classList.toggle('flip', on && $('book3d').classList.contains('leaves'));
     if (on) { b3.saved = { rx: b3.rx, ry: b3.ry }; b3.ry = 0; b3.rx = 14; } else if (b3.saved) { b3.rx = b3.saved.rx; b3.ry = b3.saved.ry; }
@@ -9347,6 +9410,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   b3Seg('b3OpenMode', 'openMode', () => { b3Render(); if (b3.open) { b3SetOpen(false); setTimeout(() => b3SetOpen(true), 900); } }); b3Range('b3Size', 'size', 1, true); b3Range('b3Blur', 'blur', 1, true); b3Range('b3Veil', 'veil', 1, true);
   $('b3Speed').addEventListener('input', () => b3Motion());
   $('b3BackNone').addEventListener('click', () => { b3cfg().backRefId = ''; b3Save(); b3Render(); });
+  $('b3BgUp').addEventListener('click', () => b3Upload('Fundo do livro 3D', (r) => { b3cfg().bgRefId = r.id; b3Save(); b3Stage(); b3Controls(); toast('Imagem de fundo adicionada ✓ Ela fica guardada nas Referências.'); }));
+  $('b3BgNone').addEventListener('click', () => { b3cfg().bgRefId = ''; b3Save(); b3Stage(); b3Controls(); });
+  ['b3BgBlur', 'b3BgDim'].forEach(id => $(id).addEventListener('input', () => { const cfg = b3cfg(); cfg[id === 'b3BgBlur' ? 'bgBlur' : 'bgDim'] = Number($(id).value); b3Save(); b3Stage();
+    $('b3BgBlurOut').textContent = cfg.bgBlur + ' px'; $('b3BgDimOut').textContent = cfg.bgDim + '%'; }));
+  $('b3Censor').addEventListener('change', () => { b3cfg().censor = $('b3Censor').checked; b3Save(); b3Render(); });
   $('b3BackUp').addEventListener('click', () => {
     const p = b3.p, inp = el('input', { type: 'file', accept: 'image/*', hidden: true });
     inp.addEventListener('change', async () => {

@@ -1005,6 +1005,26 @@
   .fp-cat button { min-height: 30px; padding: 2px 6px; }
   #filterBtn.has-filter { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
   @media (max-width: 560px) { .hide-sm-text span { display: none; } }
+  /* ---------- aula com o texto ---------- */
+  dialog.learn-dlg { width: min(980px, calc(100vw - 16px)); }
+  .learn-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .learn-cols { grid-template-columns: 1fr; } }
+  .learn-col { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; max-height: 38vh; overflow: auto; }
+  .learn-col h3 { margin: 0 0 6px; font-size: .9rem; color: var(--muted); }
+  .learn-txt { font-family: Georgia, serif; font-size: 1rem; line-height: 1.6; white-space: pre-wrap; margin: 0; }
+  .learn-txt del { color: #e5534b; text-decoration-thickness: 2px; background: color-mix(in srgb, #d93a3a 12%, transparent); border-radius: 3px; }
+  .learn-txt ins { text-decoration: none; background: color-mix(in srgb, #2f9e55 28%, transparent); border-radius: 3px; padding: 0 1px; }
+  .learn-txt sup { font-family: system-ui, sans-serif; font-size: .65rem; font-weight: 700; color: var(--accent); margin-left: 1px; }
+  .learn-list { display: grid; gap: 8px; margin-top: 12px; }
+  .learn-item { display: grid; grid-template-columns: auto 1fr; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; }
+  .learn-item .li-n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: .8rem; }
+  .learn-item .li-k { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .learn-item .li-ch { font-family: Georgia, serif; margin: 2px 0; }
+  .learn-item .li-ch del { color: #e5534b; } .learn-item .li-ch ins { text-decoration: none; color: #46c272; font-weight: 600; }
+  .learn-item .li-why { color: var(--text); font-size: .9rem; }
+  .learn-item .row { margin-top: 4px; } .learn-item .row button, .learn-item label { min-height: 0; font-size: .84rem; margin: 0; }
+  .learn-think { margin-top: 14px; }
+  .learn-think li { margin: 4px 0; font-size: .9rem; }
   dialog.img-dlg { width: auto; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); padding: 0; background: transparent; border: 0; overflow: visible; }
   dialog.img-dlg::backdrop { background: rgba(0,0,0,.85); }
   .img-dlg img { display: block; width: calc(100vw - 16px); height: calc(100vh - 80px); object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.6)); cursor: zoom-out; }
@@ -1148,6 +1168,7 @@
 <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></symbol>
 <symbol id="i-list-filter" viewBox="0 0 24 24"><path d="M3 6h18" /> <path d="M7 12h10" /> <path d="M10 18h4" /></symbol>
 <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
+<symbol id="i-graduation-cap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" /> <path d="M22 10v6" /> <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" /></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
@@ -1659,6 +1680,11 @@
   <label for="catInput">Categoria</label>
   <input type="text" id="catInput" placeholder="Ex.: Romance, Fantasia Romântica, Dark Romance" autocomplete="off">
   <div class="row end" style="margin-top:12px"><button type="button" class="link" id="catNone">Tirar a categoria</button><span style="flex:1"></span><button type="button" data-close>Cancelar</button><button type="button" class="primary" id="catApply">Aplicar</button></div>
+</dialog>
+
+<dialog id="learnDlg" class="learn-dlg" aria-labelledby="learnTitle">
+  <div class="dlg-head"><h2 id="learnTitle"><svg class="icon" aria-hidden="true"><use href="#i-graduation-cap"/></svg>Aprender com o seu texto</h2><button class="close" data-close aria-label="Fechar"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div id="learnBody"></div>
 </dialog>
 
 <dialog id="book3dDlg" class="book3d-dlg" aria-labelledby="book3dTitle">
@@ -3714,6 +3740,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           el('span', { class: 'mi-ico' }, svgIcon('history')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: `Versões anteriores${historyOf(ch).length ? ` (${historyOf(ch).length})` : ''}` }))),
         el('button', { role: 'menuitem', class: 'menu-item', disabled: chBusy || !ch.text.trim(), onclick: () => { closeAddMenus(); if (view.mode === 'editar') { const ta = $('chBody'); if (ta) openReview(p, ch, ta, true); } else { reviewWanted = ch.id; setMode('editar'); } } },
           el('span', { class: 'mi-ico' }, svgIcon('list-checks')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Revisar sem IA' }), el('span', { class: 'mi-sub', text: 'Repetições, cara de tradução, pontuação' }))),
+        el('button', { role: 'menuitem', class: 'menu-item', disabled: chBusy || !ch.text.trim(), onclick: () => { closeAddMenus(); learnChapter(p, ch); } },
+          el('span', { class: 'mi-ico' }, svgIcon('graduation-cap')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Aula de português com este capítulo' }), el('span', { class: 'mi-sub', text: 'Versão corrigida e o porquê de cada correção (sem IA)' }))),
         el('button', { role: 'menuitem', class: 'menu-item', disabled: !ch.text.trim(), onclick: () => { closeAddMenus(); guardEdit(() => openImageGen(p, { kind: 'cena', chId: ch.id }), true); } },
           el('span', { class: 'mi-ico' }, svgIcon('image')), el('span', { class: 'mi-text' }, el('span', { class: 'mi-label', text: 'Gerar imagem da cena' }))),
         el('button', { role: 'menuitem', class: 'menu-item danger-item', disabled: chBusy, onclick: () => { closeAddMenus(); guardEdit(() => { discardEdit(); deleteChapter(p, ch); }, true); } },
@@ -4053,6 +4081,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         el('button', { type: 'button', class: 'chip', icon: 'palette', 'aria-label': 'Cor do texto', title: 'Cor do texto', onclick: () => { colors.hidden = !colors.hidden; grid.hidden = true; updateSelBar(); } }),
         el('button', { type: 'button', class: 'chip', icon: 'smile', 'aria-label': 'Emojis', title: 'Emojis', onclick: () => { grid.hidden = !grid.hidden; colors.hidden = true; updateSelBar(); } }),
         el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: 'Marcar', title: 'Marcar o trecho (a anotação é opcional)', onclick: markFromEditor }),
+        el('button', { type: 'button', class: 'chip', icon: 'graduation-cap', text: 'Aprender', title: 'Ver o trecho corrigido e entender cada correção (sem IA)', onclick: () => { const t = $('chBody'), a = t.selectionStart, b = t.selectionEnd, c = cur(); hideSelBar(); openLearn(c, t.value.slice(a, b), (fixed) => { t.focus(); t.setRangeText(fixed, a, b, 'select'); t.dispatchEvent(new Event('input')); }); } }),
         el('button', { type: 'button', class: 'chip', icon: 'list-checks', text: 'Revisar trecho', 'aria-label': 'Revisar o trecho (sem IA)', title: 'Revisar só o trecho selecionado: ortografia, pontuação, repetições (sem IA)', onclick: () => { const t = $('chBody'), c = cur(), chh = c && c.chapters.find(x => x.id === view.chapterId); hideSelBar(); if (t && chh) openReview(c, chh, t); } }),
         oneWord ? el('button', { type: 'button', class: 'chip', icon: 'book-open', text: 'Sinônimos', onclick: () => {
           if (bar.querySelector('.syn-box')) { bar.querySelector('.syn-box').remove(); updateSelBar(); return; }
@@ -4064,7 +4093,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       bar.append(el('span', { class: 'sel-title', text: 'Para marcar, selecione dentro de um parágrafo.' }));
     } else {
       bar.append(
-        el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: 'Marcar', title: 'Marcar o trecho (a anotação é opcional)', onclick: () => addHighlight() }));
+        el('button', { type: 'button', class: 'chip strong', icon: 'highlighter', text: 'Marcar', title: 'Marcar o trecho (a anotação é opcional)', onclick: () => addHighlight() }),
+        el('button', { type: 'button', class: 'chip', icon: 'graduation-cap', text: 'Aprender', title: 'Ver o trecho corrigido e entender cada correção (sem IA)', onclick: () => {
+          const i = info, rng = rawQuoteRange(i.ch.text, i.quote); hideSelBar(); getSelection().removeAllRanges();
+          if (!rng) { openLearn(i.p, i.quote, null); return; }
+          openLearn(i.p, i.ch.text.slice(rng.start, rng.end), (fixed) => { pushHistory(i.ch, 'Correções da aula de português'); i.ch.text = i.ch.text.slice(0, rng.start) + fixed + i.ch.text.slice(rng.end); i.ch.editedAt = Date.now(); saveProject(i.p, true); renderChapters(); });
+        } }));
     }
   }
   $('selBar').addEventListener('mousedown', (e) => e.preventDefault()); // não apaga a seleção antes do clique
@@ -6634,7 +6668,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // Revisor automático (sem IA): aponta e sugere, você decide
   // =====================================================================
   var review = null, reviewWanted = null;
-  const RV_KINDS = { orto: 'Ortografia', pont: 'Pontuação', trad: 'Cara de tradução', rep: 'Repetição', estilo: 'Estilo' };
+  const RV_KINDS = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', trad: 'Cara de tradução', rep: 'Repetição', estilo: 'Estilo' };
   const BODY = 'cabelo|cabelos|olho|olhos|mão|mãos|boca|lábio|lábios|rosto|cabeça|braço|braços|perna|pernas|ombro|ombros|peito|nariz|testa|queixo|pescoço|dedo|dedos|coração|costas|cintura|pele|bochecha|bochechas|nuca|língua|joelho|joelhos|pé|pés|barriga|orelha|orelhas|sobrancelha|sobrancelhas';
   const RV_STOP = new Set('a o as os um uma uns umas de do da dos das em no na nos nas por pelo pela pelos pelas para pra com sem sob sobre entre até que se não mais mas como quando onde porque pois já ainda também muito muita muitos muitas pouco tudo nada todo toda todos todas isso isto aquilo esse essa esses essas este esta estes estas aquele aquela ele ela eles elas eu tu você vocês nós me te se lhe nos vos seu sua seus suas meu minha meus minhas teu tua dele dela deles delas era foi ser estar estava está estão tinha tem ter havia há fazer fez faz disse ou e é sim só bem então depois antes agora sempre nunca outra outro outras outros mesmo mesma cada qual quem'.split(' '));
   const CLICHES = [
@@ -6661,6 +6695,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     each(/(?<=[^\s\-])[^\S\n]+(?:--?|–)[^\S\n]+(?=\S)/g, m => add(m.index, m.index + m[0].length, 'pont', 'Hífen no lugar de travessão.', ' — '));
     each(/[.]([^\S\n]+—[^\S\n]+)(?=(disse|perguntou|respondeu|falou|gritou|sussurrou|murmurou|retrucou|completou|continuou|explicou|resmungou|rebateu|admitiu|insistiu)\b)/g,
       m => add(m.index, m.index + 1, 'pont', 'Antes de "— disse…", a fala não leva ponto.', ''));
+    out.forEach(x => { if (/travessão|disse|Fala/.test(x.msg)) x.lesson = 'g-dialogo'; });
     each(/(?<![\p{L}])(\p{L}{2,})\s+\1(?![\p{L}])/giu, m => { if (!/^(ha|he|hi|não|ai|oi|já|tá|tic|toc|blá|bla)$/i.test(m[1])) add(m.index, m.index + m[0].length, 'pont', 'Palavra repetida.', m[1]); });
     each(/(?<=[.!?]\s+)(\p{Ll})/gu, m => { const before = t.slice(Math.max(0, m.index - 6), m.index); if (!/(Sr|Sra|Dr|Dra|etc|p|vs)\.\s+$/i.test(before)) add(m.index, m.index + 1, 'pont', 'Depois de ponto final, letra maiúscula.', m[0].toUpperCase()); });
     if (pt) {
@@ -6901,7 +6936,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     r.len = v.length;
     const key = (x) => `${x.kind}:${v.slice(x.s, x.e)}:${x.msg}`;
     let sp = []; try { sp = isPtBr(r.p) ? spellIssues(v, r.p) : []; } catch (e) { console.error(e); }
-    r.issues = [...reviewText(v, isPtBr(r.p)), ...sp]
+    let gr = []; try { gr = isPtBr(r.p) ? gramIssues(v) : []; } catch (e) { console.error(e); }
+    r.issues = dedupeIssues([...reviewText(v, isPtBr(r.p)), ...gr, ...sp])
       .filter(x => !r.ignore.has(key(x)) && (!r.range || (x.s >= r.range.s && x.e <= r.range.e)))
       .sort((a, b) => a.s - b.s);
     r.key = key;
@@ -6929,6 +6965,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       } else {
         buttons.push(x.fix != null ? el('button', { class: 'primary', text: x.fix === '' ? 'Apagar' : 'Aplicar', onclick: () => rvApply([x]) }) : el('button', { text: 'Ver no texto', onclick: () => rvGoto(x) }));
         if (x.kind === 'rep' || (x.kind === 'estilo' && /^\p{L}+$/u.test(word))) buttons.push(el('button', { icon: 'book-open', text: 'Sinônimos', 'aria-expanded': String(isOpen), onclick: () => { r.open = isOpen ? null : id; renderReview(); } }));
+        if (x.lesson) buttons.push(el('button', { class: 'link plain', icon: 'graduation-cap', text: 'Aprender', title: 'Abrir a aula sobre isso nos Desafios', onclick: () => openLessonQuiz(x.lesson) }));
         buttons.push(el('button', { class: 'link plain', text: 'Ignorar', onclick: () => { r.ignore.add(r.key(x)); r.ch.rvIgnore = [...r.ignore].slice(-300); saveProject(r.p); runReview(); } }));
       }
       const item = el('div', { class: 'rv-item', onclick: (e) => { if (!e.target.closest('button')) rvGoto(x); } },
@@ -6941,6 +6978,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const parts = [
       el('div', { class: 'rv-head' }, el('h3', { icon: 'list-checks', text: `Revisor · ${r.issues.length}${r.range ? ' no trecho' : ''}` }), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar o revisor', onclick: closeReview })),
       r.range ? el('div', { class: 'rv-scope' }, 'Revisando só o trecho selecionado. ', el('button', { class: 'link plain', text: 'Revisar o capítulo todo', onclick: () => { r.range = null; runReview(); } })) : null,
+      el('div', { class: 'rv-scope' }, el('button', { class: 'link plain', icon: 'graduation-cap', text: 'Ver a versão corrigida e aprender', onclick: () => { const ta = r.ta, a = r.range ? r.range.s : 0, b = r.range ? r.range.e : ta.value.length; openLearn(r.p, ta.value.slice(a, b), (fixed) => { ta.focus(); ta.setRangeText(fixed, a, b, 'select'); ta.dispatchEvent(new Event('input')); }); } })),
       !speller && isPtBr(r.p) ? el('div', { class: 'rv-scope', text: r.dictErr ? 'Não consegui baixar o dicionário (sem internet?). A ortografia fica de fora por enquanto.' : 'Carregando o dicionário de português (só na primeira vez)…' }) : null,
       counts.length > 1 ? el('div', { class: 'rv-tabs' }, el('button', { class: 'chip', 'aria-pressed': String(!r.filter), text: 'Tudo', onclick: () => { r.filter = ''; renderReview(); } }),
         counts.map(([k, n]) => el('button', { class: 'chip', 'aria-pressed': String(r.filter === k), text: `${RV_KINDS[k]} ${n}`, onclick: () => { r.filter = k; renderReview(); } }))) : null,
@@ -7610,7 +7648,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     liveT = setTimeout(() => {
       const box = $('chalRules'); if (!box || !ch.challenge) return;
       const res = checkRules(text, ch.challenge.rules); box.replaceChildren(rulesList(res));
-      const b = $('chalDeliver'); if (b) b.disabled = !res.every(r => r.ok);
+      const b = $('chalDeliver'), ok = res.every(r => r.ok); if (b) { b.disabled = !ok; b.title = ok ? '' : 'Cumpra as regras para entregar'; const h = b.parentElement.querySelector('.hint'); if (h) h.hidden = ok; }
     }, 250);
   }
   async function deliverChallenge(p, ch) {
@@ -7647,7 +7685,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       el('p', { style: 'text-align:center;margin:0 0 8px', text: `${d.score >= 90 ? 'Excelente!' : d.score >= 70 ? 'Muito bom!' : 'Bom começo!'} +${d.xp} XP` }),
       rulesList(checkRules(ch.text, ch.challenge.rules)),
       el('div', { class: 'result-fb' }, fb.length ? fb.map(x => el('div', { text: '• ' + x })) : el('div', { text: '• Texto limpo: nada a apontar na revisão automática ✓' })),
-      fb.length ? el('button', { class: 'link plain', icon: 'list-checks', text: 'Abrir o Revisor neste capítulo', onclick: () => { $('chalResultDlg').close(); reviewWanted = ch.id; view.mode = 'editar'; renderChapters(); } }) : null,
+      fb.length ? el('div', { class: 'row' },
+        el('button', { class: 'primary', icon: 'graduation-cap', text: 'Ver a versão corrigida e aprender', onclick: () => { $('chalResultDlg').close(); learnChapter(p, ch); } }),
+        el('button', { class: 'link plain', icon: 'list-checks', text: 'Abrir o Revisor', onclick: () => { $('chalResultDlg').close(); reviewWanted = ch.id; view.mode = 'editar'; renderChapters(); } })) : null,
       next.length ? el('h3', { style: 'margin:14px 0 6px', text: 'Evolua esta história com outro desafio' }) : null,
       el('div', { class: 'story-pick' }, next.map(f => el('button', { class: 'hub-card', onclick: () => { $('chalResultDlg').close(); startChallenge(p, { id: f.id, kind: 'follow', n: f.n, task: f.task, rules: f.rules }); } },
         el('h3', { text: f.n }), el('p', { text: f.task })))),
@@ -7685,7 +7725,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (local.get('fanfic.tipsOff', false) || tipsClosed.has(ch.id)) return null;
     const empty = !((edit && edit.chId === ch.id ? edit.text : ch.text) || '').trim();
     const box = el('div', { class: 'tip-card', role: 'note' });
+    let isEmpty = empty;
     const paint = () => {
+      const empty = isEmpty;
       let body;
       if (empty && tipN % 3 === 0) {
         const f = pick(OFICINA.openings, tipN);
@@ -7702,7 +7744,173 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       box.replaceChildren(svgIcon('lightbulb'), el('div', { class: 'tc-body' }, ...body), el('button', { class: 'close', icon: 'x', 'aria-label': 'Fechar a dica', onclick: () => { tipsClosed.add(ch.id); box.remove(); } }));
     };
     paint();
+    // começou a escrever: a dica de primeira frase dá lugar a uma dica de escrita
+    setTimeout(() => { const ta = $('chBody'); if (ta && isEmpty) ta.addEventListener('input', function f() { if (ta.value.trim() && isEmpty) { isEmpty = false; if (box.isConnected) paint(); ta.removeEventListener('input', f); } }); }, 0);
     return box;
+  }
+
+
+  // =====================================================================
+  // Gramática sem IA: regras com explicação e a aula com o próprio texto
+  // =====================================================================
+  const capLike = (orig, rep) => orig && orig[0] !== orig[0].toLocaleLowerCase('pt-BR') ? rep[0].toLocaleUpperCase('pt-BR') + rep.slice(1) : rep;
+  const NUMW = '\\d+|um|uma|dois|duas|três|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|quinze|vinte|trinta|cem|muitos|muitas|vários|várias|alguns|algumas|poucos|poucas|tantos|tantas';
+  const TIMEW = 'anos|meses|dias|semanas|horas|minutos|segundos|séculos|décadas|noites|madrugadas';
+  const REFORMA = { 'idéia': 'ideia', 'idéias': 'ideias', 'assembléia': 'assembleia', 'platéia': 'plateia', 'européia': 'europeia', 'européias': 'europeias', 'heróico': 'heroico', 'heróica': 'heroica',
+    'jóia': 'joia', 'jóias': 'joias', 'bóia': 'boia', 'paranóia': 'paranoia', 'apóio': 'apoio', 'vôo': 'voo', 'vôos': 'voos', 'enjôo': 'enjoo', 'abençôo': 'abençoo', 'perdôo': 'perdoo',
+    'crêem': 'creem', 'dêem': 'deem', 'lêem': 'leem', 'vêem': 'veem', 'pêlo': 'pelo', 'pólo': 'polo', 'freqüente': 'frequente', 'freqüentemente': 'frequentemente', 'conseqüência': 'consequência',
+    'agüentar': 'aguentar', 'agüenta': 'aguenta', 'agüentou': 'aguentou', 'tranqüilo': 'tranquilo', 'tranqüila': 'tranquila', 'cinqüenta': 'cinquenta', 'seqüestro': 'sequestro', 'lingüiça': 'linguiça', 'bilíngüe': 'bilíngue' };
+  const A_GENTE = { vamos: 'vai', fomos: 'foi', estamos: 'está', estávamos: 'estava', somos: 'é', éramos: 'era', temos: 'tem', tínhamos: 'tinha', podemos: 'pode', podíamos: 'podia',
+    fazemos: 'faz', fizemos: 'fez', queremos: 'quer', precisamos: 'precisa', íamos: 'ia', ficamos: 'fica', sabemos: 'sabe', sabíamos: 'sabia', conseguimos: 'consegue', voltamos: 'volta' };
+  const INVAR = new Set('deus mês gás país ônibus lápis vírus tênis pires atlas cais pus bônus ônus campus três português inglês francês freguês burguês marquês japonês chinês holandês escocês através após mais menos simples óculos parabéns férias pêsames costas arredores'.split(' '));
+  function gramIssues(t) {
+    const out = [], add = (s, e, msg, fix, lesson, kind = 'gram') => { if (e > s) out.push({ s, e, kind, msg, fix, lesson }); };
+    const each = (re, fn) => { re.lastIndex = 0; let m; while ((m = re.exec(t))) { if (!m[0]) { re.lastIndex++; continue; } fn(m); } };
+    const W = (src, f = 'giu') => new RegExp(src, f);
+    // fazer/haver indicando tempo ou existência ficam no singular
+    const FAZ = { fazem: 'faz', faziam: 'fazia', fizeram: 'fez', farão: 'fará', fariam: 'faria' };
+    each(W(`(?<![\\p{L}])(fazem|faziam|fizeram|farão|fariam)(?=\\s+(?:quase\\s+|uns\\s+|umas\\s+|mais de\\s+|cerca de\\s+)?(?:${NUMW})\\s+(?:${TIMEW})(?![\\p{L}]))`), m =>
+      add(m.index, m.index + m[1].length, 'Indicando tempo, o verbo "fazer" fica no singular: "faz dois anos", "fazia três anos".', capLike(m[1], FAZ[m[1].toLowerCase()]), 'g-pronomes'));
+    const HAV = { haviam: 'havia', houveram: 'houve', haverão: 'haverá', haveriam: 'haveria' };
+    each(W(`(?<![\\p{L}])(haviam|houveram|haverão|haveriam)(?=\\s+(?:${NUMW}|outros|outras|uns|umas)(?![\\p{L}]))`), m =>
+      add(m.index, m.index + m[1].length, 'No sentido de "existir", o verbo "haver" fica no singular: "havia muitas pessoas".', capLike(m[1], HAV[m[1].toLowerCase()]), 'g-pronomes'));
+    each(W(`(?<![\\p{L}])a gente\\s+(${Object.keys(A_GENTE).join('|')})(?![\\p{L}])`), m => {
+      const at = m.index + m[0].length - m[1].length;
+      add(at, at + m[1].length, '"A gente" pede o verbo como "ele": "a gente vai", "a gente foi" (ou use "nós vamos").', A_GENTE[m[1].toLowerCase()], 'g-pronomes');
+    });
+    each(W(`(?<![\\p{L}])(eles|elas|vocês)\\s+(tem|vem)(?![\\p{L}])`), m => {
+      const at = m.index + m[0].length - m[2].length;
+      add(at, at + m[2].length, 'No plural, "ter" e "vir" levam acento: eles têm, elas vêm.', m[2].toLowerCase() === 'tem' ? 'têm' : 'vêm', 'g-acentos');
+    });
+    each(W(`(?<![\\p{L}])(?:vou|vai|vamos|vão|pode|posso|podia|quero|quer|queria|preciso|precisa|ia|for)\\s+(por)(?=\\s+(?:o|a|os|as|um|uma|isso|isto|aquilo|tudo|fogo|fim|ordem|em|no|na|pra|para)(?![\\p{L}]))`), m => {
+      const at = m.index + m[0].length - 3;
+      add(at, at + 3, 'Quando é o verbo (colocar), "pôr" leva acento.', 'pôr', 'g-acentos');
+    });
+    // crase
+    const CRASE = [['as vezes', 'às vezes', '(?<!(?:todas|muitas|poucas|várias|algumas|duas|três|das|nas|quantas)\\s)'], ['as pressas', 'às pressas', ''], ['a procura de', 'à procura de', ''], ['a medida que', 'à medida que', ''],
+      ['a beira d', 'à beira d', ''], ['a frente d', 'à frente d', ''], ['a direita', 'à direita', '(?<=(?:virou|vire|fica|ficava|ficou|siga|está|estava)\\s)'], ['a esquerda', 'à esquerda', '(?<=(?:virou|vire|fica|ficava|ficou|siga|está|estava)\\s)'],
+      ['a vontade', 'à vontade', '(?<=(?:fique|fica|ficar|ficou|esteja|estava|está|sinta-se|sentir-se)\\s)']];
+    CRASE.forEach(([a, b, pre]) => each(W(`${pre}(?<![\\p{L}])${a}(?![\\p{L}])${a === 'a vontade' ? '(?!\\s+(?:de|dele|dela|deles|delas))' : ''}`), m =>
+      add(m.index, m.index + a.length, `Expressão com palavra feminina leva crase: "${b}".`, capLike(m[0], b), 'g-crase')));
+    each(W(`(?<![\\p{L}])as\\s+(uma|duas|três|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|\\d{1,2})(?=\\s*(?:h(?![\\p{L}])|horas|da manhã|da tarde|da noite|e meia|em ponto))`), m =>
+      add(m.index, m.index + 2, 'Hora exata leva crase: "às duas da manhã".', capLike(m[0], 'às'), 'g-crase'));
+    each(W(`(?<![\\p{L}])à(?=\\s+(?:pé|cavalo|partir|ele|eles|você|vocês|mim|nós|eu|isso|isto|todo|todos|cada|uma|um|nenhum|ninguém)(?![\\p{L}]))`), m =>
+      add(m.index, m.index + 1, 'Não há crase antes de palavra masculina, pronome ou "partir": "a pé", "a partir", "a ele".', capLike(m[0], 'a'), 'g-crase'));
+    // porquês
+    each(W(`(?<![\\p{L}])(porque|por que)(?=\\s*\\?)`), m => add(m.index, m.index + m[1].length, 'No fim da pergunta, usa-se "por quê", separado e com acento.', capLike(m[1], 'por quê'), 'g-porques'));
+    each(W(`(^|[.!?…—]\\s*|\\n)(Porque)(?=\\s[^.!?\\n]*\\?)`, 'gmu'), m => { const at = m.index + m[1].length; add(at, at + 6, 'Pergunta começando com "por qual motivo" se escreve separado: "Por que…?"', 'Por que', 'g-porques'); });
+    each(W(`(?<![\\p{L}])(o|um|seu|meu|esse|este|qual o|qual é o)\\s+(porque|por que)(?![\\p{L}])`), m => { const at = m.index + m[0].length - m[2].length; add(at, at + m[2].length, 'Com artigo ("o porquê" = o motivo), é substantivo: "porquê", junto e com acento.', 'porquê', 'g-porques'); });
+    // há / a
+    each(W(`(?<![\\p{L}])há\\s+([^.,;:!?\\n]{1,30}?)\\s+atrás(?![\\p{L}])`), m => add(m.index, m.index + m[0].length, '"Há" já indica tempo passado; "atrás" fica repetido. Use um ou outro: "há três anos" ou "três anos atrás".', capLike(m[0], 'há ' + m[1]), 'g-confusoes'));
+    each(W(`(?<!daqui\\s|dentro de\\s|de\\s)(?<![\\p{L}])a\\s+((?:${NUMW})\\s+(?:${TIMEW})|muito tempo|anos|meses|séculos)(?=\\s+atrás|[.,;!?]|\\s+(?:que|não|eu|ele|ela|nós|eles|elas|você))`), m => {
+      if (/(daqui|dentro de|daí)\s*$/i.test(t.slice(Math.max(0, m.index - 12), m.index))) return;
+      add(m.index, m.index + 1, 'Tempo que já passou se escreve com "há" (= faz): "há três anos". Para o futuro, use "a": "daqui a três anos".', capLike(m[0], 'há'), 'g-confusoes');
+    });
+    // mal / mau, mas / mais, onde / aonde
+    each(W(`(?<![\\p{L}])mal(?=\\s+(?:humor|caráter|gosto|hábito|exemplo|sinal|cheiro|negócio|pressentimento|jeito|momento|elemento|tempo)(?![\\p{L}]))`), m => add(m.index, m.index + 3, 'Antes de substantivo, o oposto de "bom" é "mau": "mau humor", "mau sinal".', capLike(m[0], 'mau'), 'g-confusoes'));
+    each(W(`(?<![\\p{L}])mau(?=[\\s-]+(?:feito|educado|educada|humorado|humorada|criado|criada|vestido|vestida|dormido|dormida|resolvido|resolvida|entendido|entendida|acostumado|acostumada|agradecido|agradecida|cheiroso|sucedido|sucedida|amado|amada)(?![\\p{L}]))`), m => add(m.index, m.index + 3, 'Antes de particípio ou adjetivo, o oposto de "bem" é "mal": "mal-humorado", "mal dormido".', capLike(m[0], 'mal'), 'g-confusoes'));
+    each(W(`,(\\s+)mais(?=\\s+(?:não|nunca|eu|ele|ela|nós|eles|elas|você|vocês|ninguém|também|isso|quando|agora|ainda)(?![\\p{L}]))`), m => { const at = m.index + 1 + m[1].length; add(at, at + 4, 'Ideia de oposição (porém) é "mas"; "mais" é quantidade.', 'mas', 'g-confusoes'); });
+    each(W(`(?<![\\p{L}])onde(?=\\s+(?:(?:você|vocês|ele|ela|eles|elas|a gente|nós|eu)\\s+)?(?:vai|vão|vamos|foi|foram|fomos|ia|iam|íamos|irá|irão|iremos|vou|iria)(?![\\p{L}]))`), m => add(m.index, m.index + 4, 'Com verbo de movimento (ir a algum lugar), use "aonde": "aonde você vai?".', capLike(m[0], 'aonde'), 'g-confusoes'));
+    // pronomes
+    each(W(`(?<![\\p{L}])para mim(?=\\s+\\p{L}+(?:ar|er|ir|or)(?![\\p{L}]))`), m => { const w = (t.slice(m.index + m[0].length).match(/^\s+(\p{L}+)/u) || [])[1] || ''; if (/^(lugar|mulher|colher|prazer|mar|par|bar|lar|olhar|amor|calor|favor|melhor|pior|maior|menor|senhor|interior|exterior|anterior|posterior|valor|cor|dor|flor)$/i.test(w)) return; add(m.index, m.index + m[0].length, 'Antes de verbo no infinitivo, quem faz a ação é "eu": "para eu fazer" (e "para mim" quando não vem verbo).', capLike(m[0], 'para eu'), 'g-pronomes'); });
+    each(W(`(?<![\\p{L}])entre eu e(?![\\p{L}])`), m => add(m.index, m.index + m[0].length, 'Depois de "entre", use "mim": "entre mim e você".', capLike(m[0], 'entre mim e'), 'g-pronomes'));
+    // vírgula
+    each(W(`([^\\s,;:—(\\n.!?…])(\\s+)mas(?=\\s)(?![^.\\n]{0,3}também)`), m => {
+      if (/não só|nem/i.test(t.slice(Math.max(0, m.index - 40), m.index))) return;
+      const at = m.index + 1; add(at, at + m[2].length, 'Antes de "mas" vai vírgula: "queria ficar, mas precisava ir".', ', ', 'g-virgula', 'pont');
+    });
+    each(W(`(?<![\\p{L}])(Oi|Olá|Tchau|Obrigado|Obrigada|Valeu|Ei|Bom dia|Boa tarde|Boa noite|Desculpa|Desculpe|Calma|Vem|Para)(\\s+)(\\p{Lu}\\p{Ll}+)(?![\\p{L}])`), m => {
+      const at = m.index + m[1].length; add(at, at + m[2].length, 'Quem é chamado (vocativo) fica separado por vírgula: "Oi, Rafael".', ', ', 'g-virgula', 'pont');
+    });
+    each(W(`(^|[.!?…—]\\s*|\\n)(Sim)(\\s+)(?=(?:eu|ele|ela|nós|eles|elas|você|vocês|claro|senhor|senhora|com certeza)(?![\\p{L}]))`, 'gmu'), m => { const at = m.index + m[1].length + 3; add(at, at + m[3].length, '"Sim" no começo da resposta é separado por vírgula: "Sim, eu vou".', ', ', 'g-virgula', 'pont'); });
+    // reforma ortográfica
+    each(W(`(?<![\\p{L}])(${Object.keys(REFORMA).join('|')})(?![\\p{L}])`), m => add(m.index, m.index + m[0].length, 'Pela reforma ortográfica, essa palavra perdeu o acento ou o trema.', capLike(m[0], REFORMA[m[0].toLowerCase()]), 'g-acentos', 'orto'));
+    // concordância simples: palavra no singular + substantivo no plural
+    if (speller) each(W(`(?<![\\p{L}])(o|a|do|da|no|na|ao|um|uma|pelo|pela|mesmo|mesma|este|esta|esse|essa|aquele|aquela|seu|sua|meu|minha|nosso|nossa|outro|outra)\\s+(\\p{Ll}{3,}s)(?![\\p{L}])`), m => {
+      const w = m[2], lw = w.toLowerCase(); if (INVAR.has(lw) || /(ês|ás|ós|ís|ús|is|us)$/.test(lw)) return;
+      const sing = lw.endsWith('ões') ? lw.slice(0, -3) + 'ão' : lw.endsWith('ães') ? lw.slice(0, -3) + 'ão' : lw.endsWith('res') || lw.endsWith('zes') ? lw.slice(0, -2) : lw.slice(0, -1);
+      if (!speller.check(sing) || !speller.check(lw)) return;
+      const at = m.index + m[0].length - w.length;
+      add(at, at + w.length, `"${m[1]}" está no singular e "${w}" no plural. Combine os dois: "${m[1]} ${sing}" ou tudo no plural.`, sing, 'g-pronomes');
+    });
+    return out;
+  }
+  // tira repetições: se duas regras apontam o mesmo lugar, fica a mais específica
+  function dedupeIssues(list) {
+    const pri = { gram: 0, orto: 1, pont: 2, trad: 3, estilo: 4, rep: 5 }, out = [];
+    list.slice().sort((a, b) => (pri[a.kind] ?? 9) - (pri[b.kind] ?? 9)).forEach(x => { if (!out.some(y => y.fix != null && x.fix != null && x.s < y.e && x.e > y.s)) out.push(x); });
+    return out.sort((a, b) => a.s - b.s);
+  }
+  function openLessonQuiz(id) {
+    if (!DESAFIOS.gram.some(l => l.id === id)) return;
+    document.querySelectorAll('dialog[open]').forEach(d => d.close());
+    guardEdit(() => openHub({ page: 'quiz', id, qi: 0, ok: 0, picked: null }));
+  }
+  // a aula: versão corrigida lado a lado e o porquê de cada mudança
+  let learnCtx = null;
+  async function openLearn(p, text, apply) {
+    $('learnBody').replaceChildren(el('p', { class: 'muted', text: 'Lendo o texto…' }));
+    $('learnDlg').showModal();
+    try { await loadSpeller(); } catch {}
+    const pt = isPtBr(p);
+    let issues = dedupeIssues([...reviewText(text, pt), ...(pt ? gramIssues(text) : []), ...(pt && speller ? spellIssues(text, p) : [])]);
+    const fixes = issues.filter(x => x.fix != null && x.kind !== 'rep' && x.kind !== 'estilo'), think = issues.filter(x => x.fix == null || x.kind === 'rep' || x.kind === 'estilo');
+    learnCtx = { p, text, apply, fixes, on: new Set(fixes.map((_, i) => i)) };
+    renderLearn(think);
+  }
+  function learnFixed() {
+    const c = learnCtx; let t = c.text;
+    c.fixes.map((x, i) => [x, i]).filter(([, i]) => c.on.has(i)).sort((a, b) => b[0].s - a[0].s).forEach(([x]) => { t = t.slice(0, x.s) + x.fix + t.slice(x.e); });
+    return t;
+  }
+  function renderLearn(think) {
+    const c = learnCtx, body = $('learnBody'), KIND = { orto: 'Ortografia', gram: 'Gramática', pont: 'Pontuação', trad: 'Cara de tradução' };
+    const LESSON = (id) => (DESAFIOS.gram.find(l => l.id === id) || {}).n;
+    // texto original com o que sai riscado, e o corrigido com o que entra em verde
+    const orig = el('p', { class: 'learn-txt' }), fixed = el('p', { class: 'learn-txt' });
+    let pos = 0;
+    const order = c.fixes.map((x, i) => [x, i]).sort((a, b) => a[0].s - b[0].s);
+    order.forEach(([x, i]) => {
+      if (x.s < pos) return;
+      orig.append(c.text.slice(pos, x.s)); fixed.append(c.text.slice(pos, x.s));
+      const n = String(order.findIndex(o => o[1] === i) + 1), on = c.on.has(i);
+      orig.append(el('del', { text: c.text.slice(x.s, x.e) || ' ' }), el('sup', { text: n }));
+      if (on) fixed.append(el('ins', { text: x.fix || '' }), el('sup', { text: n })); else fixed.append(c.text.slice(x.s, x.e));
+      pos = x.e;
+    });
+    orig.append(c.text.slice(pos)); fixed.append(c.text.slice(pos));
+    const items = order.map(([x, i], k) => {
+      const cb = el('input', { type: 'checkbox' }); cb.checked = c.on.has(i);
+      cb.addEventListener('change', () => { cb.checked ? c.on.add(i) : c.on.delete(i); renderLearn(think); });
+      return el('div', { class: 'learn-item' }, el('span', { class: 'li-n', text: String(k + 1) }),
+        el('div', {}, el('div', { class: 'li-k', text: KIND[x.kind] || 'Correção' }),
+          (() => {
+            const was = c.text.slice(x.s, x.e);
+            if (was.trim() && (x.fix || '').trim()) return el('div', { class: 'li-ch' }, el('del', { text: was.trim() }), ' → ', el('ins', { text: x.fix.trim() }));
+            // vírgula ou espaço: mostra com as palavras do lado
+            const pre = (c.text.slice(Math.max(0, x.s - 30), x.s).match(/(\S+)\s*$/) || [, ''])[1], post = (c.text.slice(x.e, x.e + 30).match(/^\s*(\S+)/) || [, ''])[1];
+            return el('div', { class: 'li-ch' }, el('del', { text: `${pre}${was}${post}` }), ' → ', el('ins', { text: `${pre}${x.fix}${post}` }));
+          })(),
+          el('div', { class: 'li-why', text: x.kind === 'orto' && x.sugs ? `Palavra fora do dicionário. Sugestão mais provável: "${x.fix}"${x.sugs.length > 1 ? ` (outras: ${x.sugs.slice(1, 4).join(', ')})` : ''}. Se for nome ou gíria, desmarque.` : x.msg }),
+          el('div', { class: 'row' }, el('label', { class: 'check' }, cb, el('span', { text: 'Aplicar' })),
+            x.lesson && LESSON(x.lesson) ? el('button', { class: 'link plain', icon: 'graduation-cap', text: `Treinar: ${LESSON(x.lesson)}`, onclick: () => openLessonQuiz(x.lesson) }) : null)));
+    });
+    body.replaceChildren(...[
+      c.fixes.length ? el('p', { class: 'muted', style: 'margin-top:0', text: `${c.fixes.length} correção(ões) encontrada(s). Em vermelho o que sai, em verde o que entra. Leia o porquê de cada uma embaixo.` })
+        : el('p', { style: 'margin-top:0', text: 'Não achei nada para corrigir neste trecho ✓' }),
+      c.fixes.length ? el('div', { class: 'learn-cols' }, el('div', { class: 'learn-col' }, el('h3', { text: 'Seu texto' }), orig), el('div', { class: 'learn-col' }, el('h3', { text: 'Versão corrigida' }), fixed)) : null,
+      c.fixes.length ? el('div', { class: 'learn-list' }, items) : null,
+      think.length ? el('div', { class: 'learn-think' }, el('b', { text: 'Para pensar (o app não troca sozinho):' }),
+        el('ul', {}, think.slice(0, 12).map(x => el('li', {}, el('b', { text: `"${c.text.slice(x.s, x.e).slice(0, 40)}": ` }), x.msg)))) : null,
+      el('div', { class: 'row end', style: 'margin-top:14px' },
+        el('button', { 'data-close': '', text: 'Fechar' }),
+        c.apply && c.fixes.length ? el('button', { class: 'primary', icon: 'check', text: `Aplicar ${c.on.size} correção(ões)`, disabled: !c.on.size, onclick: () => { const f = learnFixed(); $('learnDlg').close(); c.apply(f); toast(`${c.on.size} correção(ões) aplicada(s) ✓`); } })
+          : !c.apply ? el('span', { class: 'hint', text: 'Para aplicar, abra o capítulo no Editar e use "Aprender" lá.' }) : null)].filter(Boolean));
+  }
+  function learnChapter(p, ch) {
+    const ta = view.mode === 'editar' && edit && edit.chId === ch.id ? $('chBody') : null;
+    if (ta) openLearn(p, ta.value, (f) => { ta.focus(); ta.setRangeText(f, 0, ta.value.length, 'select'); ta.dispatchEvent(new Event('input')); });
+    else openLearn(p, ch.text, (f) => { pushHistory(ch, 'Correções da aula de português'); ch.text = f; ch.editedAt = Date.now(); saveProject(p, true); renderChapters(); });
   }
 
   // =====================================================================

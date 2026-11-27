@@ -1,15 +1,15 @@
 // Guarda a última versão do fanfic.html para o app abrir sem internet (ler e editar capítulos).
 // Registrado com escopo "./fanfic", então não substitui o service worker do treino.
-const CACHE = 'fanfic-v45'
+const CACHE = 'fanfic-v46'
 const PAGINA = /\/fanfic\.html(\?.*)?$/
 // dicionário e sinônimos: grandes e quase nunca mudam; guardados à parte na primeira vez que são usados
 const DICT = /\/fanfic-dict-[\w-]+\.(aff|dic|txt)$/
-const DICT_CACHE = 'dictpt-v1'
+const DICT_CACHE = 'dictpt-v2'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (e) => e.waitUntil(
   caches.keys()
-    .then((keys) => Promise.all(keys.filter((k) => k.startsWith('fanfic-') && k !== CACHE).map((k) => caches.delete(k))))
+    .then((keys) => Promise.all(keys.filter((k) => (k.startsWith('fanfic-') && k !== CACHE) || (k.startsWith('dictpt-') && k !== DICT_CACHE)).map((k) => caches.delete(k))))
     .then(() => self.clients.claim()),
 ))
 

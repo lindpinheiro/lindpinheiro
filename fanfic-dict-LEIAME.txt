@@ -9,12 +9,23 @@ fanfic-dict-pt.aff e fanfic-dict-pt.dic
   Texto completo da licença e créditos: veja a seção abaixo (README_pt_BR.txt).
 
 fanfic-dict-sinonimos.txt
-  VERSÃO MODIFICADA do dicionário de sinônimos pt_BR (th_pt_BR.dat) que vem no LibreOffice
-  (repositório "dictionaries", pasta pt_BR). Modificações feitas para o Writer Agent:
-  formato de texto simples (uma palavra por linha), no máximo 4 sentidos e 10 sinônimos
-  por palavra, e remoção de entradas e sinônimos que não passam no corretor VERO.
-  O aviso de licença que acompanha o dicionário de sinônimos (license-thes.readme)
-  está reproduzido abaixo.
+  Arquivo derivado de duas fontes:
+
+  1) OpenWordnet-PT (OWN-PT), https://github.com/own-pt/openWordnet-PT
+     Licença: Creative Commons Atribuição 4.0 Internacional (CC BY 4.0),
+     https://creativecommons.org/licenses/by/4.0/
+     Créditos: Valeria de Paiva, Alexandre Rademaker, Gerard de Melo e colaboradores
+     (IBM Research Brasil, FGV e outros).
+     MODIFICAÇÕES: convertido para texto simples (uma palavra por linha), com os
+     sinônimos agrupados por sentido (synset), a definição em português encurtada
+     como rótulo e no máximo 6 sentidos e 10 sinônimos por palavra.
+
+  2) Para as palavras que a OpenWordnet-PT não tem (linhas que começam com "~"):
+     VERSÃO MODIFICADA do dicionário de sinônimos pt_BR (th_pt_BR.dat) que vem no
+     LibreOffice (repositório "dictionaries", pasta pt_BR): no máximo 4 sentidos e
+     10 sinônimos por palavra, sem entradas e sinônimos que não passam no corretor VERO.
+     O aviso de licença que acompanha esse dicionário (license-thes.readme) está
+     reproduzido abaixo.
 
 O corretor e a busca de sinônimos do app são código próprio (dentro do fanfic.html);
 nenhum programa de terceiros é usado.

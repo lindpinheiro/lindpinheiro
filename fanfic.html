@@ -433,9 +433,7 @@
   .gen-improve { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 8px; }
   .gen-improve .hint { margin: 0; }
   .gen-quick { display: flex; flex-wrap: wrap; gap: 0 28px; align-items: flex-start; }
-  .gen-sens { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; margin: 0; }
-  .gen-sens:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); }
-  .gen-sens input { accent-color: var(--accent); margin: 0; }
+  #genMoodHint { max-width: 520px; }
   .gen-modelline { text-align: center; margin: 8px 0 0; }
   .gen-more { margin-top: 16px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; }
   .gen-more summary { cursor: pointer; font-weight: 600; }
@@ -1660,7 +1658,7 @@
   <div id="genSubWrap" hidden><label for="genSub" id="genSubLabel">Quem?</label><input type="text" id="genSub" list="genSubList" autocomplete="off"><datalist id="genSubList"></datalist></div>
   <label for="genExtra" id="genExtraLabel">Descreva a imagem</label>
   <textarea id="genExtra" rows="3" placeholder="Ex.: pôr do sol, tons quentes, os dois de costas olhando o mar"></textarea>
-  <div class="gen-improve"><button type="button" class="ai-btn" id="genPromptAI"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Melhorar meu texto com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
+  <div class="gen-improve"><button type="button" class="ai-btn" id="genSumAI" hidden><svg class="icon" aria-hidden="true"><use href="#i-scroll-text"/></svg>Resumir a cena com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button><button type="button" class="ai-btn" id="genPromptAI"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Melhorar meu texto com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
     <span class="hint">Completa a descrição com aparência, ângulo da câmera e luz.</span></div>
   <label>Estilo</label>
   <div class="chips" id="genStyles"></div>
@@ -1668,7 +1666,11 @@
   <input type="file" id="genStyleFile" accept="image/*" hidden>
   <div class="gen-quick">
     <div id="genAspectWrap"><label>Formato</label><div class="chips" id="genAspect"></div></div>
-    <div><label>Clima</label><label class="chip gen-sens"><input type="checkbox" id="genSensual"> Sensual <span class="muted">(pele à mostra, sem nudez)</span></label></div>
+    <div><label>Clima</label><div class="chips" id="genMood" role="group" aria-label="Clima da imagem">
+      <button type="button" class="chip" data-mood="normal">Normal</button>
+      <button type="button" class="chip" data-mood="sensual" title="Tensão, toques, peito e costas à mostra, roupas abertas">Sensual</button>
+      <button type="button" class="chip" data-mood="nu" title="Sem roupa, mas sem mostrar os genitais: lençol, sombra, vapor ou o enquadramento cobrem">Nudez sugerida</button>
+    </div><p class="hint" id="genMoodHint" style="margin:6px 0 0"></p></div>
   </div>
   <div class="gen-result" id="genResult" hidden><img id="genImg" alt="Imagem gerada"><div class="row" id="genActions"></div></div>
   <div class="status" id="genStatus" role="status"></div>
@@ -5976,11 +5978,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('genChWrap').hidden = !(k === 'cena' || (k === 'livre' && c.inc && c.inc.chapter));
     c.aspect = GEN_KIND[k].aspect;
     if (k === 'personagem' || k === 'lugar') { $('genSub').value = ''; if (c.inc) { if (k === 'personagem') c.inc.chars.clear(); else c.inc.places.clear(); } }
-    const LBL = { capa: ['Como você imagina a capa?', 'Ex.: os dois de costas na grade da prisão, pôr do sol, título em letras douradas'], cena: ['Algo a mais na cena?', 'Ex.: câmera de lado, luz da lua pela grade, os dois muito próximos'],
+    const LBL = { capa: ['Como você imagina a capa?', 'Ex.: os dois de costas na grade da prisão, pôr do sol, título em letras douradas'], cena: ['Resumo da cena (pode editar)', 'O resumo do capítulo escolhido aparece aqui. Ajuste o que quiser: o momento, o ângulo, a luz…'],
       personagem: ['Como ele aparece?', 'Ex.: sentado na cama da cela, sem camisa, olhar desafiador, luz baixa'], lugar: ['Como é o lugar nessa imagem?', 'Ex.: à noite, chovendo, luz amarela no corredor'],
       livre: ['Descreva a imagem', 'Ex.: Jason e Miguel na cela, à noite, luz da lua pela grade, os dois sem camisa, muito próximos'] };
-    if (!c.base) { $('genExtraLabel').replaceChildren(LBL[k][0], k === 'livre' ? '' : el('span', { class: 'muted', text: ' (opcional)' })); $('genExtra').placeholder = LBL[k][1]; $('genExtra').rows = k === 'livre' ? 4 : 3; }
+    $('genSumAI').hidden = k !== 'cena' || !!c.base;
+    if (!c.base) { $('genExtraLabel').replaceChildren(LBL[k][0], k === 'livre' || k === 'cena' ? '' : el('span', { class: 'muted', text: ' (opcional)' })); $('genExtra').placeholder = LBL[k][1]; $('genExtra').rows = k === 'livre' ? 4 : 3; }
     renderGenCtx();
+    if (k === 'cena' && !c.base) genSceneSummary();
     $('genSubLabel').textContent = k === 'personagem' ? 'Qual personagem?' : 'Qual lugar?';
     $('genSubWrap').hidden = !((k === 'personagem' || k === 'lugar') && !$('genPeople').querySelector('.chip'));
     $('genSub').placeholder = k === 'personagem' ? 'Ex.: Theo' : 'Ex.: Bar do Zé';
@@ -6068,8 +6072,18 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return out.join('\n\n');
   }
   const GEN_SENSUAL = 'Clima sensual e romântico, de bom gosto, como uma capa de romance: tensão, proximidade, olhares, toques, respiração, pele à mostra (peito, costas, ombros, abdômen), camisas abertas, lençóis, suor, luz baixa e quente. Sem nudez frontal, sem genitais e sem ato sexual explícito.';
+  const GEN_NU = 'Nudez sugerida, artística e de bom gosto, como capa de romance ousada ou ensaio fotográfico artístico: os personagens podem estar sem roupa, mas os genitais NUNCA aparecem; ficam cobertos por lençol, toalha, sombra, vapor, água, mãos, objetos ou pelo próprio enquadramento (da cintura para cima, de costas, de lado). Tensão, toques e intimidade, sem ato sexual explícito.';
+  const GEN_MOOD_HINT = { normal: '', sensual: 'Tensão, toques, pele à mostra (peito, costas, abdômen), camisas abertas, lençóis e luz baixa.',
+    nu: 'Sem roupa, mas os genitais nunca aparecem: lençol, sombra, vapor ou o enquadramento cobrem. Alguns modelos às vezes recusam; se recusar, o app oferece tentar no clima Sensual.' };
+  const genMoodRule = (c) => c && c.mood === 'nu' ? GEN_NU : c && c.mood === 'sensual' ? GEN_SENSUAL : '';
+  function setGenMood(m) {
+    const c = genCtx; if (!c) return;
+    c.mood = m; c.sensual = m !== 'normal'; settings.imageMood = m; local.set('fanfic.settings', settings);
+    $('genMood').querySelectorAll('[data-mood]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mood === m)));
+    $('genMoodHint').textContent = GEN_MOOD_HINT[m] || ''; $('genMoodHint').hidden = !GEN_MOOD_HINT[m];
+  }
   const genRules = (c) => c && c.sensual
-    ? `Regras: imagem bonita e bem acabada; todos os personagens são homens adultos (maiores de 18 anos, com rosto e corpo de adulto). ${GEN_SENSUAL}`
+    ? `Regras: imagem bonita e bem acabada; todos os personagens são homens adultos (maiores de 18 anos, com rosto e corpo de adulto). ${genMoodRule(c)}`
     : 'Regras: imagem bonita e bem acabada; todos os personagens são adultos; sem nudez, sem conteúdo sexual explícito e sem violência gráfica. Sugira o clima com elegância.';
   function buildEditPrompt(p, base, extra, style, c) {
     const cut = (t, n) => { t = (t || '').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
@@ -6087,9 +6101,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   async function openImageGen(p, opts = {}) {
     if (!isConfigured()) { openSetup(1, () => openImageGen(p, opts)); return; }
-    genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null, sel: new Set(), canSee: true, base: null, sensual: !!settings.imageSensual, promptDirty: false,
+    genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null, sel: new Set(), canSee: true, base: null, sensual: false, mood: 'normal', promptDirty: false,
       inc: { infos: true, facts: false, chapter: false, refText: true, chars: new Set(), places: new Set(), manual: new Set() } };
-    $('genSensual').checked = genCtx.sensual; $('genNeg').value = settings.imageNeg || ''; $('genMore').open = false;
+    setGenMood(settings.imageMood || (settings.imageSensual ? 'sensual' : 'normal')); $('genNeg').value = settings.imageNeg || ''; $('genMore').open = false;
     if (settings.imgProv || settings.imageModel === '__prov') { delete settings.imgProv; if (settings.imageModel === '__prov') settings.imageModel = ''; saveSettings(); } // o provedor sem censura saiu do app
     const chs = p.chapters.filter(c => c.text.trim());
     $('genCh').replaceChildren(...chs.map(c => el('option', { value: c.id, text: `${p.chapters.indexOf(c) + 1}. ${chTitle(p, c)}` })));
@@ -6217,9 +6231,34 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   const genNegative = () => $('genNeg').value.trim();
   ['genSub', 'genExtra'].forEach(id => $(id).addEventListener('input', () => { clearTimeout(genAutoNames.t); genAutoNames.t = setTimeout(() => { genAutoNames(); genPromptFill(); }, 350); }));
-  $('genCh').addEventListener('change', () => genPromptFill());
+  // resumo da cena escolhida: o resumo do capítulo (da Bíblia) ou o começo dele; com IA, o momento mais visual
+  function genSceneSummary() {
+    const c = genCtx; if (!c || c.kind !== 'cena') return;
+    const ch = c.p.chapters.find(x => x.id === $('genCh').value); if (!ch) return;
+    let t = ch.recap && ch.recap.text ? ch.recap.text.trim() : '';
+    if (!t) { const paras = storyPlain(ch.text || '').split(/\n+/).map(x => x.trim()).filter(x => x && !/^[—–-]/.test(x) && x !== '* * *'); t = paras.slice(0, 3).join(' ').replace(/\s+/g, ' '); if (t.length > 420) t = t.slice(0, t.lastIndexOf(' ', 420)) + '…'; }
+    const cur = $('genExtra').value.trim();
+    if (!cur || cur === c.autoSum) { $('genExtra').value = t; c.autoSum = t;
+      // quem foi marcado sozinho pelo resumo anterior sai; quem você marcou fica
+      [...c.inc.chars].forEach(n => { if (!c.inc.manual.has('personagens:' + n)) c.inc.chars.delete(n); }); [...c.inc.places].forEach(n => { if (!c.inc.manual.has('lugares:' + n)) c.inc.places.delete(n); }); renderGenCtx(); }
+    c.promptDirty = false; genAutoNames(); genPromptFill();
+  }
+  $('genCh').addEventListener('change', () => { if (genCtx && genCtx.kind === 'cena') genSceneSummary(); else genPromptFill(); });
+  $('genSumAI').addEventListener('click', async () => {
+    const c = genCtx; if (!c) return;
+    const ch = c.p.chapters.find(x => x.id === $('genCh').value); if (!ch || !(ch.text || '').trim()) { genStatus('Escolha um capítulo com texto.', 'err'); return; }
+    const btn = $('genSumAI'); btn.disabled = true; genStatus('Resumindo a cena…');
+    try {
+      const r = await callAI(`Leia o capítulo abaixo e escolha o momento mais visual e marcante para virar uma ilustração. Descreva esse momento em 2 a 4 frases, em português, como uma cena para desenhar: quem está nela (pelos nomes), onde estão, o que estão fazendo, a posição dos corpos e as expressões, a luz e o clima. Sem diálogos, sem explicar a história. Responda só com a descrição.\n\nCAPÍTULO "${chTitle(c.p, ch)}":\n${storyPlain(ch.text).slice(0, 14000)}`,
+        { support: true, simple: 'text', label: 'Resumo da cena para imagem' });
+      const t = (r.text || '').trim(); if (t.length < 20) throw Object.assign(new Error('A IA não devolveu o resumo. Tente de novo.'), { action: 'model' });
+      $('genExtra').value = t; c.autoSum = t; c.promptDirty = false; genAutoNames(); genPromptFill();
+      genStatus('Resumo pronto ✓ Ajuste se quiser e toque em Gerar imagem.', 'ok');
+    } catch (e) { genStatus(e.message || 'Não deu certo.', 'err'); if (e.action) handleAIError(e, null); }
+    finally { btn.disabled = false; }
+  });
   $('genNeg').addEventListener('change', () => { settings.imageNeg = $('genNeg').value.trim(); local.set('fanfic.settings', settings); });
-  $('genSensual').addEventListener('change', () => { if (genCtx) { genCtx.sensual = $('genSensual').checked; settings.imageSensual = genCtx.sensual; local.set('fanfic.settings', settings); genPromptFill(); renderGenRefs(); } });
+  $('genMood').addEventListener('click', (e) => { const b = e.target.closest('[data-mood]'); if (!b || !genCtx) return; setGenMood(b.dataset.mood); genPromptFill(); renderGenCtx(); });
   $('genPrompt').addEventListener('input', () => { if (genCtx) genCtx.promptDirty = true; });
   $('genPromptReset').addEventListener('click', () => genPromptFill(true));
   $('genPromptMine').addEventListener('click', () => { const c = genCtx; if (!c) return; const t = $('genExtra').value.trim(); if (!t) { genStatus('Escreva a cena no campo de descrição primeiro.', 'err'); return; } $('genPrompt').value = t; c.promptDirty = true; genStatus('O pedido agora é só o seu texto. Toque em "Melhorar o pedido com IA" se quiser.', 'ok'); });
@@ -6234,7 +6273,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         `Reescreva o pedido do autor como UM pedido forte, em português, em um ou dois parágrafos (até 170 palavras), nesta ordem: quem está na cena e a aparência detalhada de cada personagem (idade, altura e corpo, tom de pele, rosto, cabelo, olhos, barba, tatuagens, roupa); a ação, a pose e como eles interagem; o ângulo da câmera e o enquadramento (plano, lente, ponto de vista); o cenário; a luz, as cores e o clima; o estilo visual e o acabamento.\n` +
         `Mantenha TUDO o que o autor pediu e não invente personagens nem história. Use as aparências abaixo à risca.\n${looks ? `APARÊNCIAS:\n${looks}\n` : ''}${refs}\n` +
         (c.style ? `O estilo visual escolhido é: ${c.style} (${GEN_STYLE_DESC[c.style] || ''}). Descreva tudo nesse estilo; ${c.style === 'Realista e cinematográfico' ? '' : 'nunca use as palavras realista, foto, fotografia ou fotorrealista, '}e comece o texto dizendo o estilo.\n` : '') +
-        `${c.sensual ? GEN_SENSUAL + ' Todos são homens adultos (maiores de 18 anos).' : 'Sem nudez e sem conteúdo sexual.'} Se o pedido passar disso, reescreva no limite permitido (sugira em vez de mostrar).\n` +
+        `${c.sensual ? genMoodRule(c) + ' Todos são homens adultos (maiores de 18 anos).' : 'Sem nudez e sem conteúdo sexual.'} Se o pedido passar disso, reescreva no limite permitido (sugira em vez de mostrar).\n` +
         `Responda SOMENTE com um JSON: {"prompt": "...", "negative": "o que evitar, separado por vírgulas (anatomia errada, mãos e dedos errados, rostos diferentes das referências, texto na imagem, marca d'água, e o que contradiz o pedido)"}\n\nPEDIDO DO AUTOR:\n${src.slice(0, 6000)}`,
         { support: true, label: 'Melhorar pedido de imagem' });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = { prompt: r.text.trim() }; }
@@ -6256,7 +6295,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ? `${c.base ? 'Se quiser, escolha mais imagens para a IA seguir' : 'Escolha até 4 imagens para a IA seguir'}: rosto, cabelo, roupa, lugar ou estilo.${c.sel.size ? ` (${c.sel.size} escolhida${c.sel.size > 1 ? 's' : ''})` : ''}`
       : c.base ? 'Este modelo não aceita imagens, então não consegue melhorar uma imagem. Escolha outro modelo de imagem (por exemplo, o Gemini Image).'
       : 'Este modelo não enxerga imagens: das referências escolhidas vai só a descrição escrita de cada uma (imagens sem descrição ficam de fora).';
-    if (c.sensual) $('genRefsHint').textContent = 'Clima sensual: só servem de referência os retratos criados aqui no app a partir das fichas (fotos enviadas ficam de fora, porque podem ser de pessoas reais). Escolha os retratos dos personagens da cena: os rostos saem iguais.';
+    if (c.sensual) $('genRefsHint').textContent = (c.mood === 'nu' ? 'Nudez sugerida' : 'Clima sensual') + ': só servem de referência os retratos criados aqui no app a partir das fichas (fotos enviadas ficam de fora, porque podem ser de pessoas reais). Escolha os retratos dos personagens da cena: os rostos saem iguais.';
     $('genRefs').replaceChildren(
       ...imgs.filter(r => !c.base || r.id !== c.base.id).map(r => {
         const on = c.sel.has(r.id);
@@ -6308,7 +6347,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const useInfos = !c || !c.inc || c.inc.infos;
     let task;
     if (kind === 'capa') task = `Crie a CAPA de um livro, em formato vertical (retrato, proporção 2:3). Ela deve transmitir a essência da história, o clima e os protagonistas. Escreva o título "${title}" na capa, em tipografia elegante e bem legível. Nenhum outro texto.`;
-    else if (kind === 'cena') task = `Crie uma ILUSTRAÇÃO de uma cena do capítulo "${chTitle(p, ch)}": escolha o momento mais visual e emocionante. Formato horizontal (paisagem). Sem texto na imagem.\nTrecho do capítulo:\n${cut(ch.text, 5000)}`;
+    else if (kind === 'cena') task = extra ? `Crie uma ILUSTRAÇÃO desta cena do capítulo "${chTitle(p, ch)}". Sem texto na imagem.\nA CENA: ${extra}\nTrecho do capítulo (só para contexto):\n${cut(ch.text, 2500)}`
+      : `Crie uma ILUSTRAÇÃO de uma cena do capítulo "${chTitle(p, ch)}": escolha o momento mais visual e emocionante. Sem texto na imagem.\nTrecho do capítulo:\n${cut(ch.text, 5000)}`;
     else if (kind === 'personagem') task = `Crie um RETRATO do personagem ${sub}. ${fromWorld('personagens', sub)} Formato vertical. Sem texto na imagem.`;
     else if (kind === 'lugar') task = `Crie uma ILUSTRAÇÃO do lugar ${sub}. ${fromWorld('lugares', sub)} Formato horizontal. Sem texto na imagem.`;
     else task = `Crie esta imagem: ${extra || '(descreva a imagem)'}. Sem texto na imagem.` + (ch ? `\nCena do capítulo "${chTitle(p, ch)}" (use como base):\n${cut(ch.text, 4000)}` : '');
@@ -6316,7 +6356,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const more = genCtxText(p, c, kind === 'personagem' || kind === 'lugar' ? sub : null);
     const looks = c && c.inc ? [...new Set([...(kind === 'personagem' && sub ? [sub] : []), ...c.inc.chars])].map(n => { const l = charLook(p, n, 400); return l ? `- ${n}: ${l}` : ''; }).filter(Boolean) : [];
     const neg = [genNegative(c), genStyleNeg(style)].filter(Boolean).join(', ');
-    return `${genStyleLine(style)}\n\n` + (looks.length ? `APARÊNCIA DOS PERSONAGENS (siga à risca em todos os detalhes):\n${looks.join('\n')}\n\n` : '') + `${task}` + (neg ? `\nEvite: ${neg}.` : '') + `\n\n${genStyleLine(style)}` + (extra && kind !== 'livre' ? `\nPedido do autor: ${extra}` : '') +
+    return `${genStyleLine(style)}\n\n` + (looks.length ? `APARÊNCIA DOS PERSONAGENS (siga à risca em todos os detalhes):\n${looks.join('\n')}\n\n` : '') + `${task}` + (neg ? `\nEvite: ${neg}.` : '') + `\n\n${genStyleLine(style)}` + (extra && kind !== 'livre' && kind !== 'cena' ? `\nPedido do autor: ${extra}` : '') +
       (useInfos ? `\n\nCONTEXTO DA HISTÓRIA:\n${ctx}` : '') + (more ? `\n\n${more}` : '') + `\n\n${genRules(c)}`;
   }
   async function requestImage(model, content, aspect, signal) {
@@ -6394,7 +6434,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         ? { id: uid(), projectId: p.id, kind: 'image', name: isCover ? 'Capa melhorada' : `${(base.name || 'Imagem').replace(/\s*\((gerada|melhorada)\)$/, '')} (melhorada)`, type: 'img', text: '', data, chars: 0,
             imgKind: base.imgKind || 'outro', subject: base.subject || '', note: base.note || '', enabled: false, generated: true, fromText, from: base.id, addedAt: Date.now(), updatedAt: Date.now() }
         : { id: uid(), projectId: p.id, kind: 'image', name: kind === 'capa' ? 'Capa gerada' : kind === 'cena' ? `Cena · ${chTitle(p, ch)}` : kind === 'livre' ? 'Imagem gerada' : `${sub} (gerada)`, type: 'img', text: '', data, chars: 0,
-            imgKind: kindSaved, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : kind === 'livre' ? $('genExtra').value.trim().slice(0, 60) : sub, sensual: !!c.sensual, note: '', enabled: false, generated: true, fromText, addedAt: Date.now(), updatedAt: Date.now() };
+            imgKind: kindSaved, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : kind === 'livre' ? $('genExtra').value.trim().slice(0, 60) : sub, sensual: !!c.sensual, mood: c.mood, note: '', enabled: false, generated: true, fromText, addedAt: Date.now(), updatedAt: Date.now() };
       await db.put('refs', ref);
       (refsCache[p.id] = refsCache[p.id] || []).push(ref);
       markDirty('refs');
@@ -6412,7 +6452,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         : 'Pronto! A imagem ficou guardada nas Referências. Toque em Gerar imagem para fazer outra.', 'ok');
     } catch (e) {
       if (e.name === 'AbortError') genStatus('Parado.');
-      else { genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ` Toque em "${base ? 'Gerar versão melhorada' : 'Gerar imagem'}" para tentar de novo.`, 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
+      else {
+        genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ` Toque em "${base ? 'Gerar versão melhorada' : 'Gerar imagem'}" para tentar de novo.`, 'err'); if (e.action && e.action !== 'model') handleAIError(e, null);
+        if (c.mood === 'nu') $('genStatus').append(' ', el('button', { type: 'button', class: 'link plain', text: 'Tentar no clima Sensual', onclick: () => { setGenMood('sensual'); c.promptDirty = false; genPromptFill(); $('genGo').click(); } }));
+      }
     } finally {
       job.stop(); c.ctrl = null; genGoLabel(false);
       if (currentId === p.id) renderTab();

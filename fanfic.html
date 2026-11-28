@@ -423,17 +423,10 @@
   .gc-vis .gv-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
   .gc-vis .gv-row b { grid-column: 1 / -1; font-size: .85rem; }
   .gc-vis input { min-width: 0; }
-  .gp-models { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .gen-adult { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font-weight: 400; }
   .gen-adult input { margin-top: 4px; accent-color: var(--accent); }
-  .gen-prov, .gen-prompt { margin-top: 12px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
-  .gen-prov summary, .gen-prompt summary { cursor: pointer; font-weight: 600; }
-  .gp-help { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: .92rem; }
-  .gp-help ol { margin: 6px 0 0; padding-left: 20px; } .gp-help li { margin: 3px 0; }
-  .gp-adv { margin-top: 12px; } .gp-adv summary { font-weight: 600; cursor: pointer; color: var(--muted); }
-  .gp-now { margin: 8px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--ok-soft); color: var(--ok); font-weight: 600; }
-  .gp-now:empty { display: none; }
-  #gpMsg.err { color: var(--danger); font-weight: 600; } #gpMsg.ok { color: var(--ok); font-weight: 600; }
+  .gen-prompt { margin-top: 12px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .gen-prompt summary { cursor: pointer; font-weight: 600; }
   .gen-prompt textarea { width: 100%; margin-top: 8px; font-size: .9rem; }
   .gen-refs { display: flex; flex-wrap: wrap; gap: 8px; }
   .gen-ref { position: relative; width: 76px; height: 76px; min-height: 0; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid var(--border); background: var(--surface-2); }
@@ -1657,7 +1650,7 @@
   <label>O que mandar junto no pedido</label>
   <p class="hint" style="margin-top:0">Fichas e contextos prontos do seu projeto. Os nomes que aparecem no pedido já vêm marcados.</p>
   <div id="genCtx" class="gen-ctx"></div>
-  <label class="check gen-adult"><input type="checkbox" id="genAdult"><span><b>Conteúdo adulto (+18)</b> · libera nudez e cenas explícitas entre personagens adultos. Os modelos da OpenAI, do Google e do Recraft recusam isso: use um provedor sem censura (embaixo).</span></label>
+  <label class="check gen-adult"><input type="checkbox" id="genSensual"><span><b>Clima sensual</b> · cena quente e romântica, como capa de romance: tensão, toques, pele à mostra (peito, costas, abdômen), lençóis, luz baixa. Sem nudez explícita: é o limite que os bons modelos aceitam. Personagens sempre adultos.</span></label>
   <label>Referências visuais <span class="muted">(opcional)</span></label>
   <p class="hint" id="genRefsHint" style="margin-top:0">Escolha até 4 imagens para a IA seguir: rosto, cabelo, roupa, lugar ou estilo.</p>
   <div class="gen-refs" id="genRefs" role="group" aria-label="Referências visuais"></div>
@@ -1665,30 +1658,13 @@
   <label for="genModel">Modelo de imagem</label>
   <select id="genModel"><option value="">Carregando…</option></select>
   <p class="hint" id="genCost"></p>
-  <details class="gen-prov" id="genProvBox">
-    <summary>Provedor de imagens sem censura (para cenas adultas)</summary>
-    <p class="gp-now" id="gpNow"></p>
-    <p class="hint">Use a sua conta em um serviço que gera imagens adultas e aceita chamadas pela API. A chave fica guardada só neste aparelho. A chave do OpenRouter <b>não</b> funciona aqui: cada serviço tem a sua.</p>
-    <label for="gpPreset">Serviço</label>
-    <select id="gpPreset"><option value="venice">Venice.ai</option><option value="together">Together.ai (FLUX)</option><option value="openai">Outro compatível com a API da OpenAI (avançado)</option></select>
-    <div class="gp-help" id="gpHelp"></div>
-    <label for="gpKey">Chave da API</label><input type="password" id="gpKey" autocomplete="off" placeholder="Cole aqui a chave de API do serviço escolhido">
-    <details class="gp-adv" id="gpAdv"><summary>Endereço, modelo e parâmetros (já vêm preenchidos)</summary>
-    <label for="gpBase">Endereço da API</label><input type="text" inputmode="url" id="gpBase" placeholder="Endereço da API, começando com https://">
-    <label for="gpModel">Modelo</label><input type="text" id="gpModel" list="gpModels" placeholder="Nome do modelo de imagem"><datalist id="gpModels"></datalist>
-    <label for="gpExtra">Parâmetros extras (JSON, opcional)</label><input type="text" id="gpExtra" placeholder='Ex.: {"chave": "valor"}'>
-    </details>
-    <div class="row" style="margin-top:10px"><button type="button" class="primary" id="gpSave">Salvar e usar</button><button type="button" id="gpTest">Testar a chave</button><button type="button" id="gpList">Ver modelos do serviço</button><button type="button" class="link plain" id="gpOff">Remover</button></div>
-    <p class="hint" id="gpMsg"></p>
-    <div class="gp-models" id="gpModelChips"></div>
-  </details>
   <details class="gen-prompt" id="genPromptBox">
     <summary>Ver e editar o pedido antes de gerar</summary>
     <textarea id="genPrompt" rows="12" aria-label="Pedido que vai para o modelo de imagem"></textarea>
     <div class="row"><button type="button" class="ai-btn" id="genPromptAI"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Melhorar o pedido com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
       <button type="button" class="link plain" id="genPromptMine">Usar só o meu texto</button>
       <button type="button" class="link plain" id="genPromptReset">Montar de novo a partir das escolhas</button></div>
-    <p class="hint" id="genPromptHint">Escreva a cena do seu jeito (ângulo, enquadramento, aparência de cada personagem, luz) e toque em "Melhorar o pedido com IA": ela reorganiza o texto no formato que os geradores de imagem entendem melhor, em inglês, e sugere o que evitar.</p>
+    <p class="hint" id="genPromptHint">Escreva a cena do seu jeito (ângulo, enquadramento, aparência de cada personagem, luz) e toque em "Melhorar o pedido com IA": ela reescreve o texto do jeito que os modelos de imagem entendem melhor, com a aparência de cada personagem bem detalhada.</p>
   </details>
   <div class="gen-result" id="genResult" hidden><img id="genImg" alt="Imagem gerada"><div class="row" id="genActions"></div></div>
   <div class="status" id="genStatus" role="status"></div>
@@ -5914,10 +5890,6 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   };
   const GEN_ASPECTS = [['2:3', 'Vertical'], ['1:1', 'Quadrada'], ['3:2', 'Horizontal'], ['9:16', 'Stories'], ['16:9', 'Tela larga']];
   const GEN_SIZE = { '2:3': [832, 1216], '3:2': [1216, 832], '1:1': [1024, 1024], '3:4': [896, 1152], '4:3': [1152, 896], '4:5': [896, 1120], '5:4': [1120, 896], '9:16': [768, 1344], '16:9': [1344, 768] };
-  const GP_PRESETS = { venice: { base: 'https://api.venice.ai/api/v1', model: 'lustify-sdxl', style: 'venice', extra: '{"safe_mode": false, "hide_watermark": true}' },
-    together: { base: 'https://api.together.xyz/v1', model: 'black-forest-labs/FLUX.1-schnell', style: 'wh', extra: '{"disable_safety_checker": true, "steps": 4}' },
-    openai: { base: '', model: '', style: 'openai', extra: '' } };
-  const gpCfg = () => settings.imgProv || null;
   let genCtx = null, imageModelsCache = null;
   function openImage(src, alt, name) {
     const d = $('imgDlg'), img = $('imgDlgImg');
@@ -5929,6 +5901,21 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function downloadData(url, name) {
     const a = el('a', { href: url, download: name || 'imagem.jpg' });
     document.body.append(a); a.click(); a.remove();
+  }
+  // só os modelos de imagem que seguem bem as fichas e as referências (e enxergam imagens)
+  const GOOD_IMG = [
+    [/nano.?banana.?pro|gemini-3[\d.]*-pro-image/i, ['★ o melhor', 'O melhor para seguir as fichas, as referências e manter os rostos.']],
+    [/gpt-5[\d.]*[- ]image|gpt[- ]image[- ]?2/i, ['★ muito fiel', 'Muito fiel ao pedido; ótimo também com o título na capa.']],
+    [/nano.?banana.?2|gemini-3[\d.]*-flash-image/i, ['rápido e bom', 'Rápido e mais barato, bom com referências.']],
+    [/seedream/i, ['realista', 'Imagens realistas e bonitas.']],
+    [/flux[ .-]?2/i, ['realista', 'Muito realista.']],
+    [/gemini-2\.5-flash-image|nano.?banana/i, ['barato', 'Bom e barato.']]];
+  function goodImageModels(list) {
+    const sees = (m) => !m.architecture || (m.architecture.input_modalities || []).includes('image');
+    const ok = list.filter(m => sees(m) && !/(?<![a-z])(mini|lite)(?![a-z])|vector|utility|recraft|riverflow|schnell/i.test(`${m.id} ${m.name || ''}`))
+      .map(m => { const k = GOOD_IMG.findIndex(([re]) => re.test(`${m.id} ${m.name || ''}`)); return k < 0 ? null : Object.assign({}, m, { good: GOOD_IMG[k][1], rank: k }); }).filter(Boolean)
+      .sort((a, b) => a.rank - b.rank);
+    return ok.length ? ok : list.filter(sees).length ? list.filter(sees) : list;
   }
   async function loadImageModels() {
     if (imageModelsCache) return imageModelsCache;
@@ -6027,8 +6014,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (c.inc.refText) { const refs = (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.sel.has(r.id) && (r.note || '').trim()); if (refs.length) out.push('DESCRIÇÃO DAS IMAGENS DE REFERÊNCIA:\n' + refs.map(r => `- ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ' (' + r.subject + ')' : ''}: ${cut(r.note, 500)}`).join('\n')); }
     return out.join('\n\n');
   }
-  const genRules = (c) => c && c.adult
-    ? 'Regras: imagem bonita e bem acabada; TODOS os personagens são adultos (maiores de 18 anos, com corpo e rosto de adulto) e tudo é consensual. Conteúdo adulto permitido: nudez e cena sexual explícita, se o pedido pedir.'
+  const GEN_SENSUAL = 'Clima sensual e romântico, de bom gosto, como uma capa de romance: tensão, proximidade, olhares, toques, respiração, pele à mostra (peito, costas, ombros, abdômen), camisas abertas, lençóis, suor, luz baixa e quente. Sem nudez frontal, sem genitais e sem ato sexual explícito.';
+  const genRules = (c) => c && c.sensual
+    ? `Regras: imagem bonita e bem acabada; todos os personagens são homens adultos (maiores de 18 anos, com rosto e corpo de adulto). ${GEN_SENSUAL}`
     : 'Regras: imagem bonita e bem acabada; todos os personagens são adultos; sem nudez, sem conteúdo sexual explícito e sem violência gráfica. Sugira o clima com elegância.';
   function buildEditPrompt(p, base, extra, style, c) {
     const cut = (t, n) => { t = (t || '').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
@@ -6046,9 +6034,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   async function openImageGen(p, opts = {}) {
     if (!isConfigured()) { openSetup(1, () => openImageGen(p, opts)); return; }
-    genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null, sel: new Set(), canSee: true, base: null, adult: !!settings.imageAdult, promptDirty: false,
+    genCtx = { p, kind: 'capa', style: settings.imageStyle || GEN_STYLES[0], ctrl: null, sel: new Set(), canSee: true, base: null, sensual: !!settings.imageSensual, promptDirty: false,
       inc: { infos: true, facts: false, chapter: false, refText: true, chars: new Set(), places: new Set(), manual: new Set() } };
-    $('genAdult').checked = genCtx.adult; $('genNeg').value = settings.imageNeg || ''; $('genPromptBox').open = false; gpFill(); $('genProvBox').open = false;
+    $('genSensual').checked = genCtx.sensual; $('genNeg').value = settings.imageNeg || ''; $('genPromptBox').open = false;
+    if (settings.imgProv || settings.imageModel === '__prov') { delete settings.imgProv; if (settings.imageModel === '__prov') settings.imageModel = ''; saveSettings(); } // o provedor sem censura saiu do app
     const chs = p.chapters.filter(c => c.text.trim());
     $('genCh').replaceChildren(...chs.map(c => el('option', { value: c.id, text: `${p.chapters.indexOf(c) + 1}. ${chTitle(p, c)}` })));
     $('genCh').value = opts.chId || (chs.at(-1) || {}).id || '';
@@ -6063,24 +6052,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     await genFillModels();
   }
   async function genFillModels() {
-    const sel = $('genModel'), g = gpCfg();
-    let list = await loadImageModels();
-    if (g) list = [{ id: '__prov', name: `Seu provedor: ${g.model} (${g.preset === 'together' ? 'Together' : g.preset === 'venice' ? 'Venice' : 'API própria'}) · sem censura`, architecture: { input_modalities: ['text'], output_modalities: ['image'] }, prov: true }, ...list];
+    const sel = $('genModel');
+    let list = goodImageModels(await loadImageModels());
     if (!list.length) {
       sel.replaceChildren(el('option', { value: '', text: 'Nenhum modelo de imagem encontrado' })); sel.disabled = true; $('genGo').disabled = true;
       $('genCost').textContent = 'Gerar imagens precisa de um modelo de imagem do OpenRouter (por exemplo, o Gemini Image).';
       return;
     }
     sel.disabled = false; $('genGo').disabled = false;
-    sel.replaceChildren(...list.map(m => el('option', { value: m.id, text: (m.name || m.id) + (isFree(m) ? ' · grátis' : '') })));
+    sel.replaceChildren(...list.map(m => el('option', { value: m.id, text: (m.name || m.id) + (m.good ? ` · ${m.good[0]}` : '') + (isFree(m) ? ' · grátis' : '') })));
     const sees = (m) => !m.architecture || (m.architecture.input_modalities || []).includes('image');
-    let pref = list.find(m => m.id === settings.imageModel) || (genCtx.adult && list.find(m => m.prov)) || list.find(m => /gemini.*image/i.test(m.id)) || list[0];
+    let pref = list.find(m => m.id === settings.imageModel) || list[0];
     if (genCtx.base && !sees(pref)) pref = list.find(m => sees(m) && /gemini.*image/i.test(m.id)) || list.find(sees) || pref;
     sel.value = pref.id;
     const costLine = () => {
       const m = list.find(x => x.id === sel.value);
-      $('genCost').textContent = m && m.prov ? 'Cobrado direto pelo seu provedor, conforme o plano de lá.' + (genCtx.adult ? '' : ' Marque "Conteúdo adulto" para liberar cenas explícitas.')
-        : (m && isFree(m) ? 'Modelo grátis.' : 'Cada imagem costuma custar alguns centavos de dólar. O valor exato aparece no aviso e nos Gastos com IA.') + (genCtx.adult ? ' Atenção: este modelo recusa conteúdo explícito. Para cenas adultas, configure o provedor sem censura logo abaixo.' : '');
+      $('genCost').textContent = (m && m.good ? m.good[1] + ' ' : '') + (m && isFree(m) ? 'Modelo grátis.' : 'Cada imagem custa alguns centavos de dólar; o valor exato aparece nos Gastos com IA.');
       const ins = (m && m.architecture && m.architecture.input_modalities) || [];
       genCtx.canSee = !m || !m.architecture || ins.includes('image');
       renderGenRefs();
@@ -6150,63 +6137,31 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function genBuildPrompt() {
     const c = genCtx, p = c.p, base = c.base, kind = base ? (base.imgKind || 'outro') : c.kind, sub = base ? (base.subject || '') : $('genSub').value.trim();
     const ch = (kind === 'cena' || c.inc.chapter) && !base ? p.chapters.find(x => x.id === $('genCh').value) : null;
-    if (!base && $('genModel').value === '__prov') return buildProvPrompt(p, kind, sub, ch, c.style, $('genExtra').value.trim(), c);
     return base ? buildEditPrompt(p, base, $('genExtra').value.trim(), c.style, c) : buildImagePrompt(p, kind, sub, ch, c.style, $('genExtra').value.trim(), c);
   }
-  // modelos do tipo Stable Diffusion/FLUX: pedido curto, com a aparência dos personagens primeiro
-  function buildProvPrompt(p, kind, sub, ch, style, extra, c) {
-    const cut = (t, n) => { t = (t || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
-    const names = [...new Set([...(kind === 'personagem' && sub ? [sub] : []), ...c.inc.chars])];
-    const looks = names.map(n => { const l = charLook(p, n, 300); return l ? `${n}: ${l}` : ''; }).filter(Boolean);
-    const w = p.world ? worldOf(p) : null, places = [...c.inc.places].map(t => { const e = w && (w.e.lugares || []).find(x => (x.title || '').trim() === t); return e ? `${t}: ${cut(e.text.replace(/\*\*/g, ''), 220)}` : ''; }).filter(Boolean);
-    const what = kind === 'capa' ? `Capa de livro vertical, título "${(p.title || '').trim()}"` : kind === 'personagem' ? `Retrato de ${sub}` : kind === 'lugar' ? `Ilustração do lugar ${sub}` : 'Cena';
-    const scene = extra || (ch ? cut(ch.text, 500) : '');
-    return [`${style}, alta qualidade, detalhado. ${what}.`, looks.length ? `PERSONAGENS: ${looks.join(' | ')}` : '', scene ? `CENA: ${scene}` : '', places.length ? `LUGAR: ${places.join(' | ')}` : '',
-      c.adult ? 'Todos são homens adultos (maiores de 18 anos, com corpo e rosto de adulto), cena consensual.' : 'Todos adultos. Sem nudez.'].filter(Boolean).join('\n').slice(0, 1800);
-  }
-  // o que evitar: o da pessoa + o que nunca pode aparecer no modo adulto
-  const genNegative = (c) => [$('genNeg').value.trim(), c && c.adult ? 'child, minor, teen, underage, childlike, young-looking, school uniform, non-consensual, restrained, tied up, bondage, violence, blood, crying, fear' : ''].filter(Boolean).join(', ');
-  // no modo adulto: só adultos e só consentimento
-  // há conteúdo sexual ou de nudez no pedido?
-  const GEN_SEX = /(?<![\p{L}])(sexo|sexual\w*|transa\w*|acasal\w*|cruza\w*|pênis|penis|pau|piroca|rola|membro|órgão reprodutor|orgao reprodutor|genita\w*|nu|nus|nua|nuas|pelad[oa]s?|nudez|oral|boquete|penetra\w*|gozo|gozand\w*|ereç\w*|excitad[oa]s?|explícit\w*|chupa\w*|lambe\w*|bunda|ânus|anal|masturb\w*|punheta|tesão|erótic\w*|sensual|nsfw|naked|nude|sex|cock|dick|penis|blowjob|fuck\w*)(?![\p{L}])/u;
-  // tira do texto conferido as linhas de regras que o próprio app escreve
-  const genOwnLines = (t) => (t || '').split('\n').filter(l => !/^\s*(Regras:|Evite:|Evitar:|Todos adultos\. Sem nudez\.|Todos são homens adultos)/.test(l)).join('\n');
-  function genSafety(text, sexual = true) {
-    const t = genOwnLines(text).toLocaleLowerCase('pt-BR');
-    if (!sexual && !GEN_SEX.test(t)) return '';
-    const m0 = t.match(/(?<![\p{L}])(t-?rex\w*|tiranossaur\w*|dinossaur\w*|animal|animais|bicho\w*|cachorr\w*|cavalo\w*|lob[oa]s?|dragão|dragões|criatura\w*|feral|bestial\w*|zoofil\w*|réptil|répteis)(?![\p{L}])/u);
-    if (m0) return `Imagens com sexo ou nudez só podem ter pessoas adultas. Não dá para gerar isso com animais ou criaturas (tire do pedido: "${m0[0]}").`;
-    const m1 = t.match(/(?<![\p{L}])(for[çc]and\w*|for[çc]ou|for[çc]ar|for[çc]ad[oa]s?|à for[çc]a|a for[çc]a|estupr\w*|abus\w*|contra a (sua )?vontade|sem consentimento|sem consentir|sem querer|obrigando|coagi\w*|coer\w*|drogad[oa]s?|dopad[oa]s?|inconsciente|desmaiad[oa]|dormindo|amarrad[oa]s?|algemad[oa]s?|rendid[oa]s?|implorando para parar|chorando)(?![\p{L}])/u);
-    if (m1) return `No modo +18 só dá para gerar cenas consensuais entre adultos. Tire do pedido: "${m1[0]}".`;
-    const m2 = t.match(/(?<![\p{L}])(menor de idade|menores|criança\w*|adolescente\w*|colegial|infantil|novinh[oa]s?|menin[oa]s?|garot[oa]s?|garotinh[oa]s?|1[0-7] anos|teen\w*)(?![\p{L}])/u);
-    if (m2) return `No modo +18 todos os personagens precisam ser adultos. Tire do pedido: "${m2[0]}" (use "homem", "rapaz adulto").`;
-    return '';
-  }
+  const genNegative = () => $('genNeg').value.trim();
   ['genSub', 'genExtra'].forEach(id => $(id).addEventListener('input', () => { clearTimeout(genAutoNames.t); genAutoNames.t = setTimeout(() => { genAutoNames(); genPromptFill(); }, 350); }));
   $('genCh').addEventListener('change', () => genPromptFill());
   $('genNeg').addEventListener('change', () => { settings.imageNeg = $('genNeg').value.trim(); local.set('fanfic.settings', settings); });
-  $('genAdult').addEventListener('change', () => { if (genCtx) { genCtx.adult = $('genAdult').checked; settings.imageAdult = genCtx.adult; local.set('fanfic.settings', settings); genPromptFill(); costLineRefresh(); renderGenRefs(); } });
+  $('genSensual').addEventListener('change', () => { if (genCtx) { genCtx.sensual = $('genSensual').checked; settings.imageSensual = genCtx.sensual; local.set('fanfic.settings', settings); genPromptFill(); renderGenRefs(); } });
   $('genPrompt').addEventListener('input', () => { if (genCtx) genCtx.promptDirty = true; });
   $('genPromptReset').addEventListener('click', () => genPromptFill(true));
   $('genPromptMine').addEventListener('click', () => { const c = genCtx; if (!c) return; const t = $('genExtra').value.trim(); if (!t) { genStatus('Escreva a cena no campo de descrição primeiro.', 'err'); return; } $('genPrompt').value = t; c.promptDirty = true; genStatus('O pedido agora é só o seu texto. Toque em "Melhorar o pedido com IA" se quiser.', 'ok'); });
   $('genPromptAI').addEventListener('click', async () => {
     const c = genCtx; if (!c) return;
     const src = ($('genPrompt').value.trim() || $('genExtra').value.trim()); if (!src) { genStatus('Escreva a cena primeiro.', 'err'); return; }
-    const prov = $('genModel').value === '__prov';
-    if (c.adult || prov) { const bad = genSafety(src, c.adult); if (bad) { genStatus(bad, 'err'); return; } }
     const btn = $('genPromptAI'); btn.disabled = true; genStatus('Melhorando o pedido…');
-    const rules = c.adult
-      ? 'Adult content mode: explicit nudity and sex are allowed ONLY between consenting adult human men (18+, clearly adult faces and bodies). Never minors or young-looking people, never animals or creatures, never force, restraint, violence or unconsciousness. If the request contains any of these, remove that part.'
-      : 'No nudity and no sexual content.';
+    const looks = [...c.inc.chars].map(n => { const l = charLook(c.p, n, 400); return l ? `- ${n}: ${l}` : ''; }).filter(Boolean).join('\n');
+    const refs = c.canSee && c.sel.size ? 'O autor vai anexar imagens de referência dos personagens: peça para manter os rostos, cabelos, corpos e tatuagens exatamente iguais aos das referências.' : '';
     try {
-      const r = await callAI(`You are an expert at writing prompts for image generation models (Stable Diffusion XL, FLUX). Rewrite the author's request below as one strong prompt, following best practices:\n` +
-        `- Start with the main subject and action, then each character's appearance (age, body, skin, hair, eyes, facial hair, tattoos, clothing), then pose and interaction, camera angle and framing (shot type, lens, point of view), setting, lighting, mood, color palette, art style and quality tags.\n` +
-        `- Keep EVERYTHING the author asked for (characters, appearance, angle, details). Do not invent new characters or story. Be specific and visual; comma-separated phrases; English; at most 120 words.\n- ${rules}\n` +
-        `Answer ONLY with a JSON object: {"prompt": "...", "negative": "comma-separated things to avoid (anatomy errors, extra limbs, blurry, text, watermark, and anything that contradicts the request)"}\n\nAUTHOR'S REQUEST (may be in Portuguese):\n${src.slice(0, 6000)}`,
+      const r = await callAI(`Você é especialista em escrever pedidos para modelos de imagem modernos (Nano Banana / Gemini Image, GPT Image), que entendem texto corrido e descritivo, não lista de palavras-chave.\n` +
+        `Reescreva o pedido do autor como UM pedido forte, em português, em um ou dois parágrafos (até 170 palavras), nesta ordem: quem está na cena e a aparência detalhada de cada personagem (idade, altura e corpo, tom de pele, rosto, cabelo, olhos, barba, tatuagens, roupa); a ação, a pose e como eles interagem; o ângulo da câmera e o enquadramento (plano, lente, ponto de vista); o cenário; a luz, as cores e o clima; o estilo visual e o acabamento.\n` +
+        `Mantenha TUDO o que o autor pediu e não invente personagens nem história. Use as aparências abaixo à risca.\n${looks ? `APARÊNCIAS:\n${looks}\n` : ''}${refs}\n` +
+        `${c.sensual ? GEN_SENSUAL + ' Todos são homens adultos (maiores de 18 anos).' : 'Sem nudez e sem conteúdo sexual.'} Se o pedido passar disso, reescreva no limite permitido (sugira em vez de mostrar).\n` +
+        `Responda SOMENTE com um JSON: {"prompt": "...", "negative": "o que evitar, separado por vírgulas (anatomia errada, mãos e dedos errados, rostos diferentes das referências, texto na imagem, marca d'água, e o que contradiz o pedido)"}\n\nPEDIDO DO AUTOR:\n${src.slice(0, 6000)}`,
         { support: true, label: 'Melhorar pedido de imagem' });
       let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = { prompt: r.text.trim() }; }
       const out = String(data.prompt || '').trim(); if (out.length < 15) throw Object.assign(new Error('A IA não devolveu um pedido. Tente de novo ou escolha outro modelo de texto.'), { action: 'model' });
-      if (c.adult || prov) { const bad = genSafety(out, c.adult); if (bad) { genStatus(bad, 'err'); return; } }
       $('genPrompt').value = out; c.promptDirty = true;
       if (data.negative && !$('genNeg').value.trim()) { $('genNeg').value = String(data.negative).slice(0, 400); settings.imageNeg = $('genNeg').value; local.set('fanfic.settings', settings); }
       genStatus('Pedido melhorado ✓ Confira, ajuste se quiser e toque em Gerar imagem.', 'ok');
@@ -6215,107 +6170,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   });
   $('genPromptBox').addEventListener('toggle', () => { if ($('genPromptBox').open) genPromptFill(); });
   let costLineRefresh = () => {};
-  // provedor sem censura (API de imagens compatível)
-  const GP_NAME = { venice: 'Venice.ai', together: 'Together.ai', openai: 'o serviço' };
-  const GP_HELP = {
-    venice: ['Venice.ai', 'https://venice.ai/settings/api', ['Entre na sua conta do Venice.ai.', 'Abra Configurações → API (botão abaixo) e crie uma chave de API.', 'A conta precisa ter acesso à API (plano ou crédito de API).', 'Copie a chave inteira e cole aqui embaixo. Endereço e modelo já vêm prontos.']],
-    together: ['Together.ai', 'https://api.together.ai/settings/api-keys', ['Entre na sua conta do Together.ai.', 'Abra Settings → API Keys (botão abaixo) e copie a chave.', 'A conta precisa ter crédito.', 'Cole a chave aqui embaixo. Endereço e modelo já vêm prontos.']],
-    openai: ['', '', ['Para outro serviço, abra "Endereço, modelo e parâmetros" e preencha o endereço da API (termina em /v1), o nome do modelo e a chave, conforme a documentação do serviço.']] };
-  // tira "Bearer", aspas e espaços que vêm junto quando a pessoa copia a chave
-  const gpCleanKey = (k) => (k || '').trim().replace(/^["'`]+|["'`]+$/g, '').trim().replace(/^bearer\s+/i, '').replace(/\s+/g, '');
-  function gpHelp() {
-    const pre = $('gpPreset').value, [name, link, steps] = GP_HELP[pre];
-    $('gpHelp').replaceChildren(el('b', { text: name ? `Como pegar a chave no ${name}:` : 'Outro serviço:' }), el('ol', {}, steps.map(t => el('li', { text: t }))),
-      link ? el('a', { class: 'btn link plain', href: link, target: '_blank', rel: 'noopener', iconEnd: 'external-link', text: `Abrir a página de chaves do ${name}` }) : '');
-    $('gpAdv').open = pre === 'openai';
-  }
-  function gpFill() {
-    const g = gpCfg() || {}, pre = g.preset || 'venice', P = GP_PRESETS[pre];
-    $('gpPreset').value = pre; $('gpBase').value = g.base || P.base; $('gpKey').value = g.key || ''; $('gpModel').value = g.model || P.model;
-    $('gpExtra').value = g.extra ?? P.extra; $('gpOff').hidden = !g.key; gpMsg('');
-    $('gpNow').textContent = g.key ? `Em uso: ${GP_HELP[g.preset] && GP_HELP[g.preset][0] || g.base} · modelo ${g.model} · chave terminando em …${g.key.slice(-4)}` : '';
-    gpHelp();
-  }
-  const gpMsg = (t, kind) => { $('gpMsg').textContent = t; $('gpMsg').className = 'hint' + (kind ? ' ' + kind : ''); };
-  $('gpPreset').addEventListener('change', () => { const P = GP_PRESETS[$('gpPreset').value]; $('gpBase').value = P.base; $('gpModel').value = P.model; $('gpExtra').value = P.extra; gpMsg(''); gpHelp(); });
-  // confere a chave sem gerar imagem (quando o serviço permite)
-  $('gpTest').addEventListener('click', async () => {
-    const pre = $('gpPreset').value, base = $('gpBase').value.trim().replace(/\/+$/, ''), key = gpCleanKey($('gpKey').value);
-    if (!key) { gpMsg('Cole a chave primeiro.', 'err'); return; }
-    if (!/^https:\/\//.test(base)) { gpMsg('Falta o endereço da API (em "Endereço, modelo e parâmetros").', 'err'); $('gpAdv').open = true; return; }
-    gpMsg('Conferindo a chave…');
-    try {
-      const res = await fetch(base + (pre === 'venice' ? '/api_keys/rate_limits' : '/models'), { headers: { Authorization: 'Bearer ' + key } });
-      if (res.status === 401 || res.status === 403) gpMsg(`O ${GP_NAME[pre]} recusou esta chave (${res.status}). Confira se é a chave de API desse serviço, copiada inteira, e se a conta tem acesso à API.`, 'err');
-      else if (res.ok) gpMsg('Chave aceita ✓ Toque em "Salvar e usar".', 'ok');
-      else gpMsg(`Não deu para conferir a chave sem gerar uma imagem (o serviço respondeu ${res.status}). Salve e tente gerar.`);
-    } catch (e) { gpMsg('Não consegui falar com o serviço daqui (internet, endereço errado, ou o serviço não aceita chamadas direto do navegador).', 'err'); }
-  });
-  $('gpSave').addEventListener('click', () => {
-    const pre = $('gpPreset').value, base = $('gpBase').value.trim().replace(/\/+$/, ''), key = gpCleanKey($('gpKey').value), model = $('gpModel').value.trim(), extra = $('gpExtra').value.trim();
-    if (!key) { gpMsg('Cole a chave de API do serviço.', 'err'); $('gpKey').focus(); return; }
-    if (!/^https:\/\//.test(base)) { gpMsg('Falta o endereço da API (começa com https://). Ele fica em "Endereço, modelo e parâmetros".', 'err'); $('gpAdv').open = true; $('gpBase').focus(); return; }
-    if (!model) { gpMsg('Falta o nome do modelo (em "Endereço, modelo e parâmetros").', 'err'); $('gpAdv').open = true; $('gpModel').focus(); return; }
-    if (/^sk-or-/.test(key)) { gpMsg('Essa é uma chave do OpenRouter. Aqui precisa da chave do próprio serviço de imagens.', 'err'); return; }
-    if (extra) { try { JSON.parse(extra); } catch { gpMsg('Os parâmetros extras precisam ser um JSON válido, como {"safe_mode": false}.', 'err'); $('gpAdv').open = true; return; } }
-    settings.imgProv = { preset: pre, base, key, model, extra, style: GP_PRESETS[pre].style };
-    settings.imageModel = '__prov'; saveSettings();
-    if (genCtx) genFillModels();
-    gpFill(); gpMsg('Salvo ✓ O modelo de imagem agora é o do seu provedor.', 'ok');
-  });
-  $('gpOff').addEventListener('click', () => { delete settings.imgProv; if (settings.imageModel === '__prov') settings.imageModel = ''; saveSettings(); gpFill(); if (genCtx) genFillModels(); });
-  $('gpList').addEventListener('click', async () => {
-    const base = $('gpBase').value.trim().replace(/\/+$/, ''), key = gpCleanKey($('gpKey').value);
-    gpMsg('Buscando os modelos…'); $('gpAdv').open = true;
-    try {
-      const res = await fetch(base + '/models' + ($('gpPreset').value === 'venice' ? '?type=image' : ''), { headers: key ? { Authorization: 'Bearer ' + key } : {} });
-      if (!res.ok) throw new Error('o serviço respondeu ' + res.status);
-      const j = await res.json(), list = (Array.isArray(j) ? j : j.data || []).filter(m => m && m.id && (!m.type || /image/i.test(m.type)));
-      $('gpModels').replaceChildren(...list.map(m => el('option', { value: m.id, text: [m.display_name || (m.model_spec && m.model_spec.name) || '', (m.model_spec && (m.model_spec.traits || []).join(', ')) || ''].filter(Boolean).join(' · ') })));
-      gpMsg(list.length ? `${list.length} modelo(s). Toque em um para usar.` : 'O serviço não listou modelos de imagem.', list.length ? 'ok' : '');
-      $('gpModelChips').replaceChildren(...list.slice(0, 40).map(m => { const tr = (m.model_spec && (m.model_spec.traits || []).join(', ')) || ''; return el('button', { type: 'button', class: 'chip', 'aria-pressed': String($('gpModel').value === m.id), text: m.id + (tr ? ` · ${tr}` : ''),
-        title: (m.model_spec && m.model_spec.name) || m.display_name || m.id, onclick: () => { $('gpModel').value = m.id; $('gpModelChips').querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x.textContent.startsWith(m.id + ' ') || x.textContent === m.id))); gpMsg(`Modelo "${m.id}" escolhido. Toque em "Salvar e usar".`, 'ok'); } }); }));
-    } catch (e) { gpMsg(`Não consegui listar (${e.message === 'Failed to fetch' ? 'o serviço pode não aceitar chamadas direto do navegador' : e.message}). Digite o nome do modelo.`, 'err'); }
-  });
-  async function requestProvImage(prompt, aspect, signal, negative, adult) {
-    const g = gpCfg(); if (!g) throw new Error('Configure o provedor sem censura primeiro.');
-    const [W, H] = GEN_SIZE[aspect] || GEN_SIZE['2:3'], extra = g.extra ? JSON.parse(g.extra) : {};
-    let url, body;
-    if (g.style === 'venice') { url = g.base + '/image/generate'; body = Object.assign({ model: g.model, prompt, width: W, height: H, format: 'png' }, negative ? { negative_prompt: negative } : {}, extra, adult ? {} : { safe_mode: true }); }
-    else if (negative) prompt += `\nEvitar: ${negative}`;
-    else if (g.style === 'wh') { url = g.base + '/images/generations'; body = Object.assign({ model: g.model, prompt, width: W, height: H, n: 1, response_format: 'b64_json' }, extra); }
-    else { url = g.base + '/images/generations'; body = Object.assign({ model: g.model, prompt, n: 1, size: `${W}x${H}`, response_format: 'b64_json' }, extra); }
-    let res;
-    try { res = await fetch(url, { method: 'POST', signal, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + g.key }, body: JSON.stringify(body) }); }
-    catch (e) { if (e.name === 'AbortError') throw e; throw Object.assign(new Error('Não consegui falar com o provedor de imagens. Confira a internet e o endereço da API (alguns serviços não aceitam chamadas direto do navegador).'), { charged: false }); }
-    if (!res.ok) {
-      let msg = await res.text(); try { const j = JSON.parse(msg); msg = (j.error && (j.error.message || j.error)) || j.message || j.details || msg; } catch {}
-      msg = String(typeof msg === 'string' ? msg : JSON.stringify(msg)).slice(0, 220);
-      const who = GP_NAME[g.preset] || 'O provedor', st = res.status;
-      const why = st === 401 || st === 403 ? `${who === 'o serviço' ? 'O serviço' : 'O ' + who} recusou a chave (${st}: ${msg}). Confira no quadro "Provedor de imagens sem censura": a chave tem que ser a chave de API desse serviço (não a do OpenRouter), copiada inteira, e a conta precisa ter acesso à API. Use "Testar a chave".`
-        : st === 402 || /credit|balance|insufficient|payment/i.test(msg) ? `Sem crédito no ${who} (${st}: ${msg}). Adicione crédito de API na conta de lá.`
-        : st === 404 ? `Endereço ou modelo não encontrado (${st}: ${msg}). Confira o endereço da API e o nome do modelo ("Ver modelos do serviço" ajuda).`
-        : st === 429 ? `Limite de uso do ${who} atingido agora (${msg}). Espere um pouco e tente de novo.`
-        : `O provedor de imagens respondeu com erro (${st}): ${msg}`;
-      throw Object.assign(new Error(why), { action: null });
-    }
-    const ct = res.headers.get('content-type') || '';
-    if (/^image\//.test(ct)) { const blob = await res.blob(); return { url: URL.createObjectURL(blob), blob }; }
-    const j = await res.json(), d = (j.data && j.data[0]) || null, b64 = (j.images && j.images[0]) || (d && d.b64_json);
-    if (b64) return { url: /^data:/.test(b64) ? b64 : 'data:image/png;base64,' + b64 };
-    if (d && d.url) return { url: d.url };
-    throw new Error('O provedor não devolveu imagem. Tente de novo ou mude o pedido.');
-  }
   // imagens de referência para a geração: as das Referências do projeto + novas enviadas aqui
   function renderGenRefs() {
     const c = genCtx; if (!c) return;
-    const imgs = (refsCache[c.p.id] || []).filter(r => r.kind === 'image' && (!c.adult || r.fromText));
+    const imgs = (refsCache[c.p.id] || []).filter(r => r.kind === 'image' && (!c.sensual || r.fromText));
     for (const id of [...c.sel]) if (!imgs.some(r => r.id === id)) c.sel.delete(id);
     $('genRefsHint').textContent = c.canSee
       ? `${c.base ? 'Se quiser, escolha mais imagens para a IA seguir' : 'Escolha até 4 imagens para a IA seguir'}: rosto, cabelo, roupa, lugar ou estilo.${c.sel.size ? ` (${c.sel.size} escolhida${c.sel.size > 1 ? 's' : ''})` : ''}`
       : c.base ? 'Este modelo não aceita imagens, então não consegue melhorar uma imagem. Escolha outro modelo de imagem (por exemplo, o Gemini Image).'
       : 'Este modelo não enxerga imagens: das referências escolhidas vai só a descrição escrita de cada uma (imagens sem descrição ficam de fora).';
-    if (c.adult) $('genRefsHint').textContent = 'Modo +18: só servem de referência os retratos criados aqui no app a partir das fichas (fotos enviadas ficam de fora, porque podem ser de pessoas reais). Para o personagem sair parecido, use "Tirar do retrato" nos traços visuais.';
+    if (c.sensual) $('genRefsHint').textContent = 'Clima sensual: só servem de referência os retratos criados aqui no app a partir das fichas (fotos enviadas ficam de fora, porque podem ser de pessoas reais). Escolha os retratos dos personagens da cena: os rostos saem iguais.';
     $('genRefs').replaceChildren(
       ...imgs.filter(r => !c.base || r.id !== c.base.id).map(r => {
         const on = c.sel.has(r.id);
@@ -6324,7 +6188,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           onclick: () => { on ? c.sel.delete(r.id) : c.sel.add(r.id); renderGenRefs(); } },
           el('img', { src: r.data, alt: '' }), el('span', { class: 'gen-check' }, svgIcon('check')), el('span', { class: 'gen-cap', text: r.subject || IMG_LABEL[r.imgKind] || '' }));
       }),
-      c.adult ? '' : el('button', { type: 'button', class: 'gen-ref add', disabled: !c.canSee || c.sel.size >= 4, onclick: () => $('genRefFile').click() }, svgIcon('plus'), el('span', { text: 'Adicionar' })));
+      c.sensual ? '' : el('button', { type: 'button', class: 'gen-ref add', disabled: !c.canSee || c.sel.size >= 4, onclick: () => $('genRefFile').click() }, svgIcon('plus'), el('span', { text: 'Adicionar' })));
   }
   $('genRefFile').addEventListener('change', async () => {
     const c = genCtx, files = [...$('genRefFile').files]; $('genRefFile').value = '';
@@ -6418,19 +6282,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     } else if ((kind === 'personagem' || kind === 'lugar') && !sub) { genStatus(kind === 'personagem' ? 'Diga qual personagem.' : 'Diga qual lugar.', 'err'); $('genSub').focus(); return; }
     else if (kind === 'livre' && !$('genExtra').value.trim()) { genStatus('Descreva a imagem que você quer.', 'err'); $('genExtra').focus(); return; }
     if (kind === 'cena' && !ch) { genStatus('Escolha um capítulo.', 'err'); return; }
-    const prov = $('genModel').value === '__prov';
-    if (base && prov) { genStatus('O provedor sem censura não melhora imagens prontas; ele cria do zero. Toque em "Criar do zero" ou escolha outro modelo.', 'err'); return; }
     const model = $('genModel').value;
     if (!model) return;
     const name = $('genModel').selectedOptions[0]?.textContent || model;
     const isCover = base && (kind === 'capa' || base.id === p.coverRefId);
     const what = base ? (isCover ? 'uma versão melhorada da capa' : `uma versão melhorada de ${sub || 'imagem'}`) : kind === 'capa' ? 'a capa' : kind === 'cena' ? `uma imagem da cena de "${chTitle(p, ch)}"` : kind === 'livre' ? 'a imagem que você descreveu' : `uma imagem de ${sub}`;
-    if (!prov && !(await confirmAI(`Gerar ${what} com ${name}.`))) return;
+    if (!(await confirmAI(`Gerar ${what} com ${name}.`))) return;
     const prompt = (c.promptDirty && $('genPrompt').value.trim()) || genBuildPrompt();
-    // com o provedor sem censura ou no modo +18, confere sempre: só adultos humanos, só consentimento
-    if (c.adult || prov) { const lookTxt = [...c.inc.chars].map(n => charLook(p, n, 400)).join(' '); const bad = genSafety(`${$('genExtra').value} ${$('genSub').value} ${lookTxt} ${prompt}`, c.adult); if (bad) { genStatus(bad, 'err'); return; } }
     // referências visuais escolhidas pela pessoa
-    const chosen = c.canSee && !prov ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.sel.has(r.id)).slice(0, 4) : [];
+    const chosen = c.canSee ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.sel.has(r.id)).slice(0, 4) : [];
     const content = base ? [
       { type: 'text', text: prompt },
       { type: 'text', text: 'Imagem que deve ser melhorada:' },
@@ -6438,7 +6298,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ...chosen.flatMap(r => [
         { type: 'text', text: `Referência extra — ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}${(r.note || '').trim() ? ` (${r.note.trim().slice(0, 300)})` : ''}:` },
         { type: 'image_url', image_url: { url: r.data } }])] : chosen.length ? [
-      { type: 'text', text: prompt + '\n\nUse as imagens de referência anexadas para manter a aparência (rosto, cabelo, corpo, roupas), o lugar ou o estilo, conforme cada uma indica.' },
+      { type: 'text', text: prompt + '\n\nUse as imagens de referência anexadas: cada personagem deve ter EXATAMENTE o mesmo rosto da sua referência (formato do rosto, olhos, nariz, boca, cabelo, barba, tom de pele, tatuagens e tipo de corpo), como se fosse a mesma pessoa em outra cena. Para lugares e estilo, siga as referências correspondentes.' },
       ...chosen.flatMap(r => [
         { type: 'text', text: `Referência — ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}${(r.note || '').trim() ? ` (${r.note.trim().slice(0, 300)})` : ''}:` },
         { type: 'image_url', image_url: { url: r.data } }])] : prompt;
@@ -6448,19 +6308,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     genStatus('Gerando a imagem… pode levar até um minuto.');
     try {
       const aspect = base ? await imageAspect(base.data) : (c.aspect || GEN_KIND[kind].aspect);
-      let r;
-      if (prov) {
-        genStatus('Gerando a imagem no seu provedor… pode levar até um minuto.');
-        r = await requestProvImage(prompt, aspect, c.ctrl.signal, genNegative(c), !!c.adult);
-      } else r = await requestImage(model, content, aspect, c.ctrl.signal);
-      if (!prov) recordSpend({ op: uid(), action: base ? `Melhorar imagem · ${isCover ? 'capa' : sub || 'imagem'}` : `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
+      const r = await requestImage(model, content, aspect, c.ctrl.signal);
+      recordSpend({ op: uid(), action: base ? `Melhorar imagem · ${isCover ? 'capa' : sub || 'imagem'}` : `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
       const data = await shrinkImage(r.blob || await (await fetch(r.url)).blob());
       const kindSaved = kind === 'livre' ? 'cena' : kind, fromText = (!base || !!base.fromText) && chosen.every(x => x.fromText);
       const ref = base
         ? { id: uid(), projectId: p.id, kind: 'image', name: isCover ? 'Capa melhorada' : `${(base.name || 'Imagem').replace(/\s*\((gerada|melhorada)\)$/, '')} (melhorada)`, type: 'img', text: '', data, chars: 0,
             imgKind: base.imgKind || 'outro', subject: base.subject || '', note: base.note || '', enabled: false, generated: true, fromText, from: base.id, addedAt: Date.now(), updatedAt: Date.now() }
         : { id: uid(), projectId: p.id, kind: 'image', name: kind === 'capa' ? 'Capa gerada' : kind === 'cena' ? `Cena · ${chTitle(p, ch)}` : kind === 'livre' ? 'Imagem gerada' : `${sub} (gerada)`, type: 'img', text: '', data, chars: 0,
-            imgKind: kindSaved, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : kind === 'livre' ? $('genExtra').value.trim().slice(0, 60) : sub, adult: !!c.adult, note: '', enabled: false, generated: true, fromText, addedAt: Date.now(), updatedAt: Date.now() };
+            imgKind: kindSaved, subject: kind === 'cena' ? chTitle(p, ch) : kind === 'capa' ? (p.title || '').trim() : kind === 'livre' ? $('genExtra').value.trim().slice(0, 60) : sub, sensual: !!c.sensual, note: '', enabled: false, generated: true, fromText, addedAt: Date.now(), updatedAt: Date.now() };
       await db.put('refs', ref);
       (refsCache[p.id] = refsCache[p.id] || []).push(ref);
       markDirty('refs');
@@ -6478,8 +6334,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         : 'Pronto! A imagem ficou guardada nas Referências. Toque em Gerar imagem para fazer outra.', 'ok');
     } catch (e) {
       if (e.name === 'AbortError') genStatus('Parado.');
-      else { if (prov && /chave|crédito|Endereço/.test(e.message || '')) { $('genProvBox').open = true; gpMsg(e.message, 'err'); }
-        genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ` Toque em "${base ? 'Gerar versão melhorada' : 'Gerar imagem'}" para tentar de novo.`, 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
+      else { genStatus((e.message || 'Não deu certo.') + (e.charged === false ? ' Nada foi cobrado.' : '') + ` Toque em "${base ? 'Gerar versão melhorada' : 'Gerar imagem'}" para tentar de novo.`, 'err'); if (e.action && e.action !== 'model') handleAIError(e, null); }
     } finally {
       job.stop(); c.ctrl = null; genGoLabel(false);
       if (currentId === p.id) renderTab();

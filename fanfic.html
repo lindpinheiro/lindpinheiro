@@ -1658,7 +1658,7 @@
   <div id="genSubWrap" hidden><label for="genSub" id="genSubLabel">Quem?</label><input type="text" id="genSub" list="genSubList" autocomplete="off"><datalist id="genSubList"></datalist></div>
   <label for="genExtra" id="genExtraLabel">Descreva a imagem</label>
   <textarea id="genExtra" rows="3" placeholder="Ex.: pôr do sol, tons quentes, os dois de costas olhando o mar"></textarea>
-  <div class="gen-improve"><button type="button" class="ai-btn" id="genPromptAI"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Melhorar meu texto com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
+  <div class="gen-improve"><button type="button" class="ai-btn" id="genSumAI" hidden><svg class="icon" aria-hidden="true"><use href="#i-scroll-text"/></svg>Resumir a cena com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button><button type="button" class="ai-btn" id="genPromptAI"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Melhorar meu texto com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
     <span class="hint">Completa a descrição com aparência, ângulo da câmera e luz.</span></div>
   <label>Estilo</label>
   <div class="chips" id="genStyles"></div>
@@ -5978,11 +5978,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('genChWrap').hidden = !(k === 'cena' || (k === 'livre' && c.inc && c.inc.chapter));
     c.aspect = GEN_KIND[k].aspect;
     if (k === 'personagem' || k === 'lugar') { $('genSub').value = ''; if (c.inc) { if (k === 'personagem') c.inc.chars.clear(); else c.inc.places.clear(); } }
-    const LBL = { capa: ['Como você imagina a capa?', 'Ex.: os dois de costas na grade da prisão, pôr do sol, título em letras douradas'], cena: ['Algo a mais na cena?', 'Ex.: câmera de lado, luz da lua pela grade, os dois muito próximos'],
+    const LBL = { capa: ['Como você imagina a capa?', 'Ex.: os dois de costas na grade da prisão, pôr do sol, título em letras douradas'], cena: ['Resumo da cena (pode editar)', 'O resumo do capítulo escolhido aparece aqui. Ajuste o que quiser: o momento, o ângulo, a luz…'],
       personagem: ['Como ele aparece?', 'Ex.: sentado na cama da cela, sem camisa, olhar desafiador, luz baixa'], lugar: ['Como é o lugar nessa imagem?', 'Ex.: à noite, chovendo, luz amarela no corredor'],
       livre: ['Descreva a imagem', 'Ex.: Jason e Miguel na cela, à noite, luz da lua pela grade, os dois sem camisa, muito próximos'] };
-    if (!c.base) { $('genExtraLabel').replaceChildren(LBL[k][0], k === 'livre' ? '' : el('span', { class: 'muted', text: ' (opcional)' })); $('genExtra').placeholder = LBL[k][1]; $('genExtra').rows = k === 'livre' ? 4 : 3; }
+    $('genSumAI').hidden = k !== 'cena' || !!c.base;
+    if (!c.base) { $('genExtraLabel').replaceChildren(LBL[k][0], k === 'livre' || k === 'cena' ? '' : el('span', { class: 'muted', text: ' (opcional)' })); $('genExtra').placeholder = LBL[k][1]; $('genExtra').rows = k === 'livre' ? 4 : 3; }
     renderGenCtx();
+    if (k === 'cena' && !c.base) genSceneSummary();
     $('genSubLabel').textContent = k === 'personagem' ? 'Qual personagem?' : 'Qual lugar?';
     $('genSubWrap').hidden = !((k === 'personagem' || k === 'lugar') && !$('genPeople').querySelector('.chip'));
     $('genSub').placeholder = k === 'personagem' ? 'Ex.: Theo' : 'Ex.: Bar do Zé';
@@ -6229,7 +6231,32 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   const genNegative = () => $('genNeg').value.trim();
   ['genSub', 'genExtra'].forEach(id => $(id).addEventListener('input', () => { clearTimeout(genAutoNames.t); genAutoNames.t = setTimeout(() => { genAutoNames(); genPromptFill(); }, 350); }));
-  $('genCh').addEventListener('change', () => genPromptFill());
+  // resumo da cena escolhida: o resumo do capítulo (da Bíblia) ou o começo dele; com IA, o momento mais visual
+  function genSceneSummary() {
+    const c = genCtx; if (!c || c.kind !== 'cena') return;
+    const ch = c.p.chapters.find(x => x.id === $('genCh').value); if (!ch) return;
+    let t = ch.recap && ch.recap.text ? ch.recap.text.trim() : '';
+    if (!t) { const paras = storyPlain(ch.text || '').split(/\n+/).map(x => x.trim()).filter(x => x && !/^[—–-]/.test(x) && x !== '* * *'); t = paras.slice(0, 3).join(' ').replace(/\s+/g, ' '); if (t.length > 420) t = t.slice(0, t.lastIndexOf(' ', 420)) + '…'; }
+    const cur = $('genExtra').value.trim();
+    if (!cur || cur === c.autoSum) { $('genExtra').value = t; c.autoSum = t;
+      // quem foi marcado sozinho pelo resumo anterior sai; quem você marcou fica
+      [...c.inc.chars].forEach(n => { if (!c.inc.manual.has('personagens:' + n)) c.inc.chars.delete(n); }); [...c.inc.places].forEach(n => { if (!c.inc.manual.has('lugares:' + n)) c.inc.places.delete(n); }); renderGenCtx(); }
+    c.promptDirty = false; genAutoNames(); genPromptFill();
+  }
+  $('genCh').addEventListener('change', () => { if (genCtx && genCtx.kind === 'cena') genSceneSummary(); else genPromptFill(); });
+  $('genSumAI').addEventListener('click', async () => {
+    const c = genCtx; if (!c) return;
+    const ch = c.p.chapters.find(x => x.id === $('genCh').value); if (!ch || !(ch.text || '').trim()) { genStatus('Escolha um capítulo com texto.', 'err'); return; }
+    const btn = $('genSumAI'); btn.disabled = true; genStatus('Resumindo a cena…');
+    try {
+      const r = await callAI(`Leia o capítulo abaixo e escolha o momento mais visual e marcante para virar uma ilustração. Descreva esse momento em 2 a 4 frases, em português, como uma cena para desenhar: quem está nela (pelos nomes), onde estão, o que estão fazendo, a posição dos corpos e as expressões, a luz e o clima. Sem diálogos, sem explicar a história. Responda só com a descrição.\n\nCAPÍTULO "${chTitle(c.p, ch)}":\n${storyPlain(ch.text).slice(0, 14000)}`,
+        { support: true, simple: 'text', label: 'Resumo da cena para imagem' });
+      const t = (r.text || '').trim(); if (t.length < 20) throw Object.assign(new Error('A IA não devolveu o resumo. Tente de novo.'), { action: 'model' });
+      $('genExtra').value = t; c.autoSum = t; c.promptDirty = false; genAutoNames(); genPromptFill();
+      genStatus('Resumo pronto ✓ Ajuste se quiser e toque em Gerar imagem.', 'ok');
+    } catch (e) { genStatus(e.message || 'Não deu certo.', 'err'); if (e.action) handleAIError(e, null); }
+    finally { btn.disabled = false; }
+  });
   $('genNeg').addEventListener('change', () => { settings.imageNeg = $('genNeg').value.trim(); local.set('fanfic.settings', settings); });
   $('genMood').addEventListener('click', (e) => { const b = e.target.closest('[data-mood]'); if (!b || !genCtx) return; setGenMood(b.dataset.mood); genPromptFill(); renderGenCtx(); });
   $('genPrompt').addEventListener('input', () => { if (genCtx) genCtx.promptDirty = true; });
@@ -6320,7 +6347,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const useInfos = !c || !c.inc || c.inc.infos;
     let task;
     if (kind === 'capa') task = `Crie a CAPA de um livro, em formato vertical (retrato, proporção 2:3). Ela deve transmitir a essência da história, o clima e os protagonistas. Escreva o título "${title}" na capa, em tipografia elegante e bem legível. Nenhum outro texto.`;
-    else if (kind === 'cena') task = `Crie uma ILUSTRAÇÃO de uma cena do capítulo "${chTitle(p, ch)}": escolha o momento mais visual e emocionante. Formato horizontal (paisagem). Sem texto na imagem.\nTrecho do capítulo:\n${cut(ch.text, 5000)}`;
+    else if (kind === 'cena') task = extra ? `Crie uma ILUSTRAÇÃO desta cena do capítulo "${chTitle(p, ch)}". Sem texto na imagem.\nA CENA: ${extra}\nTrecho do capítulo (só para contexto):\n${cut(ch.text, 2500)}`
+      : `Crie uma ILUSTRAÇÃO de uma cena do capítulo "${chTitle(p, ch)}": escolha o momento mais visual e emocionante. Sem texto na imagem.\nTrecho do capítulo:\n${cut(ch.text, 5000)}`;
     else if (kind === 'personagem') task = `Crie um RETRATO do personagem ${sub}. ${fromWorld('personagens', sub)} Formato vertical. Sem texto na imagem.`;
     else if (kind === 'lugar') task = `Crie uma ILUSTRAÇÃO do lugar ${sub}. ${fromWorld('lugares', sub)} Formato horizontal. Sem texto na imagem.`;
     else task = `Crie esta imagem: ${extra || '(descreva a imagem)'}. Sem texto na imagem.` + (ch ? `\nCena do capítulo "${chTitle(p, ch)}" (use como base):\n${cut(ch.text, 4000)}` : '');
@@ -6328,7 +6356,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const more = genCtxText(p, c, kind === 'personagem' || kind === 'lugar' ? sub : null);
     const looks = c && c.inc ? [...new Set([...(kind === 'personagem' && sub ? [sub] : []), ...c.inc.chars])].map(n => { const l = charLook(p, n, 400); return l ? `- ${n}: ${l}` : ''; }).filter(Boolean) : [];
     const neg = [genNegative(c), genStyleNeg(style)].filter(Boolean).join(', ');
-    return `${genStyleLine(style)}\n\n` + (looks.length ? `APARÊNCIA DOS PERSONAGENS (siga à risca em todos os detalhes):\n${looks.join('\n')}\n\n` : '') + `${task}` + (neg ? `\nEvite: ${neg}.` : '') + `\n\n${genStyleLine(style)}` + (extra && kind !== 'livre' ? `\nPedido do autor: ${extra}` : '') +
+    return `${genStyleLine(style)}\n\n` + (looks.length ? `APARÊNCIA DOS PERSONAGENS (siga à risca em todos os detalhes):\n${looks.join('\n')}\n\n` : '') + `${task}` + (neg ? `\nEvite: ${neg}.` : '') + `\n\n${genStyleLine(style)}` + (extra && kind !== 'livre' && kind !== 'cena' ? `\nPedido do autor: ${extra}` : '') +
       (useInfos ? `\n\nCONTEXTO DA HISTÓRIA:\n${ctx}` : '') + (more ? `\n\n${more}` : '') + `\n\n${genRules(c)}`;
   }
   async function requestImage(model, content, aspect, signal) {

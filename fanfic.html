@@ -1129,6 +1129,11 @@
   dialog.learn-dlg { width: min(980px, calc(100vw - 16px)); }
   .rv-struct { display: flex; flex-direction: column; gap: 8px; margin: 4px 12px 10px; padding: 10px 12px; border: 1px solid var(--ai-border); border-radius: 12px; background: color-mix(in srgb, var(--ai) 8%, transparent); font-size: .9rem; }
   .rv-struct button { align-self: flex-start; }
+  .st-parecer { margin-top: 14px; display: grid; gap: 8px; } .st-parecer h3 { margin: 0; }
+  .st-par { padding: 10px 12px; border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; }
+  .st-par.ok { border-left-color: var(--ok); }
+  .st-par .sp-h { font-size: .9rem; } .st-par ul { margin: 6px 0 0; padding-left: 20px; } .st-par li { margin: 3px 0; font-size: .92rem; }
+  .learn-txt ins.st-br { padding: 0 4px; font-weight: 700; color: var(--ok); }
   .st-sum { margin: 0 0 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); }
   .st-tipo { display: inline-block; padding: 1px 8px; border-radius: 99px; background: var(--ai-soft); color: var(--ai); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
   .st-edit { width: 100%; min-height: 30vh; font-family: Georgia, serif; font-size: 1rem; line-height: 1.6; }
@@ -7376,7 +7381,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       }
       return false;
     }
-    const COMMON = { concerteza: 'com certeza', derrepente: 'de repente', apartir: 'a partir', porisso: 'por isso', ancioso: 'ansioso', excessão: 'exceção', previlégio: 'privilégio',
+    const COMMON = { trega: 'trégua', tregua: 'trégua', quintura: 'quentura', concerteza: 'com certeza', derrepente: 'de repente', apartir: 'a partir', porisso: 'por isso', ancioso: 'ansioso', excessão: 'exceção', previlégio: 'privilégio',
       mendingo: 'mendigo', menas: 'menos', seje: 'seja', esteje: 'esteja', impecilho: 'empecilho', poblema: 'problema', cabeleleiro: 'cabeleireiro', advinhar: 'adivinhar',
       gratuíto: 'gratuito', rúbrica: 'rubrica', beneficiente: 'beneficente', iorgute: 'iogurte', mortandela: 'mortadela', asterístico: 'asterisco', deslise: 'deslize',
       paralizar: 'paralisar', analizar: 'analisar', pesquizar: 'pesquisar', atravez: 'através', tambem: 'também', voce: 'você', nao: 'não', entao: 'então', ate: 'até', so: 'só', ja: 'já', tb: 'também', vc: 'você', pq: 'porque', q: 'que', oque: 'o que', derepente: 'de repente' };
@@ -8633,6 +8638,81 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
   let stCtx = null;
   // sem IA: junta as correções seguras do app (estrutura, pontuação, gramática, grafia) numa versão nova do trecho
+  // ---------- o "editor" sem IA: olha o parágrafo inteiro (diálogo, quebras, mostrar x contar, pleonasmos) ----------
+  const ED_SAY = 'disse|diz|dizia|perguntou|pergunta|respondeu|responde|falou|fala|gritou|sussurrou|murmurou|retrucou|completou|continuou|explicou|resmungou|rebateu|admitiu|insistiu|provocou|brincou|repetiu|confessou|pediu|mandou|avisou|exclamou|comentou|acrescentou|emendou|disparou|rosnou|cochichou|implorou|prometeu|garantiu|concordou|negou|chamou';
+  const ED_SHIFT = /^(Depois|Então|Mais tarde|Naquela|Naquele|No dia seguinte|No outro dia|Na manhã|Na noite|À noite|De manhã|À tarde|Quando|Enquanto isso|Horas depois|Minutos depois|Dias depois|Semanas depois|De repente|Ao chegar|Lá fora|Do outro lado|Assim que|Logo depois|Pouco depois|Agora|Ali|Lá|Em casa|No quarto|Na cozinha)(?![\p{L}])/u;
+  const ED_PLEO = [
+    [/(?<![\p{L}])((?:sub|sob)\p{L}*)\s+(?:pra|para)\s+cima(?![\p{L}])(?!\s+d[aoe]s?(?![\p{L}]))/giu, m => m[1], 'Pleonasmo: quem sobe, sobe para cima.'],
+    [/(?<![\p{L}])(desc\p{L}*)\s+(?:pra|para)\s+baixo(?![\p{L}])(?!\s+d[aoe]s?(?![\p{L}]))/giu, m => m[1], 'Pleonasmo: quem desce, desce para baixo.'],
+    [/(?<![\p{L}])(entr\p{L}*)\s+(?:pra|para)\s+dentro(?![\p{L}])(?!\s+d[aoe]s?(?![\p{L}]))/giu, m => m[1], 'Pleonasmo: quem entra, entra para dentro.'],
+    [/(?<![\p{L}])((?:sai|saí|sair|saiu|saíram|saindo)\p{L}*)\s+(?:pra|para)\s+fora(?![\p{L}])(?!\s+d[aoe]s?(?![\p{L}]))/giu, m => m[1], 'Pleonasmo: quem sai, sai para fora.'],
+    [/(?<![\p{L}])(há\s+[^.,;!?\n]{1,25}?)\s+atrás(?![\p{L}])/giu, m => m[1], 'Redundância: "há" já indica passado. Use "há três anos" ou "três anos atrás", não os dois.'],
+    [/(?<![\p{L}])elo de ligação(?![\p{L}])/giu, () => 'elo', 'Pleonasmo: todo elo liga.'],
+    [/(?<![\p{L}])(encar\p{L}*)\s+de frente(?![\p{L}])/giu, m => m[1], 'Pleonasmo: encarar já é de frente.'],
+    [/(?<![\p{L}])surpresa inesperada(?![\p{L}])/giu, () => 'surpresa', 'Pleonasmo: toda surpresa é inesperada.'],
+    [/(?<![\p{L}])outra alternativa(?![\p{L}])/giu, () => 'alternativa', 'Pleonasmo: alternativa já é "outra".'],
+    [/(?<![\p{L}])exatamente igual(?![\p{L}])/giu, () => 'igual', 'Redundância: igual já é exato.'],
+    [/(?<![\p{L}])(repet\p{L}*)\s+de novo(?![\p{L}])/giu, m => m[1], 'Pleonasmo: repetir já é de novo.'],
+    [/(?<![\p{L}])(convive\p{L}*|conviv\p{L}*)\s+juntos?(?![\p{L}])/giu, m => m[1], 'Pleonasmo: conviver já é junto.'],
+    [/(?<![\p{L}])multidão de pessoas(?![\p{L}])/giu, () => 'multidão', 'Pleonasmo: multidão já é de pessoas.']];
+  function editorPass(text, p) {
+    const fixes = [], paras = [], cap = (ch) => ch.toLocaleUpperCase('pt-BR');
+    const names = new Set(); `${p.characters || ''}`.replace(/\p{Lu}\p{Ll}{2,}/gu, m => { names.add(m); return m; });
+    if (p.world) (worldOf(p).e.personagens || []).forEach(e => (e.title || '').replace(/\p{Lu}\p{Ll}{2,}/gu, m => { names.add(m); return m; }));
+    const add = (s, e, fix, msg, extra) => { if (!fixes.some(x => s < x.e && e > x.s)) fixes.push(Object.assign({ s, e, fix, kind: 'estr', msg }, extra || {})); };
+    const W = (t) => (t.match(/\p{L}+/gu) || []).length;
+    let pm; const pre = /[^\n]+/g;
+    while ((pm = pre.exec(text))) {
+      const par = pm[0], p0 = pm.index, lead = par.match(/^\s*/)[0].length, body = par.slice(lead), dlg = /^[—–-]/.test(body);
+      const sens = []; let sm; const sre = /[^.!?…]+(?:[.!?…]+["”»’)]*|$)/g;
+      while ((sm = sre.exec(body))) { if (!sm[0].trim()) { sre.lastIndex++; continue; } const l2 = sm[0].match(/^\s*/)[0].length; sens.push({ s: p0 + lead + sm.index + l2, e: p0 + lead + sm.index + sm[0].length, t: sm[0].slice(l2) }); }
+      const words = W(body), obs = [];
+      // fala entre aspas vira travessão
+      const q = body.match(new RegExp(`^["“]([^"”\\n]+)["”]\\s*(?:,\\s*((?:${ED_SAY})(?![\\p{L}])[^\\n]*))?$`, 'u'));
+      if (q) add(p0 + lead, p0 + par.length, `— ${q[1].trim()}${q[2] ? ` — ${q[2].trim()}` : ''}`, 'No Brasil, a fala do personagem vem com travessão (—) no começo da linha, não entre aspas.', { lesson: 'g-dialogo', ptype: 'dialogo' });
+      // fala começando no meio da narração: vai para a linha de baixo
+      if (!dlg) { let m; const re = /([.!?…])([^\S\n]+)(?=—[^\S\n]*\p{Lu})/gu; while ((m = re.exec(body))) { const at = p0 + lead + m.index + 1; add(at, at + m[2].length, '\n\n', 'Fala nova começa em outro parágrafo, com o travessão no começo da linha.', { lesson: 'g-dialogo', ptype: 'quebra' }); } }
+      if (dlg || /[.!?…]\s+—\s*\p{Lu}/u.test(body)) {
+        // dois personagens falando no mesmo parágrafo
+        const tags = [...body.matchAll(new RegExp(`—\\s*(?:${ED_SAY})\\s+(\\p{Lu}\\p{Ll}+)`, 'gu'))];
+        const first = tags[0] && tags[0][1], other = tags.find(t => t[1] !== first);
+        if (other) { const before = body.slice(0, other.index), cut = [...before.matchAll(/([.!?…])([^\S\n]+)(?=—\s)/g)].pop(); if (cut) { const at = p0 + lead + cut.index + 1; add(at, at + cut[2].length, '\n\n', `${first} e ${other[1]} falam no mesmo parágrafo. Cada personagem fala em um parágrafo próprio: o leitor sabe sempre quem está falando.`, { lesson: 'g-dialogo', ptype: 'quebra' }); } }
+        // narração longa grudada depois do "disse": parágrafo seguinte
+        const nm = body.match(new RegExp(`—[^\\n—]+—\\s*(?:${ED_SAY})(?![\\p{L}])[^.!?…\\n]*[.!?…]+([^\\S\\n]+)(?!—)(?=\\p{Lu})`, 'u'));
+        if (nm && W(body.slice(nm.index + nm[0].length)) >= 14) { const at = p0 + lead + nm.index + nm[0].length - nm[1].length; add(at, at + nm[1].length, '\n\n', 'Depois da fala e do "disse", a narração longa fica melhor no parágrafo seguinte: a fala ganha destaque e o texto respira.', { ptype: 'quebra' }); }
+      }
+      // parágrafo longo: onde quebrar
+      if (!dlg && sens.length >= 4 && words > 110) {
+        let acc = 0; const cands = [];
+        sens.forEach((x, i) => { if (i === 0) { acc += W(x.t); return; } const left = acc, right = words - acc; acc += W(x.t); if (left < 28 || right < 28) return;
+          const fw = (x.t.match(/^\p{L}+/u) || [''])[0], prevFw = (sens[i - 1].t.match(/^\p{L}+/u) || [''])[0];
+          const score = ED_SHIFT.test(x.t) ? 3 : (names.has(fw) && fw !== prevFw) ? 2 : 0; cands.push({ i, score, d: Math.abs(left - words / 2), fw }); });
+        cands.sort((a, b) => b.score - a.score || a.d - b.d);
+        const c = cands[0];
+        if (c && (c.score || words > 160)) { const sp = sens[c.i], gap = text.slice(sens[c.i - 1].e, sp.s);
+          add(sens[c.i - 1].e, sp.s, gap.replace(/[^\S\n]+/g, '') + '\n\n', c.score === 3 ? `Aqui muda o tempo ou o lugar ("${sp.t.split(/\s+/).slice(0, 3).join(' ')}…"): bom ponto para um parágrafo novo.` : c.score === 2 ? `O foco passa para ${c.fw}: comece um parágrafo novo.` : `Parágrafo muito longo (${words} palavras): quebre aqui para o leitor respirar.`, { ptype: 'quebra' }); }
+      }
+      // pleonasmos (com correção)
+      ED_PLEO.forEach(([re, fn, msg]) => { re.lastIndex = 0; let m; while ((m = re.exec(body))) { const at = p0 + lead + m.index; add(at, at + m[0].length, fn(m), msg, { ptype: 'texto' }); } });
+      // parecer do editor (observações sobre o parágrafo inteiro)
+      const low = body.toLocaleLowerCase('pt-BR');
+      const filt = [...low.matchAll(/(?<![\p{L}])(sentiu|sentia|sentindo|percebeu|percebia|notou|reparou|ouviu|pensou|imaginou|se deu conta)(?![\p{L}])/gu)].map(m => m[1]);
+      if (filt.length >= 2) obs.push(`Verbos-filtro (${[...new Set(filt)].join(', ')}): eles afastam o leitor. Em vez de "sentiu o ar quente bater no rosto", tente "o ar quente bateu no rosto".`);
+      const tell = low.match(/(?<![\p{L}])(estava|ficou|sentia-se|se sentia|sentiu-se|era)\s+(muito\s+|tão\s+|bem\s+)?(feliz|triste|nervos[oa]|ansios[oa]|com medo|irritad[oa]|furios[oa]|apaixonad[oa]|envergonhad[oa]|confus[oa]|preocupad[oa]|animad[oa]|assustad[oa]|com raiva|com ciúmes?|excitad[oa])(?![\p{L}])/u);
+      if (tell) obs.push(`Conta a emoção ("${tell[0]}"). Mostre pelo corpo: mãos, respiração, voz, o que ele faz.`);
+      const ints = [...low.matchAll(/(?<![\p{L}])(muito|bastante|realmente|totalmente|completamente|extremamente|demais|tão)(?![\p{L}])/gu)];
+      if (ints.length >= 3) obs.push(`"${[...new Set(ints.map(m => m[1]))].join('", "')}" aparecem ${ints.length} vezes: troque por palavras mais precisas ("muito cansado" → "exausto").`);
+      const ech = sens.filter(x => (x.t.match(/(?<![\p{L}])e(?![\p{L}])/gu) || []).length >= 3);
+      if (ech.length) obs.push(`Frase com muitos "e" encadeados ("${ech[0].t.slice(0, 50)}…"): troque alguns por vírgula ou divida a frase.`);
+      const opens = sens.map(x => ((x.t.match(/^\p{L}+/u) || [''])[0]).toLowerCase()).filter(Boolean), cnt = {}; opens.forEach(o => { cnt[o] = (cnt[o] || 0) + 1; });
+      const rep = Object.entries(cnt).find(([o, n]) => n >= 3 && sens.length >= 4 && !/^(o|a|os|as|e)$/.test(o)); if (rep) obs.push(`${rep[1]} frases começam com "${rep[0]}": varie a abertura (comece pela ação, pelo lugar, por um detalhe).`);
+      const mente = low.match(/(?<![\p{L}])\p{L}{3,}mente(?![\p{L}])/gu) || []; if (mente.length >= 2) obs.push(`Advérbios em -mente (${mente.slice(0, 3).join(', ')}): um verbo mais forte costuma resolver ("andou rapidamente" → "correu").`);
+      if (!dlg && sens.length >= 3) { const lens = sens.map(x => W(x.t)), longest = Math.max(...lens), shortest = Math.min(...lens); if (shortest > 14) obs.push(`Todas as frases são médias ou longas (a menor tem ${shortest} palavras). Uma frase curta no ponto alto dá impacto.`); }
+      if (sens.length === 1 && words > 45 && !dlg) obs.push('Parágrafo de uma frase só, e longa. Divida em duas ou três frases.');
+      paras.push({ s: p0, e: p0 + par.length, words, n: sens.length, avg: sens.length ? Math.round(words / sens.length) : 0, dlg: dlg || /^["“]/.test(body), obs, first: body.slice(0, 60) });
+    }
+    return { fixes, paras };
+  }
   async function localStruct(p, text) {
     const pt = isPtBr(p); let iss = [];
     try { if (pt && !speller) await loadSpeller(); } catch {}
@@ -8640,15 +8720,17 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     try { iss.push(...reviewText(text, pt).filter(x => x.fix != null && (x.kind === 'pont' || x.kind === 'trad'))); } catch (e) { console.error(e); }
     if (pt) { try { iss.push(...gramIssues(text).filter(x => x.fix != null)); } catch (e) { console.error(e); } }
     if (pt && speller) { try { iss.push(...spellIssues(text, p).filter(x => x.fix != null && x.word && x.word[0] === x.word[0].toLocaleLowerCase('pt-BR'))); } catch (e) { console.error(e); } }
-    iss = dedupeIssues(iss);
+    let ed = { fixes: [], paras: [] }; try { ed = editorPass(text, p); } catch (e) { console.error(e); }
+    iss = dedupeIssues([...ed.fixes, ...iss]);
     const fixes = iss.filter(x => x.fix != null).sort((a, b) => a.s - b.s), notes = iss.filter(x => x.fix == null && x.kind === 'estr');
     // um raio-x das frases
     const sens = (text.match(/[^.!?…\n]+[.!?…]*/g) || []).map(x => (x.match(/\p{L}+/gu) || []).length).filter(n => n > 0);
     const avg = sens.length ? Math.round(sens.reduce((a, b) => a + b, 0) / sens.length) : 0, max = sens.length ? Math.max(...sens) : 0;
-    const splits = fixes.filter(x => x.split).length;
-    const resumo = `${sens.length} frase(s), em média ${avg} palavras; a mais longa tem ${max}.` + (splits ? ` Achei ${splits} lugar(es) onde uma frase deve terminar e outra começar.` : '') +
+    const splits = fixes.filter(x => x.split).length, brks = fixes.filter(x => x.ptype === 'quebra').length, dlgs = fixes.filter(x => x.ptype === 'dialogo').length;
+    const resumo = `${ed.paras.length} parágrafo(s), ${sens.length} frase(s), em média ${avg} palavras; a mais longa tem ${max}.` + (splits ? ` ${splits} lugar(es) onde uma frase deve terminar e outra começar.` : '') +
+      (brks ? ` ${brks} quebra(s) de parágrafo sugerida(s).` : '') + (dlgs ? ` ${dlgs} fala(s) para passar para o travessão.` : '') +
       (fixes.length ? ` Ao todo, ${fixes.length} ajuste(s) que o app consegue fazer sozinho.` : ' Nada que o app consiga ajustar sozinho.') + (notes.length ? ` E ${notes.length} ponto(s) para você decidir.` : '');
-    return { fixes, notes, resumo };
+    return { fixes, notes, resumo, paras: ed.paras };
   }
   const stLocalOut = (c) => { let t = c.text; c.fixes.map((x, i) => [x, i]).filter(([, i]) => c.on.has(i)).sort((a, b) => b[0].s - a[0].s).forEach(([x]) => { t = t.slice(0, x.s) + x.fix + t.slice(x.e); }); return t; };
   async function openStruct(p, text, apply, level = 'leve') {
@@ -8695,14 +8777,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (c.busy) { body.replaceChildren(el('p', { class: 'muted', text: `A IA está lendo o trecho e arrumando a estrutura${c.level === 'forte' ? ' (reorganizando mais)' : ''}…` }), el('div', { class: 'row end learn-foot' }, el('button', { text: 'Parar', onclick: () => c.job && c.job.ctrl.abort() }))); return; }
     if (!c.out) { body.replaceChildren(el('p', { text: c.err || 'Não deu certo desta vez.' }), el('div', { class: 'row end learn-foot' }, el('button', { 'data-close': '', text: 'Fechar' }), el('button', { class: 'primary ai-btn', icon: 'refresh-cw', ai: true, text: 'Tentar de novo', onclick: () => openStruct(c.p, c.text, c.apply, c.level) }))); return; }
     const d = wordDiff(c.text, c.out), orig = el('p', { class: 'learn-txt' }), neu = el('p', { class: 'learn-txt' });
-    if (d) d.forEach(([t, x]) => { if (t === '=') { orig.append(x); neu.append(x); } else if (t === '-') orig.append(/^\s+$/.test(x) ? x : el('del', { text: x })); else neu.append(/^\s+$/.test(x) ? x : el('ins', { text: x })); });
+    if (d) d.forEach(([t, x]) => { if (t === '=') { orig.append(x); neu.append(x); } else if (t === '-') orig.append(/^\s+$/.test(x) ? x : el('del', { text: x }));
+      else if (/^\s+$/.test(x)) neu.append(...(/\n/.test(x) ? [el('ins', { class: 'st-br', text: '¶', title: 'Parágrafo novo' }), x] : [x])); else neu.append(el('ins', { text: x })); });
     else { orig.textContent = c.text; neu.textContent = c.out; }
     const ed = el('textarea', { class: 'st-edit', 'aria-label': 'Nova versão (pode editar)' }); ed.value = c.out;
     ed.addEventListener('input', () => { c.out = ed.value; });
     const ctxCh = (x) => { const was = c.text.slice(x.s, x.e); if (was.trim() && (x.fix || '').trim() && !x.split) return [was.trim(), x.fix.trim()];
       const pre = (c.text.slice(Math.max(0, x.s - 30), x.s).match(/(\S+\s*)$/) || [, ''])[1], post = (c.text.slice(x.e, x.e + 30).match(/^(\S*\s*\S+)/) || [, ''])[1];
-      return [`${pre}${was}${post}`, `${pre}${x.fix}${post}`]; };
-    if (c.local) c.changes = c.fixes.map((x, i) => { const [a, b] = ctxCh(x); return { tipo: RV_KINDS[x.kind] || 'Ajuste', antes: a, depois: b, porque: x.kind === 'orto' && x.sugs ? `Palavra fora do dicionário; a sugestão mais provável é "${x.fix}". Se for nome ou gíria, desmarque.` : x.msg, i, lesson: x.lesson }; });
+      return [`${pre}${was}${post}`, `${pre}${x.fix}${post}`].map(t => t.replace(/\s*\n\s*\n\s*/g, ' ¶ ')); };
+    const PT = { quebra: 'Parágrafo', dialogo: 'Diálogo', texto: 'Texto' };
+    if (c.local) c.changes = c.fixes.map((x, i) => { const [a, b] = ctxCh(x); return { tipo: PT[x.ptype] || RV_KINDS[x.kind] || 'Ajuste', antes: a, depois: b, porque: x.kind === 'orto' && x.sugs ? `Palavra fora do dicionário; a sugestão mais provável é "${x.fix}". Se for nome ou gíria, desmarque.` : x.msg, i, lesson: x.lesson }; });
     const changes = (c.local ? c.changes : c.changes.slice(0, 15)).map((x, k) => el('div', { class: 'learn-item' }, el('span', { class: 'li-n', text: String(k + 1) }),
       el('div', {}, x.tipo ? el('span', { class: 'st-tipo', text: String(x.tipo) }) : '',
         el('div', { class: 'li-ch' }, x.antes ? el('del', { text: String(x.antes) }) : '', x.antes && x.depois ? ' → ' : '', x.depois ? el('ins', { text: String(x.depois) }) : ''),
@@ -8711,18 +8795,22 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
           cb.addEventListener('change', () => { cb.checked ? c.on.add(x.i) : c.on.delete(x.i); c.out = stLocalOut(c); c.editing = false; renderStruct(); });
           return el('label', { class: 'check' }, cb, el('span', { text: 'Aplicar' })); })(),
           x.lesson ? el('button', { class: 'link plain', icon: 'graduation-cap', text: 'Treinar', onclick: () => openLessonQuiz(x.lesson) }) : '') : '')));
-    const notes = c.local && c.notes && c.notes.length ? el('div', { class: 'learn-think' }, el('b', { text: 'Para você decidir (o app não consegue mudar sozinho):' }),
-      el('ul', {}, c.notes.map(x => el('li', {}, el('b', { text: `"${c.text.slice(x.s, x.e).replace(/\s+/g, ' ').slice(0, 60)}${x.e - x.s > 60 ? '…' : ''}": ` }), x.msg)))) : null;
+    const notes = c.local && c.paras && c.paras.length ? el('div', { class: 'st-parecer' }, el('h3', { text: 'Parecer do editor, parágrafo por parágrafo' }),
+      ...c.paras.map((pa, k) => {
+        const own = (c.notes || []).filter(x => x.s >= pa.s && x.s < pa.e).map(x => x.msg), fx = c.fixes.filter(x => x.s >= pa.s && x.s < pa.e).length, all = [...own, ...pa.obs];
+        return el('div', { class: 'st-par' + (all.length || fx ? '' : ' ok') }, el('div', { class: 'sp-h' }, el('b', { text: `§${k + 1}` }), ` ${pa.dlg ? 'Diálogo' : 'Narração'} · ${pa.n} frase(s) · ${pa.words} palavras · média ${pa.avg}`, el('span', { class: 'muted', text: ` · "${pa.first.replace(/\s+/g, ' ').slice(0, 40)}…"` })),
+          all.length ? el('ul', {}, all.map(t => el('li', { text: t }))) : el('p', { class: 'muted', style: 'margin:4px 0 0', text: fx ? `Só os ${fx} ajuste(s) da lista abaixo.` : 'Parágrafo equilibrado ✓' }));
+      })) : null;
     const scrolls = [...body.querySelectorAll('.learn-col')].map(x => x.scrollTop);
     body.replaceChildren(...[
       c.resumo ? el('p', { class: 'st-sum' }, el('b', { text: c.local ? 'Raio-x do trecho: ' : 'O que a IA viu: ' }), c.resumo) : null,
       el('p', { class: 'muted', style: 'margin-top:0', text: 'Em vermelho o que saiu, em verde o que entrou. Leia as explicações embaixo: é ali que está o aprendizado.' }),
       el('div', { class: 'learn-cols' }, el('div', { class: 'learn-col' }, el('h3', { text: 'Seu texto' }), orig),
         el('div', { class: 'learn-col' }, el('h3', {}, 'Nova estrutura ', el('button', { class: 'link plain', icon: 'pencil', text: c.editing ? 'Ver as diferenças' : 'Editar', onclick: () => { c.editing = !c.editing; renderStruct(); } })), c.editing ? ed : neu)),
+      notes,
       changes.length ? el('h3', { style: 'margin:14px 0 0', text: 'O que mudou e por quê' }) : null,
       changes.length ? el('div', { class: 'learn-list' }, changes) : null,
-      notes,
-      c.local ? el('p', { class: 'hint', text: 'Sem IA o app divide frases, troca vírgulas por ponto e corrige pontuação, gramática e grafia. Mudar a ordem das ideias e o ritmo da cena precisa de IA: toque em "Tentar com IA".' }) : null,
+      c.local ? el('p', { class: 'hint', text: 'Sem IA o app quebra parágrafos, põe as falas no travessão, divide frases, tira pleonasmos e corrige pontuação, gramática e grafia; o parecer aponta o resto. Reescrever o parágrafo com outras palavras e outra ordem só a IA faz: toque em "Tentar com IA".' }) : null,
       el('div', { class: 'row end learn-foot' },
         el('button', { 'data-close': '', text: 'Fechar' }),
         c.local ? el('button', { class: 'ai-btn', icon: 'wand-sparkles', ai: true, text: 'Tentar com IA', onclick: () => openStruct(c.p, c.text, c.apply, 'leve') }) :

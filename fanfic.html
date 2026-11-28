@@ -748,8 +748,8 @@
   .book3d.flip .b3-leaf { transform: translateZ(calc(var(--d) / 2 - 1.6px + var(--i) * .12px)) rotateY(calc(-179.3deg + var(--i) * .07deg)); transition: transform .5s cubic-bezier(.3,.1,.25,1) calc(.6s + var(--i) * 75ms); }
   .b3-leaf > .b3-face { inset: 0; }
   .b3-leaf .lf-b { transform: rotateY(180deg); }
-  .b3-pg { background: linear-gradient(90deg, rgba(70,48,32,.38) 0, rgba(70,48,32,.14) 3.5%, rgba(255,255,255,.32) 9%, rgba(255,255,255,0) 17%), linear-gradient(90deg, #e2d8c8, #f8f3e9 9%, #fbf8f1 70%, #f1eadf); color: #2a2124; font-family: Georgia, serif; padding: 16px 20px 16px 24px; display: flex; flex-direction: column; }
-  .b3-pg.lft { background: linear-gradient(270deg, rgba(70,48,32,.38) 0, rgba(70,48,32,.14) 3.5%, rgba(255,255,255,.32) 9%, rgba(255,255,255,0) 17%), linear-gradient(270deg, #e2d8c8, #f8f3e9 9%, #fbf8f1 70%, #f1eadf); padding: 16px 24px 16px 20px; }
+  .b3-pg { background: linear-gradient(90deg, rgba(40,25,12,.30) 0, rgba(40,25,12,.17) 2%, rgba(40,25,12,.07) 5%, rgba(40,25,12,0) 11%, rgba(255,255,255,.16) 13.5%, rgba(255,255,255,0) 22%), linear-gradient(180deg, rgba(60,40,20,.05), rgba(60,40,20,0) 5%, rgba(60,40,20,0) 95%, rgba(60,40,20,.06)), linear-gradient(90deg, #ebe3d5, #f8f4eb 9%, #fbf8f1 72%, #f4eee3 96%, #e9e0d0); color: #2a2124; font-family: Georgia, serif; padding: 16px 20px 16px 24px; display: flex; flex-direction: column; }
+  .b3-pg.lft { background: linear-gradient(270deg, rgba(40,25,12,.30) 0, rgba(40,25,12,.17) 2%, rgba(40,25,12,.07) 5%, rgba(40,25,12,0) 11%, rgba(255,255,255,.16) 13.5%, rgba(255,255,255,0) 22%), linear-gradient(180deg, rgba(60,40,20,.05), rgba(60,40,20,0) 5%, rgba(60,40,20,0) 95%, rgba(60,40,20,.06)), linear-gradient(270deg, #ebe3d5, #f8f4eb 9%, #fbf8f1 72%, #f4eee3 96%, #e9e0d0); padding: 16px 24px 16px 20px; }
   .b3-pg .ph { font-size: 7.5px; letter-spacing: .16em; text-transform: uppercase; text-align: center; color: #8a6d75; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .b3-pg .fx { font-size: 9.5px; line-height: 1.6; text-align: justify; hyphens: auto; overflow: hidden; flex: 1; white-space: pre-line; }
   .b3-pg .fn { font-size: 9px; text-align: center; color: #8a6d75; margin-top: 6px; }
@@ -767,19 +767,24 @@
     display: flex; align-items: center; justify-content: center; color: var(--spine-ink); font-family: Georgia, serif; }
   .b3-inside div { border: 1px solid currentColor; padding: 14px 18px; text-align: center; font-size: 11px; line-height: 1.5; opacity: .85; max-width: 72%; }
   .b3-inside b { display: block; font-size: 14px; font-style: italic; }
-  .b3-first { width: calc(var(--w) - 4px); height: calc(var(--h) - 6px); top: 3px; left: 0; transform: translateZ(calc(var(--d) / 2 - 2.2px)); background: linear-gradient(90deg, rgba(70,48,32,.38) 0, rgba(70,48,32,.14) 3.5%, rgba(255,255,255,.32) 9%, rgba(255,255,255,0) 17%), linear-gradient(90deg, #e2d8c8, #f8f3e9 9%, #fbf8f1 70%, #f1eadf);
+  .b3-first { width: calc(var(--w) - 4px); height: calc(var(--h) - 6px); top: 3px; left: 0; transform: translateZ(calc(var(--d) / 2 - 2.2px)); background: linear-gradient(90deg, rgba(40,25,12,.30) 0, rgba(40,25,12,.17) 2%, rgba(40,25,12,.07) 5%, rgba(40,25,12,0) 11%, rgba(255,255,255,.16) 13.5%, rgba(255,255,255,0) 22%), linear-gradient(180deg, rgba(60,40,20,.05), rgba(60,40,20,0) 5%, rgba(60,40,20,0) 95%, rgba(60,40,20,.06)), linear-gradient(90deg, #ebe3d5, #f8f4eb 9%, #fbf8f1 72%, #f4eee3 96%, #e9e0d0);
     color: #2a2124; font-family: Georgia, serif; padding: 26px 20px 20px 24px; display: flex; flex-direction: column; }
   .b3-first .fk, .b3-pg .fk { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; text-align: center; color: #8a6d75; }
   .b3-first .ft, .b3-pg .ft { font-size: 15px; font-weight: 700; text-align: center; margin: 4px 0 14px; line-height: 1.25; }
   .b3-first .fx { font-size: 9.5px; line-height: 1.6; text-align: justify; hyphens: auto; overflow: hidden; flex: 1; white-space: pre-line; }
   /* a dobra do meio do livro aberto */
-  .b3-gutter { width: 22px; height: calc(var(--h) - 6px); top: 3px; left: -11px; transform: translateZ(calc(var(--d) / 2 + .3px)); opacity: 0; pointer-events: none;
-    background: linear-gradient(90deg, rgba(251,248,241,0), rgba(214,203,186,.9) 30%, #9c8f7b 47%, #6f6455 50%, #9c8f7b 53%, rgba(214,203,186,.9) 70%, rgba(251,248,241,0)); }
+  .b3-gutter { width: 16px; height: calc(var(--h) - 6px); top: 3px; left: -8px; transform: translateZ(calc(var(--d) / 2 + .3px)); opacity: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(40,25,12,0), rgba(40,25,12,.14) 32%, rgba(30,18,8,.34) 50%, rgba(40,25,12,.14) 68%, rgba(40,25,12,0)); }
+  /* sombra do livro no chão */
+  .b3-floor { position: absolute; left: 50%; top: 50%; width: var(--fw, 260px); height: var(--fh, 46px); border-radius: 50%; pointer-events: none; opacity: var(--fo, .7);
+    background: radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,.25) 45%, rgba(0,0,0,0) 72%); filter: blur(8px);
+    transform: translate(calc(-50% + var(--fx, 0px)), var(--fy, 170px)); transition: width .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1), opacity .9s; }
+  .b3-floor.live { transition: none; }
   .book3d.flip .b3-gutter { opacity: 1; transition: opacity .3s ease 1.3s; }
   /* palavrão riscado com lápis de cor vermelho */
   .b3-cens { position: relative; }
-  .b3-cens::after { content: ""; position: absolute; left: -3px; right: -3px; top: -6%; bottom: -10%; pointer-events: none; mix-blend-mode: multiply; clip-path: inset(0 100% 0 0);
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23d11a2a' stroke-linecap='round' stroke-linejoin='round' opacity='.78'%3E%3Cpath stroke-width='4.2' stroke-dasharray='34 3 20 4' d='M1 25 L9 4 L16 25 L24 4 L31 25 L39 4 L46 25 L54 4 L61 25 L69 4 L76 25 L84 4 L91 25 L99 4'/%3E%3Cpath stroke-width='3.6' stroke-dasharray='26 5' d='M2 6 L8 27 L15 6 L21 27 L28 6 L34 27 L40 6 L47 27 L53 6 L60 27 L66 6 L72 27 L79 6 L85 27 L92 6 L98 27'/%3E%3Cpath stroke-width='3' stroke-dasharray='18 3 30 4' d='M0 20 L5 8 L11 20 L16 8 L21 20 L26 8 L32 20 L37 8 L42 20 L47 8 L53 20 L58 8 L63 20 L68 8 L74 20 L79 8 L84 20 L89 8 L95 20 L100 8'/%3E%3Cpath stroke-width='2.2' d='M0 16 C18 10 36 22 54 14 S86 19 100 13'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+  .b3-cens::after { content: ""; position: absolute; left: -3px; right: -3px; top: -8%; bottom: -12%; pointer-events: none; mix-blend-mode: multiply; clip-path: inset(0 100% 0 0);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23c8102a' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath stroke-width='2.6' opacity='.55' d='M-8 31 L1 -1 M-5 31 L4 -1 M-2 31 L7 -1 M1 31 L10 -1 M4 31 L13 -1 M7 31 L16 -1 M10 31 L19 -1 M13 31 L22 -1 M16 31 L25 -1 M19 31 L28 -1 M22 31 L31 -1 M25 31 L34 -1 M28 31 L37 -1 M31 31 L40 -1 M34 31 L43 -1 M37 31 L46 -1 M40 31 L49 -1 M43 31 L52 -1 M46 31 L55 -1 M49 31 L58 -1 M52 31 L61 -1 M55 31 L64 -1 M58 31 L67 -1 M61 31 L70 -1 M64 31 L73 -1 M67 31 L76 -1 M70 31 L79 -1 M73 31 L82 -1 M76 31 L85 -1 M79 31 L88 -1 M82 31 L91 -1 M85 31 L94 -1 M88 31 L97 -1 M91 31 L100 -1 M94 31 L103 -1 M97 31 L106 -1 M100 31 L109 -1 M103 31 L112 -1'/%3E%3Cpath stroke-width='4.4' opacity='.9' d='M0 27 L7 3 L13 27 L20 3 L27 27 L33 3 L40 27 L47 3 L53 27 L60 3 L67 27 L73 3 L80 27 L87 3 L93 27 L100 3'/%3E%3Cpath stroke-width='4' opacity='.9' d='M1 4 L7 27 L13 4 L18 27 L24 4 L30 27 L36 4 L41 27 L47 4 L53 27 L59 4 L64 27 L70 4 L76 27 L82 4 L87 27 L93 4 L99 27'/%3E%3Cpath stroke-width='3.4' opacity='.85' d='M0 22 L5 7 L10 22 L14 7 L19 22 L24 7 L29 22 L33 7 L38 22 L43 7 L48 22 L52 7 L57 22 L62 7 L67 22 L71 7 L76 22 L81 7 L86 22 L90 7 L95 22 L100 7'/%3E%3Cpath stroke-width='3' opacity='.8' d='M0 15 C18 8 36 23 54 13 S86 20 100 12'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat; }
   .book3d.flip .b3-cens::after { clip-path: inset(0 0 0 0); transition: clip-path .45s ease-out 2.9s; }
   .b3-bgimg { position: absolute; inset: -60px; background: center / cover no-repeat; filter: blur(var(--bgb, 0px)) brightness(var(--bgd, 1)); pointer-events: none; }
   .b3-bgimg[hidden] { display: none; }
@@ -1889,7 +1894,7 @@
   </header>
   <div class="b3-wrap">
     <div class="b3-main">
-      <div class="b3-stage" id="b3Stage" aria-label="Livro em 3D. Arraste para girar, toque para abrir."><div class="b3-bgimg" id="b3BgImg" hidden></div><div class="book3d" id="book3d"></div>
+      <div class="b3-stage" id="b3Stage" aria-label="Livro em 3D. Arraste para girar, toque para abrir."><div class="b3-bgimg" id="b3BgImg" hidden></div><div class="b3-floor" id="b3Floor"></div><div class="book3d" id="book3d"></div>
         <button type="button" class="b3-expand" id="b3Full" title="Tela cheia (bom para gravar vídeos)"><svg class="icon" aria-hidden="true"><use href="#i-maximize-2"/></svg><span>Tela cheia</span></button>
         <div class="b3-float" id="b3Float">
           <button type="button" data-b3act="open"><svg class="icon" aria-hidden="true"><use href="#i-book-open"/></svg><span>Abrir</span></button>
@@ -1910,6 +1915,10 @@
         <h3><svg class="icon" aria-hidden="true"><use href="#i-rotate-3d"/></svg>Movimento</h3>
         <div class="seg" role="group" aria-label="Movimento do livro" id="b3Motion">
           <button type="button" data-v="parado">Parado</button><button type="button" data-v="girar">Girar sozinho</button><button type="button" data-v="balancar">Balançar</button>
+        </div>
+        <label>Direção</label>
+        <div class="seg" role="group" aria-label="Direção do giro" id="b3Dir">
+          <button type="button" data-v="1">⟳ Para a direita</button><button type="button" data-v="-1">⟲ Para a esquerda</button>
         </div>
         <label for="b3Zoom">Distância do livro</label>
         <div class="b3-range"><span class="muted">longe</span><input type="range" id="b3Zoom" min="0.4" max="1.8" step="0.05"><span class="muted">perto</span></div>
@@ -9309,7 +9318,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   let b3 = null;
   const bookWords = (p) => p.chapters.reduce((n, c) => n + countWords(c.text), 0);
   const bookPages = (p) => Math.max(24, Math.ceil(bookWords(p) / 250));
-  const B3_DEF = { color: '', pos: 'top', align: 'left', size: 12.5, backRefId: '', blur: 10, veil: 45, motion: 'parado', speed: 1, bg: 'vinho', zoom: 1, openMode: 'hot', hotKey: '', censor: true, bgRefId: '', bgBlur: 8, bgDim: 25 };
+  const B3_DEF = { color: '', pos: 'top', align: 'left', size: 12.5, backRefId: '', blur: 10, veil: 45, motion: 'parado', speed: 1, bg: 'vinho', zoom: 1, openMode: 'hot', hotKey: '', censor: true, bgRefId: '', bgBlur: 8, bgDim: 25, dir: '1' };
   const B3_BG = { vinho: ['Vinho', 'radial-gradient(ellipse at 50% 85%, rgba(155,77,99,.38), transparent 60%), #241a1e', '#5a2f3c'], noite: ['Noite', 'radial-gradient(ellipse at 50% 80%, #2a2a33, #08080b 70%)', '#101015'],
     papel: ['Papel', 'radial-gradient(ellipse at 50% 80%, #fffaf2, #e7ddcf 75%)', '#efe6d8'], rosa: ['Rosa', 'linear-gradient(160deg, #f8dbe3, #e9b4c3)', '#efc3cf'], lilas: ['Lilás', 'linear-gradient(160deg, #d9d0f2, #9c8bd0)', '#b9acdf'],
     verde: ['Verde (chroma key, para recortar no editor de vídeo)', '#00b140', '#00b140'] };
@@ -9345,6 +9354,10 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     bk.style.transform = `translateX(${tx}px) scale(${s}) rotateX(${b3.rx}deg) rotateY(${b3.ry}deg)`;
     // o Chrome às vezes deixa as imagens da contracapa vazarem pela frente: some com a face que está de costas
     const cy = Math.cos(b3.ry * Math.PI / 180); bk.classList.toggle('fb', cy > .05); bk.classList.toggle('bb', cy < -.05);
+    // sombra no chão: acompanha o tamanho, a abertura e o quanto o livro está de lado
+    const fl = $('b3Floor'); if (fl) { fl.classList.toggle('live', !anim); const wide = b3.open ? 470 : 150 + 110 * Math.abs(Math.cos(b3.ry * Math.PI / 180)) + 60 * Math.abs(Math.sin(b3.ry * Math.PI / 180));
+      fl.style.setProperty('--fw', wide * s + 'px'); fl.style.setProperty('--fh', 44 * s + 'px'); fl.style.setProperty('--fy', (b3.open ? 150 : 165) * s + 'px'); fl.style.setProperty('--fx', tx + 'px');
+      fl.style.setProperty('--fo', String(Math.max(.35, Math.min(.85, .75 - b3.rx / 90)))); }
   }
   // ---------- a cena quente (sem IA): o trecho com mais palavras de pele, beijo e desejo ----------
   const HOT_W = (() => { const m = new Map();
@@ -9472,7 +9485,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // atualiza os controles da lateral conforme as escolhas
   function b3Controls() {
     const cfg = b3cfg(), seg = (id, v) => $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === v)));
-    seg('b3Motion', cfg.motion); seg('b3Pos', cfg.pos); seg('b3Align', cfg.align);
+    seg('b3Motion', cfg.motion); seg('b3Pos', cfg.pos); seg('b3Align', cfg.align); seg('b3Dir', String(cfg.dir || '1'));
     $('b3Speed').value = cfg.speed; $('b3SpeedOut').textContent = cfg.speed.toFixed(1) + '×'; $('b3Zoom').value = cfg.zoom;
     seg('b3OpenMode', cfg.openMode); $('b3HotBox').hidden = cfg.openMode !== 'hot';
     { const stx = b3Stream(b3.p), cur = b3HotPick();
@@ -9539,8 +9552,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const step = (t) => {
       const dt = Math.min(60, t - last); last = t;
       if (!b3.drag) {
-        if (cfg.motion === 'girar' && !b3.open) b3.ry += dt * .045 * cfg.speed;
-        if (cfg.motion === 'balancar' || (cfg.motion === 'girar' && b3.open)) { const amp = b3.open ? 10 : 32, mid = b3.open ? 0 : -24; b3.ry = mid + Math.sin((t - t0) / 1000 * cfg.speed * 1.1) * amp; }
+        const dir = Number(cfg.dir) < 0 ? -1 : 1;
+        if (cfg.motion === 'girar' && !b3.open) b3.ry += dt * .045 * cfg.speed * dir;
+        if (cfg.motion === 'balancar' || (cfg.motion === 'girar' && b3.open)) { const amp = b3.open ? 10 : 32, mid = b3.open ? 0 : -24 * dir; b3.ry = mid + Math.sin((t - t0) / 1000 * cfg.speed * 1.1) * amp * dir; }
         b3Apply(false);
       }
       b3.spin = requestAnimationFrame(step);
@@ -9609,6 +9623,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('b3Open').addEventListener('click', () => b3SetOpen(!b3.open));
   const b3Seg = (id, key, after) => $(id).addEventListener('click', (e) => { const x = e.target.closest('button[data-v]'); if (!x) return; b3cfg()[key] = x.dataset.v; b3Save(); after ? after() : b3Render(); });
   b3Seg('b3Motion', 'motion', () => { b3Controls(); b3Motion(); });
+  b3Seg('b3Dir', 'dir', () => { b3Controls(); if (b3cfg().motion === 'parado') { b3cfg().motion = 'girar'; b3Save(); b3Controls(); } b3Motion(); });
   b3Seg('b3Pos', 'pos', () => { b3Render(); b3.ry = 180; b3.rx = 4; b3Apply(); });
   b3Seg('b3Align', 'align', () => { b3Render(); b3.ry = 180; b3.rx = 4; b3Apply(); });
   const b3Range = (id, key, num, show) => $(id).addEventListener('input', () => { b3cfg()[key] = Number($(id).value); b3Save(); if (key === 'zoom') return b3Apply(false); b3Render(); if (show) { if (b3.open) b3SetOpen(false); b3.ry = 180; b3.rx = 4; b3Apply(false); } });

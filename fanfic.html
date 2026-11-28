@@ -425,6 +425,11 @@
   .gc-vis input { min-width: 0; }
   .gen-people .chip { display: inline-flex; align-items: center; gap: 6px; }
   .gen-people .chip img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-left: -6px; }
+  .gen-stylerefs { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+  .gen-stylerefs .gs-ref { position: relative; width: 56px; height: 56px; min-height: 0; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid var(--border); }
+  .gen-stylerefs .gs-ref[aria-pressed=true] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .gen-stylerefs .gs-ref img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gen-stylerefs .hint { margin: 0; flex-basis: 100%; }
   .gen-improve { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 8px; }
   .gen-improve .hint { margin: 0; }
   .gen-quick { display: flex; flex-wrap: wrap; gap: 0 28px; align-items: flex-start; }
@@ -1659,6 +1664,8 @@
     <span class="hint">Completa a descrição com aparência, ângulo da câmera e luz.</span></div>
   <label>Estilo</label>
   <div class="chips" id="genStyles"></div>
+  <div class="gen-stylerefs" id="genStyleRefs"></div>
+  <input type="file" id="genStyleFile" accept="image/*" hidden>
   <div class="gen-quick">
     <div id="genAspectWrap"><label>Formato</label><div class="chips" id="genAspect"></div></div>
     <div><label>Clima</label><label class="chip gen-sens"><input type="checkbox" id="genSensual"> Sensual <span class="muted">(pele à mostra, sem nudez)</span></label></div>
@@ -5896,6 +5903,16 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
 
   // ---------- gerar imagens (capa, cena, personagem, lugar) ----------
   const GEN_STYLES = ['Ilustração digital', 'Realista e cinematográfico', 'Anime', 'Aquarela', 'Pintura a óleo', 'Minimalista'];
+  // cada estilo explicado do jeito que o modelo entende (e o que ele não pode virar)
+  const GEN_STYLE_DESC = {
+    'Ilustração digital': 'ilustração digital pintada, como arte de capa de romance ou webtoon: pinceladas e traços visíveis, cores ricas, acabamento de ilustração. NÃO é foto: nada de fotorrealismo',
+    'Realista e cinematográfico': 'fotografia cinematográfica realista: lente de cinema, profundidade de campo, luz dramática, granulação sutil',
+    'Anime': 'anime/mangá: cel shading, contornos limpos, olhos expressivos, cores chapadas. NÃO é foto',
+    'Aquarela': 'aquarela tradicional em papel: manchas, transparências e bordas suaves. NÃO é foto',
+    'Pintura a óleo': 'pintura a óleo em tela: pinceladas grossas e visíveis, textura de tinta. NÃO é foto',
+    'Minimalista': 'ilustração minimalista: formas simples, poucas cores, fundo limpo. NÃO é foto' };
+  const genStyleLine = (style) => style ? `ESTILO VISUAL (obrigatório, vale mais que qualquer referência): ${style} — ${GEN_STYLE_DESC[style] || style}.` : '';
+  const genStyleNeg = (style) => style && style !== 'Realista e cinematográfico' ? 'foto, fotografia, fotorrealismo, render 3D realista' : '';
   const GEN_KIND = {
     capa: { label: 'capa', what: 'Uma capa vertical com o título, feita a partir das infos da obra, do mundo e dos personagens.', aspect: '2:3' },
     cena: { label: 'cena', what: 'Uma ilustração do momento mais marcante do capítulo escolhido.', aspect: '3:2' },
@@ -5979,8 +5996,26 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   function renderGenStyles() {
     const keep = genCtx.base ? [el('button', { type: 'button', class: 'chip', 'aria-pressed': String(!genCtx.style), text: 'Manter o estilo atual', onclick: () => { genCtx.style = ''; renderGenStyles(); } })] : [];
     $('genStyles').replaceChildren(...keep, ...GEN_STYLES.map(st => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(genCtx.style === st), text: st,
-      onclick: () => { genCtx.style = st; if (!genCtx.base) { settings.imageStyle = st; local.set('fanfic.settings', settings); } renderGenStyles(); } })));
+      onclick: () => { genCtx.style = st; if (!genCtx.base) { settings.imageStyle = st; local.set('fanfic.settings', settings); } renderGenStyles(); genPromptFill(); } })));
+    const c = genCtx; c.styleSel = c.styleSel || new Set();
+    const sr = (refsCache[c.p.id] || []).filter(r => r.kind === 'image' && r.imgKind === 'estilo');
+    $('genStyleRefs').replaceChildren(
+      ...sr.map(r => { const on = c.styleSel.has(r.id); return el('button', { type: 'button', class: 'gs-ref', 'aria-pressed': String(on), title: on ? 'Usando como referência de estilo' : 'Usar como referência de estilo', 'aria-label': 'Referência de estilo',
+        disabled: !on && c.styleSel.size >= 2, onclick: () => { on ? c.styleSel.delete(r.id) : c.styleSel.add(r.id); renderGenStyles(); } }, el('img', { src: r.data, alt: '' })); }),
+      el('button', { type: 'button', class: 'chip', icon: 'plus', text: 'Imagem de estilo', title: 'Envie um exemplo do estilo que você quer (uma ilustração, um quadro, uma capa)', onclick: () => $('genStyleFile').click() }),
+      el('p', { class: 'hint', text: c.styleSel.size ? `${c.styleSel.size} referência(s) de estilo: a IA copia só o jeito de desenhar (traço, cores, luz), nunca as pessoas.` : 'Tem um exemplo do estilo que você quer? Envie uma imagem: a IA copia só o jeito de desenhar, não as pessoas.' }));
+    $('genStyleRefs').hidden = !!c.base;
   }
+  $('genStyleFile').addEventListener('change', async () => {
+    const c = genCtx, f = $('genStyleFile').files[0]; $('genStyleFile').value = ''; if (!c || !f) return;
+    try {
+      const data = await shrinkImage(f);
+      const r = { id: uid(), projectId: c.p.id, kind: 'image', name: f.name, type: 'img', text: '', data, chars: 0, imgKind: 'estilo', subject: 'Referência de estilo', note: '', enabled: false, addedAt: Date.now(), updatedAt: Date.now() };
+      await db.put('refs', r); (refsCache[c.p.id] = refsCache[c.p.id] || []).push(r); markDirty('refs');
+      c.styleSel = c.styleSel || new Set(); if (c.styleSel.size < 2) c.styleSel.add(r.id);
+      renderGenStyles(); genStatus('Referência de estilo adicionada ✓ Ela fica guardada nas Referências.', 'ok');
+    } catch (e) { toast(`Não consegui abrir essa imagem: ${e.message}.`); }
+  });
   // "Melhorar": a imagem escolhida vira o ponto de partida da nova
   function setGenBase(r) {
     const c = genCtx; if (!c) return;
@@ -6047,7 +6082,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     return `A imagem anexada é ${what}. Crie uma NOVA VERSÃO dela, partindo dessa imagem.\n\nO QUE MUDAR (pedido do autor): ${extra}\n\n` +
       `Mude só o que foi pedido. Mantenha todo o resto igual: composição, enquadramento, personagens (rosto, corpo, cores, roupas), cenário, iluminação` + (style ? '' : ', estilo visual') + ' e formato.' +
       (isCover ? ` Se a capa tem o título "${title}", mantenha-o escrito exatamente assim, bem legível.` : '') +
-      (style ? `\nEstilo visual desejado: ${style}.` : '') +
+      (style ? `\n${genStyleLine(style)}` : '') +
       `\n\nCONTEXTO DA HISTÓRIA (só para entender):\n${ctx}` + (genCtxText(p, c) ? '\n\n' + genCtxText(p, c) : '') + `\n\n${genRules(c)}`;
   }
   async function openImageGen(p, opts = {}) {
@@ -6198,6 +6233,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const r = await callAI(`Você é especialista em escrever pedidos para modelos de imagem modernos (Nano Banana / Gemini Image, GPT Image), que entendem texto corrido e descritivo, não lista de palavras-chave.\n` +
         `Reescreva o pedido do autor como UM pedido forte, em português, em um ou dois parágrafos (até 170 palavras), nesta ordem: quem está na cena e a aparência detalhada de cada personagem (idade, altura e corpo, tom de pele, rosto, cabelo, olhos, barba, tatuagens, roupa); a ação, a pose e como eles interagem; o ângulo da câmera e o enquadramento (plano, lente, ponto de vista); o cenário; a luz, as cores e o clima; o estilo visual e o acabamento.\n` +
         `Mantenha TUDO o que o autor pediu e não invente personagens nem história. Use as aparências abaixo à risca.\n${looks ? `APARÊNCIAS:\n${looks}\n` : ''}${refs}\n` +
+        (c.style ? `O estilo visual escolhido é: ${c.style} (${GEN_STYLE_DESC[c.style] || ''}). Descreva tudo nesse estilo; ${c.style === 'Realista e cinematográfico' ? '' : 'nunca use as palavras realista, foto, fotografia ou fotorrealista, '}e comece o texto dizendo o estilo.\n` : '') +
         `${c.sensual ? GEN_SENSUAL + ' Todos são homens adultos (maiores de 18 anos).' : 'Sem nudez e sem conteúdo sexual.'} Se o pedido passar disso, reescreva no limite permitido (sugira em vez de mostrar).\n` +
         `Responda SOMENTE com um JSON: {"prompt": "...", "negative": "o que evitar, separado por vírgulas (anatomia errada, mãos e dedos errados, rostos diferentes das referências, texto na imagem, marca d'água, e o que contradiz o pedido)"}\n\nPEDIDO DO AUTOR:\n${src.slice(0, 6000)}`,
         { support: true, label: 'Melhorar pedido de imagem' });
@@ -6214,7 +6250,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // imagens de referência para a geração: as das Referências do projeto + novas enviadas aqui
   function renderGenRefs() {
     const c = genCtx; if (!c) return;
-    const imgs = (refsCache[c.p.id] || []).filter(r => r.kind === 'image' && (!c.sensual || r.fromText));
+    const imgs = (refsCache[c.p.id] || []).filter(r => r.kind === 'image' && r.imgKind !== 'estilo' && (!c.sensual || r.fromText));
     for (const id of [...c.sel]) if (!imgs.some(r => r.id === id)) c.sel.delete(id);
     $('genRefsHint').textContent = c.canSee
       ? `${c.base ? 'Se quiser, escolha mais imagens para a IA seguir' : 'Escolha até 4 imagens para a IA seguir'}: rosto, cabelo, roupa, lugar ou estilo.${c.sel.size ? ` (${c.sel.size} escolhida${c.sel.size > 1 ? 's' : ''})` : ''}`
@@ -6279,8 +6315,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (kind !== 'cena' && kind !== 'livre' && ch) task += `\nTrecho do capítulo "${chTitle(p, ch)}" para dar contexto:\n${cut(ch.text, 3000)}`;
     const more = genCtxText(p, c, kind === 'personagem' || kind === 'lugar' ? sub : null);
     const looks = c && c.inc ? [...new Set([...(kind === 'personagem' && sub ? [sub] : []), ...c.inc.chars])].map(n => { const l = charLook(p, n, 400); return l ? `- ${n}: ${l}` : ''; }).filter(Boolean) : [];
-    const neg = genNegative(c);
-    return (looks.length ? `APARÊNCIA DOS PERSONAGENS (siga à risca em todos os detalhes):\n${looks.join('\n')}\n\n` : '') + `${task}` + (neg ? `\nEvite: ${neg}.` : '') + `\n\nEstilo visual: ${style}.` + (extra && kind !== 'livre' ? `\nPedido do autor: ${extra}` : '') +
+    const neg = [genNegative(c), genStyleNeg(style)].filter(Boolean).join(', ');
+    return `${genStyleLine(style)}\n\n` + (looks.length ? `APARÊNCIA DOS PERSONAGENS (siga à risca em todos os detalhes):\n${looks.join('\n')}\n\n` : '') + `${task}` + (neg ? `\nEvite: ${neg}.` : '') + `\n\n${genStyleLine(style)}` + (extra && kind !== 'livre' ? `\nPedido do autor: ${extra}` : '') +
       (useInfos ? `\n\nCONTEXTO DA HISTÓRIA:\n${ctx}` : '') + (more ? `\n\n${more}` : '') + `\n\n${genRules(c)}`;
   }
   async function requestImage(model, content, aspect, signal) {
@@ -6331,7 +6367,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     if (!(await confirmAI(`Gerar ${what} com ${name}.`))) return;
     const prompt = (c.promptDirty && $('genPrompt').value.trim()) || genBuildPrompt();
     // referências visuais escolhidas pela pessoa
-    const chosen = c.canSee ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.sel.has(r.id)).slice(0, 4) : [];
+    const styleRefs = c.canSee && !base ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.styleSel && c.styleSel.has(r.id)).slice(0, 2) : [];
+    const chosen = c.canSee ? [...(refsCache[p.id] || []).filter(r => r.kind === 'image' && r.imgKind !== 'estilo' && c.sel.has(r.id)).slice(0, 4), ...styleRefs] : [];
     const content = base ? [
       { type: 'text', text: prompt },
       { type: 'text', text: 'Imagem que deve ser melhorada:' },
@@ -6339,9 +6376,9 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       ...chosen.flatMap(r => [
         { type: 'text', text: `Referência extra — ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}${(r.note || '').trim() ? ` (${r.note.trim().slice(0, 300)})` : ''}:` },
         { type: 'image_url', image_url: { url: r.data } }])] : chosen.length ? [
-      { type: 'text', text: prompt + '\n\nUse as imagens de referência anexadas: cada personagem deve ter EXATAMENTE o mesmo rosto da sua referência (formato do rosto, olhos, nariz, boca, cabelo, barba, tom de pele, tatuagens e tipo de corpo), como se fosse a mesma pessoa em outra cena. Para lugares e estilo, siga as referências correspondentes.' },
+      { type: 'text', text: prompt + '\n\nUse as imagens de referência anexadas: cada personagem deve ter EXATAMENTE o mesmo rosto da sua referência (formato do rosto, olhos, nariz, boca, cabelo, barba, tom de pele, tatuagens e tipo de corpo), como se fosse a mesma pessoa em outra cena. As referências de personagem e de lugar servem só para aparência: o ESTILO da imagem final é o ESTILO VISUAL pedido, mesmo que a referência seja uma foto ou de outro estilo.' + (styleRefs.length ? ' As referências de ESTILO mostram o estilo artístico a copiar (traço, pincelada, cores, luz e acabamento); não copie as pessoas, os rostos nem a cena delas.' : '') },
       ...chosen.flatMap(r => [
-        { type: 'text', text: `Referência — ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}${(r.note || '').trim() ? ` (${r.note.trim().slice(0, 300)})` : ''}:` },
+        { type: 'text', text: r.imgKind === 'estilo' ? 'Referência de ESTILO (copie só o estilo artístico, não o conteúdo):' : `Referência — ${IMG_LABEL[r.imgKind || 'personagem'] || 'Imagem'}${r.subject ? ': ' + r.subject : ''}${(r.note || '').trim() ? ` (${r.note.trim().slice(0, 300)})` : ''}:` },
         { type: 'image_url', image_url: { url: r.data } }])] : prompt;
     c.ctrl = new AbortController();
     const job = startBusy('genimage', 'Gerar imagem', null); job.ctrl = c.ctrl;
@@ -6352,7 +6389,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       const r = await requestImage(model, content, aspect, c.ctrl.signal);
       recordSpend({ op: uid(), action: base ? `Melhorar imagem · ${isCover ? 'capa' : sub || 'imagem'}` : `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
       const data = await shrinkImage(r.blob || await (await fetch(r.url)).blob());
-      const kindSaved = kind === 'livre' ? 'cena' : kind, fromText = (!base || !!base.fromText) && chosen.every(x => x.fromText);
+      const kindSaved = kind === 'livre' ? 'cena' : kind, fromText = (!base || !!base.fromText) && chosen.every(x => x.fromText || x.imgKind === 'estilo');
       const ref = base
         ? { id: uid(), projectId: p.id, kind: 'image', name: isCover ? 'Capa melhorada' : `${(base.name || 'Imagem').replace(/\s*\((gerada|melhorada)\)$/, '')} (melhorada)`, type: 'img', text: '', data, chars: 0,
             imgKind: base.imgKind || 'outro', subject: base.subject || '', note: base.note || '', enabled: false, generated: true, fromText, from: base.id, addedAt: Date.now(), updatedAt: Date.now() }

@@ -435,6 +435,7 @@
   .gen-quick { display: flex; flex-wrap: wrap; gap: 0 28px; align-items: flex-start; }
   #genMoodHint { max-width: 520px; }
   .gen-modelline { text-align: center; margin: 8px 0 0; }
+  .gen-mq { margin-top: 10px; } .gen-mq label { margin-top: 0; }
   .gen-more { margin-top: 16px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; }
   .gen-more summary { cursor: pointer; font-weight: 600; }
   .gen-more textarea { width: 100%; font-size: .9rem; }
@@ -1681,6 +1682,7 @@
   <div class="status" id="genStatus" role="status"></div>
   <div class="row" style="margin-top:14px"><button class="primary wide ai-btn" id="genGo"></button></div>
   <p class="hint gen-modelline" id="genModelLine"></p>
+  <div class="gen-mq" id="genModelQuickWrap" hidden><label for="genModelQuick">Modelo de imagem</label><select id="genModelQuick"></select></div>
   <details class="gen-more" id="genMore">
     <summary>Mais opções <span class="muted">(modelo, referências, contexto da obra, o que evitar, pedido completo)</span></summary>
     <label for="genModel">Modelo de imagem</label>
@@ -6046,11 +6048,12 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       $('genChWrap').hidden = true; $('genSubWrap').hidden = true;
       // só o essencial: o que mudar, estilo, formato e clima
       $('genPeopleWrap').hidden = true; $('genSumAI').hidden = true; document.querySelector('.gen-improve').hidden = true; $('genStyleRefs').hidden = true;
+      $('genMore').open = false; $('genMore').hidden = true; $('genModelLine').hidden = true; $('genModelQuickWrap').hidden = false;
       c.aspect = null; imageAspect(r.data).then(a => { if (genCtx === c && c.base === r) { c.aspect = GEN_ASPECTS.some(x => x[0] === a) ? a : ({ '3:4': '2:3', '4:5': '2:3', '4:3': '3:2', '5:4': '3:2' })[a] || a; renderGenCtx(); } });
       $('genExtraLabel').textContent = 'O que melhorar?';
       $('genExtra').placeholder = 'Ex.: deixe o título maior e dourado, o céu mais alaranjado e o T-Rex vermelho sorrindo';
     } else {
-      document.querySelector('.gen-improve').hidden = false;
+      document.querySelector('.gen-improve').hidden = false; $('genMore').hidden = false; $('genModelLine').hidden = false; $('genModelQuickWrap').hidden = true;
       $('genExtraLabel').replaceChildren('Algo mais? ', el('span', { class: 'muted', text: '(opcional)' }));
       $('genExtra').placeholder = 'Ex.: pôr do sol, tons quentes, os dois de costas olhando o mar';
       setGenKind(c.kind);
@@ -6138,6 +6141,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     }
     sel.disabled = false; $('genGo').disabled = false;
     sel.replaceChildren(...list.map(m => el('option', { value: m.id, text: (m.name || m.id) + (m.good ? ` · ${m.good[0]}` : '') + (isFree(m) ? ' · grátis' : '') })));
+    $('genModelQuick').replaceChildren(...[...sel.options].map(o => el('option', { value: o.value, text: o.textContent })));
     const sees = (m) => !m.architecture || (m.architecture.input_modalities || []).includes('image');
     let pref = list.find(m => m.id === settings.imageModel) || list[0];
     if (genCtx.base && !sees(pref)) pref = list.find(m => sees(m) && /gemini.*image/i.test(m.id)) || list.find(sees) || pref;
@@ -6150,7 +6154,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       genCtx.canSee = !m || !m.architecture || ins.includes('image');
       renderGenRefs();
     };
-    sel.onchange = () => { settings.imageModel = sel.value; local.set('fanfic.settings', settings); costLine(); genPromptFill(); };
+    sel.onchange = () => { settings.imageModel = sel.value; local.set('fanfic.settings', settings); costLine(); genPromptFill(); $('genModelQuick').value = sel.value; };
+    $('genModelQuick').value = sel.value; $('genModelQuick').onchange = () => { sel.value = $('genModelQuick').value; sel.onchange(); };
     costLineRefresh = costLine;
     costLine();
   }
@@ -6416,7 +6421,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const isCover = base && (kind === 'capa' || base.id === p.coverRefId);
     const what = base ? (isCover ? 'uma versão melhorada da capa' : `uma versão melhorada de ${sub || 'imagem'}`) : kind === 'capa' ? 'a capa' : kind === 'cena' ? `uma imagem da cena de "${chTitle(p, ch)}"` : kind === 'livre' ? 'a imagem que você descreveu' : `uma imagem de ${sub}`;
     if (!(await confirmAI(`Gerar ${what} com ${name}.`))) return;
-    const prompt = (c.promptDirty && $('genPrompt').value.trim()) || genBuildPrompt();
+    const prompt = (!base && c.promptDirty && $('genPrompt').value.trim()) || genBuildPrompt();
     // referências visuais escolhidas pela pessoa
     const styleRefs = c.canSee && !base ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.styleSel && c.styleSel.has(r.id)).slice(0, 2) : [];
     const chosen = c.canSee && !base ? [...(refsCache[p.id] || []).filter(r => r.kind === 'image' && r.imgKind !== 'estilo' && c.sel.has(r.id)).slice(0, 4), ...styleRefs] : [];

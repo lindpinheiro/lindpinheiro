@@ -1,6 +1,6 @@
 // Guarda a última versão do fanfic.html para o app abrir sem internet (ler e editar capítulos).
 // Registrado com escopo "./fanfic", então não substitui o service worker do treino.
-const CACHE = 'fanfic-v67'
+const CACHE = 'fanfic-v68'
 const PAGINA = /\/fanfic\.html(\?.*)?$/
 // dicionário e sinônimos: grandes e quase nunca mudam; guardados à parte na primeira vez que são usados
 const DICT = /\/fanfic-dict-[\w-]+\.(aff|dic|txt)$/

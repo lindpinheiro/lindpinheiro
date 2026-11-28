@@ -5913,10 +5913,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   }
 
   // ---------- gerar imagens (capa, cena, personagem, lugar) ----------
-  const GEN_STYLES = ['Ilustração digital', 'Realista e cinematográfico', 'Anime', 'Aquarela', 'Pintura a óleo', 'Minimalista'];
+  const GEN_STYLES = ['Ilustração digital', 'Ilustração estilizada', 'Realista e cinematográfico', 'Anime', 'Aquarela', 'Pintura a óleo', 'Minimalista'];
   // cada estilo explicado do jeito que o modelo entende (e o que ele não pode virar)
   const GEN_STYLE_DESC = {
-    'Ilustração digital': 'ilustração digital pintada, como arte de capa de romance ou webtoon: pinceladas e traços visíveis, cores ricas, acabamento de ilustração. NÃO é foto: nada de fotorrealismo',
+    'Ilustração digital': 'ilustração digital pintada, como arte de capa de romance: pinceladas e traços visíveis, pele pintada (sem poros nem textura de foto), cores ricas, acabamento claramente de ilustração. NÃO é foto: nada de fotorrealismo',
+    'Ilustração estilizada': 'ilustração estilizada, bem longe do realismo, como capa de webtoon ou HQ moderna: contornos de desenho marcados, proporções levemente estilizadas, sombreamento simplificado em blocos (cel shading suave), cores chapadas e vibrantes, fundo com menos detalhes. NÃO é foto, NÃO é pintura realista, nada de pele com textura fotográfica',
     'Realista e cinematográfico': 'fotografia cinematográfica realista: lente de cinema, profundidade de campo, luz dramática, granulação sutil',
     'Anime': 'anime/mangá: cel shading, contornos limpos, olhos expressivos, cores chapadas. NÃO é foto',
     'Aquarela': 'aquarela tradicional em papel: manchas, transparências e bordas suaves. NÃO é foto',
@@ -6043,9 +6044,13 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       $('genBaseTitle').textContent = `Melhorando: ${r.imgKind === 'capa' || r.id === c.p.coverRefId ? 'a capa' : (r.subject || r.name || 'imagem')}`;
       $('genWhat').textContent = 'Diga o que mudar. Ex.: título maior e dourado, céu mais alaranjado, mais nitidez nos rostos.';
       $('genChWrap').hidden = true; $('genSubWrap').hidden = true;
+      // só o essencial: o que mudar, estilo, formato e clima
+      $('genPeopleWrap').hidden = true; $('genSumAI').hidden = true; document.querySelector('.gen-improve').hidden = true; $('genStyleRefs').hidden = true;
+      c.aspect = null; imageAspect(r.data).then(a => { if (genCtx === c && c.base === r) { c.aspect = GEN_ASPECTS.some(x => x[0] === a) ? a : ({ '3:4': '2:3', '4:5': '2:3', '4:3': '3:2', '5:4': '3:2' })[a] || a; renderGenCtx(); } });
       $('genExtraLabel').textContent = 'O que melhorar?';
       $('genExtra').placeholder = 'Ex.: deixe o título maior e dourado, o céu mais alaranjado e o T-Rex vermelho sorrindo';
     } else {
+      document.querySelector('.gen-improve').hidden = false;
       $('genExtraLabel').replaceChildren('Algo mais? ', el('span', { class: 'muted', text: '(opcional)' }));
       $('genExtra').placeholder = 'Ex.: pôr do sol, tons quentes, os dois de costas olhando o mar';
       setGenKind(c.kind);
@@ -6094,19 +6099,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   const genRules = (c) => c && c.sensual
     ? `Regras: imagem bonita e bem acabada; todos os personagens são homens adultos (maiores de 18 anos, com rosto e corpo de adulto). ${genMoodRule(c)}`
     : 'Regras: imagem bonita e bem acabada; todos os personagens são adultos; sem nudez, sem conteúdo sexual explícito e sem violência gráfica. Sugira o clima com elegância.';
+  // melhorar uma imagem: só a imagem + o que mudar + estilo, formato e clima (sem as infos do livro)
   function buildEditPrompt(p, base, extra, style, c) {
-    const cut = (t, n) => { t = (t || '').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
-    const title = (p.title || '').trim() || 'Sem título';
-    const isCover = base.imgKind === 'capa' || base.id === p.coverRefId;
-    const what = isCover ? 'a capa do livro' : `uma imagem (${IMG_LABEL[base.imgKind] || 'imagem'}${base.subject ? ': ' + base.subject : ''})`;
-    const ctx = [`História: "${title}"${p.category ? ` (${p.category})` : ''}${p.fandom ? `, universo: ${p.fandom}` : ''}.`,
-      p.premise ? `Enredo: ${cut(p.premise, 600)}` : '', p.characters ? `Personagens: ${cut(p.characters, 800)}` : '',
-      (base.note || '').trim() ? `Descrição da imagem: ${cut(base.note, 400)}` : ''].filter(Boolean).join('\n');
-    return `A imagem anexada é ${what}. Crie uma NOVA VERSÃO dela, partindo dessa imagem.\n\nO QUE MUDAR (pedido do autor): ${extra}\n\n` +
-      `Mude só o que foi pedido. Mantenha todo o resto igual: composição, enquadramento, personagens (rosto, corpo, cores, roupas), cenário, iluminação` + (style ? '' : ', estilo visual') + ' e formato.' +
-      (isCover ? ` Se a capa tem o título "${title}", mantenha-o escrito exatamente assim, bem legível.` : '') +
-      (style ? `\n${genStyleLine(style)}` : '') +
-      `\n\nCONTEXTO DA HISTÓRIA (só para entender):\n${ctx}` + (genCtxText(p, c) ? '\n\n' + genCtxText(p, c) : '') + `\n\n${genRules(c)}`;
+    const isCover = base.imgKind === 'capa' || base.id === p.coverRefId, title = (p.title || '').trim();
+    const fmt = c && c.aspect ? `${(GEN_ASPECTS.find(a => a[0] === c.aspect) || [, ''])[1] || ''} (${c.aspect})`.trim() : '';
+    return `A imagem anexada é a base. Crie uma NOVA VERSÃO dela.\n\nO QUE MUDAR (pedido do autor): ${extra}\n\n` +
+      `Mude só o que foi pedido. Mantenha todo o resto igual: as mesmas pessoas (rostos, corpos, cabelos, barbas, tatuagens, roupas), a composição, o enquadramento, o cenário e a iluminação` + (style ? '.' : ' e o estilo visual.') +
+      (isCover && title ? ` Se houver o título "${title}", mantenha-o escrito exatamente assim, bem legível.` : '') +
+      (style ? `\n${genStyleLine(style)} Redesenhe a imagem inteira nesse estilo, mantendo as mesmas pessoas e a mesma cena.` : '') +
+      (fmt ? `\nFormato da imagem: ${fmt}.` : '') + `\n\n${genRules(c)}`;
   }
   async function openImageGen(p, opts = {}) {
     if (!isConfigured()) { openSetup(1, () => openImageGen(p, opts)); return; }
@@ -6226,7 +6227,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     $('genSubWrap').hidden = !(one && !list.length) || !!c.base;
     genAutoRefs(); renderGenRefs();
     $('genAspect').replaceChildren(...GEN_ASPECTS.map(([a, n]) => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(c.aspect === a), text: n, onclick: () => { c.aspect = a; renderGenCtx(); } })));
-    $('genAspectWrap').hidden = !!c.base;
+    $('genAspectWrap').hidden = false;
   }
   function genPromptFill(force) {
     const c = genCtx; if (!c || (c.promptDirty && !force)) return;
@@ -6298,6 +6299,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // imagens de referência para a geração: as das Referências do projeto + novas enviadas aqui
   function renderGenRefs() {
     const c = genCtx; if (!c) return;
+    if (c.base) { $('genRefsHint').textContent = 'Na melhoria, a única referência é a própria imagem que está sendo melhorada.'; $('genRefs').replaceChildren(); return; }
     const imgs = (refsCache[c.p.id] || []).filter(r => r.kind === 'image' && r.imgKind !== 'estilo' && (!c.sensual || r.fromText));
     for (const id of [...c.sel]) if (!imgs.some(r => r.id === id)) c.sel.delete(id);
     $('genRefsHint').textContent = c.canSee
@@ -6407,7 +6409,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       if (!c.canSee) { genStatus('Este modelo não aceita imagens. Escolha outro modelo de imagem (por exemplo, o Gemini Image).', 'err'); $('genModel').focus(); return; }
     } else if ((kind === 'personagem' || kind === 'lugar') && !sub) { genStatus(kind === 'personagem' ? 'Diga qual personagem.' : 'Diga qual lugar.', 'err'); $('genSub').focus(); return; }
     else if (kind === 'livre' && !$('genExtra').value.trim()) { genStatus('Descreva a imagem que você quer.', 'err'); $('genExtra').focus(); return; }
-    if (kind === 'cena' && !ch) { genStatus('Escolha um capítulo.', 'err'); return; }
+    if (kind === 'cena' && !ch && !base) { genStatus('Escolha um capítulo.', 'err'); return; }
     const model = $('genModel').value;
     if (!model) return;
     const name = $('genModel').selectedOptions[0]?.textContent || model;
@@ -6417,7 +6419,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const prompt = (c.promptDirty && $('genPrompt').value.trim()) || genBuildPrompt();
     // referências visuais escolhidas pela pessoa
     const styleRefs = c.canSee && !base ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.styleSel && c.styleSel.has(r.id)).slice(0, 2) : [];
-    const chosen = c.canSee ? [...(refsCache[p.id] || []).filter(r => r.kind === 'image' && r.imgKind !== 'estilo' && c.sel.has(r.id)).slice(0, 4), ...styleRefs] : [];
+    const chosen = c.canSee && !base ? [...(refsCache[p.id] || []).filter(r => r.kind === 'image' && r.imgKind !== 'estilo' && c.sel.has(r.id)).slice(0, 4), ...styleRefs] : [];
     const content = base ? [
       { type: 'text', text: prompt },
       { type: 'text', text: 'Imagem que deve ser melhorada:' },
@@ -6434,7 +6436,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     genGoLabel(true); $('genResult').hidden = true;
     genStatus('Gerando a imagem… pode levar até um minuto.');
     try {
-      const aspect = base ? await imageAspect(base.data) : (c.aspect || GEN_KIND[kind].aspect);
+      const aspect = base ? (c.aspect || await imageAspect(base.data)) : (c.aspect || GEN_KIND[kind].aspect);
       const r = await requestImage(model, content, aspect, c.ctrl.signal);
       recordSpend({ op: uid(), action: base ? `Melhorar imagem · ${isCover ? 'capa' : sub || 'imagem'}` : `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
       const data = await shrinkImage(r.blob || await (await fetch(r.url)).blob());

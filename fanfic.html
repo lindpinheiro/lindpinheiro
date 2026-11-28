@@ -1685,7 +1685,10 @@
   <details class="gen-prompt" id="genPromptBox">
     <summary>Ver e editar o pedido antes de gerar</summary>
     <textarea id="genPrompt" rows="12" aria-label="Pedido que vai para o modelo de imagem"></textarea>
-    <div class="row"><button type="button" class="link plain" id="genPromptReset">Montar de novo a partir das escolhas</button></div>
+    <div class="row"><button type="button" class="ai-btn" id="genPromptAI"><svg class="icon" aria-hidden="true"><use href="#i-wand-sparkles"/></svg>Melhorar o pedido com IA<span class="ai-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span></button>
+      <button type="button" class="link plain" id="genPromptMine">Usar só o meu texto</button>
+      <button type="button" class="link plain" id="genPromptReset">Montar de novo a partir das escolhas</button></div>
+    <p class="hint" id="genPromptHint">Escreva a cena do seu jeito (ângulo, enquadramento, aparência de cada personagem, luz) e toque em "Melhorar o pedido com IA": ela reorganiza o texto no formato que os geradores de imagem entendem melhor, em inglês, e sugere o que evitar.</p>
   </details>
   <div class="gen-result" id="genResult" hidden><img id="genImg" alt="Imagem gerada"><div class="row" id="genActions"></div></div>
   <div class="status" id="genStatus" role="status"></div>
@@ -6164,8 +6167,15 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   // o que evitar: o da pessoa + o que nunca pode aparecer no modo adulto
   const genNegative = (c) => [$('genNeg').value.trim(), c && c.adult ? 'child, minor, teen, underage, childlike, young-looking, school uniform, non-consensual, restrained, tied up, bondage, violence, blood, crying, fear' : ''].filter(Boolean).join(', ');
   // no modo adulto: só adultos e só consentimento
-  function genSafety(text) {
-    const t = (text || '').toLocaleLowerCase('pt-BR');
+  // há conteúdo sexual ou de nudez no pedido?
+  const GEN_SEX = /(?<![\p{L}])(sexo|sexual\w*|transa\w*|acasal\w*|cruza\w*|pênis|penis|pau|piroca|rola|membro|órgão reprodutor|orgao reprodutor|genita\w*|nu|nus|nua|nuas|pelad[oa]s?|nudez|oral|boquete|penetra\w*|gozo|gozand\w*|ereç\w*|excitad[oa]s?|explícit\w*|chupa\w*|lambe\w*|bunda|ânus|anal|masturb\w*|punheta|tesão|erótic\w*|sensual|nsfw|naked|nude|sex|cock|dick|penis|blowjob|fuck\w*)(?![\p{L}])/u;
+  // tira do texto conferido as linhas de regras que o próprio app escreve
+  const genOwnLines = (t) => (t || '').split('\n').filter(l => !/^\s*(Regras:|Evite:|Evitar:|Todos adultos\. Sem nudez\.|Todos são homens adultos)/.test(l)).join('\n');
+  function genSafety(text, sexual = true) {
+    const t = genOwnLines(text).toLocaleLowerCase('pt-BR');
+    if (!sexual && !GEN_SEX.test(t)) return '';
+    const m0 = t.match(/(?<![\p{L}])(t-?rex\w*|tiranossaur\w*|dinossaur\w*|animal|animais|bicho\w*|cachorr\w*|cavalo\w*|lob[oa]s?|dragão|dragões|criatura\w*|feral|bestial\w*|zoofil\w*|réptil|répteis)(?![\p{L}])/u);
+    if (m0) return `Imagens com sexo ou nudez só podem ter pessoas adultas. Não dá para gerar isso com animais ou criaturas (tire do pedido: "${m0[0]}").`;
     const m1 = t.match(/(?<![\p{L}])(for[çc]and\w*|for[çc]ou|for[çc]ar|for[çc]ad[oa]s?|à for[çc]a|a for[çc]a|estupr\w*|abus\w*|contra a (sua )?vontade|sem consentimento|sem consentir|sem querer|obrigando|coagi\w*|coer\w*|drogad[oa]s?|dopad[oa]s?|inconsciente|desmaiad[oa]|dormindo|amarrad[oa]s?|algemad[oa]s?|rendid[oa]s?|implorando para parar|chorando)(?![\p{L}])/u);
     if (m1) return `No modo +18 só dá para gerar cenas consensuais entre adultos. Tire do pedido: "${m1[0]}".`;
     const m2 = t.match(/(?<![\p{L}])(menor de idade|menores|criança\w*|adolescente\w*|colegial|infantil|novinh[oa]s?|menin[oa]s?|garot[oa]s?|garotinh[oa]s?|1[0-7] anos|teen\w*)(?![\p{L}])/u);
@@ -6178,6 +6188,31 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
   $('genAdult').addEventListener('change', () => { if (genCtx) { genCtx.adult = $('genAdult').checked; settings.imageAdult = genCtx.adult; local.set('fanfic.settings', settings); genPromptFill(); costLineRefresh(); renderGenRefs(); } });
   $('genPrompt').addEventListener('input', () => { if (genCtx) genCtx.promptDirty = true; });
   $('genPromptReset').addEventListener('click', () => genPromptFill(true));
+  $('genPromptMine').addEventListener('click', () => { const c = genCtx; if (!c) return; const t = $('genExtra').value.trim(); if (!t) { genStatus('Escreva a cena no campo de descrição primeiro.', 'err'); return; } $('genPrompt').value = t; c.promptDirty = true; genStatus('O pedido agora é só o seu texto. Toque em "Melhorar o pedido com IA" se quiser.', 'ok'); });
+  $('genPromptAI').addEventListener('click', async () => {
+    const c = genCtx; if (!c) return;
+    const src = ($('genPrompt').value.trim() || $('genExtra').value.trim()); if (!src) { genStatus('Escreva a cena primeiro.', 'err'); return; }
+    const prov = $('genModel').value === '__prov';
+    if (c.adult || prov) { const bad = genSafety(src, c.adult); if (bad) { genStatus(bad, 'err'); return; } }
+    const btn = $('genPromptAI'); btn.disabled = true; genStatus('Melhorando o pedido…');
+    const rules = c.adult
+      ? 'Adult content mode: explicit nudity and sex are allowed ONLY between consenting adult human men (18+, clearly adult faces and bodies). Never minors or young-looking people, never animals or creatures, never force, restraint, violence or unconsciousness. If the request contains any of these, remove that part.'
+      : 'No nudity and no sexual content.';
+    try {
+      const r = await callAI(`You are an expert at writing prompts for image generation models (Stable Diffusion XL, FLUX). Rewrite the author's request below as one strong prompt, following best practices:\n` +
+        `- Start with the main subject and action, then each character's appearance (age, body, skin, hair, eyes, facial hair, tattoos, clothing), then pose and interaction, camera angle and framing (shot type, lens, point of view), setting, lighting, mood, color palette, art style and quality tags.\n` +
+        `- Keep EVERYTHING the author asked for (characters, appearance, angle, details). Do not invent new characters or story. Be specific and visual; comma-separated phrases; English; at most 120 words.\n- ${rules}\n` +
+        `Answer ONLY with a JSON object: {"prompt": "...", "negative": "comma-separated things to avoid (anatomy errors, extra limbs, blurry, text, watermark, and anything that contradicts the request)"}\n\nAUTHOR'S REQUEST (may be in Portuguese):\n${src.slice(0, 6000)}`,
+        { support: true, label: 'Melhorar pedido de imagem' });
+      let data; try { data = JSON.parse(r.text.slice(r.text.indexOf('{'), r.text.lastIndexOf('}') + 1)); } catch { data = { prompt: r.text.trim() }; }
+      const out = String(data.prompt || '').trim(); if (out.length < 15) throw Object.assign(new Error('A IA não devolveu um pedido. Tente de novo ou escolha outro modelo de texto.'), { action: 'model' });
+      if (c.adult || prov) { const bad = genSafety(out, c.adult); if (bad) { genStatus(bad, 'err'); return; } }
+      $('genPrompt').value = out; c.promptDirty = true;
+      if (data.negative && !$('genNeg').value.trim()) { $('genNeg').value = String(data.negative).slice(0, 400); settings.imageNeg = $('genNeg').value; local.set('fanfic.settings', settings); }
+      genStatus('Pedido melhorado ✓ Confira, ajuste se quiser e toque em Gerar imagem.', 'ok');
+    } catch (e) { genStatus(e.message || 'Não deu certo.', 'err'); if (e.action) handleAIError(e, null); }
+    finally { btn.disabled = false; }
+  });
   $('genPromptBox').addEventListener('toggle', () => { if ($('genPromptBox').open) genPromptFill(); });
   let costLineRefresh = () => {};
   // provedor sem censura (API de imagens compatível)
@@ -6242,11 +6277,11 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
         title: (m.model_spec && m.model_spec.name) || m.display_name || m.id, onclick: () => { $('gpModel').value = m.id; $('gpModelChips').querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x.textContent.startsWith(m.id + ' ') || x.textContent === m.id))); gpMsg(`Modelo "${m.id}" escolhido. Toque em "Salvar e usar".`, 'ok'); } }); }));
     } catch (e) { gpMsg(`Não consegui listar (${e.message === 'Failed to fetch' ? 'o serviço pode não aceitar chamadas direto do navegador' : e.message}). Digite o nome do modelo.`, 'err'); }
   });
-  async function requestProvImage(prompt, aspect, signal, negative) {
+  async function requestProvImage(prompt, aspect, signal, negative, adult) {
     const g = gpCfg(); if (!g) throw new Error('Configure o provedor sem censura primeiro.');
     const [W, H] = GEN_SIZE[aspect] || GEN_SIZE['2:3'], extra = g.extra ? JSON.parse(g.extra) : {};
     let url, body;
-    if (g.style === 'venice') { url = g.base + '/image/generate'; body = Object.assign({ model: g.model, prompt, width: W, height: H, format: 'png' }, negative ? { negative_prompt: negative } : {}, extra); }
+    if (g.style === 'venice') { url = g.base + '/image/generate'; body = Object.assign({ model: g.model, prompt, width: W, height: H, format: 'png' }, negative ? { negative_prompt: negative } : {}, extra, adult ? {} : { safe_mode: true }); }
     else if (negative) prompt += `\nEvitar: ${negative}`;
     else if (g.style === 'wh') { url = g.base + '/images/generations'; body = Object.assign({ model: g.model, prompt, width: W, height: H, n: 1, response_format: 'b64_json' }, extra); }
     else { url = g.base + '/images/generations'; body = Object.assign({ model: g.model, prompt, n: 1, size: `${W}x${H}`, response_format: 'b64_json' }, extra); }
@@ -6392,7 +6427,8 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
     const what = base ? (isCover ? 'uma versão melhorada da capa' : `uma versão melhorada de ${sub || 'imagem'}`) : kind === 'capa' ? 'a capa' : kind === 'cena' ? `uma imagem da cena de "${chTitle(p, ch)}"` : kind === 'livre' ? 'a imagem que você descreveu' : `uma imagem de ${sub}`;
     if (!prov && !(await confirmAI(`Gerar ${what} com ${name}.`))) return;
     const prompt = (c.promptDirty && $('genPrompt').value.trim()) || genBuildPrompt();
-    if (c.adult) { const lookTxt = [...c.inc.chars].map(n => charLook(p, n, 400)).join(' '); const bad = genSafety(`${$('genExtra').value} ${$('genSub').value} ${lookTxt} ${prompt}`); if (bad) { genStatus(bad, 'err'); return; } }
+    // com o provedor sem censura ou no modo +18, confere sempre: só adultos humanos, só consentimento
+    if (c.adult || prov) { const lookTxt = [...c.inc.chars].map(n => charLook(p, n, 400)).join(' '); const bad = genSafety(`${$('genExtra').value} ${$('genSub').value} ${lookTxt} ${prompt}`, c.adult); if (bad) { genStatus(bad, 'err'); return; } }
     // referências visuais escolhidas pela pessoa
     const chosen = c.canSee && !prov ? (refsCache[p.id] || []).filter(r => r.kind === 'image' && c.sel.has(r.id)).slice(0, 4) : [];
     const content = base ? [
@@ -6415,7 +6451,7 @@ Devolva apenas o que foi pedido, sem títulos, comentários, avisos ou explicaç
       let r;
       if (prov) {
         genStatus('Gerando a imagem no seu provedor… pode levar até um minuto.');
-        r = await requestProvImage(prompt, aspect, c.ctrl.signal, genNegative(c));
+        r = await requestProvImage(prompt, aspect, c.ctrl.signal, genNegative(c), !!c.adult);
       } else r = await requestImage(model, content, aspect, c.ctrl.signal);
       if (!prov) recordSpend({ op: uid(), action: base ? `Melhorar imagem · ${isCover ? 'capa' : sub || 'imagem'}` : `Gerar imagem · ${kind === 'capa' ? 'capa' : kind === 'cena' ? 'cena de ' + chTitle(p, ch) : sub}`, project: (p.title || '').trim(), model, usage: r.usage, promptChars: prompt.length, outChars: 0 });
       const data = await shrinkImage(r.blob || await (await fetch(r.url)).blob());
